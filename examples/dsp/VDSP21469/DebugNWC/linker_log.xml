@@ -1,0 +1,509 @@
+<?xml version="1.0" standalone="no"?>
+<?xml-stylesheet type="text/xsl" href="file:///D:/Analog Devices/VisualDSP 5.1/System/linker_log.xsl"?>
+<DOCUMENT gen_time='Sat Apr 19 17:56:02 2014
+'>
+<MSG id='02BE1CA0' mid='li2153' type='Warning' suppressed=''>
+<TEXT><![CDATA[Input sections have inconsistent qualifiers as follows.
+DOUBLE32  | .\DebugNWC\21469_copytable_init.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\21469_copytable_init.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\ascii.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\ascii8x16.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\ascii8x16.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\adm1032.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\adm1032.doj(seg_pmco)
+unknown   | exceptions.doj(seg_rth)
+DOUBLE32  | .\DebugNWC\ascii6x12.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\ascii6x12.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\ascii8x8.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\at45db321.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\at45db321.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\char_term.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\char_term.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\clock.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\clock.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\cmd_easynorflash.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\cmd_easynorflash.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\cpu.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\cpu.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\cpu_peri_dma.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\cpu_peri_dma.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\cpu_peri_iic.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\cpu_peri_iic.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\cpu_peri_spi.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\cpu_peri_spi.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\cpu_peri_linkport.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\cpu_peri_linkport.doj(seg_int_data)
+DOUBLE32  | .\DebugNWC\cpu_peri_linkport.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\cpu_peri_uart.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\cpu_peri_uart.doj(seg_pmco)
+unknown   | .\DebugNWC\cpus.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\crc.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\crc.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\critical.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\djyos.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\djyos.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\driver.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\driver.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\easynorflash.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\easynorflash.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\easynor_s29glxxx.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\easynor_s29glxxx.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\ecc.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\ecc.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\encoding.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\endian.doj(seg_pmco)
+unknown   | .\DebugNWC\exception_handles.doj(seg_pmco)
+unknown   | .\DebugNWC\exception_handles.doj(seg_rth)
+DOUBLE32  | .\DebugNWC\exception.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\exception.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\file.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\file.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\font.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\flash_s29glxxx.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\flash_s29glxxx.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\gb2312.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\gb2312_16.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\general.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\gk_api.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\gk_clip.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\gk_display.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\gk_draw.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\iic.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\iic.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\gk_win.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\int.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\int.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\int_config.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\int_config.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\int_hard.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\int_hard.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\keyboard.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\led_key.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\led_key.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\line.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\loader.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\loader.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\loc_string.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\lock.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\lock.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\memb.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\memb.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\mems.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\mems.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\module_init.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\module_init.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\nls.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\msg.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\pipe.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\pipe.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\pre_loader.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\pre_loader.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\printf.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\printf.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\rsc.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\rsc.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\ring.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\rtc_ds1390.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\rtc_ds1390.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\shell.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\shell.doj(seg_pmco)
+unknown   | .\DebugNWC\second_stage_boot_kernel.doj(seg_ldr)
+DOUBLE32  | .\DebugNWC\shell_fs.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\shell_fs.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\stdin_dev.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\stdin_dev.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\sys_init.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\Touch.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\textshow.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\translate.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\uart.doj(seg_dmda)
+DOUBLE32  | .\DebugNWC\uart.doj(seg_pmco)
+DOUBLE32  | .\DebugNWC\utf8.doj(seg_pmco)
+DOUBLEANY | libc_nwc.dlb[divrem_u32.doj](seg_pmco)
+DOUBLEANY | libc_nwc.dlb[divrem_s32.doj](seg_pmco)
+DOUBLEANY | libc_nwc.dlb[divrem_u64.doj](seg_pmco)
+DOUBLEANY | libc_nwc.dlb[divrem_s64.doj](seg_pmco)
+DOUBLEANY | libc_nwc.dlb[heap.doj](seg_init)
+DOUBLEANY | libc_nwc.dlb[inits.doj](seg_init)
+DOUBLEANY | libc_nwc.dlb[int_tabl.doj](seg_dmda)
+DOUBLEANY | libc_nwc.dlb[isalnum.doj](seg_pmco)
+DOUBLEANY | libc_nwc.dlb[memcmp.doj](seg_pmco)
+DOUBLEANY | libc_nwc.dlb[memcpy.doj](seg_pmco)
+DOUBLEANY | libc_nwc.dlb[memset.doj](seg_pmco)
+DOUBLEANY | libc_nwc.dlb[num_heaps.doj](seg_dmda)
+DOUBLEANY | libc_nwc.dlb[rtheap.doj](seg_pmco)
+DOUBLEANY | libc_nwc.dlb[set_args.doj](seg_dmda)
+DOUBLEANY | libc_nwc.dlb[set_args.doj](seg_pmco)
+DOUBLEANY | libc_nwc.dlb[set_c.doj](seg_ctdml)
+DOUBLEANY | libc_nwc.dlb[set_c.doj](seg_pmco)
+DOUBLEANY | libc_nwc.dlb[strcat.doj](seg_pmco)
+DOUBLEANY | libc_nwc.dlb[strchr.doj](seg_pmco)
+DOUBLEANY | libc_nwc.dlb[strcmp.doj](seg_pmco)
+DOUBLEANY | libc_nwc.dlb[strcpy.doj](seg_pmco)
+DOUBLEANY | libc_nwc.dlb[strlen.doj](seg_pmco)
+DOUBLEANY | libc_nwc.dlb[strncmp.doj](seg_pmco)
+DOUBLEANY | libc_nwc.dlb[strncpy.doj](seg_pmco)
+DOUBLEANY | libc_nwc.dlb[sure_rti.doj](seg_pmco)]]></TEXT>
+</MSG>
+<MSG id='02BA7968' mid='li2200' type='Warning' suppressed=''>
+<TEXT><![CDATA[Unable to find global symbol '_main' specified in keep list of processor 'p0']]></TEXT>
+</MSG>
+<MSG id='02B4BA38' mid='li3201' type='Informational' >
+<TEXT><![CDATA[
+Eliminated object (_preload_copy_table, ._preload_copy_table.end) of size 30 bytes from '.\DebugNWC\21469_copytable_init.doj(seg_dmda)'
+Eliminated object (.epcbss, .epcbss.end) of size 25 bytes from '.\DebugNWC\adm1032.doj(seg_dmda)'
+Eliminated object (_timeout, ._timeout.end) of size 5 bytes from '.\DebugNWC\adm1032.doj(seg_dmda)'
+Eliminated object (.siic1.0, .siic1.0.end) of size 25 bytes from '.\DebugNWC\adm1032.doj(seg_dmda)'
+Eliminated object (_ptSemID_adm1032, _ptSemID_adm1032+0x1) of size 5 bytes from '.\DebugNWC\adm1032.doj(seg_dmda)'
+Eliminated object (_ADM1032_Read_Data, ._ADM1032_Read_Data.end) of size 198 bytes from '.\DebugNWC\adm1032.doj(seg_pmco)'
+Eliminated object (_ADM1032_Write_Data, ._ADM1032_Write_Data.end) of size 126 bytes from '.\DebugNWC\adm1032.doj(seg_pmco)'
+Eliminated object (_module_init_adm1032, ._module_init_adm1032.end) of size 246 bytes from '.\DebugNWC\adm1032.doj(seg_pmco)'
+Eliminated object (_cs_ascii_6x12, ._cs_ascii_6x12.end) of size 15360 bytes from '.\DebugNWC\ascii6x12.doj(seg_dmda)'
+Eliminated object (_cs_ascii_8x16, ._cs_ascii_8x16.end) of size 20480 bytes from '.\DebugNWC\ascii8x16.doj(seg_dmda)'
+Eliminated object (__at45db321_buff, .__at45db321_buff.end) of size 2560 bytes from '.\DebugNWC\at45db321.doj(seg_dmda)'
+Eliminated object (__at45db321_Ready_Buff, .__at45db321_Ready_Buff.end) of size 5 bytes from '.\DebugNWC\at45db321.doj(seg_dmda)'
+Eliminated object (__at45db321_Binary_Page_Size_512, .__at45db321_Binary_Page_Size_512.end) of size 24 bytes from '.\DebugNWC\at45db321.doj(seg_pmco)'
+Eliminated object (__at45db321_Chip_Erase, .__at45db321_Chip_Erase.end) of size 24 bytes from '.\DebugNWC\at45db321.doj(seg_pmco)'
+Eliminated object (__at45db321_Block_Erase, .__at45db321_Block_Erase.end) of size 36 bytes from '.\DebugNWC\at45db321.doj(seg_pmco)'
+Eliminated object (__at45db321_Need_Erase_orNot, .__at45db321_Need_Erase_orNot.end) of size 198 bytes from '.\DebugNWC\at45db321.doj(seg_pmco)'
+Eliminated object (__at45db321_Written_Caculate, .__at45db321_Written_Caculate.end) of size 90 bytes from '.\DebugNWC\at45db321.doj(seg_pmco)'
+Eliminated object (__at45db321_Block_Caculate, .__at45db321_Block_Caculate.end) of size 42 bytes from '.\DebugNWC\at45db321.doj(seg_pmco)'
+Eliminated object (__at45db321_Page_Caculate, .__at45db321_Page_Caculate.end) of size 42 bytes from '.\DebugNWC\at45db321.doj(seg_pmco)'
+Eliminated object (__at45db321_Offset_Caculate, .__at45db321_Offset_Caculate.end) of size 48 bytes from '.\DebugNWC\at45db321.doj(seg_pmco)'
+Eliminated object (__at45db321_Continuous_Array_Read, .__at45db321_Continuous_Array_Read.end) of size 336 bytes from '.\DebugNWC\at45db321.doj(seg_pmco)'
+Eliminated object (__at45db321_Buff_Write, .__at45db321_Buff_Write.end) of size 438 bytes from '.\DebugNWC\at45db321.doj(seg_pmco)'
+Eliminated object (__at45db321_Buff_Read, .__at45db321_Buff_Read.end) of size 444 bytes from '.\DebugNWC\at45db321.doj(seg_pmco)'
+Eliminated object (__at45db321_Page_to_Buff, .__at45db321_Page_to_Buff.end) of size 360 bytes from '.\DebugNWC\at45db321.doj(seg_pmco)'
+Eliminated object (__at45db321_Buff_to_Page, .__at45db321_Buff_to_Page.end) of size 564 bytes from '.\DebugNWC\at45db321.doj(seg_pmco)'
+Eliminated object (__at45db321_Page_Erase, .__at45db321_Page_Erase.end) of size 222 bytes from '.\DebugNWC\at45db321.doj(seg_pmco)'
+Eliminated object (__at45db321_Read_Status, .__at45db321_Read_Status.end) of size 222 bytes from '.\DebugNWC\at45db321.doj(seg_pmco)'
+Eliminated object (_at45db321_Check_Busy, ._at45db321_Check_Busy.end) of size 108 bytes from '.\DebugNWC\at45db321.doj(seg_pmco)'
+Eliminated object (_at45db321_Wait_Ready, ._at45db321_Wait_Ready.end) of size 420 bytes from '.\DebugNWC\at45db321.doj(seg_pmco)'
+Eliminated object (_SPI_FLASH_Read, ._SPI_FLASH_Read.end) of size 312 bytes from '.\DebugNWC\at45db321.doj(seg_pmco)'
+Eliminated object (_SPI_FLASH_Write, ._SPI_FLASH_Write.end) of size 816 bytes from '.\DebugNWC\at45db321.doj(seg_pmco)'
+Eliminated object (_djy_gets, ._djy_gets.end) of size 42 bytes from '.\DebugNWC\char_term.doj(seg_pmco)'
+Eliminated object (0x2b,0x2c) of size 5 bytes from '.\DebugNWC\clock.doj(seg_dmda)'
+Eliminated object (_DaysToMonth, ._DaysToMonth.end) of size 65 bytes from '.\DebugNWC\clock.doj(seg_dmda)'
+Eliminated object (0x39,0x3a) of size 5 bytes from '.\DebugNWC\clock.doj(seg_dmda)'
+Eliminated object (___get_time_us, .___get_time_us.end) of size 5 bytes from '.\DebugNWC\clock.doj(seg_dmda)'
+Eliminated object (.sclock.4, .sclock.4.end) of size 30 bytes from '.\DebugNWC\clock.doj(seg_dmda)'
+Eliminated object (_tm_connect_rtc, ._tm_connect_rtc.end) of size 54 bytes from '.\DebugNWC\clock.doj(seg_pmco)'
+Eliminated object (_tm_mktime_us, ._tm_mktime_us.end) of size 150 bytes from '.\DebugNWC\clock.doj(seg_pmco)'
+Eliminated object (_tm_gmtime_r, ._tm_gmtime_r.end) of size 240 bytes from '.\DebugNWC\clock.doj(seg_pmco)'
+Eliminated object (_tm_gmtime, ._tm_gmtime.end) of size 198 bytes from '.\DebugNWC\clock.doj(seg_pmco)'
+Eliminated object (_tm_localtime, ._tm_localtime.end) of size 60 bytes from '.\DebugNWC\clock.doj(seg_pmco)'
+Eliminated object (_tm_localtime_us_r, ._tm_localtime_us_r.end) of size 348 bytes from '.\DebugNWC\clock.doj(seg_pmco)'
+Eliminated object (_tm_gmtime_us_r, ._tm_gmtime_us_r.end) of size 240 bytes from '.\DebugNWC\clock.doj(seg_pmco)'
+Eliminated object (_tm_gmtime_us, ._tm_gmtime_us.end) of size 198 bytes from '.\DebugNWC\clock.doj(seg_pmco)'
+Eliminated object (_tm_localtime_us, ._tm_localtime_us.end) of size 300 bytes from '.\DebugNWC\clock.doj(seg_pmco)'
+Eliminated object (_tm_set_datatime, ._tm_set_datatime.end) of size 210 bytes from '.\DebugNWC\clock.doj(seg_pmco)'
+Eliminated object (_tm_inc_second, ._tm_inc_second.end) of size 240 bytes from '.\DebugNWC\clock.doj(seg_pmco)'
+Eliminated object (_tm_asctime, ._tm_asctime.end) of size 750 bytes from '.\DebugNWC\clock.doj(seg_pmco)'
+Eliminated object (_tm_asctime_ms, ._tm_asctime_ms.end) of size 174 bytes from '.\DebugNWC\clock.doj(seg_pmco)'
+Eliminated object (_tm_asctime_us, ._tm_asctime_us.end) of size 144 bytes from '.\DebugNWC\clock.doj(seg_pmco)'
+Eliminated object (_time_run, ._time_run.end) of size 156 bytes from '.\DebugNWC\clock.doj(seg_pmco)'
+Eliminated object (_module_init_datatime, ._module_init_datatime.end) of size 270 bytes from '.\DebugNWC\clock.doj(seg_pmco)'
+Eliminated object (_tm_time_us, ._tm_time_us.end) of size 390 bytes from '.\DebugNWC\clock.doj(seg_pmco)'
+Eliminated object (_tg_filesize_cmd_rsc, _tg_filesize_cmd_rsc+0x12) of size 90 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (_filesize_cmd_table, ._filesize_cmd_table.end) of size 40 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (.sfile.0, .sfile.0.end) of size 25 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (0x1f,0x20) of size 5 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (.s.1, .s.1.end) of size 185 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (0x45,0x46) of size 5 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (.sfile.2, .sfile.2.end) of size 110 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (.sdiref.3, .sdiref.3.end) of size 35 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (0x63,0x64) of size 5 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (.s.4, .s.4.end) of size 185 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (0x89,0x8a) of size 5 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (.sdiref.5, .sdiref.5.end) of size 120 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (.s.6, .s.6.end) of size 90 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (.sfilesi.7, .sfilesi.7.end) of size 145 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (0xd1,0xd2) of size 5 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (.sfs.8, .sfs.8.end) of size 15 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (0xd5,0xd6) of size 5 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (.seasyno.9, .seasyno.9.end) of size 75 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (0xe5,0xe6) of size 5 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (.s.10, .s.10.end) of size 135 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (0x101,0x102) of size 5 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (.sbyteby.11, .sbyteby.11.end) of size 375 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (0x14d,0x14e) of size 5 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (.s32s0x0.12, .s32s0x0.12.end) of size 150 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (.s.13, .s.13.end) of size 95 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (0x17f,0x180) of size 5 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (.s.14, .s.14.end) of size 100 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (.sd.15, .sd.15.end) of size 85 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_dmda)'
+Eliminated object (_install_filesize_cmd, ._install_filesize_cmd.end) of size 108 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_pmco)'
+Eliminated object (_sh_show_file, ._sh_show_file.end) of size 1428 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_pmco)'
+Eliminated object (___read_filesize, .___read_filesize.end) of size 972 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_pmco)'
+Eliminated object (_sh_dir_ef, ._sh_dir_ef.end) of size 600 bytes from '.\DebugNWC\cmd_easynorflash.doj(seg_pmco)'
+Eliminated object (_pg_dma_linkport0_reg, ._pg_dma_linkport0_reg.end) of size 5 bytes from '.\DebugNWC\cpu_peri_dma.doj(seg_dmda)'
+Eliminated object (_pg_dma_linkport1_reg, ._pg_dma_linkport1_reg.end) of size 5 bytes from '.\DebugNWC\cpu_peri_dma.doj(seg_dmda)'
+Eliminated object (_InitDMA_LinkPort, ._InitDMA_LinkPort.end) of size 480 bytes from '.\DebugNWC\cpu_peri_dma.doj(seg_pmco)'
+Eliminated object (.epcbss, .epcbss.end) of size 115 bytes from '.\DebugNWC\cpu_peri_iic.doj(seg_dmda)'
+Eliminated object (_I2C_clk_cycle, ._I2C_clk_cycle.end) of size 5 bytes from '.\DebugNWC\cpu_peri_iic.doj(seg_dmda)'
+Eliminated object (.SWITCH.0, .SWITCH.0.end) of size 20 bytes from '.\DebugNWC\cpu_peri_iic.doj(seg_dmda)'
+Eliminated object (.siic1.4, .siic1.4.end) of size 25 bytes from '.\DebugNWC\cpu_peri_iic.doj(seg_dmda)'
+Eliminated object (_pg_iic1_rhdl, _pg_iic1_rhdl+0x1) of size 5 bytes from '.\DebugNWC\cpu_peri_iic.doj(seg_dmda)'
+Eliminated object (_iic1_data_buf, _iic1_data_buf+0xfe) of size 1270 bytes from '.\DebugNWC\cpu_peri_iic.doj(seg_dmda)'
+Eliminated object (___iic_set_clk, .___iic_set_clk.end) of size 246 bytes from '.\DebugNWC\cpu_peri_iic.doj(seg_pmco)'
+Eliminated object (___iic_start_recv_data, .___iic_start_recv_data.end) of size 36 bytes from '.\DebugNWC\cpu_peri_iic.doj(seg_pmco)'
+Eliminated object (___iic_generate_disable, .___iic_generate_disable.end) of size 168 bytes from '.\DebugNWC\cpu_peri_iic.doj(seg_pmco)'
+Eliminated object (___iic_generate_stop, .___iic_generate_stop.end) of size 66 bytes from '.\DebugNWC\cpu_peri_iic.doj(seg_pmco)'
+Eliminated object (___iic_int_disable, .___iic_int_disable.end) of size 138 bytes from '.\DebugNWC\cpu_peri_iic.doj(seg_pmco)'
+Eliminated object (___iic_int_enable, .___iic_int_enable.end) of size 138 bytes from '.\DebugNWC\cpu_peri_iic.doj(seg_pmco)'
+Eliminated object (___iic_generate_write_start, .___iic_generate_write_start.end) of size 456 bytes from '.\DebugNWC\cpu_peri_iic.doj(seg_pmco)'
+Eliminated object (___iic_generate_read_start, .___iic_generate_read_start.end) of size 378 bytes from '.\DebugNWC\cpu_peri_iic.doj(seg_pmco)'
+Eliminated object (___iic_generate_end, .___iic_generate_end.end) of size 258 bytes from '.\DebugNWC\cpu_peri_iic.doj(seg_pmco)'
+Eliminated object (___iic_start_send_data, .___iic_start_send_data.end) of size 168 bytes from '.\DebugNWC\cpu_peri_iic.doj(seg_pmco)'
+Eliminated object (_iic_int, ._iic_int.end) of size 756 bytes from '.\DebugNWC\cpu_peri_iic.doj(seg_pmco)'
+Eliminated object (_module_init_iic, ._module_init_iic.end) of size 636 bytes from '.\DebugNWC\cpu_peri_iic.doj(seg_pmco)'
+Eliminated object (_pg_linkport0_reg, ._pg_linkport0_reg.end) of size 5 bytes from '.\DebugNWC\cpu_peri_linkport.doj(seg_dmda)'
+Eliminated object (_pg_linkport1_reg, ._pg_linkport1_reg.end) of size 5 bytes from '.\DebugNWC\cpu_peri_linkport.doj(seg_dmda)'
+Eliminated object (_LP1SendFlag, ._LP1SendFlag.end) of size 5 bytes from '.\DebugNWC\cpu_peri_linkport.doj(seg_dmda)'
+Eliminated object (_LP2SendFlag, ._LP2SendFlag.end) of size 5 bytes from '.\DebugNWC\cpu_peri_linkport.doj(seg_dmda)'
+Eliminated object (_LP1RecvFlag, ._LP1RecvFlag.end) of size 5 bytes from '.\DebugNWC\cpu_peri_linkport.doj(seg_dmda)'
+Eliminated object (_LP2RecvFlag, ._LP2RecvFlag.end) of size 5 bytes from '.\DebugNWC\cpu_peri_linkport.doj(seg_dmda)'
+Eliminated object (_linkport1_send_buf, ._linkport1_send_buf.end) of size 160 bytes from '.\DebugNWC\cpu_peri_linkport.doj(seg_int_data)'
+Eliminated object (_linkport1_recv_buf, ._linkport1_recv_buf.end) of size 160 bytes from '.\DebugNWC\cpu_peri_linkport.doj(seg_int_data)'
+Eliminated object (_linkport2_send_buf, ._linkport2_send_buf.end) of size 160 bytes from '.\DebugNWC\cpu_peri_linkport.doj(seg_int_data)'
+Eliminated object (_linkport2_recv_buf, ._linkport2_recv_buf.end) of size 160 bytes from '.\DebugNWC\cpu_peri_linkport.doj(seg_int_data)'
+Eliminated object (_LinkPort2SendData, ._LinkPort2SendData.end) of size 126 bytes from '.\DebugNWC\cpu_peri_linkport.doj(seg_pmco)'
+Eliminated object (_LinkPort1SendData, ._LinkPort1SendData.end) of size 126 bytes from '.\DebugNWC\cpu_peri_linkport.doj(seg_pmco)'
+Eliminated object (_LinkPort2RecvData, ._LinkPort2RecvData.end) of size 108 bytes from '.\DebugNWC\cpu_peri_linkport.doj(seg_pmco)'
+Eliminated object (_LinkPort1RecvData, ._LinkPort1RecvData.end) of size 108 bytes from '.\DebugNWC\cpu_peri_linkport.doj(seg_pmco)'
+Eliminated object (_module_init_linkport, ._module_init_linkport.end) of size 708 bytes from '.\DebugNWC\cpu_peri_linkport.doj(seg_pmco)'
+Eliminated object (_uart_send_service_directly, ._uart_send_service_directly.end) of size 42 bytes from '.\DebugNWC\cpu_peri_uart.doj(seg_pmco)'
+Eliminated object (__asm_start_thread, .__asm_start_thread.end) of size 6 bytes from '.\DebugNWC\cpus.doj(seg_pmco)'
+Eliminated object (___asm_start_thread, .___asm_start_thread.end) of size 6 bytes from '.\DebugNWC\cpus.doj(seg_pmco)'
+Eliminated object (0x331,0x332) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x337,0x338) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x34b,0x34c) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x35f,0x360) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x36d,0x36e) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x385,0x386) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x38f,0x390) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x3a3,0x3a4) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x3af,0x3b0) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x3ed,0x3ee) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x3ff,0x400) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x41b,0x41c) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x431,0x432) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x435,0x436) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x485,0x486) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x48b,0x48c) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x4d3,0x4d4) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x4f7,0x4f8) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x511,0x512) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x54b,0x54c) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x59f,0x5a0) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x5a7,0x5a8) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x5af,0x5b0) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x5bf,0x5c0) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x5d5,0x5d6) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x5db,0x5dc) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x5e9,0x5ea) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x63b,0x63c) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x65f,0x660) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x667,0x668) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x67b,0x67c) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0x6b1,0x6b2) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (_pg_my_process, _pg_my_process+0x1) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (0xa0d,0xa0e) of size 5 bytes from '.\DebugNWC\djyos.doj(seg_dmda)'
+Eliminated object (_djy_api_start, ._djy_api_start.end) of size 36 bytes from '.\DebugNWC\djyos.doj(seg_pmco)'
+Eliminated object (_djy_get_event_info, ._djy_get_event_info.end) of size 210 bytes from '.\DebugNWC\djyos.doj(seg_pmco)'
+Eliminated object (___djy_lookup_id, .___djy_lookup_id.end) of size 60 bytes from '.\DebugNWC\djyos.doj(seg_pmco)'
+Eliminated object (_djy_wakeup_from, ._djy_wakeup_from.end) of size 36 bytes from '.\DebugNWC\djyos.doj(seg_pmco)'
+Eliminated object (___djy_cut_event_from_evtt_marked, .___djy_cut_event_from_evtt_marked.end) of size 234 bytes from '.\DebugNWC\djyos.doj(seg_pmco)'
+Eliminated object (_djy_get_event_result, ._djy_get_event_result.end) of size 36 bytes from '.\DebugNWC\djyos.doj(seg_pmco)'
+Eliminated object (_djy_create_process_vm, ._djy_create_process_vm.end) of size 36 bytes from '.\DebugNWC\djyos.doj(seg_pmco)'
+Eliminated object (_djy_get_RRS_slice, ._djy_get_RRS_slice.end) of size 54 bytes from '.\DebugNWC\djyos.doj(seg_pmco)'
+Eliminated object (_djy_get_last_error, ._djy_get_last_error.end) of size 48 bytes from '.\DebugNWC\djyos.doj(seg_pmco)'
+Eliminated object (_djy_set_event_prio, ._djy_set_event_prio.end) of size 252 bytes from '.\DebugNWC\djyos.doj(seg_pmco)'
+Eliminated object (_djy_event_delay_to, ._djy_event_delay_to.end) of size 852 bytes from '.\DebugNWC\djyos.doj(seg_pmco)'
+Eliminated object (_djy_wait_event_completed, ._djy_wait_event_completed.end) of size 720 bytes from '.\DebugNWC\djyos.doj(seg_pmco)'
+Eliminated object (_djy_wait_evtt_completed, ._djy_wait_evtt_completed.end) of size 930 bytes from '.\DebugNWC\djyos.doj(seg_pmco)'
+Eliminated object (___djy_active_eventsync_exp, .___djy_active_eventsync_exp.end) of size 258 bytes from '.\DebugNWC\djyos.doj(seg_pmco)'
+Eliminated object (___djy_active_parasync_exp, .___djy_active_parasync_exp.end) of size 462 bytes from '.\DebugNWC\djyos.doj(seg_pmco)'
+Eliminated object (_djy_event_exit, ._djy_event_exit.end) of size 2160 bytes from '.\DebugNWC\djyos.doj(seg_pmco)'
+Eliminated object (_dev_check_device, ._dev_check_device.end) of size 192 bytes from '.\DebugNWC\driver.doj(seg_pmco)'
+Eliminated object (_dev_check_device_scion, ._dev_check_device_scion.end) of size 240 bytes from '.\DebugNWC\driver.doj(seg_pmco)'
+Eliminated object (_dev_open_right_scion, ._dev_open_right_scion.end) of size 330 bytes from '.\DebugNWC\driver.doj(seg_pmco)'
+Eliminated object (_dev_close_right, ._dev_close_right.end) of size 120 bytes from '.\DebugNWC\driver.doj(seg_pmco)'
+Eliminated object (_easynor_move_file, ._easynor_move_file.end) of size 48 bytes from '.\DebugNWC\easynorflash.doj(seg_pmco)'
+Eliminated object (_ecc_table, ._ecc_table.end) of size 1280 bytes from '.\DebugNWC\ecc.doj(seg_dmda)'
+Eliminated object (_ecc_make_256, ._ecc_make_256.end) of size 1146 bytes from '.\DebugNWC\ecc.doj(seg_pmco)'
+Eliminated object (_ecc_count_bits, ._ecc_count_bits.end) of size 144 bytes from '.\DebugNWC\ecc.doj(seg_pmco)'
+Eliminated object (_ecc_corect_256, ._ecc_corect_256.end) of size 1056 bytes from '.\DebugNWC\ecc.doj(seg_pmco)'
+Eliminated object (_fill_big_64bit, ._fill_big_64bit.end) of size 924 bytes from '.\DebugNWC\endian.doj(seg_pmco)'
+Eliminated object (_fill_big_32bit, ._fill_big_32bit.end) of size 426 bytes from '.\DebugNWC\endian.doj(seg_pmco)'
+Eliminated object (_fill_big_16bit, ._fill_big_16bit.end) of size 210 bytes from '.\DebugNWC\endian.doj(seg_pmco)'
+Eliminated object (_pick_big_64bit, ._pick_big_64bit.end) of size 702 bytes from '.\DebugNWC\endian.doj(seg_pmco)'
+Eliminated object (_pick_big_32bit, ._pick_big_32bit.end) of size 198 bytes from '.\DebugNWC\endian.doj(seg_pmco)'
+Eliminated object (_pick_big_16bit, ._pick_big_16bit.end) of size 102 bytes from '.\DebugNWC\endian.doj(seg_pmco)'
+Eliminated object (_fill_little_64bit, ._fill_little_64bit.end) of size 924 bytes from '.\DebugNWC\endian.doj(seg_pmco)'
+Eliminated object (_decode_exp_type, ._decode_exp_type.end) of size 288 bytes from '.\DebugNWC\exception.doj(seg_pmco)'
+Eliminated object (___backup_stks_regs, .___backup_stks_regs.end) of size 330 bytes from '.\DebugNWC\exception_handles.doj(seg_pmco)'
+Eliminated object (___read_irptl_seg, .___read_irptl_seg.end) of size 30 bytes from '.\DebugNWC\exception_handles.doj(seg_pmco)'
+Eliminated object (___set_irptl_seg, .___set_irptl_seg.end) of size 54 bytes from '.\DebugNWC\exception_handles.doj(seg_pmco)'
+Eliminated object (___clr_irptl_seg, .___clr_irptl_seg.end) of size 60 bytes from '.\DebugNWC\exception_handles.doj(seg_pmco)'
+Eliminated object (___sys_Debug_exception, .___sys_Debug_exception.end) of size 12 bytes from '.\DebugNWC\exception_handles.doj(seg_pmco)'
+Eliminated object (___djyfs_is_contain_filename, .___djyfs_is_contain_filename.end) of size 120 bytes from '.\DebugNWC\file.doj(seg_pmco)'
+Eliminated object (_djyfs_fflush, ._djyfs_fflush.end) of size 300 bytes from '.\DebugNWC\file.doj(seg_pmco)'
+Eliminated object (_djyfs_fcubage, ._djyfs_fcubage.end) of size 306 bytes from '.\DebugNWC\file.doj(seg_pmco)'
+Eliminated object (_djyfs_ftruncate, ._djyfs_ftruncate.end) of size 402 bytes from '.\DebugNWC\file.doj(seg_pmco)'
+Eliminated object (_s_block_buf, _s_block_buf+0x20000) of size 655360 bytes from '.\DebugNWC\flash_s29glxxx.doj(seg_dmda)'
+Eliminated object (_i.0, ._i.0.end) of size 5 bytes from '.\DebugNWC\flash_s29glxxx.doj(seg_dmda)'
+Eliminated object (_i.1, ._i.1.end) of size 5 bytes from '.\DebugNWC\flash_s29glxxx.doj(seg_dmda)'
+Eliminated object (_Flash_ResetChip, ._Flash_ResetChip.end) of size 36 bytes from '.\DebugNWC\flash_s29glxxx.doj(seg_pmco)'
+Eliminated object (___wait_end_s29glxxx, .___wait_end_s29glxxx.end) of size 228 bytes from '.\DebugNWC\flash_s29glxxx.doj(seg_pmco)'
+Eliminated object (___wait_erase_end_s29glxxx, .___wait_erase_end_s29glxxx.end) of size 228 bytes from '.\DebugNWC\flash_s29glxxx.doj(seg_pmco)'
+Eliminated object (___data_write_s29glxxx, .___data_write_s29glxxx.end) of size 150 bytes from '.\DebugNWC\flash_s29glxxx.doj(seg_pmco)'
+Eliminated object (___Flash_WriteISReady, .___Flash_WriteISReady.end) of size 300 bytes from '.\DebugNWC\flash_s29glxxx.doj(seg_pmco)'
+Eliminated object (_Flash_WriteData, ._Flash_WriteData.end) of size 258 bytes from '.\DebugNWC\flash_s29glxxx.doj(seg_pmco)'
+Eliminated object (_Flash_ReadData, ._Flash_ReadData.end) of size 306 bytes from '.\DebugNWC\flash_s29glxxx.doj(seg_pmco)'
+Eliminated object (_Flash_EraseSector, ._Flash_EraseSector.end) of size 222 bytes from '.\DebugNWC\flash_s29glxxx.doj(seg_pmco)'
+Eliminated object (_Flash_WriteDataCheck, ._Flash_WriteDataCheck.end) of size 906 bytes from '.\DebugNWC\flash_s29glxxx.doj(seg_pmco)'
+Eliminated object (_atom_uadd, ._atom_uadd.end) of size 168 bytes from '.\DebugNWC\general.doj(seg_pmco)'
+Eliminated object (_atom_usub, ._atom_usub.end) of size 156 bytes from '.\DebugNWC\general.doj(seg_pmco)'
+Eliminated object (.SWITCH.0, .SWITCH.0.end) of size 20 bytes from '.\DebugNWC\iic.doj(seg_dmda)'
+Eliminated object (.siicbus.1, .siicbus.1.end) of size 65 bytes from '.\DebugNWC\iic.doj(seg_dmda)'
+Eliminated object (0x11,0x12) of size 5 bytes from '.\DebugNWC\iic.doj(seg_dmda)'
+Eliminated object (.siicbuf.2, .siicbuf.2.end) of size 65 bytes from '.\DebugNWC\iic.doj(seg_dmda)'
+Eliminated object (0x1f,0x20) of size 5 bytes from '.\DebugNWC\iic.doj(seg_dmda)'
+Eliminated object (.siicdev.3, .siicdev.3.end) of size 80 bytes from '.\DebugNWC\iic.doj(seg_dmda)'
+Eliminated object (.siicdev.4, .siicdev.4.end) of size 85 bytes from '.\DebugNWC\iic.doj(seg_dmda)'
+Eliminated object (_iic_app_write, ._iic_app_write.end) of size 1164 bytes from '.\DebugNWC\iic.doj(seg_pmco)'
+Eliminated object (_iic_app_read, ._iic_app_read.end) of size 1236 bytes from '.\DebugNWC\iic.doj(seg_pmco)'
+Eliminated object (_iic_port_write, ._iic_port_write.end) of size 390 bytes from '.\DebugNWC\iic.doj(seg_pmco)'
+Eliminated object (_iic_port_read, ._iic_port_read.end) of size 234 bytes from '.\DebugNWC\iic.doj(seg_pmco)'
+Eliminated object (_iic_ctrl, ._iic_ctrl.end) of size 270 bytes from '.\DebugNWC\iic.doj(seg_pmco)'
+Eliminated object (_iic_install_port, ._iic_install_port.end) of size 774 bytes from '.\DebugNWC\iic.doj(seg_pmco)'
+Eliminated object (_int_evtt_disconnect, ._int_evtt_disconnect.end) of size 132 bytes from '.\DebugNWC\int.doj(seg_pmco)'
+Eliminated object (_int_isr_disconnect, ._int_isr_disconnect.end) of size 120 bytes from '.\DebugNWC\int.doj(seg_pmco)'
+Eliminated object (_int_evtt_connect, ._int_evtt_connect.end) of size 144 bytes from '.\DebugNWC\int.doj(seg_pmco)'
+Eliminated object (_int_set_clear_type, ._int_set_clear_type.end) of size 198 bytes from '.\DebugNWC\int.doj(seg_pmco)'
+Eliminated object (_int_check_line, ._int_check_line.end) of size 168 bytes from '.\DebugNWC\int.doj(seg_pmco)'
+Eliminated object (_int_check_asyn_signal, ._int_check_asyn_signal.end) of size 72 bytes from '.\DebugNWC\int.doj(seg_pmco)'
+Eliminated object (_int_save_asyn_line, ._int_save_asyn_line.end) of size 360 bytes from '.\DebugNWC\int.doj(seg_pmco)'
+Eliminated object (_int_save_real_line, ._int_save_real_line.end) of size 336 bytes from '.\DebugNWC\int.doj(seg_pmco)'
+Eliminated object (_int_disable_asyn_line, ._int_disable_asyn_line.end) of size 324 bytes from '.\DebugNWC\int.doj(seg_pmco)'
+Eliminated object (_int_disable_real_line, ._int_disable_real_line.end) of size 300 bytes from '.\DebugNWC\int.doj(seg_pmco)'
+Eliminated object (_int_enable_asyn_line, ._int_enable_asyn_line.end) of size 270 bytes from '.\DebugNWC\int.doj(seg_pmco)'
+Eliminated object (_int_enable_real_line, ._int_enable_real_line.end) of size 246 bytes from '.\DebugNWC\int.doj(seg_pmco)'
+Eliminated object (_int_asyn_signal_sync, ._int_asyn_signal_sync.end) of size 654 bytes from '.\DebugNWC\int.doj(seg_pmco)'
+Eliminated object (0x1,0x2) of size 5 bytes from '.\DebugNWC\int_hard.doj(seg_dmda)'
+Eliminated object (_u32g_vect_table, _u32g_vect_table+0x27) of size 195 bytes from '.\DebugNWC\int_hard.doj(seg_dmda)'
+Eliminated object (_int_set_prio, ._int_set_prio.end) of size 48 bytes from '.\DebugNWC\int_hard.doj(seg_pmco)'
+Eliminated object (_int_disable_nest, ._int_disable_nest.end) of size 42 bytes from '.\DebugNWC\int_hard.doj(seg_pmco)'
+Eliminated object (_int_enable_nest, ._int_enable_nest.end) of size 42 bytes from '.\DebugNWC\int_hard.doj(seg_pmco)'
+Eliminated object (_int_setto_real, ._int_setto_real.end) of size 42 bytes from '.\DebugNWC\int_hard.doj(seg_pmco)'
+Eliminated object (_int_tap_line, ._int_tap_line.end) of size 420 bytes from '.\DebugNWC\int_hard.doj(seg_pmco)'
+Eliminated object (_int_query_line, ._int_query_line.end) of size 546 bytes from '.\DebugNWC\int_hard.doj(seg_pmco)'
+Eliminated object (_g_nNumLEDs, ._g_nNumLEDs.end) of size 5 bytes from '.\DebugNWC\led_key.doj(seg_dmda)'
+Eliminated object (0x1,0x2) of size 5 bytes from '.\DebugNWC\led_key.doj(seg_dmda)'
+Eliminated object (_state.1, ._state.1.end) of size 5 bytes from '.\DebugNWC\led_key.doj(seg_dmda)'
+Eliminated object (0x113,0x114) of size 5 bytes from '.\DebugNWC\led_key.doj(seg_dmda)'
+Eliminated object (0x123,0x124) of size 5 bytes from '.\DebugNWC\led_key.doj(seg_dmda)'
+Eliminated object (___int_engine_dpi, .___int_engine_dpi.end) of size 210 bytes from '.\DebugNWC\led_key.doj(seg_pmco)'
+Eliminated object (_UARTisr, ._UARTisr.end) of size 126 bytes from '.\DebugNWC\led_key.doj(seg_pmco)'
+Eliminated object (_Init_PushButtons, ._Init_PushButtons.end) of size 216 bytes from '.\DebugNWC\led_key.doj(seg_pmco)'
+Eliminated object (_Init_LEDs, ._Init_LEDs.end) of size 582 bytes from '.\DebugNWC\led_key.doj(seg_pmco)'
+Eliminated object (_LED_Bar, ._LED_Bar.end) of size 162 bytes from '.\DebugNWC\led_key.doj(seg_pmco)'
+Eliminated object (_LED_Bar_Reverse, ._LED_Bar_Reverse.end) of size 162 bytes from '.\DebugNWC\led_key.doj(seg_pmco)'
+Eliminated object (_LED_Bar_BacknForth, ._LED_Bar_BacknForth.end) of size 540 bytes from '.\DebugNWC\led_key.doj(seg_pmco)'
+Eliminated object (_ClearSet_LED_Bank, ._ClearSet_LED_Bank.end) of size 168 bytes from '.\DebugNWC\led_key.doj(seg_pmco)'
+Eliminated object (_Strobe_LEDs, ._Strobe_LEDs.end) of size 552 bytes from '.\DebugNWC\led_key.doj(seg_pmco)'
+Eliminated object (_line_search_str, ._line_search_str.end) of size 372 bytes from '.\DebugNWC\line.doj(seg_pmco)'
+Eliminated object (_line_search_ch, ._line_search_ch.end) of size 180 bytes from '.\DebugNWC\line.doj(seg_pmco)'
+Eliminated object (_line_flush, ._line_flush.end) of size 48 bytes from '.\DebugNWC\line.doj(seg_pmco)'
+Eliminated object (_line_is_full, ._line_is_full.end) of size 90 bytes from '.\DebugNWC\line.doj(seg_pmco)'
+Eliminated object (_line_is_empty, ._line_is_empty.end) of size 84 bytes from '.\DebugNWC\line.doj(seg_pmco)'
+Eliminated object (_line_check, ._line_check.end) of size 48 bytes from '.\DebugNWC\line.doj(seg_pmco)'
+Eliminated object (_line_get_buf, ._line_get_buf.end) of size 48 bytes from '.\DebugNWC\line.doj(seg_pmco)'
+Eliminated object (_line_read, ._line_read.end) of size 120 bytes from '.\DebugNWC\line.doj(seg_pmco)'
+Eliminated object (_line_skip_tail, ._line_skip_tail.end) of size 126 bytes from '.\DebugNWC\line.doj(seg_pmco)'
+Eliminated object (_line_capacity, ._line_capacity.end) of size 48 bytes from '.\DebugNWC\line.doj(seg_pmco)'
+Eliminated object (_line_init, ._line_init.end) of size 90 bytes from '.\DebugNWC\line.doj(seg_pmco)'
+Eliminated object (_line_write, ._line_write.end) of size 366 bytes from '.\DebugNWC\line.doj(seg_pmco)'
+Eliminated object (_mutex_query, ._mutex_query.end) of size 66 bytes from '.\DebugNWC\lock.doj(seg_pmco)'
+Eliminated object (_semp_set_sync_sort, ._semp_set_sync_sort.end) of size 72 bytes from '.\DebugNWC\lock.doj(seg_pmco)'
+Eliminated object (_mutex_create, ._mutex_create.end) of size 228 bytes from '.\DebugNWC\lock.doj(seg_pmco)'
+Eliminated object (_mutex_delete_r, ._mutex_delete_r.end) of size 180 bytes from '.\DebugNWC\lock.doj(seg_pmco)'
+Eliminated object (_mutex_delete, ._mutex_delete.end) of size 210 bytes from '.\DebugNWC\lock.doj(seg_pmco)'
+Eliminated object (_mb_delete_pool_r, ._mb_delete_pool_r.end) of size 240 bytes from '.\DebugNWC\memb.doj(seg_pmco)'
+Eliminated object (_mb_delete_pool, ._mb_delete_pool.end) of size 270 bytes from '.\DebugNWC\memb.doj(seg_pmco)'
+Eliminated object (_mb_query_capacital, ._mb_query_capacital.end) of size 108 bytes from '.\DebugNWC\memb.doj(seg_pmco)'
+Eliminated object (_endian_test, ._endian_test.end) of size 5 bytes from '.\DebugNWC\module_init.doj(seg_dmda)'
+Eliminated object (_endian_test64, ._endian_test64.end) of size 10 bytes from '.\DebugNWC\module_init.doj(seg_dmda)'
+Eliminated object (_endian_result64, ._endian_result64.end) of size 10 bytes from '.\DebugNWC\module_init.doj(seg_dmda)'
+Eliminated object (_test_data_buf, ._test_data_buf.end) of size 80 bytes from '.\DebugNWC\module_init.doj(seg_dmda)'
+Eliminated object (0x23,0x24) of size 5 bytes from '.\DebugNWC\module_init.doj(seg_dmda)'
+Eliminated object (_temp_data, ._temp_data.end) of size 5 bytes from '.\DebugNWC\module_init.doj(seg_dmda)'
+Eliminated object (0x29,0x2a) of size 5 bytes from '.\DebugNWC\module_init.doj(seg_dmda)'
+Eliminated object (0x51,0x52) of size 5 bytes from '.\DebugNWC\module_init.doj(seg_dmda)'
+Eliminated object (0x7f,0x80) of size 5 bytes from '.\DebugNWC\module_init.doj(seg_dmda)'
+Eliminated object (0x97,0x98) of size 5 bytes from '.\DebugNWC\module_init.doj(seg_dmda)'
+Eliminated object (_run_module_init, ._run_module_init.end) of size 24 bytes from '.\DebugNWC\module_init.doj(seg_pmco)'
+Eliminated object (.epcbss, .epcbss.end) of size 130 bytes from '.\DebugNWC\pipe.doj(seg_dmda)'
+Eliminated object (.spipe.1, .spipe.1.end) of size 25 bytes from '.\DebugNWC\pipe.doj(seg_dmda)'
+Eliminated object (0x1f,0x20) of size 5 bytes from '.\DebugNWC\pipe.doj(seg_dmda)'
+Eliminated object (.spipe.2, .spipe.2.end) of size 65 bytes from '.\DebugNWC\pipe.doj(seg_dmda)'
+Eliminated object (_pipe_dev_ctrl, ._pipe_dev_ctrl.end) of size 66 bytes from '.\DebugNWC\pipe.doj(seg_pmco)'
+Eliminated object (_module_init_pipe, ._module_init_pipe.end) of size 288 bytes from '.\DebugNWC\pipe.doj(seg_pmco)'
+Eliminated object (_pipe_create, ._pipe_create.end) of size 834 bytes from '.\DebugNWC\pipe.doj(seg_pmco)'
+Eliminated object (_pipe_dev_read, ._pipe_dev_read.end) of size 426 bytes from '.\DebugNWC\pipe.doj(seg_pmco)'
+Eliminated object (_pipe_dev_write, ._pipe_dev_write.end) of size 528 bytes from '.\DebugNWC\pipe.doj(seg_pmco)'
+Eliminated object (_pipe_delete, ._pipe_delete.end) of size 288 bytes from '.\DebugNWC\pipe.doj(seg_pmco)'
+Eliminated object (_pipe_capacity, ._pipe_capacity.end) of size 84 bytes from '.\DebugNWC\pipe.doj(seg_pmco)'
+Eliminated object (_pipe_check, ._pipe_check.end) of size 84 bytes from '.\DebugNWC\pipe.doj(seg_pmco)'
+Eliminated object (_load_preload, ._load_preload.end) of size 678 bytes from '.\DebugNWC\pre_loader.doj(seg_pmco)'
+Eliminated object (_debug_printk, ._debug_printk.end) of size 84 bytes from '.\DebugNWC\printf.doj(seg_pmco)'
+Eliminated object (___div64_32, .___div64_32.end) of size 660 bytes from '.\DebugNWC\printf.doj(seg_pmco)'
+Eliminated object (_djy_sprintf, ._djy_sprintf.end) of size 120 bytes from '.\DebugNWC\printf.doj(seg_pmco)'
+Eliminated object (_djy_fprintf, ._djy_fprintf.end) of size 216 bytes from '.\DebugNWC\printf.doj(seg_pmco)'
+Eliminated object (_djy_printk, ._djy_printk.end) of size 180 bytes from '.\DebugNWC\printf.doj(seg_pmco)'
+Eliminated object (_ring_search_str, ._ring_search_str.end) of size 1902 bytes from '.\DebugNWC\ring.doj(seg_pmco)'
+Eliminated object (_ring_search_ch, ._ring_search_ch.end) of size 492 bytes from '.\DebugNWC\ring.doj(seg_pmco)'
+Eliminated object (_ring_is_full, ._ring_is_full.end) of size 90 bytes from '.\DebugNWC\ring.doj(seg_pmco)'
+Eliminated object (_ring_is_empty, ._ring_is_empty.end) of size 84 bytes from '.\DebugNWC\ring.doj(seg_pmco)'
+Eliminated object (_ring_get_buf, ._ring_get_buf.end) of size 48 bytes from '.\DebugNWC\ring.doj(seg_pmco)'
+Eliminated object (_ring_dumb_read, ._ring_dumb_read.end) of size 318 bytes from '.\DebugNWC\ring.doj(seg_pmco)'
+Eliminated object (_ring_recede_read, ._ring_recede_read.end) of size 342 bytes from '.\DebugNWC\ring.doj(seg_pmco)'
+Eliminated object (_ring_skip_tail, ._ring_skip_tail.end) of size 342 bytes from '.\DebugNWC\ring.doj(seg_pmco)'
+Eliminated object (_rsc_node_ranking, ._rsc_node_ranking.end) of size 180 bytes from '.\DebugNWC\rsc.doj(seg_pmco)'
+Eliminated object (_rsc_is_last, ._rsc_is_last.end) of size 126 bytes from '.\DebugNWC\rsc.doj(seg_pmco)'
+Eliminated object (_rsc_is_head, ._rsc_is_head.end) of size 120 bytes from '.\DebugNWC\rsc.doj(seg_pmco)'
+Eliminated object (_rsc_rename_node, ._rsc_rename_node.end) of size 102 bytes from '.\DebugNWC\rsc.doj(seg_pmco)'
+Eliminated object (_rsc_moveto_tree, ._rsc_moveto_tree.end) of size 48 bytes from '.\DebugNWC\rsc.doj(seg_pmco)'
+Eliminated object (_rsc_insert_node, ._rsc_insert_node.end) of size 348 bytes from '.\DebugNWC\rsc.doj(seg_pmco)'
+Eliminated object (_rsc_add_node, ._rsc_add_node.end) of size 348 bytes from '.\DebugNWC\rsc.doj(seg_pmco)'
+Eliminated object (_rsc_displace_node, ._rsc_displace_node.end) of size 426 bytes from '.\DebugNWC\rsc.doj(seg_pmco)'
+Eliminated object (_rsc_del_branch, ._rsc_del_branch.end) of size 300 bytes from '.\DebugNWC\rsc.doj(seg_pmco)'
+Eliminated object (_rsc_moveto_last, ._rsc_moveto_last.end) of size 390 bytes from '.\DebugNWC\rsc.doj(seg_pmco)'
+Eliminated object (_rsc_moveto_head, ._rsc_moveto_head.end) of size 228 bytes from '.\DebugNWC\rsc.doj(seg_pmco)'
+Eliminated object (_rsc_moveto_next, ._rsc_moveto_next.end) of size 312 bytes from '.\DebugNWC\rsc.doj(seg_pmco)'
+Eliminated object (_rsc_moveto_previous, ._rsc_moveto_previous.end) of size 312 bytes from '.\DebugNWC\rsc.doj(seg_pmco)'
+Eliminated object (_rsc_round_previous, ._rsc_round_previous.end) of size 216 bytes from '.\DebugNWC\rsc.doj(seg_pmco)'
+Eliminated object (_rsc_round_next, ._rsc_round_next.end) of size 216 bytes from '.\DebugNWC\rsc.doj(seg_pmco)'
+Eliminated object (_rsc_get_name, ._rsc_get_name.end) of size 174 bytes from '.\DebugNWC\rsc.doj(seg_pmco)'
+Eliminated object (_rsc_get_previous, ._rsc_get_previous.end) of size 174 bytes from '.\DebugNWC\rsc.doj(seg_pmco)'
+Eliminated object (_rsc_get_head, ._rsc_get_head.end) of size 180 bytes from '.\DebugNWC\rsc.doj(seg_pmco)'
+Eliminated object (_rsc_search_sibling, ._rsc_search_sibling.end) of size 294 bytes from '.\DebugNWC\rsc.doj(seg_pmco)'
+Eliminated object (_rsc_search_scion, ._rsc_search_scion.end) of size 240 bytes from '.\DebugNWC\rsc.doj(seg_pmco)'
+Eliminated object (___rtc_write, .___rtc_write.end) of size 240 bytes from '.\DebugNWC\rtc_ds1390.doj(seg_pmco)'
+Eliminated object (_rtc_update_time, ._rtc_update_time.end) of size 852 bytes from '.\DebugNWC\rtc_ds1390.doj(seg_pmco)'
+Eliminated object (_sh_uninstall_cmd_bytab, ._sh_uninstall_cmd_bytab.end) of size 276 bytes from '.\DebugNWC\shell.doj(seg_pmco)'
+Eliminated object (_sh_cmd_parser, ._sh_cmd_parser.end) of size 522 bytes from '.\DebugNWC\shell.doj(seg_pmco)'
+Eliminated object (_sh_create_dbx, ._sh_create_dbx.end) of size 42 bytes from '.\DebugNWC\shell_fs.doj(seg_pmco)'
+Eliminated object (___path_include_dbxname, .___path_include_dbxname.end) of size 168 bytes from '.\DebugNWC\shell_fs.doj(seg_pmco)'
+Eliminated object (___path_is_absolute_path, .___path_is_absolute_path.end) of size 210 bytes from '.\DebugNWC\shell_fs.doj(seg_pmco)'
+Eliminated object (___pick_path_end_item, .___pick_path_end_item.end) of size 510 bytes from '.\DebugNWC\shell_fs.doj(seg_pmco)'
+Eliminated object (_get_folder_wildcard_str, ._get_folder_wildcard_str.end) of size 708 bytes from '.\DebugNWC\shell_fs.doj(seg_pmco)'
+Eliminated object (_stdin_get_focus_default, ._stdin_get_focus_default.end) of size 30 bytes from '.\DebugNWC\stdin_dev.doj(seg_pmco)'
+Eliminated object (_stdin_set_focus_default, ._stdin_set_focus_default.end) of size 42 bytes from '.\DebugNWC\stdin_dev.doj(seg_pmco)'
+Eliminated object (_dlsp_module_loader, ._dlsp_module_loader.end) of size 24 bytes from '.\DebugNWC\sys_init.doj(seg_pmco)'
+Eliminated object (___lib_setup_runtime_heap, .___lib_setup_runtime_heap.end) of size 18 bytes from 'libc_nwc.dlb[set_c.doj](seg_pmco)'
+Successfully eliminated 767106 bytes in processor 'p0'
+]]></TEXT>
+</MSG>
+</DOCUMENT>

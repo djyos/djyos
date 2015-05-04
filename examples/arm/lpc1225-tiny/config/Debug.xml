@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="GB2312" standalone="no"?>
+<CONFIGURATION>
+    <MEMORY>
+        <RXM LENGTH="64k" NAME="ROM1" RXW="RX" START="0x00000000"/>
+        <RXM LENGTH="8k" NAME="RAM1" RXW="RXW" START="0x10000000"/>
+    </MEMORY>
+    <SECTIONS>
+        <LOADDEFAULT>
+            <RXM REGION="ROM1">
+                <SECTION TYPE="STARTUP">
+                    <INPUT>KEEP(* (.isr_vector .isr_vector.*))</INPUT>
+                    <INPUT>./src/OS_code/bsp/arch/core/exceptions.o (.text .text.* .rodata .rodata.*)</INPUT>
+                    <INPUT>./src/OS_code/bsp/arch/startup/*.o (.text .text.* .rodata .rodata.*)</INPUT>
+                    <INPUT>./src/OS_code/loader/si/pre_loader.o (.text .text.* .rodata .rodata.*)</INPUT>
+                </SECTION>
+                <SECTION TYPE="PRELOAD">
+                    <INPUT>KEEP(* (.table.exceptions .table.exceptions.*))</INPUT>
+                    <INPUT>KEEP(* (.table.vectors .table.vectors.*))</INPUT>
+                    <INPUT>./src/OS_code/loader/si/loader.o (.text .text.* .rodata .rodata.*)</INPUT>
+                    <INPUT>./src/OS_code/bsp/arch/core/int_hard.o (.text .text.* .rodata .rodata.*)</INPUT>
+                    <INPUT>./src/OS_code/djyos/int/int.o (.text .text.* .rodata .rodata.*)</INPUT>
+                    <INPUT>./src/OS_code/bsp/arch/core/ints.o (.text .text.* .rodata .rodata.*)</INPUT>
+                    <INPUT>./src/user/critical/*.o (.text .text.* .rodata .rodata.*)</INPUT>
+                    <INPUT>./src/OS_code/bsp/cpu_peripheral/src/gpio.o (.text .text.* .rodata .rodata.*)</INPUT>
+                    <INPUT>./src/OS_code/loader/si/loader.o (.data .data.*)</INPUT>
+                    <INPUT>./src/OS_code/bsp/arch/core/int_hard.o (.data .data.*)</INPUT>
+                    <INPUT>./src/OS_code/djyos/int/int.o (.data .data.*)</INPUT>
+                    <INPUT>./src/OS_code/bsp/arch/core/ints.o (.data .data.*)</INPUT>
+                    <INPUT>./src/user/critical/*.o (.data .data.*)</INPUT>
+                    <INPUT>./src/OS_code/bsp/cpu_peripheral/src/gpio.o (.data .data.*)</INPUT>
+                </SECTION>
+                <SECTION TYPE="SYSLOAD">
+                    <INPUT>* (.text .text.* .rodata .rodata.*)</INPUT>
+                    <INPUT>* (.data .data.*)</INPUT>
+                </SECTION>
+            </RXM>
+        </LOADDEFAULT>
+        <RUNDEFAULT>
+            <RXM REGION="RAM1">
+                <SECTION TYPE="PRELOAD">
+                    <INPUT>KEEP(* (.table.exceptions .table.exceptions.*))</INPUT>
+                    <INPUT>KEEP(* (.table.vectors .table.vectors.*))</INPUT>
+                    <INPUT>./src/OS_code/loader/si/loader.o (.data .data.*)</INPUT>
+                    <INPUT>./src/OS_code/bsp/arch/core/int_hard.o (.data .data.*)</INPUT>
+                    <INPUT>./src/OS_code/djyos/int/int.o (.data .data.*)</INPUT>
+                    <INPUT>./src/OS_code/bsp/arch/core/ints.o (.data .data.*)</INPUT>
+                    <INPUT>./src/user/critical/*.o (.data .data.*)</INPUT>
+                    <INPUT>./src/OS_code/bsp/cpu_peripheral/src/gpio.o (.data .data.*)</INPUT>
+                    <INPUT>./src/OS_code/loader/si/loader.o (.bss .bss.* COMMON)</INPUT>
+                    <INPUT>./src/OS_code/bsp/arch/core/int_hard.o (.bss .bss.* COMMON)</INPUT>
+                    <INPUT>./src/OS_code/djyos/int/int.o (.bss .bss.* COMMON)</INPUT>
+                    <INPUT>./src/OS_code/bsp/arch/core/ints.o (.bss .bss.* COMMON)</INPUT>
+                    <INPUT>./src/user/critical/*.o (.bss .bss.* COMMON)</INPUT>
+                    <INPUT>./src/OS_code/bsp/cpu_peripheral/src/gpio.o (.bss .bss.* COMMON)</INPUT>
+                </SECTION>
+                <SECTION TYPE="STACK">
+                    <INPUT>KEEP(* (.stack.msp .stack.msp.*))</INPUT>
+                </SECTION>
+                <SECTION TYPE="SYSLOAD">
+                    <INPUT>* (.data .data.*)</INPUT>
+                    <INPUT>* (.bss .bss.* COMMON)</INPUT>
+                </SECTION>
+                <SECTION TYPE="HEAP">
+                    <INPUT>* (.sys_heap)</INPUT>
+                </SECTION>
+            </RXM>
+        </RUNDEFAULT>
+    </SECTIONS>
+</CONFIGURATION>

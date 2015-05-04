@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.1235240069">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.1235240069" moduleId="org.eclipse.cdt.core.settings" name="Debug">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" description="" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.1235240069" name="Debug" parent="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug">
+					<folderInfo id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.1235240069." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.debug.1004932600" name="ARM Windows GCC (Sourcery G++ Lite)" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.toolchain.debug">
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level.391790224" name="Debug level" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.debugging.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.debugging.level.max" valueType="enumerated"/>
+							<option id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor.712910927" name="Processor" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.option.target.processor" value="org.eclipse.cdt.cross.arm.gnu.base.option.mcpu.cortex-m0" valueType="enumerated"/>
+							<targetPlatform id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.platform.debug.496913486" isAbstract="false" name="Windows Platform" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.platform.debug"/>
+							<builder buildPath="${workspace_loc:/lpc1225/Debug}" id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.builder.debug.1926995842" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="ARM Sourcery Windows GNU Make builder" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.builder.debug"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.debug.1535906936" name="ARM Sourcery Windows GCC Assembler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths.208313554" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src/bsp/arch/cpu/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../${DJYOS_SRC_LOCATION}\lib\include&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def.2139502215" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="debug"/>
+								</option>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.1063416602" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.debug.2055930313" name="ARM Sourcery Windows GCC C Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level.428308287" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.size" valueType="enumerated"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths.1505893676" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src/OS_prjcfg/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../${DJYOS_SRC_LOCATION}\bsp\cpu_peripheral\std_inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../${DJYOS_SRC_LOCATION}\bsp\vendor_lib/CMSIS/CM0/CoreSupport&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../${DJYOS_SRC_LOCATION}\djyos\gui\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../${DJYOS_SRC_LOCATION}\bsp\cpu_peripheral\lpc12xx\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../${DJYOS_SRC_LOCATION}\bsp\arch\arm\cortex_m\cortex_m0\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../${DJYOS_SRC_LOCATION}\lib\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../${DJYOS_SRC_LOCATION}\djyos\djyfs&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../${DJYOS_SRC_LOCATION}/djyos/driver/include&quot;"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def.334741285" name="Defined symbols (-D)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="debug"/>
+								</option>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.std.1501610549" name="Language Standard" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.std" value="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.misc.std.c99" valueType="enumerated"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.1916948879" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.debug.2116846393" name="ARM Sourcery Windows GCC C++ Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.compiler.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level.2124130758" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.none" valueType="enumerated"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.linker.debug.744496745" name="ARM Sourcery Windows GCC C Linker" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.linker.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile.656376246" name="Script file (-T)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile" value="..\config.\debug.lds" valueType="string"/>
+								<inputType id="org.eclipse.cdt.cross.arm.gnu.c.linker.input.1714584341" superClass="org.eclipse.cdt.cross.arm.gnu.c.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.linker.debug.1225266643" name="ARM Sourcery Windows GCC C++ Linker" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.cpp.linker.debug"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.archiver.base.381984" name="ARM Sourcery Windows GCC Archiver" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.archiver.base"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createflash.debug.61224381" name="ARM Sourcery Windows GNU Create Flash Image" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createflash.debug">
+								<option id="org.eclipse.cdt.cross.arm.gnu.createflash.out.choice.1886130346" name="Output file format (-O)" superClass="org.eclipse.cdt.cross.arm.gnu.createflash.out.choice" value="org.eclipse.cdt.cross.arm.gnu.createflash.out.choice.binary" valueType="enumerated"/>
+							</tool>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createlisting.debug.1606296856" name="ARM Sourcery Windows GNU Create Listing" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.createlisting.debug"/>
+							<tool id="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.printsize.debug.2108661916" name="ARM Sourcery Windows GNU Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.printsize.debug"/>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry excluding="src/OS_code/djyos/exp|src/OS_code/djyos/timer|src/OS_code/djyos/wdt|src/OS_code/loader/si/check_text_code.c|src/OS_code/djyos/driver/pci|src/OS_code/djyos/djyfs/fat32|src/OS_code/djyos/djyfs/easynorflash|src/OS_code/djyos/djyip|src/OS_code/djyos/driver/driver|src/djyos/djyip" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="lpc1225.org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.1978887102" name="ARM Cross Target Application" projectType="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf"/>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="com.djyos.wizard.configuration.elf.release.1600426771;com.djyos.wizard.configuration.elf.release.1600426771.;com.djyos.wizard.tool.sourcery.complete.assembler.release.1779182995;com.djyos.wizard.inputType.sourcery.assembler.2130502885">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.djyos.wizard.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.2002121203;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.2002121203.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.release.400649908;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.708123989">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.djyos.wizard.configuration.elf.debug.2014571742;com.djyos.wizard.configuration.elf.debug.2014571742.1521580112;com.djyos.wizard.tool.sourcery.complete.elf.assembler.debug.1074757979;com.djyos.wizard.inputType.sourcery.assembler.1875899457">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.djyos.wizard.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.djyos.wizard.configuration.elf.debug.2014571742;com.djyos.wizard.configuration.elf.debug.2014571742.1521580112;com.djyos.wizard.tool.sourcery.complete.elf.cCompiler.debug.948737545;com.djyos.wizard.inputType.sourcery.cCompiler.579139945">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.djyos.wizard.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.djyos.wizard.configuration.elf.debug.2014571742;com.djyos.wizard.configuration.elf.debug.2014571742.2039152151;com.djyos.wizard.tool.sourcery.complete.elf.cCompiler.debug.1004325641.155644007;com.djyos.wizard.inputType.sourcery.cCompiler.943383487">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.djyos.wizard.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.2002121203;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.release.2002121203.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.release.1680434823;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.241761013">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.1235240069;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.1235240069.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.c.compiler.debug.2055930313;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.c.compiler.base.input.1916948879">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.1235240069;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.1235240069.;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.assembler.debug.1535906936;org.eclipse.cdt.cross.arm.gnu.sourcery.windows.assembler.base.input.1063416602">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.djyos.wizard.configuration.elf.debug.2014571742;com.djyos.wizard.configuration.elf.debug.2014571742.1948990596;com.djyos.wizard.tool.sourcery.complete.elf.assembler.debug.652209745;com.djyos.wizard.inputType.sourcery.assembler.1366536005">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.djyos.wizard.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.djyos.wizard.configuration.elf.debug.2014571742;com.djyos.wizard.configuration.elf.debug.2014571742.1948990596;com.djyos.wizard.tool.sourcery.complete.elf.cCompiler.debug.880659037;com.djyos.wizard.inputType.sourcery.cCompiler.1530199082">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.djyos.wizard.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.djyos.wizard.configuration.elf.debug.2014571742;com.djyos.wizard.configuration.elf.debug.2014571742.;com.djyos.wizard.tool.sourcery.complete.elf.assembler.debug.1309904469;com.djyos.wizard.inputType.sourcery.assembler.1542309201">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.djyos.wizard.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.djyos.wizard.configuration.elf.release.1600426771;com.djyos.wizard.configuration.elf.release.1600426771.;com.djyos.wizard.tool.sourcery.complete.cCompiler.release.1203700806;com.djyos.wizard.inputType.sourcery.cCompiler.2010483034">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.djyos.wizard.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.djyos.wizard.configuration.elf.debug.2014571742;com.djyos.wizard.configuration.elf.debug.2014571742.;com.djyos.wizard.tool.sourcery.complete.elf.cCompiler.debug.1004325641;com.djyos.wizard.inputType.sourcery.cCompiler.92415167">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.djyos.wizard.ARM_CS_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="refreshScope" versionNumber="1">
+		<resource resourceType="PROJECT" workspacePath="/lpc1225"/>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+</cproject>

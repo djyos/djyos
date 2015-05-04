@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="GB2312" standalone="no"?>
+<CONFIGURATION>
+    <MEMORY>
+        <RXM LENGTH="2M" NAME="ROM1" RXW="RX" START="0x00000000"/>
+        <RXM LENGTH="8M" NAME="RAM1" RXW="RXW" START="0x08000000"/>
+    </MEMORY>
+    <SECTIONS>
+        <LOADDEFAULT>
+            <RXM REGION="ROM1">
+                <SECTION TYPE="STARTUP">
+                    <INPUT>KEEP(* (.isr_vector .isr_vector.*))</INPUT>
+                    <INPUT>./src/OS_code/bsp/arch/core/exceptions.o (.text .text.* .rodata .rodata.*)</INPUT>
+                    <INPUT>./src/OS_code/bsp/arch/startup/*.o (.text .text.* .rodata .rodata.*)</INPUT>
+                    <INPUT>./src/OS_code/loader/si/pre_loader.o (.text .text.* .rodata .rodata.*)</INPUT>
+                </SECTION>
+                <SECTION TYPE="PRELOAD"/>
+                <SECTION TYPE="SYSLOAD"/>
+            </RXM>
+        </LOADDEFAULT>
+        <RUNDEFAULT>
+            <RXM REGION="RAM1">
+                <SECTION TYPE="PRELOAD"/>
+                <SECTION TYPE="STACK"/>
+                <SECTION TYPE="SYSLOAD"/>
+                <SECTION TYPE="HEAP"/>
+            </RXM>
+        </RUNDEFAULT>
+    </SECTIONS>
+</CONFIGURATION>

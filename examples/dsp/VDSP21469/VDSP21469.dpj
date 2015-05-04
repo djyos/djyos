@@ -1,0 +1,2675 @@
+<?xml version="1.0" encoding='ISO-8859-1'?>
+<visualdsp-project schema="17" name="VDSP21469" file="VDSP21469.dpj" version="1">
+	<!-- Project build target -->
+	<target>
+		<processor revision="any">ADSP-21469</processor>
+		<extension>.ldr</extension>
+		<type>Loader file</type>
+	</target>
+	<!-- Configurations -->
+	<configurations active="DebugNWC">
+		<configuration name="Debug">
+			<intermediate-dir>.\Debug</intermediate-dir>
+			<output-dir>.\Debug</output-dir>
+			<changed-property-page-flags>0</changed-property-page-flags>
+			<tools>
+				<tool type="Compiler">
+					<option><![CDATA[|-Version>5.0|-O>0|-O1>0|-Ov>100|-ipa>0|-g>1|-no-annotate>0|-save-temps -path-output>0|-ED>0|-no-auto-attrs>0|-no-builtin>0|-no-extra-keywords>0|-enum-is-int>0|-no-fp-associative>0|-structs-do-not-overlap>1|-implicit-pointers>0|-eh >0|-rtti>1|-check-init-order>0|-ignore-std>0|-const-read-write>0|-const-strings>0|-no-multiline>1|-misra>0|-misra-strict>0|-misra-no-cross-module>0|-misra-no-runtime>0|-misra-testing>0|-misra-suppress-advisory>0|-D>no_strnlen_lib|-no-std-inc>0|-double-size-32>1|-double-size-any>0|-swc>1|-no-simd>0|-section switch=seg_pmda>0|-no-shift-to-add>0|-pguide>0|NOSWITCH>0|-flags-compiler --diag_warning,implicit_func_decl>0|-warn-protos>1|-flags-compiler --diag_warning,call_not_inlined>0|-Wremarks>0|-w>0]]></option>
+				</tool>
+				<tool type="Assembler">
+					<option><![CDATA[|-Version>4.5|-v>0|-g>1|-l>0|-save-temps>0|-sp>0|-swc>1]]></option>
+				</tool>
+				<tool type="Linker">
+					<option><![CDATA[|-Version>5.0|-flags-link -t>0|-flags-link -S>0|-flags-link -s>0|-mem>0|-flags-link -warnonce>0|-map>0|-flags-link -xref>0|-flags-link -save-temps>0|-flags-link -ip>0|-flags-link -e>0|-flags-link -ev>0|-flags-link -MD__ADI_LIBEH__>0|-add-debug-libpaths>1|-swc>1]]></option>
+				</tool>
+				<tool type="Splitter">
+					<option><![CDATA[|-Version>5.0|-pm>1|-dm>0|-64>0|s>0|-ram>1|-norom>0|-f s3>1|-r> 8 8 32|-u>0]]></option>
+				</tool>
+				<tool type="Loader">
+					<option><![CDATA[|-Version>4.5|-bprom>1|-fHEX>1|-HostWidth8>1|-v>0|-nokernel>0|UserKernel>0|-COMPRESSION>0|-COMPRESSIONOVERLAY>0|-RETAINSECONDSTAGEKERNEL>0|-COMPRESSWS>9]]></option>
+				</tool>
+				<tool type="Archiver">
+					<option><![CDATA[]]></option>
+				</tool>
+				<tool type="VdkGen">
+					<option><![CDATA[]]></option>
+				</tool>
+			</tools>
+		</configuration>
+		<configuration name="Release">
+			<intermediate-dir>.\Release</intermediate-dir>
+			<output-dir>.\Release</output-dir>
+			<changed-property-page-flags>0</changed-property-page-flags>
+			<tools>
+				<tool type="Compiler">
+					<option><![CDATA[]]></option>
+				</tool>
+				<tool type="Assembler">
+					<option><![CDATA[]]></option>
+				</tool>
+				<tool type="Linker">
+					<option><![CDATA[]]></option>
+				</tool>
+				<tool type="Splitter">
+					<option><![CDATA[]]></option>
+				</tool>
+				<tool type="Loader">
+					<option><![CDATA[]]></option>
+				</tool>
+				<tool type="Archiver">
+					<option><![CDATA[]]></option>
+				</tool>
+				<tool type="VdkGen">
+					<option><![CDATA[]]></option>
+				</tool>
+			</tools>
+		</configuration>
+		<configuration name="DebugNWC">
+			<intermediate-dir>.\DebugNWC</intermediate-dir>
+			<output-dir>.\DebugNWC</output-dir>
+			<changed-property-page-flags>0</changed-property-page-flags>
+			<tools>
+				<tool type="Compiler">
+					<option><![CDATA[|-Version>5.0|-O>0|-O1>0|-Ov>0|-ipa>0|-g>1|-no-annotate>0|-save-temps -path-output>0|-ED>0|-no-auto-attrs>0|-no-builtin>0|-no-extra-keywords>0|-enum-is-int>0|-no-fp-associative>0|-structs-do-not-overlap>1|-implicit-pointers>0|-eh >0|-rtti>1|-check-init-order>0|-ignore-std>0|-const-read-write>0|-const-strings>0|-no-multiline>1|-misra>0|-misra-strict>0|-misra-no-cross-module>0|-misra-no-runtime>0|-misra-testing>0|-misra-suppress-advisory>0|-D>no_strnlen_lib;Monitor_version|-I>src\OS_prjcfg\include;src\user;..\..\..\djysrc\bsp\chips\include;..\..\..\djysrc\djyos\include;..\..\..\djysrc\djyos\djyip\include;..\..\..\djysrc\djyos\gui\include;..\..\..\djysrc\lib\include;..\..\..\djysrc\bsp\arch\dsp\sharc\include;..\..\..\djysrc\bsp\arch\dsp\sharc\21469\include;..\..\..\djysrc\bsp\cpu_peripheral\Sharc21469\include;..\..\..\djysrc\djyos\djyfs;..\..\..\djysrc\loader\si;..\..\..\djysrc\bsp\board_peripheral\adsp21469\include;..\..\..\djysrc\bsp\cpu_peripheral\Sharc21469\include;..\..\..\djysrc\djyos\driver\include;..\..\..\djysrc\djyos\djyfs\easynorflash;..\..\..\djysrc\bsp\vendor_lib\Sharc21469\include|-no-std-inc>0|-double-size-32>1|-double-size-any>0|-nwc>1|-no-simd>0|-section switch=seg_pmda>0|-no-shift-to-add>0|-pguide>0|NOSWITCH>0|-flags-compiler --diag_warning,implicit_func_decl>0|-warn-protos>1|-flags-compiler --diag_warning,call_not_inlined>0|-Wremarks>0|-w>0]]></option>
+				</tool>
+				<tool type="Assembler">
+					<option><![CDATA[|-Version>4.5|-v>0|-g>1|-l>0|-save-temps>0|-sp>0|-nwc>1|-i>..\..\..\djysrc\bsp\cpu_peripheral\Sharc21469\include;..\..\..\djysrc\bsp\arch\dsp\sharc\include;..\..\..\djysrc\bsp\arch\dsp\sharc\21469\include;..\..\..\djysrc\bsp\vendor_lib\Sharc21469\include]]></option>
+				</tool>
+				<tool type="Linker">
+					<option><![CDATA[|-Version>5.0|-flags-link -t>0|-flags-link -S>0|-flags-link -s>0|-mem>0|-flags-link -warnonce>0|-map>1|-flags-link -xref>0|-flags-link -save-temps>0|-flags-link -ip>0|-L>src\OS_prjcfg\include;.\Linker Files;..\..\..\djysrc\djyos\include;..\..\..\djysrc\djyos\djyip\include;..\..\..\djysrc\djyos\gui\include;..\..\..\djysrc\lib\include;..\..\..\djysrc\bsp\arch\dsp\sharc\include;..\..\..\djysrc\bsp\arch\dsp\sharc\21469\include;..\..\..\djysrc\bsp\cpu_peripheral\Sharc21469\include;..\..\..\djysrc\djyos\djyfs;..\..\..\djysrc\loader\si;..\..\..\djysrc\bsp\board_peripheral\sharc21469\include|-MD>Monitor_version|-i>".\Linker Files"|-flags-link -e>1|-flags-link -ev>1|-flags-link -MD__ADI_LIBEH__>0|-add-debug-libpaths>0|-nwc>1]]></option>
+				</tool>
+				<tool type="Splitter">
+					<option><![CDATA[|-Version>5.0|-pm>1|-dm>0|-64>0|s>0|-ram>1|-norom>0|-f s3>1|-r> 8 8 32|-u>0]]></option>
+				</tool>
+				<tool type="Loader">
+					<option><![CDATA[|-Version>4.5|-bprom>1|-fBinary>1|-HostWidth8>1|-v>0|-nokernel>0|UserKernel>1|-l>.\469_prom_version\Release\469_prom_version.dxe|-id0exe=>0: |-id1exe=>1: |-id2exe=>2: |-id3exe=>3: |-id4exe=>4: |-id5exe=>5: |-id6exe=>6: |-id7exe=>7: |-COMPRESSION>0|-COMPRESSIONOVERLAY>0|-RETAINSECONDSTAGEKERNEL>0|-COMPRESSWS>9]]></option>
+				</tool>
+				<tool type="Archiver">
+					<option><![CDATA[]]></option>
+				</tool>
+				<tool type="VdkGen">
+					<option><![CDATA[]]></option>
+				</tool>
+			</tools>
+		</configuration>
+		<configuration name="ReleaseNWC">
+			<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+			<output-dir>.\ReleaseNWC</output-dir>
+			<changed-property-page-flags>0</changed-property-page-flags>
+			<tools>
+				<tool type="Compiler">
+					<option><![CDATA[|-Version>5.0|-O>0|-O1>0|-Ov>100|-ipa>0|-g>0|-no-annotate>0|-save-temps -path-output>0|-ED>0|-no-auto-attrs>0|-no-builtin>0|-no-extra-keywords>0|-enum-is-int>0|-no-fp-associative>0|-structs-do-not-overlap>1|-implicit-pointers>0|-eh >0|-rtti>1|-check-init-order>0|-ignore-std>0|-const-read-write>0|-const-strings>0|-no-multiline>1|-misra>0|-misra-strict>0|-misra-no-cross-module>0|-misra-no-runtime>0|-misra-testing>0|-misra-suppress-advisory>0|-D>no_strnlen_lib;Release_version|-I>D:\djysdk\djysrc\djyos\include;D:\djysdk\djysrc\djyos\djyip\include;D:\djysdk\djysrc\djyos\gui\include;D:\djysdk\djyos_dsp_project\examples\VDSP21469\src\OS_prjcfg\include;D:\djysdk\djysrc\lib\include;D:\djysdk\djysrc\bsp\arch\dsp\sharc\include;D:\djysdk\djysrc\bsp\arch\dsp\sharc\21469\include;D:\djysdk\djysrc\bsp\cpu_peripheral\Sharc21469\include;D:\djysdk\djysrc\djyos\djyfs;D:\djysdk\djysrc\loader\si;D:\djysdk\djysrc\bsp\board_peripheral\adsp21469\include;D:\djysdk\djysrc\bsp\cpu_peripheral\Sharc21469\include;D:\djysdk\djyos_dsp_project\examples\VDSP21469\src\user;D:\djysdk\djysrc\djyos\driver\include;D:\djysdk\djysrc\bsp\chips\include;D:\djysdk\djysrc\djyos\djyfs\easynorflash;D:\djysdk\djysrc\bsp\vendor_lib\Sharc21469\include|-no-std-inc>0|-double-size-32>1|-double-size-any>0|-nwc>1|-no-simd>0|-section switch=seg_pmda>0|-no-shift-to-add>0|-pguide>0|NOSWITCH>0|-flags-compiler --diag_warning,implicit_func_decl>0|-warn-protos>1|-flags-compiler --diag_warning,call_not_inlined>0|-Wremarks>0|-w>0]]></option>
+				</tool>
+				<tool type="Assembler">
+					<option><![CDATA[|-Version>4.5|-v>0|-g>0|-l>0|-save-temps>0|-sp>0|-nwc>1|-i>D:\djysdk\djysrc\bsp\cpu_peripheral\Sharc21469\include;D:\djysdk\djysrc\bsp\arch\dsp\sharc\include;D:\djysdk\djysrc\bsp\arch\dsp\sharc\21469\include;D:\djysdk\djysrc\bsp\vendor_lib\Sharc21469\include]]></option>
+				</tool>
+				<tool type="Linker">
+					<option><![CDATA[|-Version>5.0|-flags-link -t>0|-flags-link -S>0|-flags-link -s>0|-mem>0|-flags-link -warnonce>0|-map>1|-flags-link -xref>0|-flags-link -save-temps>0|-flags-link -ip>0|-L>D:\djysdk\djysrc\lib\include;D:\djysdk\djysrc\djyos\include;D:\djysdk\djysrc\djyos\djyip\include;D:\djysdk\djysrc\djyos\gui\include;D:\djysdk\djyos_dsp_project\examples\VDSP21469\src\OS_prjcfg\include;D:\djysdk\djysrc\bsp\arch\dsp\sharc\include;D:\djysdk\djysrc\bsp\arch\dsp\sharc\21469\include;D:\djysdk\djysrc\bsp\cpu_peripheral\Sharc21469\include;D:\djysdk\djysrc\djyos\djyfs;D:\djysdk\djysrc\loader\si;D:\djysdk\djysrc\bsp\board_peripheral\sharc21469\include;D:\djysdk\djyos_dsp_project\examples\VDSP21469\Linker Files|-MD>Release_version|-i>"D:\djysdk\djyos_dsp_project\examples\VDSP21469\Linker Files"|-flags-link -e>1|-flags-link -ev>1|-flags-link -MD__ADI_LIBEH__>0|-add-debug-libpaths>0|-nwc>1]]></option>
+				</tool>
+				<tool type="Splitter">
+					<option><![CDATA[|-Version>5.0|-pm>1|-dm>0|-64>0|s>0|-ram>1|-norom>0|-f s3>1|-r> 8 8 32|-u>0]]></option>
+				</tool>
+				<tool type="Loader">
+					<option><![CDATA[|-Version>4.5|-bprom>1|-fBinary>1|-HostWidth8>1|-v>0|-nokernel>0|UserKernel>0|-l>D:\Analog Devices\VisualDSP 5.1\214xx\ldr\469_prom.dxe|-id0exe=>0: |-id1exe=>1: |-id2exe=>2: |-id3exe=>3: |-id4exe=>4: |-id5exe=>5: |-id6exe=>6: |-id7exe=>7: |-COMPRESSION>0|-COMPRESSIONOVERLAY>0|-RETAINSECONDSTAGEKERNEL>0|-COMPRESSWS>9]]></option>
+				</tool>
+				<tool type="Archiver">
+					<option><![CDATA[]]></option>
+				</tool>
+				<tool type="VdkGen">
+					<option><![CDATA[]]></option>
+				</tool>
+			</tools>
+		</configuration>
+	</configurations>
+	<!-- Project folders -->
+	<folders>
+		<folder name="Linker Files" ext=".ldf,.dlb">
+			<files>
+				<file name=".\Linker Files\VDSP21469.LDF">
+					<file-configurations>
+						<file-configuration name="Debug">
+							<excluded-flag value="no"/>
+							<build-with-flag value="project"/>
+							<intermediate-dir>.\Debug</intermediate-dir>
+							<output-dir>.\Debug</output-dir>
+						</file-configuration>
+						<file-configuration name="Release">
+							<excluded-flag value="no"/>
+							<build-with-flag value="project"/>
+							<intermediate-dir>.\Release</intermediate-dir>
+							<output-dir>.\Release</output-dir>
+						</file-configuration>
+						<file-configuration name="DebugNWC">
+							<excluded-flag value="no"/>
+							<build-with-flag value="project"/>
+							<intermediate-dir>.\DebugNWC</intermediate-dir>
+							<output-dir>.\DebugNWC</output-dir>
+						</file-configuration>
+						<file-configuration name="ReleaseNWC">
+							<excluded-flag value="no"/>
+							<build-with-flag value="project"/>
+							<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+							<output-dir>.\ReleaseNWC</output-dir>
+						</file-configuration>
+					</file-configurations>
+				</file>
+			</files>
+		</folder>
+		<folder name="src" ext=".c,.cpp,.cxx,.asm,.dsp,.s">
+			<folders>
+				<folder name="OS_code">
+					<folders>
+						<folder name="bsp">
+							<folders>
+								<folder name="arch">
+									<folders>
+										<folder name="21469">
+											<folders>
+												<folder name="core">
+													<files>
+														<file name="..\..\..\djysrc\bsp\arch\dsp\sharc\21469\core\cpu.c">
+															<file-configurations>
+																<file-configuration name="Debug">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\Debug</intermediate-dir>
+																	<output-dir>.\Debug</output-dir>
+																</file-configuration>
+																<file-configuration name="Release">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\Release</intermediate-dir>
+																	<output-dir>.\Release</output-dir>
+																</file-configuration>
+																<file-configuration name="DebugNWC">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\DebugNWC</intermediate-dir>
+																	<output-dir>.\DebugNWC</output-dir>
+																</file-configuration>
+																<file-configuration name="ReleaseNWC">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+																	<output-dir>.\ReleaseNWC</output-dir>
+																</file-configuration>
+															</file-configurations>
+														</file>
+														<file name="..\..\..\djysrc\bsp\arch\dsp\sharc\21469\core\cpus.S">
+															<file-configurations>
+																<file-configuration name="Debug">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\Debug</intermediate-dir>
+																	<output-dir>.\Debug</output-dir>
+																</file-configuration>
+																<file-configuration name="Release">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\Release</intermediate-dir>
+																	<output-dir>.\Release</output-dir>
+																</file-configuration>
+																<file-configuration name="DebugNWC">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\DebugNWC</intermediate-dir>
+																	<output-dir>.\DebugNWC</output-dir>
+																</file-configuration>
+																<file-configuration name="ReleaseNWC">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+																	<output-dir>.\ReleaseNWC</output-dir>
+																</file-configuration>
+															</file-configurations>
+														</file>
+														<file name="..\..\..\djysrc\bsp\arch\dsp\sharc\21469\core\exception.c">
+															<file-configurations>
+																<file-configuration name="Debug">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\Debug</intermediate-dir>
+																	<output-dir>.\Debug</output-dir>
+																</file-configuration>
+																<file-configuration name="Release">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\Release</intermediate-dir>
+																	<output-dir>.\Release</output-dir>
+																</file-configuration>
+																<file-configuration name="DebugNWC">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\DebugNWC</intermediate-dir>
+																	<output-dir>.\DebugNWC</output-dir>
+																</file-configuration>
+																<file-configuration name="ReleaseNWC">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+																	<output-dir>.\ReleaseNWC</output-dir>
+																</file-configuration>
+															</file-configurations>
+														</file>
+														<file name="..\..\..\djysrc\bsp\arch\dsp\sharc\21469\core\exception_handles.S">
+															<file-configurations>
+																<file-configuration name="Debug">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\Debug</intermediate-dir>
+																	<output-dir>.\Debug</output-dir>
+																</file-configuration>
+																<file-configuration name="Release">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\Release</intermediate-dir>
+																	<output-dir>.\Release</output-dir>
+																</file-configuration>
+																<file-configuration name="DebugNWC">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\DebugNWC</intermediate-dir>
+																	<output-dir>.\DebugNWC</output-dir>
+																</file-configuration>
+																<file-configuration name="ReleaseNWC">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+																	<output-dir>.\ReleaseNWC</output-dir>
+																</file-configuration>
+															</file-configurations>
+														</file>
+														<file name="..\..\..\djysrc\bsp\arch\dsp\sharc\21469\core\exceptions.S">
+															<file-configurations>
+																<file-configuration name="Debug">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\Debug</intermediate-dir>
+																	<output-dir>.\Debug</output-dir>
+																</file-configuration>
+																<file-configuration name="Release">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\Release</intermediate-dir>
+																	<output-dir>.\Release</output-dir>
+																</file-configuration>
+																<file-configuration name="DebugNWC">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\DebugNWC</intermediate-dir>
+																	<output-dir>.\DebugNWC</output-dir>
+																</file-configuration>
+																<file-configuration name="ReleaseNWC">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+																	<output-dir>.\ReleaseNWC</output-dir>
+																</file-configuration>
+															</file-configurations>
+														</file>
+														<file name="..\..\..\djysrc\bsp\arch\dsp\sharc\21469\core\int_hard.c">
+															<file-configurations>
+																<file-configuration name="Debug">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\Debug</intermediate-dir>
+																	<output-dir>.\Debug</output-dir>
+																</file-configuration>
+																<file-configuration name="Release">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\Release</intermediate-dir>
+																	<output-dir>.\Release</output-dir>
+																</file-configuration>
+																<file-configuration name="DebugNWC">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\DebugNWC</intermediate-dir>
+																	<output-dir>.\DebugNWC</output-dir>
+																</file-configuration>
+																<file-configuration name="ReleaseNWC">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+																	<output-dir>.\ReleaseNWC</output-dir>
+																</file-configuration>
+															</file-configurations>
+														</file>
+													</files>
+												</folder>
+												<folder name="include">
+													<files>
+														<file name="..\..\..\djysrc\bsp\arch\dsp\sharc\21469\include\arch.h">
+														</file>
+														<file name="..\..\..\djysrc\bsp\arch\dsp\sharc\21469\include\cpu.h">
+														</file>
+														<file name="..\..\..\djysrc\bsp\arch\dsp\sharc\21469\include\exception.h">
+														</file>
+														<file name="..\..\..\djysrc\bsp\arch\dsp\sharc\21469\include\int_hard.h">
+														</file>
+													</files>
+												</folder>
+												<folder name="startup">
+													<files>
+														<file name="..\..\..\djysrc\bsp\arch\dsp\sharc\21469\startup\21469_copytable_init.c">
+															<file-configurations>
+																<file-configuration name="Debug">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\Debug</intermediate-dir>
+																	<output-dir>.\Debug</output-dir>
+																</file-configuration>
+																<file-configuration name="Release">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\Release</intermediate-dir>
+																	<output-dir>.\Release</output-dir>
+																</file-configuration>
+																<file-configuration name="DebugNWC">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\DebugNWC</intermediate-dir>
+																	<output-dir>.\DebugNWC</output-dir>
+																</file-configuration>
+																<file-configuration name="ReleaseNWC">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+																	<output-dir>.\ReleaseNWC</output-dir>
+																</file-configuration>
+															</file-configurations>
+														</file>
+														<file name="..\..\..\djysrc\bsp\arch\dsp\sharc\21469\startup\second_stage_boot_kernel.S">
+															<file-configurations>
+																<file-configuration name="Debug">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\Debug</intermediate-dir>
+																	<output-dir>.\Debug</output-dir>
+																</file-configuration>
+																<file-configuration name="Release">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\Release</intermediate-dir>
+																	<output-dir>.\Release</output-dir>
+																</file-configuration>
+																<file-configuration name="DebugNWC">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\DebugNWC</intermediate-dir>
+																	<output-dir>.\DebugNWC</output-dir>
+																</file-configuration>
+																<file-configuration name="ReleaseNWC">
+																	<excluded-flag value="no"/>
+																	<build-with-flag value="project"/>
+																	<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+																	<output-dir>.\ReleaseNWC</output-dir>
+																</file-configuration>
+															</file-configurations>
+														</file>
+													</files>
+												</folder>
+											</folders>
+										</folder>
+										<folder name="common">
+										</folder>
+										<folder name="include">
+											<files>
+												<file name="..\..\..\djysrc\bsp\arch\dsp\sharc\include\stdint.h">
+												</file>
+											</files>
+										</folder>
+									</folders>
+								</folder>
+								<folder name="board_peripheral">
+									<folders>
+										<folder name="include">
+											<files>
+												<file name="..\..\..\djysrc\bsp\board_peripheral\adsp21469\include\key_hard.h">
+												</file>
+											</files>
+										</folder>
+									</folders>
+								</folder>
+								<folder name="chips">
+									<folders>
+										<folder name="include">
+											<files>
+												<file name="..\..\..\djysrc\bsp\chips\include\adm1032.h">
+												</file>
+												<file name="..\..\..\djysrc\bsp\chips\include\at45db321.h">
+												</file>
+												<file name="..\..\..\djysrc\bsp\chips\include\easynor_s29glxxx.h">
+												</file>
+												<file name="..\..\..\djysrc\bsp\chips\include\flash_s29glxxx.h">
+												</file>
+												<file name="..\..\..\djysrc\bsp\chips\include\rtc_ds1390.h">
+												</file>
+											</files>
+										</folder>
+										<folder name="src">
+											<files>
+												<file name="..\..\..\djysrc\bsp\chips\adm1032\adm1032.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\bsp\chips\at45db321\at45db321.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\bsp\chips\s29glxxx\easynor_s29glxxx.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\bsp\chips\s29glxxx\flash_s29glxxx.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\bsp\chips\ds1390\rtc_ds1390.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+											</files>
+										</folder>
+									</folders>
+								</folder>
+								<folder name="cpu_peripheral">
+									<folders>
+										<folder name="include">
+											<files>
+												<file name="..\..\..\djysrc\bsp\cpu_peripheral\Sharc21469\include\cpu_peri.h">
+												</file>
+												<file name="..\..\..\djysrc\bsp\cpu_peripheral\Sharc21469\include\cpu_peri_address.h">
+												</file>
+												<file name="..\..\..\djysrc\bsp\cpu_peripheral\Sharc21469\include\cpu_peri_cmd.h">
+												</file>
+												<file name="..\..\..\djysrc\bsp\cpu_peripheral\Sharc21469\include\cpu_peri_dma.h">
+												</file>
+												<file name="..\..\..\djysrc\bsp\cpu_peripheral\Sharc21469\include\cpu_peri_iic.h">
+												</file>
+												<file name="..\..\..\djysrc\bsp\cpu_peripheral\Sharc21469\include\cpu_peri_int_line.h">
+												</file>
+												<file name="..\..\..\djysrc\bsp\cpu_peripheral\Sharc21469\include\cpu_peri_linkport.h">
+												</file>
+												<file name="..\..\..\djysrc\bsp\cpu_peripheral\Sharc21469\include\cpu_peri_spi.h">
+												</file>
+												<file name="..\..\..\djysrc\bsp\cpu_peripheral\Sharc21469\include\cpu_peri_uart.h">
+												</file>
+											</files>
+										</folder>
+										<folder name="src">
+											<files>
+												<file name="..\..\..\djysrc\bsp\cpu_peripheral\Sharc21469\src\cpu_peri_dma.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\bsp\cpu_peripheral\Sharc21469\src\cpu_peri_iic.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\bsp\cpu_peripheral\Sharc21469\src\cpu_peri_linkport.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\bsp\cpu_peripheral\Sharc21469\src\cpu_peri_spi.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\bsp\cpu_peripheral\Sharc21469\src\cpu_peri_uart.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+											</files>
+										</folder>
+									</folders>
+								</folder>
+								<folder name="vendor_lib">
+									<folders>
+										<folder name="include">
+											<files>
+												<file name="..\..\..\djysrc\bsp\vendor_lib\Sharc21469\include\Cdef21469.h">
+												</file>
+												<file name="..\..\..\djysrc\bsp\vendor_lib\Sharc21469\include\def21469.h">
+												</file>
+												<file name="..\..\..\djysrc\bsp\vendor_lib\Sharc21469\include\irptl.h">
+												</file>
+												<file name="..\..\..\djysrc\bsp\vendor_lib\Sharc21469\include\lib_glob.h">
+												</file>
+												<file name="..\..\..\djysrc\bsp\vendor_lib\Sharc21469\include\linkports.h">
+												</file>
+												<file name="..\..\..\djysrc\bsp\vendor_lib\Sharc21469\include\sig_glob.h">
+												</file>
+											</files>
+										</folder>
+										<folder name="src">
+										</folder>
+									</folders>
+								</folder>
+							</folders>
+						</folder>
+						<folder name="djyos">
+							<folders>
+								<folder name="buffer">
+									<files>
+										<file name="..\..\..\djysrc\djyos\buffer\line.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+										<file name="..\..\..\djysrc\djyos\buffer\ring.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+									</files>
+								</folder>
+								<folder name="clock">
+									<files>
+										<file name="..\..\..\djysrc\djyos\clock\clock.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+									</files>
+								</folder>
+								<folder name="core">
+									<files>
+										<file name="..\..\..\djysrc\djyos\core\djyos.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+										<file name="..\..\..\djysrc\djyos\core\sys_init.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+									</files>
+								</folder>
+								<folder name="djyfs">
+									<files>
+										<file name="..\..\..\djysrc\djyos\djyfs\file.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+										<file name="..\..\..\djysrc\djyos\djyfs\file.h">
+										</file>
+									</files>
+									<folders>
+										<folder name="easynorflash">
+											<files>
+												<file name="..\..\..\djysrc\djyos\djyfs\easynorflash\cmd_easynorflash.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\djyos\djyfs\easynorflash\easynorflash.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\djyos\djyfs\easynorflash\easynorflash.h">
+												</file>
+											</files>
+										</folder>
+									</folders>
+								</folder>
+								<folder name="driver">
+									<files>
+										<file name="..\..\..\djysrc\djyos\driver\driver.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+									</files>
+									<folders>
+										<folder name="iic">
+											<files>
+												<file name="..\..\..\djysrc\djyos\driver\iic\iic.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+											</files>
+										</folder>
+										<folder name="include">
+											<files>
+												<file name="..\..\..\djysrc\djyos\driver\include\iic.h">
+												</file>
+												<file name="..\..\..\djysrc\djyos\driver\include\uart.h">
+												</file>
+											</files>
+										</folder>
+										<folder name="uart">
+											<files>
+												<file name="..\..\..\djysrc\djyos\driver\uart\uart.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+											</files>
+										</folder>
+									</folders>
+								</folder>
+								<folder name="gui">
+									<folders>
+										<folder name="display">
+											<files>
+												<file name="..\..\..\djysrc\djyos\gui\display\gk_display.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+											</files>
+										</folder>
+										<folder name="encoding">
+											<files>
+												<file name="..\..\..\djysrc\djyos\gui\encoding\ascii.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\encoding\ascii.h">
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\encoding\encoding.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\encoding\encoding.h">
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\encoding\gb2312.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\encoding\gb2312.h">
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\encoding\loc_string.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\encoding\loc_string.h">
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\encoding\nls.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\encoding\nls.h">
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\encoding\utf8.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\encoding\utf8.h">
+												</file>
+											</files>
+										</folder>
+										<folder name="font">
+											<files>
+												<file name="..\..\..\djysrc\djyos\gui\font\ascii6x12.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\font\ascii6x12.h">
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\font\ascii8x16.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\font\ascii8x16.h">
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\font\ascii8x8.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\font\ascii8x8.h">
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\font\font.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\font\font.h">
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\font\gb2312_16.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\font\gb2312_16.h">
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\font\textshow.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+											</files>
+										</folder>
+										<folder name="gk_draw">
+											<files>
+												<file name="..\..\..\djysrc\djyos\gui\gk_draw\gk_draw.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+											</files>
+										</folder>
+										<folder name="include">
+											<files>
+												<file name="..\..\..\djysrc\djyos\gui\include\config-gui.h">
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\include\gk_api.h">
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\include\gk_clip.h">
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\include\gk_display.h">
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\include\gk_draw.h">
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\include\gk_inc.h">
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\include\gk_syscall.h">
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\include\gk_usercall.h">
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\include\gk_win.h">
+												</file>
+											</files>
+										</folder>
+										<folder name="lib">
+											<files>
+												<file name="..\..\..\djysrc\djyos\gui\lib\gk_api.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+											</files>
+										</folder>
+										<folder name="window">
+											<files>
+												<file name="..\..\..\djysrc\djyos\gui\window\gk_clip.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+												<file name="..\..\..\djysrc\djyos\gui\window\gk_win.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+											</files>
+										</folder>
+									</folders>
+								</folder>
+								<folder name="include">
+									<files>
+										<file name="..\..\..\djysrc\djyos\include\char_term.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\clock.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\critical.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\djyos.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\driver.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\int.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\kernel.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\keyboard.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\line.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\lock.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\memb.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\memory.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\mems.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\msg.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\os_inc.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\pipe.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\ring.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\rsc.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\shell.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\shell_fs.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\stdin_dev.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\sys_init.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\Touch.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\version.h">
+										</file>
+										<file name="..\..\..\djysrc\djyos\include\wdt.h">
+										</file>
+									</files>
+								</folder>
+								<folder name="int">
+									<files>
+										<file name="..\..\..\djysrc\djyos\int\int.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+									</files>
+								</folder>
+								<folder name="lock">
+									<files>
+										<file name="..\..\..\djysrc\djyos\lock\lock.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+									</files>
+								</folder>
+								<folder name="memory">
+									<files>
+										<file name="..\..\..\djysrc\djyos\memory\memb.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+										<file name="..\..\..\djysrc\djyos\memory\mems.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+									</files>
+								</folder>
+								<folder name="msg">
+									<files>
+										<file name="..\..\..\djysrc\djyos\msg\msg.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+									</files>
+								</folder>
+								<folder name="pipe">
+									<files>
+										<file name="..\..\..\djysrc\djyos\pipe\pipe.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+									</files>
+								</folder>
+								<folder name="rsc">
+									<files>
+										<file name="..\..\..\djysrc\djyos\rsc\rsc.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+									</files>
+								</folder>
+								<folder name="shell">
+									<files>
+										<file name="..\..\..\djysrc\djyos\shell\shell.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+										<file name="..\..\..\djysrc\djyos\shell\shell_fs.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+									</files>
+								</folder>
+								<folder name="stdin">
+									<files>
+										<file name="..\..\..\djysrc\djyos\stdin\stdin_dev.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+									</files>
+									<folders>
+										<folder name="char_term">
+											<files>
+												<file name="..\..\..\djysrc\djyos\stdin\char_term\char_term.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+											</files>
+										</folder>
+										<folder name="keypad">
+											<files>
+												<file name="..\..\..\djysrc\djyos\stdin\keypad\keyboard.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+											</files>
+										</folder>
+										<folder name="touch">
+											<files>
+												<file name="..\..\..\djysrc\djyos\stdin\touch\Touch.c">
+													<file-configurations>
+														<file-configuration name="Debug">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Debug</intermediate-dir>
+															<output-dir>.\Debug</output-dir>
+														</file-configuration>
+														<file-configuration name="Release">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\Release</intermediate-dir>
+															<output-dir>.\Release</output-dir>
+														</file-configuration>
+														<file-configuration name="DebugNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\DebugNWC</intermediate-dir>
+															<output-dir>.\DebugNWC</output-dir>
+														</file-configuration>
+														<file-configuration name="ReleaseNWC">
+															<excluded-flag value="no"/>
+															<build-with-flag value="project"/>
+															<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+															<output-dir>.\ReleaseNWC</output-dir>
+														</file-configuration>
+													</file-configurations>
+												</file>
+											</files>
+										</folder>
+									</folders>
+								</folder>
+								<folder name="wdt">
+									<files>
+										<file name="..\..\..\djysrc\djyos\wdt\wdt.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="yes"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="yes"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+									</files>
+								</folder>
+							</folders>
+						</folder>
+						<folder name="lib">
+							<folders>
+								<folder name="include">
+									<files>
+										<file name="..\..\..\djysrc\lib\include\crc.h">
+										</file>
+										<file name="..\..\..\djysrc\lib\include\ecc.h">
+										</file>
+										<file name="..\..\..\djysrc\lib\include\endian.h">
+										</file>
+										<file name="..\..\..\djysrc\lib\include\general.h">
+										</file>
+										<file name="..\..\..\djysrc\lib\include\printf.h">
+										</file>
+										<file name="..\..\..\djysrc\lib\include\translate.h">
+										</file>
+									</files>
+								</folder>
+								<folder name="libc">
+									<files>
+										<file name="..\..\..\djysrc\lib\libc\crc\crc.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+										<file name="..\..\..\djysrc\lib\libc\ecc\ecc.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+										<file name="..\..\..\djysrc\lib\libc\endian.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+										<file name="..\..\..\djysrc\lib\libc\general.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+										<file name="..\..\..\djysrc\lib\libc\printf\printf.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+										<file name="..\..\..\djysrc\lib\libc\char_translate\translate.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+									</files>
+								</folder>
+							</folders>
+						</folder>
+						<folder name="loader">
+							<folders>
+								<folder name="si">
+									<files>
+										<file name="..\..\..\djysrc\loader\si\copy_table.h">
+										</file>
+										<file name="..\..\..\djysrc\loader\si\loader.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+										<file name="..\..\..\djysrc\loader\si\pre_loader.c">
+											<file-configurations>
+												<file-configuration name="Debug">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Debug</intermediate-dir>
+													<output-dir>.\Debug</output-dir>
+												</file-configuration>
+												<file-configuration name="Release">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\Release</intermediate-dir>
+													<output-dir>.\Release</output-dir>
+												</file-configuration>
+												<file-configuration name="DebugNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\DebugNWC</intermediate-dir>
+													<output-dir>.\DebugNWC</output-dir>
+												</file-configuration>
+												<file-configuration name="ReleaseNWC">
+													<excluded-flag value="no"/>
+													<build-with-flag value="project"/>
+													<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+													<output-dir>.\ReleaseNWC</output-dir>
+												</file-configuration>
+											</file-configurations>
+										</file>
+									</files>
+								</folder>
+							</folders>
+						</folder>
+					</folders>
+				</folder>
+				<folder name="OS_prjcfg">
+					<folders>
+						<folder name="config">
+							<files>
+								<file name=".\src\OS_prjcfg\config\int_config.c">
+									<file-configurations>
+										<file-configuration name="Debug">
+											<excluded-flag value="no"/>
+											<build-with-flag value="project"/>
+											<intermediate-dir>.\Debug</intermediate-dir>
+											<output-dir>.\Debug</output-dir>
+										</file-configuration>
+										<file-configuration name="Release">
+											<excluded-flag value="no"/>
+											<build-with-flag value="project"/>
+											<intermediate-dir>.\Release</intermediate-dir>
+											<output-dir>.\Release</output-dir>
+										</file-configuration>
+										<file-configuration name="DebugNWC">
+											<excluded-flag value="no"/>
+											<build-with-flag value="project"/>
+											<intermediate-dir>.\DebugNWC</intermediate-dir>
+											<output-dir>.\DebugNWC</output-dir>
+										</file-configuration>
+										<file-configuration name="ReleaseNWC">
+											<excluded-flag value="no"/>
+											<build-with-flag value="project"/>
+											<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+											<output-dir>.\ReleaseNWC</output-dir>
+										</file-configuration>
+									</file-configurations>
+								</file>
+								<file name=".\src\OS_prjcfg\config\module_init.c">
+									<file-configurations>
+										<file-configuration name="Debug">
+											<excluded-flag value="no"/>
+											<build-with-flag value="project"/>
+											<intermediate-dir>.\Debug</intermediate-dir>
+											<output-dir>.\Debug</output-dir>
+										</file-configuration>
+										<file-configuration name="Release">
+											<excluded-flag value="no"/>
+											<build-with-flag value="project"/>
+											<intermediate-dir>.\Release</intermediate-dir>
+											<output-dir>.\Release</output-dir>
+										</file-configuration>
+										<file-configuration name="DebugNWC">
+											<excluded-flag value="no"/>
+											<build-with-flag value="project"/>
+											<intermediate-dir>.\DebugNWC</intermediate-dir>
+											<output-dir>.\DebugNWC</output-dir>
+										</file-configuration>
+										<file-configuration name="ReleaseNWC">
+											<excluded-flag value="no"/>
+											<build-with-flag value="project"/>
+											<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+											<output-dir>.\ReleaseNWC</output-dir>
+										</file-configuration>
+									</file-configurations>
+								</file>
+							</files>
+						</folder>
+						<folder name="include">
+							<files>
+								<file name=".\src\OS_prjcfg\include\config-prj.h">
+								</file>
+								<file name=".\src\OS_prjcfg\include\sys_space_config.h">
+								</file>
+							</files>
+						</folder>
+					</folders>
+				</folder>
+				<folder name="user">
+					<files>
+						<file name=".\src\user\led_key.c">
+							<file-configurations>
+								<file-configuration name="Debug">
+									<excluded-flag value="no"/>
+									<build-with-flag value="project"/>
+									<intermediate-dir>.\Debug</intermediate-dir>
+									<output-dir>.\Debug</output-dir>
+								</file-configuration>
+								<file-configuration name="Release">
+									<excluded-flag value="no"/>
+									<build-with-flag value="project"/>
+									<intermediate-dir>.\Release</intermediate-dir>
+									<output-dir>.\Release</output-dir>
+								</file-configuration>
+								<file-configuration name="DebugNWC">
+									<excluded-flag value="no"/>
+									<build-with-flag value="project"/>
+									<intermediate-dir>.\DebugNWC</intermediate-dir>
+									<output-dir>.\DebugNWC</output-dir>
+								</file-configuration>
+								<file-configuration name="ReleaseNWC">
+									<excluded-flag value="no"/>
+									<build-with-flag value="project"/>
+									<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+									<output-dir>.\ReleaseNWC</output-dir>
+								</file-configuration>
+							</file-configurations>
+						</file>
+						<file name=".\src\user\led_key.h">
+						</file>
+						<file name=".\src\user\VDSP21469.c">
+							<file-configurations>
+								<file-configuration name="Debug">
+									<excluded-flag value="no"/>
+									<build-with-flag value="project"/>
+									<intermediate-dir>.\Debug</intermediate-dir>
+									<output-dir>.\Debug</output-dir>
+								</file-configuration>
+								<file-configuration name="Release">
+									<excluded-flag value="no"/>
+									<build-with-flag value="project"/>
+									<intermediate-dir>.\Release</intermediate-dir>
+									<output-dir>.\Release</output-dir>
+								</file-configuration>
+								<file-configuration name="DebugNWC">
+									<excluded-flag value="yes"/>
+									<build-with-flag value="project"/>
+									<intermediate-dir>.\DebugNWC</intermediate-dir>
+									<output-dir>.\DebugNWC</output-dir>
+								</file-configuration>
+								<file-configuration name="ReleaseNWC">
+									<excluded-flag value="yes"/>
+									<build-with-flag value="project"/>
+									<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+									<output-dir>.\ReleaseNWC</output-dir>
+								</file-configuration>
+							</file-configurations>
+						</file>
+						<file name=".\src\user\VDSP21469_uart.c">
+							<file-configurations>
+								<file-configuration name="Debug">
+									<excluded-flag value="no"/>
+									<build-with-flag value="project"/>
+									<intermediate-dir>.\Debug</intermediate-dir>
+									<output-dir>.\Debug</output-dir>
+								</file-configuration>
+								<file-configuration name="Release">
+									<excluded-flag value="no"/>
+									<build-with-flag value="project"/>
+									<intermediate-dir>.\Release</intermediate-dir>
+									<output-dir>.\Release</output-dir>
+								</file-configuration>
+								<file-configuration name="DebugNWC">
+									<excluded-flag value="yes"/>
+									<build-with-flag value="project"/>
+									<intermediate-dir>.\DebugNWC</intermediate-dir>
+									<output-dir>.\DebugNWC</output-dir>
+								</file-configuration>
+								<file-configuration name="ReleaseNWC">
+									<excluded-flag value="yes"/>
+									<build-with-flag value="project"/>
+									<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+									<output-dir>.\ReleaseNWC</output-dir>
+								</file-configuration>
+							</file-configurations>
+						</file>
+						<file name=".\src\user\VDSP21469_uart.h">
+						</file>
+					</files>
+					<folders>
+						<folder name="critical">
+							<files>
+								<file name=".\src\user\critical\critical.c">
+									<file-configurations>
+										<file-configuration name="Debug">
+											<excluded-flag value="no"/>
+											<build-with-flag value="project"/>
+											<intermediate-dir>.\Debug</intermediate-dir>
+											<output-dir>.\Debug</output-dir>
+										</file-configuration>
+										<file-configuration name="Release">
+											<excluded-flag value="no"/>
+											<build-with-flag value="project"/>
+											<intermediate-dir>.\Release</intermediate-dir>
+											<output-dir>.\Release</output-dir>
+										</file-configuration>
+										<file-configuration name="DebugNWC">
+											<excluded-flag value="no"/>
+											<build-with-flag value="project"/>
+											<intermediate-dir>.\DebugNWC</intermediate-dir>
+											<output-dir>.\DebugNWC</output-dir>
+										</file-configuration>
+										<file-configuration name="ReleaseNWC">
+											<excluded-flag value="no"/>
+											<build-with-flag value="project"/>
+											<intermediate-dir>.\ReleaseNWC</intermediate-dir>
+											<output-dir>.\ReleaseNWC</output-dir>
+										</file-configuration>
+									</file-configurations>
+								</file>
+							</files>
+						</folder>
+					</folders>
+				</folder>
+			</folders>
+		</folder>
+	</folders>
+	<!-- System Builder Components -->
+	<system-builder-component-tables>
+		<system-builder-plugin name="Standard application">
+			<system-builder-component name="Application Settings">
+				<property name="Add comments"><![CDATA[True]]></property>
+				<property name="Add source code"><![CDATA[True]]></property>
+				<property name="Include arguments"><![CDATA[False]]></property>
+				<property name="Output type"><![CDATA[Executable file]]></property>
+				<property name="Source language"><![CDATA[C]]></property>
+			</system-builder-component>
+			<system-builder-component name="Select Processor">
+				<property name="Processor family"><![CDATA[SHARC]]></property>
+			</system-builder-component>
+		</system-builder-plugin>
+		<system-builder-plugin name="Startup Code Wizard" version="2.0">
+			<system-builder-component name="Welcome">
+				<property name="Enabled"><![CDATA[True]]></property>
+			</system-builder-component>
+		</system-builder-plugin>
+	</system-builder-component-tables>
+</visualdsp-project>

@@ -1,0 +1,60 @@
+<?xml version="1.0" standalone="no"?>
+<?xml-stylesheet type="text/xsl" href="file:///D:/Analog Devices/VisualDSP 5.1/System/linker_map_ss1.xsl"?>
+<!DOCTYPE DOCUMENT SYSTEM "file:///D:/Analog Devices/VisualDSP 5.1/System/linker_map.dtd">
+<DOCUMENT>
+<LINKPROJECT guid='abd3a369011bc9142' id='00C8DCC0' name='P0' orig_file_name='.\Release\469_prom_version.dxe' architecture='ADSP-21469' >
+<FILE_NAME><![CDATA[.\Release\469_prom_version.dxe]]></FILE_NAME>
+<MEMORY id='00C63DD0' name='seg_ldr' start_address='0x8c000' end_address='0x8c0ff' type='PM' qualifier='RAM' width='0x30' words_used='0xf9' words_unused='0x7' >
+<OUTPUT_SECTIONS>
+<OUTPUT_SECTION name='seg_ldr' id='00C78218' memory_id='00C63DD0' type='SHT_PROGBITS' start_address='0x8c000' word_size='0xf9' word_size_unmapped='0x0' word_size_reserved='0x0' >
+<INPUT_SECTIONS>
+<INPUT_SECTION id='00C91460' name='seg_ldr' start_address='0x8c000' size='0xf9' element_at='0x0' >
+<INPUT_FILE><![CDATA[.\Release\469_prom_version.doj]]></INPUT_FILE>
+<SYMBOL name='reset' address='0x8c003' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='final_init_loop' address='0x8c004' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='READ_BOOT_INFO' address='0x8c01a' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='READ_THREEx32' address='0x8c037' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='READ_ONEx32' address='0x8c03c' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='___ADI_AGL_JUMP_4134' address='0x8c03e' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[__ADI_AGL_JUMP_4134]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='ZERO_LDATA' address='0x8c04a' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='ZERO_WRITE_END' address='0x8c04e' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='x50_EP0I_ISR' address='0x8c050' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='ZERO_L48' address='0x8c051' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='SAVE_PX_END' address='0x8c054' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='INIT_L16' address='0x8c056' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='READ_WRITE_END' address='0x8c05f' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='LAST_WORD_16' address='0x8c062' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='INIT_L32' address='0x8c066' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='CALL_LOOP_END' address='0x8c06b' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='INIT_L48' address='0x8c06d' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='L48_CALL_LOOP_END' address='0x8c076' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='LAST_WORD_48' address='0x8c079' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='INIT_L64' address='0x8c07d' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='L64_CALL_LOOP_END' address='0x8c084' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='ZERO_EXT16' address='0x8c086' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='ZERO_EXT8' address='0x8c086' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='INIT_EXT' address='0x8c087' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='INIT_EXT16' address='0x8c087' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='INIT_EXT8' address='0x8c087' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='MULTI_PROC' address='0x8c088' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='final_init' address='0x8c090' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='USER_INIT' address='0x8c0a8' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='InitPLL' address='0x8c0b2' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='monitor_version_judje' address='0x8c0b2' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='first_div_delay' address='0x8c0b7' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='first_bypass_delay' address='0x8c0bc' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='second_div_delay' address='0x8c0c1' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='second_bypass_delay' address='0x8c0c7' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='third_div_delay' address='0x8c0cc' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='fourth_div_delay' address='0x8c0d2' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='InitDDR2' address='0x8c0d3' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='dll_reset' address='0x8c0da' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='dll_lock' address='0x8c0dc' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+<SYMBOL name='wait_for_cal' address='0x8c0f5' size='0x0' binding='LOCAL'><DEMANGLED_NAME><![CDATA[]]></DEMANGLED_NAME></SYMBOL>
+</INPUT_SECTION>
+</INPUT_SECTIONS>
+</OUTPUT_SECTION>
+</OUTPUT_SECTIONS>
+</MEMORY>
+</LINKPROJECT>
+</DOCUMENT>

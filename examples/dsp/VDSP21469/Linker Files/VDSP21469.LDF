@@ -1,0 +1,777 @@
+/*
+** Default LDF for C, C++ and assembly applications targeting ADSP-21469.
+**
+** There are a number of configuration macros that may be specified as a
+** result of use of certain compiler switches or by linker flags directly.
+** The options are:
+** CRT_HDR
+**   Specifies a custom startup object to use instead of the default files.
+** __ADI_LIBEH__
+**   Link against C++ libraries with exception handling enabled.
+** _ADI_THREADS
+**   Link against thread-safe variants of the run-time libraries.
+** __NORMAL_WORD_CODE__
+**   Indicates that the application should link against runtime libraries
+**   build with normal word encoding (-nwc).
+** __SHORT_WORD_CODE__
+**   Indicates that the application should link against runtime libraries
+**   build with short word encoding (-swc).
+** __LIBIO_LITE
+**   The I/O library provides support for printing hexadecimal constants
+**   using the "%a" conversion specifier, and for registering alternatives to
+**   the default device driver that is supported by the VisualDSP++ simulator
+**   and EZ-KIT Lite systems. Those applications that do not require this
+**   functionality may define the macro __LIBIO_LITE which will select an
+**   alternative I/O library and lead to reduced code occupancy.
+** __LIBIO_FX
+**   Defining this macro causes use of a variant of the I/O library which
+**   contains full support for the fixed-point format specifiers, %r and %R.
+**   In contrast, the standard I/O library will print fixed-point constants
+**   with these specifiers as hexadecimal, in order to provide reduced code
+**   occupancy.
+** __NO_STD_LIB
+**   Defined by the compiler when switch -no-std-lib is used and causes
+**   the LDF to avoid using the standard VisualDSP++ library search path.
+** __MEMINIT__
+**   Macro defined by the linker when -meminit is used to enable runtime
+**   initialization.
+** USE_SDRAM
+**   Makes SDRAM available as standard program and data memory.
+** USE_SDRAM_HEAP
+**   Use SDRAM for dynamic heap allocation rather than L1 default. Should
+**   result in a much larger heap being available but can have a significant
+**   performance impact.
+** USE_SDRAM_STACK
+**   Use SDRAM for system stack rather than L1 default. Should allow for
+**   much larger stack but likely to have a significant performance impact.
+*/
+
+ARCHITECTURE(ADSP-21469)
+
+#define USE_SDRAM
+//#define __MEMINIT__
+
+#if defined(__NORMAL_WORD_CODE__) && defined(__SHORT_WORD_CODE__)
+# error Both "__NORMAL_WORD_CODE__" and "__SHORT_WORD_CODE__" have been defined. These macros are mutually exclusive.
+#endif
+
+
+#ifndef __NO_STD_LIB
+SEARCH_DIR( $ADI_DSP/214xx/lib )
+#endif
+
+#ifdef __NORMAL_WORD_CODE__
+# define RT_LIB_NAME(n) lib ## n ## _nwc.dlb
+#else
+# define RT_LIB_NAME(n) lib ## n ## .dlb
+#endif
+
+#ifdef _ADI_THREADS
+# define RT_LIB_NAME_MT(n) RT_LIB_NAME(n ## mt)
+#else
+# define RT_LIB_NAME_MT(n) RT_LIB_NAME(n)
+#endif
+
+#ifdef __ADI_LIBEH__
+# define RT_LIB_NAME_EH(n) RT_LIB_NAME_MT(n ## eh)
+#else
+# define RT_LIB_NAME_EH(n) RT_LIB_NAME_MT(n)
+#endif
+
+// Libraries from the command line are included in COMMAND_LINE_OBJECTS. 
+$LIBRARIES =
+  RT_LIB_NAME_MT(c),
+#ifdef __LIBIO_LITE
+  RT_LIB_NAME_MT(io_lite),
+#elif defined(__LIBIO_FX)
+  RT_LIB_NAME_MT(io_fx),
+#else
+  RT_LIB_NAME_MT(io),
+#endif
+  RT_LIB_NAME_EH(cpp),
+  RT_LIB_NAME(dsp);
+
+$OBJECTS =
+  exceptions.doj,
+  $COMMAND_LINE_OBJECTS;                                
+  
+/*
+** List of objects which prefer internal memory placement
+*/
+ $OBJS_LIBS_INTERNAL =
+   $OBJECTS{prefersMem("internal")},
+   $LIBRARIES{prefersMem("internal")};
+
+/*
+** List of objects which don't prefer external memory placement
+*/
+ $OBJS_LIBS_NOT_EXTERNAL =
+   $OBJECTS{!prefersMem("external")},
+   $LIBRARIES{!prefersMem("external")};
+
+/*
+** List of objects which prefer external memory placement
+*/
+ $OBJS_LIBS_EXTERNAL =
+   $EXTOBJECTS{prefersMem("external")},
+   $LIBRARIES{prefersMem("external")};
+   
+   
+#if defined(USE_SDRAM_STACK) || defined(USE_SDRAM_HEAP)
+ #warning Putting stack/heap into external sdram can have a serious performance impact
+ #if !defined(USE_SDRAM)
+  #define USE_SDRAM
+ #endif
+#endif
+
+/*
+** minimum sizes of the stack and heap allocated
+*/
+#define STACK_SIZE 4K
+#define INT_STACK_SIZE 4K
+#define HEAP_SIZE 16K
+#define STACKHEAP_SIZE 24K
+
+MEMORY
+{
+  // The SHARC 21469 has 5Mbit RAM and 4Mbit ROM in total.
+  // -------------------------- BLOCK 0 ----------------------------------------
+  // 0x0008 C000 to 0x0009 3FFF  Normal word (48) Space (1.5 Mbit RAM)
+  // 0x0009 2000 to 0x0009 DFFF  Normal word (32) Space (1.5 Mbit RAM)
+  // 0x0012 4000 to 0x0013 BFFF  Short word  (16) Space (1.5 Mbit RAM)
+  seg_rth      { TYPE(PM RAM) START(0x0008c000) END(0x0008c0ff) WIDTH(48) }
+  seg_ldr      { TYPE(PM RAM) START(0x0008c100) END(0x0008c1ff) WIDTH(48) }
+#ifdef __MEMINIT__
+  seg_init     { TYPE(PM RAM) START(0x0008c200) END(0x0008c3ff) WIDTH(48) }
+  seg_int_code { TYPE(SW RAM) START(0x00124C00) END(0x0013Bfff) WIDTH(16) }
+#else
+  seg_int_code { TYPE(SW RAM) START(0x00124600) END(0x0013BFFF) WIDTH(16) }
+#endif // __MEMINIT__
+
+  // -------------------------- BLOCK 1 ----------------------------------------
+  // 0x000A C000 to 0x000B 3FFF  Normal word (48) Space (1.5 Mbit RAM)
+  // 0x000B 2000 to 0x000B DFFF  Normal word (32) Space (1.5 Mbit RAM)
+  // 0x0016 4000 to 0x0017 BFFF  Short word (16)  Space (1.5 Mbit RAM)
+  seg_heap { TYPE(DM RAM) START(0x000B2000) END(0x000BDfff) WIDTH(32) }
+/*#ifdef IDDE_ARGS
+#define ARGV_START 0xb2000
+  mem_argv { TYPE(DM RAM) START(0x000b2000) END(0x000b20ff) WIDTH(32) }
+  seg_dmda { TYPE(DM RAM) START(0x000b2100) END(0x000bbfff) WIDTH(32) }
+#else
+  seg_dmda { TYPE(DM RAM) START(0x000b2000) END(0x000bbfff) WIDTH(32) }
+#endif
+  seg_stak { TYPE(DM RAM) START(0x000bc000) END(0x000bcfff) WIDTH(32) }
+  seg_ints_stak { TYPE(DM RAM) START(0x000bd000) END(0x000bdfff) WIDTH(32) }
+*/
+  // -------------------------- BLOCK 2 ----------------------------------------
+  // 0x000C 0000 to 0x000C 5554  Normal word (48) Space (1 Mbit RAM)
+  // 0x000C 0000 to 0x000C 7FFF  Normal word (32) Space (1 Mbit RAM)
+  // 0x0018 0000 to 0x0018 FFFF  Short word (16) Space (1 Mbit RAM)
+  seg_pmda { TYPE(PM RAM) START(0x000C0000) END(0x000C0FFF) WIDTH(32) }
+  seg_pmco { TYPE(SW RAM) START(0x00182000) END(0x0018FFFF) WIDTH(16) }
+
+  // ------------------------- BLOCK 3 -----------------------------------------
+  // 0x000E 0000 to 0x000E 5554  Normal word (48) Space (1 Mbit RAM)
+  // 0x000E 0000 to 0x000E 7FFF  Normal word (32) Space (1 Mbit RAM)
+  // 0x001C 0000 to 0x001C FFFF  Short word (16)  Space (1 Mbit RAM)
+//  seg_heap { TYPE(DM RAM) START(0x000e0000) END(0x000e7fff) WIDTH(32) }
+  seg_dmda { TYPE(DM RAM) START(0x000E0000) END(0x000E5fff) WIDTH(32) }
+  seg_stak { TYPE(DM RAM) START(0x000E6000) END(0x000E6fff) WIDTH(32) }
+  seg_ints_stak { TYPE(DM RAM) START(0x000E7000) END(0x000E7fff) WIDTH(32) }
+  ///seg_ints_stak { TYPE(DM RAM) START(0x000E7000) END(0x000E7f0f) WIDTH(32) }
+  ///seg_test { TYPE(DM RAM) START(0x001CFF1F) END(0x001CFFFF) WIDTH(16) }
+
+  // ------------------------- SDRAM (DDR2) ------------------------------------
+  // 0x0020 0000 to 0x03FF FFFF  Short word (16) Space 62M(*16bit) RAM)
+  // NOTE:code can ONLY be placed between 0x0020 0000 – 0x005F FFFF(normal word) or 0x0060 0000 – 0x00FF FFFF(short word)
+
+  seg_ext_swco  	{ TYPE(SW RAM) START(0x00600000) END(0x008FFFFF) WIDTH(16) }//3072K-16bit
+  seg_ext_nwco  	{ TYPE(PM RAM) START(0x00200000) END(0x005CFFFF) WIDTH(16) }//3904K-16bit
+  
+// for monitor version use only, only can monitor version use it
+  seg_monitor_pmco  	{ TYPE(PM RAM) START(0x005D0000) END(0x005FFFFF) WIDTH(16) }//192K-16bit
+  seg_monitor_stak  	{ TYPE(DM RAM) START(0x00900000) END(0x0091FFFF) WIDTH(16) }//128K-16bit
+  seg_monitor_ints_stak { TYPE(DM RAM) START(0x00920000) END(0x0093FFFF) WIDTH(16) }//128K-16bit
+  seg_monitor_dmda  	{ TYPE(DM RAM) START(0x00940000) END(0x00A3FFFF) WIDTH(16) }//1024K-16bit
+  seg_monitor_pmda  	{ TYPE(PM RAM) START(0x00A40000) END(0x00A5FFFF) WIDTH(16) }//128K-16bit
+  seg_monitor_heap  	{ TYPE(DM RAM) START(0x00A60000) END(0x00DFFFFF) WIDTH(16) }//3712K-16bit
+// for monitor version use only, only can monitor version use it
+
+  seg_ext_dmda  	{ TYPE(DM RAM) START(0x00E00000) END(0x03BFFFFF) WIDTH(16) }//46M-16bit
+  seg_ext_pmda  	{ TYPE(PM RAM) START(0x03C00000) END(0x03FFFFFF) WIDTH(16) }//4M-16bit
+
+  seg_flash { TYPE(DM RAM) START(0x04000000) END(0x05FFFFFF) WIDTH(8) }//32M-8bit
+} /* MEMORY */
+
+/*------------------------------- Monitor_version ----------------------------------*/
+
+#ifdef Monitor_version
+
+PROCESSOR p0
+{
+#ifdef IDDE_ARGS
+    RESOLVE(___argv_string, ARGV_START)
+#endif
+#ifdef __cplusplus
+    KEEP( _main,___ctor_NULL_marker,___lib_end_of_heap_descriptions )
+#else
+    KEEP( _main,___lib_end_of_heap_descriptions )
+#endif
+    LINK_AGAINST( $COMMAND_LINE_LINK_AGAINST )
+    OUTPUT( $COMMAND_LINE_OUTPUT_FILE )
+
+    SECTIONS
+    {
+        seg_rth PM
+        {
+            NO_FORCE_CONTIGUITY
+            INPUT_SECTIONS( $OBJECTS(seg_rth) $LIBRARIES(seg_rth))
+        } > seg_rth
+
+        seg_ldr
+        {
+            INPUT_SECTIONS( $OBJECTS(seg_ldr) $LIBRARIES(seg_ldr))
+        } > seg_ldr
+        
+/*        seg_init PM
+        {
+            ldf_seginit_space = . ;
+            INPUT_SECTIONS( $OBJECTS(seg_init) $LIBRARIES(seg_init))
+        }
+#if defined(__MEMINIT__)
+          > seg_init
+#else
+          > seg_int_code
+#endif
+*/
+        //只将指定放片内的code放在片内
+        seg_int_code_sw SW
+        {
+            FILL(0x1)
+            NO_FORCE_CONTIGUITY
+            // map code required to be in internal memory first
+            INPUT_SECTIONS( $OBJECTS(seg_int_code_sw) $LIBRARIES(seg_int_code_sw))
+            INPUT_SECTIONS( $OBJECTS(seg_int_code) $LIBRARIES(seg_int_code))
+        } > seg_int_code
+
+        seg_int_code PM
+        {
+            NO_FORCE_CONTIGUITY
+            // map code required to be in internal memory first
+            INPUT_SECTIONS( $OBJECTS(seg_int_code) $LIBRARIES(seg_int_code))
+        } > seg_int_code
+/*		
+        seg_swco SW
+        {
+            FILL(0x1)
+            NO_FORCE_CONTIGUITY
+          	INPUT_SECTIONS( $OBJECTS(seg_int_code) $LIBRARIES(seg_int_code))
+            // now map the default code sections, sw first
+            INPUT_SECTIONS( $OBJS_LIBS_INTERNAL(seg_swco))
+            INPUT_SECTIONS( $OBJS_LIBS_INTERNAL(seg_pmco))
+        } > seg_int_code
+        
+        seg_pmco PM
+        {
+            NO_FORCE_CONTIGUITY
+          	INPUT_SECTIONS( $OBJECTS(seg_int_code) $LIBRARIES(seg_int_code))
+            // now map the default code sections, pm after sw
+            INPUT_SECTIONS( $OBJS_LIBS_INTERNAL(seg_pmco))
+        } > seg_int_code
+*/		
+		//只将指定放片内的pmda放在片内
+        seg_pmda
+        {
+            INPUT_SECTIONS( $OBJECTS(seg_int_pmda) $LIBRARIES(seg_int_pmda))
+            //INPUT_SECTIONS( $OBJS_LIBS_INTERNAL(seg_pmda))
+        } > seg_pmda
+/*       
+        seg_test
+        {
+            INPUT_SECTIONS( $OBJECTS(seg_test) $LIBRARIES(seg_test))
+            //INPUT_SECTIONS( $OBJS_LIBS_INTERNAL(seg_pmda))
+        } > seg_test
+        */
+
+#ifdef __cplusplus
+#if defined(USE_SDRAM)
+ #define CPP_DATA_SECTION seg_monitor_dmda
+#else
+ #define CPP_DATA_SECTION seg_dmda
+#endif // !USE_SDRAM
+
+        dxe_ctdm
+        {
+            FORCE_CONTIGUITY
+            __ctors = .;    /* points to the start of the section */
+            INPUT_SECTIONS( $OBJECTS(seg_ctdm) $LIBRARIES(seg_ctdm))
+            INPUT_SECTIONS( $OBJECTS(seg_ctdml) $LIBRARIES(seg_ctdml))
+        } > CPP_DATA_SECTION
+
+        dxe_gdt
+        {
+            FORCE_CONTIGUITY
+            INPUT_SECTIONS( $OBJECTS(.gdt) $LIBRARIES(.gdt))
+            INPUT_SECTIONS( $OBJECTS(.gdtl) $LIBRARIES(.gdtl))
+        } > CPP_DATA_SECTION
+
+        .eh
+        {
+            INPUT_SECTIONS( $OBJECTS(.frt) $LIBRARIES(.frt))
+            INPUT_SECTIONS( $OBJECTS(.rtti) $LIBRARIES(.rtti))
+            INPUT_SECTIONS( $OBJECTS(.cht) $LIBRARIES(.cht))
+            INPUT_SECTIONS( $OBJECTS(.edt) $LIBRARIES(.edt))
+            INPUT_SECTIONS( $OBJECTS(seg_vtbl) $LIBRARIES(seg_vtbl))
+        } > CPP_DATA_SECTION
+#endif // __cplusplus
+
+        .bss ZERO_INIT
+        {
+           INPUT_SECTIONS( $OBJS_LIBS_INTERNAL(.bss))
+           INPUT_SECTIONS( $OBJS_LIBS_NOT_EXTERNAL(.bss))
+           INPUT_SECTIONS( $OBJECTS(.bss) $LIBRARIES(.bss))
+        } > seg_monitor_dmda
+		
+		//只将指定放片内的dmda放在片内
+        seg_dmda
+        {
+            INPUT_SECTIONS( $OBJECTS(seg_int_data) $LIBRARIES(seg_int_data))
+            //INPUT_SECTIONS( $OBJS_LIBS_INTERNAL(seg_dmda))
+        } > seg_dmda
+
+
+        stackseg
+        {
+            // allocate a stack for the application
+            ldf_stack_space = .;
+            ldf_stack_length = MEMORY_SIZEOF(seg_monitor_stak);
+            ldf_stack_end = ldf_stack_space + ldf_stack_length;
+        } > seg_monitor_stak
+        
+        intstackseg
+        {
+            // allocate a stack for the application
+            int_stack_space = .;
+            int_stack_length = MEMORY_SIZEOF(seg_monitor_ints_stak);
+            int_stack_end = int_stack_space + int_stack_length;
+        } > seg_monitor_ints_stak
+        
+        
+        heap
+        {
+            // allocate a heap for the application
+            ldf_heap_space = .;
+            ldf_heap_length = MEMORY_SIZEOF(seg_monitor_heap);
+            ldf_heap_end = ldf_heap_space + ldf_heap_length - 1;
+            
+        } > seg_monitor_heap
+
+
+        seg_flash
+        {
+            INPUT_SECTIONS($OBJECTS(seg_flash) $LIBRARIES(seg_flash))
+        } > seg_flash
+
+        //将所有code都放在片外
+        seg_sdram_code PM
+        {
+            ldf_seginit_space = . ;
+            INPUT_SECTIONS( $OBJECTS(seg_init) $LIBRARIES(seg_init))
+            
+          INPUT_SECTIONS( $OBJECTS(seg_ext_code) $LIBRARIES(seg_ext_code))
+          // place code we couldn't link internally into SDRAM
+          INPUT_SECTIONS( $OBJECTS(seg_pmco) $LIBRARIES(seg_pmco))
+        } > seg_monitor_pmco
+
+
+        .bss_external ZERO_INIT
+        {
+           INPUT_SECTIONS( $OBJECTS(.bss) $LIBRARIES(.bss))
+        } > seg_monitor_dmda
+
+        seg_sdram_data
+        {
+            INPUT_SECTIONS( $OBJECTS(seg_dmda) $LIBRARIES(seg_dmda))
+            INPUT_SECTIONS( $OBJECTS(seg_ext_data) $LIBRARIES(seg_ext_data))
+            INPUT_SECTIONS( $OBJECTS(seg_sdram) $LIBRARIES(seg_sdram))
+        } > seg_monitor_dmda
+/*
+#if defined(USE_SDRAM_STACK) || defined(USE_SDRAM_HEAP)
+        expand_ext_stack_and_heap
+        {
+            //expand the stack/heap to use the rest of the SDRAM.
+            RESERVE_EXPAND(stack_and_heap, stack_and_heap_length, 0)
+#if defined(USE_SDRAM_STACK) && defined(USE_SDRAM_HEAP)
+            ldf_stack_space = stack_and_heap;
+            ldf_stack_end = (ldf_stack_space + ((stack_and_heap_length *
+            STACK_SIZE) / (STACK_SIZE + HEAP_SIZE)));
+            ldf_stack_length = ldf_stack_end - ldf_stack_space - 1;
+            ldf_heap_space = ldf_stack_end;
+            ldf_heap_end = stack_and_heap + stack_and_heap_length;
+            ldf_heap_length = ldf_heap_end - ldf_heap_space;
+#elif defined(USE_SDRAM_STACK)
+            ldf_stack_space = stack_and_heap;
+            ldf_stack_length = stack_and_heap_length;
+            ldf_stack_end = ldf_stack_space + stack_and_heap_length;
+#elif defined(USE_SDRAM_HEAP)
+            ldf_heap_space = stack_and_heap;
+            ldf_heap_length = stack_and_heap_length;
+            ldf_heap_end = ldf_heap_space + stack_and_heap_length;
+#endif // USE_SDRAM_STACK && USE_SDRAM_HEAP
+        } > seg_monitor_dmda
+#endif // USE_SDRAM_STACK || USE_SDRAM_HEAP
+*/
+        seg_ext_pmda
+        {
+          INPUT_SECTIONS( $OBJECTS(seg_pmda) $LIBRARIES(seg_pmda))
+          INPUT_SECTIONS( $OBJECTS(seg_ext_pmda) $LIBRARIES(seg_ext_pmda))
+        } > seg_monitor_pmda
+
+    } /* SECTIONS */
+} /* PROCESSOR p0 */
+
+#endif //Monitor_version
+
+/*------------------------------- Release_version ----------------------------------*/
+
+
+#ifdef Release_version
+
+
+PROCESSOR p0
+{
+#ifdef IDDE_ARGS
+    RESOLVE(___argv_string, ARGV_START)
+#endif
+#ifdef __cplusplus
+    KEEP( _main,___ctor_NULL_marker,___lib_end_of_heap_descriptions )
+#else
+    KEEP( _main,___lib_end_of_heap_descriptions )
+#endif
+    LINK_AGAINST( $COMMAND_LINE_LINK_AGAINST )
+    OUTPUT( $COMMAND_LINE_OUTPUT_FILE )
+
+    SECTIONS
+    {
+        seg_rth PM
+        {
+            NO_FORCE_CONTIGUITY
+            INPUT_SECTIONS( $OBJECTS(seg_rth) $LIBRARIES(seg_rth))
+        } > seg_rth
+        
+        seg_ldr
+        {
+            INPUT_SECTIONS( $OBJECTS(seg_ldr) $LIBRARIES(seg_ldr))
+        } > seg_ldr
+        
+        seg_init PM
+        {
+            ldf_seginit_space = . ;
+            INPUT_SECTIONS( $OBJECTS(seg_init) $LIBRARIES(seg_init))
+        }
+#if defined(__MEMINIT__)
+          > seg_init
+#else
+          > seg_int_code
+#endif
+
+        seg_int_code_sw SW
+        {
+            FILL(0x1)
+            NO_FORCE_CONTIGUITY
+            // map code required to be in internal memory first
+            INPUT_SECTIONS( $OBJECTS(seg_int_code_sw) $LIBRARIES(seg_int_code_sw))
+            INPUT_SECTIONS( $OBJECTS(seg_int_code) $LIBRARIES(seg_int_code))
+        } > seg_int_code
+
+        seg_int_code PM
+        {
+            NO_FORCE_CONTIGUITY
+            // map code required to be in internal memory first
+            INPUT_SECTIONS( $OBJECTS(seg_int_code) $LIBRARIES(seg_int_code))
+        } > seg_int_code
+
+        seg_swco SW
+        {
+            FILL(0x1)
+            NO_FORCE_CONTIGUITY
+            // now map the default code sections, sw first
+            INPUT_SECTIONS( $OBJS_LIBS_INTERNAL(seg_swco))
+            INPUT_SECTIONS( $OBJS_LIBS_NOT_EXTERNAL(seg_swco))
+            INPUT_SECTIONS( $OBJS_LIBS_INTERNAL(seg_pmco))
+            INPUT_SECTIONS( $OBJS_LIBS_NOT_EXTERNAL(seg_pmco))
+            INPUT_SECTIONS( $OBJECTS(seg_swco) $LIBRARIES(seg_swco))
+            INPUT_SECTIONS( $OBJECTS(seg_pmco) $LIBRARIES(seg_pmco))
+        } > seg_int_code
+
+        seg_pmco PM
+        {
+            NO_FORCE_CONTIGUITY
+            // now map the default code sections, pm after sw
+            INPUT_SECTIONS( $OBJS_LIBS_INTERNAL(seg_pmco))
+            INPUT_SECTIONS( $OBJS_LIBS_NOT_EXTERNAL(seg_pmco))
+            INPUT_SECTIONS( $OBJECTS(seg_pmco) $LIBRARIES(seg_pmco))
+        } > seg_int_code
+
+        seg_pmda
+        {
+            INPUT_SECTIONS( $OBJS_LIBS_INTERNAL(seg_pmda))
+            INPUT_SECTIONS( $OBJS_LIBS_NOT_EXTERNAL(seg_pmda))
+            INPUT_SECTIONS( $OBJECTS(seg_pmda) $LIBRARIES(seg_pmda))
+        } > seg_pmda
+        
+        seg_swco2 SW
+        {
+            FILL(0x1)
+            NO_FORCE_CONTIGUITY
+            // now map the default code sections, sw first
+            INPUT_SECTIONS( $OBJS_LIBS_INTERNAL(seg_swco))
+            INPUT_SECTIONS( $OBJS_LIBS_NOT_EXTERNAL(seg_swco))
+            INPUT_SECTIONS( $OBJS_LIBS_INTERNAL(seg_pmco))
+            INPUT_SECTIONS( $OBJS_LIBS_NOT_EXTERNAL(seg_pmco))
+            INPUT_SECTIONS( $OBJECTS(seg_swco) $LIBRARIES(seg_swco))
+            INPUT_SECTIONS( $OBJECTS(seg_pmco) $LIBRARIES(seg_pmco))
+        } > seg_pmco
+
+        seg_pmco2 PM
+        {
+            NO_FORCE_CONTIGUITY
+            // now map the default code sections, pm after sw
+            INPUT_SECTIONS( $OBJS_LIBS_INTERNAL(seg_pmco))
+            INPUT_SECTIONS( $OBJS_LIBS_NOT_EXTERNAL(seg_pmco))
+            INPUT_SECTIONS( $OBJECTS(seg_pmco) $LIBRARIES(seg_pmco))
+        } > seg_pmco
+        
+#ifdef __cplusplus
+#if defined(USE_SDRAM)
+ #define CPP_DATA_SECTION seg_ext_dmda
+#else
+ #define CPP_DATA_SECTION seg_dmda
+#endif // !USE_SDRAM
+
+        dxe_ctdm
+        {
+            FORCE_CONTIGUITY
+            __ctors = .;    /* points to the start of the section */
+            INPUT_SECTIONS( $OBJECTS(seg_ctdm) $LIBRARIES(seg_ctdm))
+            INPUT_SECTIONS( $OBJECTS(seg_ctdml) $LIBRARIES(seg_ctdml))
+        } > CPP_DATA_SECTION
+
+        dxe_gdt
+        {
+            FORCE_CONTIGUITY
+            INPUT_SECTIONS( $OBJECTS(.gdt) $LIBRARIES(.gdt))
+            INPUT_SECTIONS( $OBJECTS(.gdtl) $LIBRARIES(.gdtl))
+        } > CPP_DATA_SECTION
+
+        .eh
+        {
+            INPUT_SECTIONS( $OBJECTS(.frt) $LIBRARIES(.frt))
+            INPUT_SECTIONS( $OBJECTS(.rtti) $LIBRARIES(.rtti))
+            INPUT_SECTIONS( $OBJECTS(.cht) $LIBRARIES(.cht))
+            INPUT_SECTIONS( $OBJECTS(.edt) $LIBRARIES(.edt))
+            INPUT_SECTIONS( $OBJECTS(seg_vtbl) $LIBRARIES(seg_vtbl))
+        } > CPP_DATA_SECTION
+#endif // __cplusplus
+
+        .bss ZERO_INIT
+        {
+           INPUT_SECTIONS( $OBJS_LIBS_INTERNAL(.bss))
+           INPUT_SECTIONS( $OBJS_LIBS_NOT_EXTERNAL(.bss))
+           INPUT_SECTIONS( $OBJECTS(.bss) $LIBRARIES(.bss))
+        } > seg_dmda
+		
+#if defined(USE_SDRAM_STACK)
+        .bss_stak ZERO_INIT
+        {
+           INPUT_SECTIONS( $OBJS_LIBS_INTERNAL(.bss))
+           INPUT_SECTIONS( $OBJS_LIBS_NOT_EXTERNAL(.bss))
+           INPUT_SECTIONS( $OBJECTS(.bss) $LIBRARIES(.bss))
+        } > seg_stak
+#endif
+
+#if defined(USE_SDRAM_HEAP)
+        .bss_heap ZERO_INIT
+        {
+           INPUT_SECTIONS( $OBJS_LIBS_INTERNAL(.bss))
+           INPUT_SECTIONS( $OBJS_LIBS_NOT_EXTERNAL(.bss))
+           INPUT_SECTIONS( $OBJECTS(.bss) $LIBRARIES(.bss))
+        } > seg_heap
+#endif
+
+        seg_dmda
+        {
+            INPUT_SECTIONS( $OBJECTS(seg_int_data) $LIBRARIES(seg_int_data))
+            INPUT_SECTIONS( $OBJS_LIBS_INTERNAL(seg_dmda))
+            INPUT_SECTIONS( $OBJS_LIBS_NOT_EXTERNAL(seg_dmda))
+            INPUT_SECTIONS( $OBJECTS(seg_dmda) $LIBRARIES(seg_dmda))
+        } > seg_dmda
+
+        seg_dmda2
+        {
+            // use unused space in seg_pmda for dmda
+            INPUT_SECTIONS( $OBJECTS(seg_dmda) $LIBRARIES(seg_dmda))
+        } > seg_pmda
+
+        seg_pmda2
+        {
+            // use unused space in seg_dmda for pmda
+            INPUT_SECTIONS( $OBJECTS(seg_pmda) $LIBRARIES(seg_pmda))
+        } > seg_dmda
+
+#if defined(USE_SDRAM_STACK)
+        seg_dmda_stak
+        {
+            INPUT_SECTIONS( $OBJECTS(seg_int_data) $LIBRARIES(seg_int_data))
+            INPUT_SECTIONS( $OBJS_LIBS_INTERNAL(seg_dmda))
+            INPUT_SECTIONS( $OBJS_LIBS_NOT_EXTERNAL(seg_dmda))
+            INPUT_SECTIONS( $OBJECTS(seg_dmda) $LIBRARIES(seg_dmda))
+        } > seg_stak
+#endif
+
+#if defined(USE_SDRAM_HEAP)
+        seg_dmda_heap
+        {
+            INPUT_SECTIONS( $OBJECTS(seg_int_data) $LIBRARIES(seg_int_data))
+            INPUT_SECTIONS( $OBJS_LIBS_INTERNAL(seg_dmda))
+            INPUT_SECTIONS( $OBJS_LIBS_NOT_EXTERNAL(seg_dmda))
+            INPUT_SECTIONS( $OBJECTS(seg_dmda) $LIBRARIES(seg_dmda))
+        } > seg_heap
+#endif
+
+#if !defined(USE_SDRAM_STACK)
+        stackseg
+        {
+            // allocate a stack for the application
+            ldf_stack_space = .;
+            ldf_stack_length = MEMORY_SIZEOF(seg_stak);
+            ldf_stack_end = ldf_stack_space + ldf_stack_length;
+        } > seg_stak
+        
+        intstackseg
+        {
+            // allocate a stack for the application
+            int_stack_space = .;
+            int_stack_length = MEMORY_SIZEOF(seg_ints_stak);
+            int_stack_end = int_stack_space + int_stack_length;
+        } > seg_ints_stak
+#endif
+
+#if !defined(USE_SDRAM_HEAP)
+        heap
+        {
+            // allocate a heap for the application
+            ldf_heap_space = .;
+            ldf_heap_length = MEMORY_SIZEOF(seg_heap);
+            ldf_heap_end = ldf_heap_space + ldf_heap_length - 1;
+            
+//            sys_heap_bottom_cnt = ldf_heap_space;
+//            sys_heap_top_cnt = ldf_heap_end;
+            
+            //sys_heap_bottom_cnt = .;
+            //ldf_heap_length = MEMORY_SIZEOF(seg_heap);
+            //sys_heap_top_cnt = sys_heap_bottom_cnt + ldf_heap_length - 1;
+        } > seg_heap
+#endif
+
+        seg_flash
+        {
+            INPUT_SECTIONS($OBJECTS(seg_flash) $LIBRARIES(seg_flash))
+        } > seg_flash
+
+#if defined(USE_SDRAM)
+        seg_sdram_code_sw SW
+        {
+          INPUT_SECTIONS( $OBJECTS(seg_ext_code) $LIBRARIES(seg_ext_code))
+          // place code we couldn't link internally into SDRAM
+          INPUT_SECTIONS( $OBJECTS(seg_swco) $LIBRARIES(seg_swco))
+          INPUT_SECTIONS( $OBJECTS(seg_pmco) $LIBRARIES(seg_pmco))
+        } > seg_ext_swco
+
+        seg_sdram_code PM
+        {
+          INPUT_SECTIONS( $OBJECTS(seg_ext_code) $LIBRARIES(seg_ext_code))
+          // place code we couldn't link internally into SDRAM
+          INPUT_SECTIONS( $OBJECTS(seg_pmco) $LIBRARIES(seg_pmco))
+        } > seg_ext_nwco
+
+        reserve_ext_stack_and_heap
+        {
+          //reserve memory for heap/stack if we need it
+#if defined(USE_SDRAM_STACK) && defined(USE_SDRAM_HEAP)
+            RESERVE(stack_and_heap, stack_and_heap_length = STACKHEAP_SIZE)
+#elif defined(USE_SDRAM_STACK)
+            RESERVE(stack_and_heap, stack_and_heap_length = STACK_SIZE)
+#elif defined(USE_SDRAM_HEAP)
+            RESERVE(stack_and_heap, stack_and_heap_length = HEAP_SIZE)
+#endif // USE_SDRAM_STACK && USE_SDRAM_HEAP
+        } > seg_ext_dmda
+
+        .bss_external ZERO_INIT
+        {
+           INPUT_SECTIONS( $OBJECTS(.bss) $LIBRARIES(.bss))
+        } > seg_ext_dmda
+
+        seg_sdram_data
+        {
+            INPUT_SECTIONS( $OBJECTS(seg_dmda) $LIBRARIES(seg_dmda))
+            INPUT_SECTIONS( $OBJECTS(seg_ext_data) $LIBRARIES(seg_ext_data))
+            INPUT_SECTIONS( $OBJECTS(seg_sdram) $LIBRARIES(seg_sdram))
+        } > seg_ext_dmda
+
+#if defined(USE_SDRAM_STACK) || defined(USE_SDRAM_HEAP)
+        expand_ext_stack_and_heap
+        {
+            //expand the stack/heap to use the rest of the SDRAM.
+            RESERVE_EXPAND(stack_and_heap, stack_and_heap_length, 0)
+#if defined(USE_SDRAM_STACK) && defined(USE_SDRAM_HEAP)
+            ldf_stack_space = stack_and_heap;
+            ldf_stack_end = (ldf_stack_space + ((stack_and_heap_length *
+            STACK_SIZE) / (STACK_SIZE + HEAP_SIZE)));
+            ldf_stack_length = ldf_stack_end - ldf_stack_space - 1;
+            ldf_heap_space = ldf_stack_end;
+            ldf_heap_end = stack_and_heap + stack_and_heap_length;
+            ldf_heap_length = ldf_heap_end - ldf_heap_space;
+#elif defined(USE_SDRAM_STACK)
+            ldf_stack_space = stack_and_heap;
+            ldf_stack_length = stack_and_heap_length;
+            ldf_stack_end = ldf_stack_space + stack_and_heap_length;
+#elif defined(USE_SDRAM_HEAP)
+            ldf_heap_space = stack_and_heap;
+            ldf_heap_length = stack_and_heap_length;
+            ldf_heap_end = ldf_heap_space + stack_and_heap_length;
+#endif // USE_SDRAM_STACK && USE_SDRAM_HEAP
+        } > seg_ext_dmda
+#endif // USE_SDRAM_STACK || USE_SDRAM_HEAP
+
+        seg_ext_pmda
+        {
+          INPUT_SECTIONS( $OBJECTS(seg_ext_pmda) $LIBRARIES(seg_ext_pmda))
+        } > seg_ext_pmda
+#else
+        seg_ext_code_sw SW
+        {
+          INPUT_SECTIONS( $OBJECTS(seg_ext_code) $LIBRARIES(seg_ext_code))
+        } > seg_ext_swco
+
+        seg_ext_code PM
+        {
+          INPUT_SECTIONS( $OBJECTS(seg_ext_code) $LIBRARIES(seg_ext_code))
+        } > seg_ext_nwco
+
+        seg_ext_data
+        {
+          INPUT_SECTIONS( $OBJECTS(seg_ext_data) $LIBRARIES(seg_ext_data))
+          INPUT_SECTIONS( $OBJECTS(seg_sdram) $LIBRARIES(seg_sdram))
+        } > seg_ext_dmda
+
+        seg_ext_pmda
+        {
+          INPUT_SECTIONS( $OBJECTS(seg_ext_pmda) $LIBRARIES(seg_ext_pmda))
+        } > seg_ext_pmda
+#endif // USE_SDRAM
+    } /* SECTIONS */
+} /* PROCESSOR p0 */
+
+
+#endif //Release_version

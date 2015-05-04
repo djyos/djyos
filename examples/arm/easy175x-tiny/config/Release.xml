@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="GB2312" standalone="no"?>
+<CONFIGURATION>
+    <MEMORY>
+        <RXM LENGTH="2M" NAME="ROM1" RXW="RX" START="0x00000000"/>
+        <RXM LENGTH="8M" NAME="RAM1" RXW="RXW" START="0x08000000"/>
+    </MEMORY>
+    <SECTIONS>
+        <LOADDEFAULT/>
+        <RUNDEFAULT/>
+    </SECTIONS>
+</CONFIGURATION>
