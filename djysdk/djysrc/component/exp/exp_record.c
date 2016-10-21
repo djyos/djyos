@@ -54,28 +54,25 @@
 
 #include "stdint.h"
 #include "stddef.h"
-#include "exp_api.h"
+#include "exp.h"
 #include "exp_record.h"
 
-static struct tagExpRecordOperate s_tExpRecordOpt = {NULL};
-static struct tagExpRecordOperate s_tExpRecordDefaultOpt = {NULL};
+static struct ExpRecordOperate s_tExpRecordOpt = {NULL};
+static struct ExpRecordOperate s_tExpRecordDefaultOpt = {NULL};
 
 // =============================================================================
-// 函数功能：__memcpyByteByByte
-//           内存拷贝
+// 函数功能：内存拷贝,此时c库尚未加载，还不可用，不能调用memcpy
 // 输入参数：
 // 输出参数：
 // 返回值  ：见_EN_EXP_RECORDRESULT定义
+// 说明      ：在异常模块的初始化过程中，C库还没有被加载（对于需要搬运的平台而言），所以memcpy还不能用
 // =============================================================================
 void __memcpyByteByByte(u8 *dest, u8 *src, u32 len)
 {
-    u32 i = 0;
-    while(i < len)
+    u32 i;
+    for(i = 0;i < len; i++)
     {
-        *dest = *src;
-        dest++;
-        src++;
-        i++;
+        dest[i] = src[i];
     }
 }
 
@@ -84,18 +81,18 @@ void __memcpyByteByByte(u8 *dest, u8 *src, u32 len)
 //           记录一帧异常信息
 // 输入参数：recordpara，需要记录的异常信息
 // 输出参数：
-// 返回值  ：见_EN_EXP_RECORDRESULT定义
+// 返回值  ：见enum EN_ExpDealResult定义
 // =============================================================================
-u32 Exp_Record(struct tagExpRecordPara *recordpara)
+enum EN_ExpDealResult Exp_Record(struct ExpRecordPara *recordpara)
 {
     u32 result;
-    if(NULL != s_tExpRecordOpt.fnexprecord)
+    if(NULL != s_tExpRecordOpt.fnExpRecordSave)
     {
-        result = (u32)(s_tExpRecordOpt.fnexprecord(recordpara));
+        result = (u32)(s_tExpRecordOpt.fnExpRecordSave(recordpara));
     }
     else
     {
-        result = (u32)EN_EXP_DEAL_RECORD_NOMETHOD;
+        result = (u32)EN_EXP_RESULT_RECORD_NOMETHOD;
     }
     return result;
 }
@@ -108,9 +105,9 @@ u32 Exp_Record(struct tagExpRecordPara *recordpara)
 // =============================================================================
 bool_t Exp_RecordClear(void)
 {
-    if(NULL != s_tExpRecordOpt.fnexprecordclear)//有主动注册的
+    if(NULL != s_tExpRecordOpt.fnExpRecordClean)//有主动注册的
     {
-        return s_tExpRecordOpt.fnexprecordclear();
+        return s_tExpRecordOpt.fnExpRecordClean();
     }
     else//默认方式处理
     {
@@ -126,9 +123,9 @@ bool_t Exp_RecordClear(void)
 // =============================================================================
 bool_t Exp_RecordCheckNum(u32 *recordnum)
 {
-    if(NULL != s_tExpRecordOpt.fnexprecordchecknum)//有主动注册的
+    if(NULL != s_tExpRecordOpt.fnExpRecordCheckNum)//有主动注册的
     {
-        return s_tExpRecordOpt.fnexprecordchecknum(recordnum);
+        return s_tExpRecordOpt.fnExpRecordCheckNum(recordnum);
     }
     else//默认方式处理
     {
@@ -147,9 +144,9 @@ bool_t Exp_RecordCheckNum(u32 *recordnum)
 bool_t Exp_RecordCheckLen(u32 assignedno, u32 *recordlen)
 {
     bool_t result;
-    if(NULL != s_tExpRecordOpt.fnexprecordchecklen)//有主动注册的
+    if(NULL != s_tExpRecordOpt.fnExpRecordCheckLen)//有主动注册的
     {
-        result = s_tExpRecordOpt.fnexprecordchecklen(assignedno, recordlen);
+        result = s_tExpRecordOpt.fnExpRecordCheckLen(assignedno, recordlen);
     }
     else//默认方式处理
     {
@@ -167,12 +164,12 @@ bool_t Exp_RecordCheckLen(u32 assignedno, u32 *recordlen)
 // 返回值  ：true 成功 false失败
 // =============================================================================
 bool_t Exp_RecordGet(u32 assignedno, u32 buflenlimit, u8 *buf, \
-                     struct tagExpRecordPara  *recordpara)
+                     struct ExpRecordPara  *recordpara)
 {
     bool_t result;
-    if(NULL != s_tExpRecordOpt.fnexprecordget)//有主动注册的
+    if(NULL != s_tExpRecordOpt.fnExpRecordGet)//有主动注册的
     {
-        result = s_tExpRecordOpt.fnexprecordget(assignedno, buflenlimit,buf,recordpara);
+        result = s_tExpRecordOpt.fnExpRecordGet(assignedno, buflenlimit,buf,recordpara);
     }
     else//默认方式处理
     {
@@ -185,11 +182,10 @@ bool_t Exp_RecordGet(u32 assignedno, u32 buflenlimit, u8 *buf, \
 //          注册异常信息处理方法
 // 输入参数：opt,需要注册的异常信息处理方法
 // 输出参数：无
-// 返回值  ：false,失败  true成功，失败的话会使用BSP默认的处理方法
-// 注意    ：理论上opt结构里面指定的处理方法都应该提供，否则的话会注册不成功
-//           OPT的各个操作方法自己提供参数校验等
+// 返回值  ：false,失败  true成功
+// 注意    ：opt结构里面指定的处理方法都应该提供，否则的话会注册不成功
 // =============================================================================
-bool_t  Exp_RegisterRecordOpt(struct tagExpRecordOperate *opt)
+bool_t  Exp_RegisterRecorder(struct ExpRecordOperate *opt)
 {
     bool_t result;
     if(NULL == opt)
@@ -198,11 +194,12 @@ bool_t  Exp_RegisterRecordOpt(struct tagExpRecordOperate *opt)
     }
     else
     {
-        if((NULL == opt->fnexprecord) ||\
-            (NULL == opt->fnexprecordchecklen)||\
-            (NULL == opt->fnexprecordchecknum)||\
-            (NULL == opt->fnexprecordclear)||\
-            (NULL == opt->fnexprecordget))
+        if((NULL == opt->fnExpRecordScan) ||\
+           (NULL == opt->fnExpRecordSave)||\
+           (NULL == opt->fnExpRecordClean)||\
+           (NULL == opt->fnExpRecordCheckNum)||\
+           (NULL == opt->fnExpRecordCheckLen)||\
+           (NULL == opt->fnExpRecordGet))
         {
             result = false;
         }
@@ -211,17 +208,17 @@ bool_t  Exp_RegisterRecordOpt(struct tagExpRecordOperate *opt)
             //注册
             __memcpyByteByByte((u8 *)&s_tExpRecordOpt, \
                                (u8 *)opt, sizeof(s_tExpRecordOpt));
-            //第一次的话保留备份
-            if(NULL == s_tExpRecordDefaultOpt.fnexprecord)
+            //第一次的话保留备份，以备恢复
+            if(NULL == s_tExpRecordDefaultOpt.fnExpRecordSave)
             {
                 __memcpyByteByByte((u8 *)&s_tExpRecordDefaultOpt, \
                                    (u8 *)&s_tExpRecordOpt, \
                                    sizeof(s_tExpRecordOpt));
             }
             //存储方案初始化扫描
-            if(NULL != s_tExpRecordOpt.fnexprecordscan)
+            if(NULL != s_tExpRecordOpt.fnExpRecordScan)
             {
-                s_tExpRecordOpt.fnexprecordscan();
+                s_tExpRecordOpt.fnExpRecordScan();
             }
             result = true;
         }
@@ -235,16 +232,16 @@ bool_t  Exp_RegisterRecordOpt(struct tagExpRecordOperate *opt)
 // 输出参数：无
 // 返回值  ：true成功  false失败
 // =============================================================================
-bool_t Exp_UnRegisterRecordOpt(void)
+bool_t Exp_UnRegisterRecorder(void)
 {
     //恢复成默认的存储方案
     __memcpyByteByByte((u8 *)&s_tExpRecordOpt, \
                        (u8 *)&s_tExpRecordDefaultOpt, \
                        sizeof(s_tExpRecordOpt));
     //存储方案初始化扫描
-    if(NULL != s_tExpRecordOpt.fnexprecordscan)
+    if(NULL != s_tExpRecordOpt.fnExpRecordScan)
     {
-        s_tExpRecordOpt.fnexprecordscan();
+        s_tExpRecordOpt.fnExpRecordScan();
     }
     return true;
 }

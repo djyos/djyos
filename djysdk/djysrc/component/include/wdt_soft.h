@@ -59,34 +59,38 @@ extern "C" {
 #endif
 
 #include "stdint.h"
+#include "exp.h"
 
-struct __tagWdt;
-typedef u32 (* fnYipHook)(struct __tagWdt *wdt);
+struct Wdt;
+typedef u32 (* fnYipHook)(struct Wdt *wdt);
 //the struct of the wdt
-typedef struct __tagWdt
+typedef struct Wdt
 {
-    struct __tagWdt *ppre;        //双向不循环链表指针-前
-    struct __tagWdt *pnxt;        //双向不循环链表指针-后
+    struct Wdt *ppre;        //双向不循环链表指针-前
+    struct Wdt *pnxt;        //双向不循环链表指针-后
     char            *pname;       //看门狗名字，指向静态或者常量字符串
     fnYipHook       fnhook;       //狗叫善后钩子函数
-    u32             action;       //狗叫动作
+    enum EN_ExpAction action;       //狗叫动作
     u32             cycle;        //看门狗周期，单位：微秒
-    u32             taskownerid;  //看门狗所属任务ID
+    s16             WdtOnwer;     //看门狗所属事件ID
     s64             deadtime;     //看门狗喂狗截止时间，到此时间还不喂，则狗叫，单位：微秒
     s64             runtime;      //上次操作看门狗时看门狗所属任务的运行时间，单位：微秒
     u32             timeoutreason;     //看门狗狗叫原因
     u16             shyiptimes;        //调度原因引起的看门狗狗叫次数   ，单位：次
-    u32             runtimelevel;      //看门狗狗叫原因判断标准，单位：微秒
-    u16             sheduletimeslevel; //看门狗狗叫调度原因连续次数，单位：次
+    //用于分辨狗叫原因，如果发生看门狗溢出，在该狗叫周期内，若当事件执行时间大于
+    //ExhaustLevelSet（uS）,则判定为逻辑错误，即被监控代码有时间运行却不喂狗；若
+    //事件执行时间小于ExhaustLevelSet（uS），则判定为调度问题，例如高优先级事件
+    //或者中断长时间占用CPU，导致被监控代码没有机会执行。
+    u32             ExhaustLevelSet;
+    //因ExhaustLevelSet而导致狗叫的容忍次数。如果因ExhaustLevelSet而导致狗叫，
+    //说明狗叫并非被监控代码的逻辑错误引起，可以用本函数设定容许次数，，超过
+    //该限制则执行fnhook，否则不执行。
+    //本参数可用于容许IO延迟，具体如下：
+    //1、假定被监视代码正常时1秒必定会执行一次，则cycle可设为1.2S(留点余量）
+    //2、但被监控代码在某特定条件下（if语句），有执行IO操作，该IO操作可能耗时
+    //   5秒。则可在执行IO操作前，把ExhaustLimit设为5（用EN_WDTCMD_SETSCHLEVEL命令）
+    u32             ExhaustLimit;
 }tagWdt;
-
-typedef struct
-{
-    u32  runtimelevel;        //当看门狗叫时，用于判断是逻辑错误还是调度延时问题
-                              //当任务运行时间大于runtime,判定为逻辑错误，即有运行却不喂狗
-                              //当任务运行时间小于runtime,判定为调度问题，没有足够运行时间
-    u16  shtimeoutlevel;      //连续的调度问题引起的狗叫次数限制，超过该限制则执行HOOK，否则不执行
-}tagWdtTolerate;              //看门狗的容忍限度
 
 enum _EN_WDT_CMD
 {
@@ -96,20 +100,26 @@ enum _EN_WDT_CMD
     //the following the api could use, but the up not
     EN_WDTCMD_PAUSE,
     EN_WDTCMD_RESUME,
-    EN_WDTCMD_SETTASKID,
-    EN_WDTCMD_SETCYCLE,                  //设置狗叫周期
-    EN_WDTCMD_SETYIPACTION,              //设置狗叫动作
-    EN_WDTCMD_SETYIPHOOK,                //设置狗叫善后钩子
-    EN_WDTCMD_SETCONSUMEDTIMELEVEL,      //设置狗叫逻辑错误时间触发水平
-    EN_WDTCMD_SETSCHLEVEL,               //设置连续狗叫逻辑错误容忍限度
-    EN_WDTCMD_INVALID,                   //无效操作
+    EN_WDTCMD_SET_OWNER,
+    EN_WDTCMD_SET_CYCLE,                    //设置狗叫周期
+    EN_WDTCMD_SET_YIP_ACTION,               //设置狗叫动作
+    EN_WDTCMD_SET_HOOK,                     //设置狗叫善后钩子
+    EN_WDTCMD_SET_CONSUME_LEVEL,            //设置狗叫逻辑错误时间触发水平
+    EN_WDTCMD_SET_SCHED_LEVEL,              //设置连续狗叫逻辑错误容忍限度
+    EN_WDTCMD_INVALID,                      //无效操作
 };
 
 ptu32_t ModuleInstall_Wdt(ptu32_t para);
 tagWdt *Wdt_Create(char *dogname,u32 yip_cycle,\
-        fnYipHook yiphook,ptu32_t yip_action, tagWdtTolerate *levelpara);
-tagWdt *Wdt_Create_s(tagWdt *wdt, char *dogname,u32 yip_cycle,\
-        fnYipHook yiphook,ptu32_t yip_action, tagWdtTolerate *levelpara);
+                   fnYipHook yiphook,
+                   enum EN_ExpAction yip_action, 
+                   u32 ExhaustLevelSet,
+                   u32 ExhaustLimit);
+tagWdt *Wdt_Create_s(tagWdt *wdt, char *dogname,u32 yip_cycle,
+                     fnYipHook yiphook,
+                     enum EN_ExpAction yip_action, 
+                     u32 ExhaustLevelSet,
+                     u32 ExhaustLimit);
 bool_t Wdt_Delete(tagWdt *wdt);
 bool_t Wdt_Delete_s(tagWdt *wdt);
 bool_t Wdt_Clean(tagWdt *wdt);

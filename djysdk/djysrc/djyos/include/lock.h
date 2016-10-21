@@ -57,14 +57,14 @@
 #ifndef __semp_h__
 #define __semp_h__
 
-#include "rsc.h"
+#include "object.h"
 #include "errno.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 
-struct  tagEventECB;
+struct EventECB;
 
 // 当事件请求信号量不得，将进入该信号量的同步队列，等待持有信号量的事件释放信号
 // 量，等待队列有两种排序方式，即优先级顺序和时间顺序方式。
@@ -75,31 +75,31 @@ struct  tagEventECB;
 //---------不限量信号的意义--------------
 //1、不限量信号可提供受保护的资源的使用计数
 //2、为可限量也可不限量的资源提供一致的代码，尤其是提供在运行时配置的可能性
-struct tagSemaphoreLCB
+struct SemaphoreLCB
 {
-    struct  tagRscNode node;
+    struct  Object node;
     u32 sync_order;
     u32 lamps_limit;   //信号灯数量上限，cn_limit_uint32表示不限数量
     u32 lamp_counter;  //可用信号灯数量。
-    struct  tagEventECB *semp_sync;    //等候信号的事件队列
+    struct EventECB *semp_sync;    //等候信号的事件队列
 };
 
 //互斥量是可以递归请求的，即同一个事件允许反复请求，但要求释放的次数和请求的次数
 //相同。即如果互斥量被一个事件连续请求三次，则要释放三次才算真正释放。
-struct tagMutexLCB
+struct MutexLCB
 {
-    struct tagRscNode node;
+    struct Object node;
     s32  enable;                        //0=可用，>0 = 被线程占用，<0 = 中断占用
     ufast_t  prio_bak;                  //优先级继承中备份原优先级
-    struct  tagEventECB *owner;         //占用互斥量的事件，若被中断占用，则无效
-    struct  tagEventECB *mutex_sync;    //等候互斥量的事件队列，优先级排队
+    struct EventECB *owner;         //占用互斥量的事件，若被中断占用，则无效
+    struct EventECB *mutex_sync;    //等候互斥量的事件队列，优先级排队
 };
 
 //用于信号量和互斥量共享内存池
 union lock_MCB
 {
-   struct tagSemaphoreLCB sem;
-   struct tagMutexLCB  mut;
+   struct SemaphoreLCB sem;
+   struct MutexLCB  mut;
 };
 
 //出错信息定义
@@ -113,27 +113,27 @@ enum _LOCK_ERROR_CODE_
 
 ptu32_t ModuleInstall_Lock1(ptu32_t para);
 ptu32_t ModuleInstall_Lock2(ptu32_t para);
-struct tagSemaphoreLCB *Lock_SempCreate(u32 lamps_limit,u32 init_lamp,
-                                        u32 sync_order,char *name);
-struct tagSemaphoreLCB *Lock_SempCreate_s( struct tagSemaphoreLCB *semp,
-                       u32 lamps_limit,u32 init_lamp,u32 sync_order,char *name);
-void Lock_SempPost(struct tagSemaphoreLCB *semp);
-bool_t Lock_SempPend(struct tagSemaphoreLCB *semp,u32 timeout);
-bool_t Lock_SempDelete_s(struct tagSemaphoreLCB *semp);
-bool_t Lock_SempDelete(struct tagSemaphoreLCB *semp);
-u32 Lock_SempQueryCapacital(struct tagSemaphoreLCB *semp);
-bool_t Lock_SempCheckBlock(struct tagSemaphoreLCB *Semp);
-u32 Lock_SempQueryFree(struct tagSemaphoreLCB *semp);
-void Lock_SempSetSyncSort(struct tagSemaphoreLCB *semp,u32 order);
-struct tagMutexLCB *Lock_MutexCreate(char *name);
-struct tagMutexLCB *  Lock_MutexCreate_s( struct tagMutexLCB *mutex,char *name);
-void Lock_MutexPost(struct tagMutexLCB *mutex);
-bool_t Lock_MutexPend(struct tagMutexLCB *mutex,u32 timeout);
-bool_t Lock_MutexDelete(struct tagMutexLCB *mutex);
-bool_t Lock_MutexDelete_s(struct tagMutexLCB *mutex);
-bool_t Lock_MutexQuery(struct tagMutexLCB *mutex);
-bool_t Lock_MutexCheckBlock(struct tagMutexLCB *mutex);
-u16 Lock_MutexGetOwner(struct tagMutexLCB *mutex);
+struct SemaphoreLCB *Lock_SempCreate(u32 lamps_limit,u32 init_lamp,
+                                        u32 sync_order,const char *name);
+struct SemaphoreLCB *Lock_SempCreate_s( struct SemaphoreLCB *semp,
+                       u32 lamps_limit,u32 init_lamp,u32 sync_order,const char *name);
+void Lock_SempPost(struct SemaphoreLCB *semp);
+bool_t Lock_SempPend(struct SemaphoreLCB *semp,u32 timeout);
+bool_t Lock_SempDelete_s(struct SemaphoreLCB *semp);
+bool_t Lock_SempDelete(struct SemaphoreLCB *semp);
+u32 Lock_SempQueryCapacital(struct SemaphoreLCB *semp);
+bool_t Lock_SempCheckBlock(struct SemaphoreLCB *Semp);
+u32 Lock_SempQueryFree(struct SemaphoreLCB *semp);
+void Lock_SempSetSyncSort(struct SemaphoreLCB *semp,u32 order);
+struct MutexLCB *Lock_MutexCreate(const char *name);
+struct MutexLCB *  Lock_MutexCreate_s( struct MutexLCB *mutex,const char *name);
+void Lock_MutexPost(struct MutexLCB *mutex);
+bool_t Lock_MutexPend(struct MutexLCB *mutex,u32 timeout);
+bool_t Lock_MutexDelete(struct MutexLCB *mutex);
+bool_t Lock_MutexDelete_s(struct MutexLCB *mutex);
+bool_t Lock_MutexQuery(struct MutexLCB *mutex);
+bool_t Lock_MutexCheckBlock(struct MutexLCB *mutex);
+u16 Lock_MutexGetOwner(struct MutexLCB *mutex);
 
 #ifdef __cplusplus
 }

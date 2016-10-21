@@ -58,7 +58,7 @@
 #define namesize 30
 struct menu_item
 {
-    struct tagRscNode  node;      //用于建立DJY资源链表
+    struct Object  node;      //用于建立DJY资源链表
     u8     byAttrib;            // 菜单属性,设置菜单特殊显示效果;
     u8     font;                //字体及其大小
     u16    wPassword;           // 访问密码，0x0000表示没有密码;

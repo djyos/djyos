@@ -74,85 +74,19 @@
 // 4、允许使能或禁止属性为实时中断的中断线
 
 #include "stdint.h"
+#include "stdlib.h"
+#include "string.h"
 #include "stddef.h"
 #include "int_hard.h"
 #include "int.h"
 #include "djyos.h"
 
-ufast_t tg_int_lookup_table[CN_INT_LINE_LAST+1];
-struct tagIntMasterCtrl  tg_int_global;
-struct tagIntLine *tg_pIntSrcTable;     //在Int_Init函数中分配内存
+struct IntLine *tg_pIntLineTable[CN_INT_LINE_LAST+1];
+struct IntMasterCtrl  tg_int_global;
 
-extern void __Djy_CutReadyEvent(struct tagEventECB *event);
+extern void __Djy_CutReadyEvent(struct EventECB *event);
 extern bool_t __Djy_Schedule(void);
 
-#if 0       //这3个函数与"高级原子操作"功能重复，不再保留。
-//----保存总中断状态并禁止总中断--------------------------------------------
-//功能：本函数是int_restore_trunk()的姊妹函数，调用本函数使禁止次数增1，调用一
-//      次int_restore_trunk使禁止次数减1。
-//      若当前次数为0，增加为1并禁止总中断，不为0时简单地增1
-//参数：无
-//返回：无
-//------------------------------------------------------------------------------
-void Int_SaveTrunk(void)
-{
-    if(tg_int_global.nest_real != 0)
-        return;
-    Int_CutTrunk();
-    if(tg_int_global.en_trunk_counter != CN_LIMIT_UCPU)//达上限后再加会回绕到0
-        tg_int_global.en_trunk_counter++;
-    //原算法是从0->1的过程中才进入，但如果在en_trunk_counter != 0的状态下因故障
-    //使中断关闭，将使用户后续调用的int_save_trunk起不到作用
-    g_bScheduleEnable = false;
-    return;
-}
-
-//----恢复保存的总中断状态---------------------------------------------------
-//功能：本函数是int_save_trunk()的姊妹函数，调用本函数使禁止次数减1，调用
-//      一次int_save_trunk使禁止次数增1，
-//      当次数减至0时激活总中断,否则简单减1
-//参数：无
-//返回：无
-//------------------------------------------------------------------------------
-void Int_RestoreTrunk(void)
-{
-    if(tg_int_global.nest_real != 0)
-        return;
-    if(tg_int_global.en_trunk_counter != 0)
-        tg_int_global.en_trunk_counter--;
-    if(tg_int_global.en_trunk_counter == 0)
-    {
-        Int_ContactTrunk();
-        if(tg_int_global.en_asyn_signal_counter == 0)
-        {
-            g_bScheduleEnable = true;
-            if(g_ptEventRunning!= g_ptEventReady)
-            {
-                Int_CutAsynSignal();
-                __Djy_Schedule();
-            }
-        }
-    }else
-    {
-        Int_CutTrunk();
-    }
-    return;
-}
-
-//----查看总中断是否允许-----------------------------------------------------
-//功能：
-//参数：无
-//返回：允许返回true,禁止返回false
-//注意: 高级原子操作也会控制异步信号开关，本函数没有考虑其影响
-//-----------------------------------------------------------------------------
-bool_t Int_CheckTrunk(void)
-{
-    if(tg_int_global.en_trunk_counter == 0)
-        return true;
-    else
-        return false;
-}
-#endif
 //----保存当前状态并禁止异步信号------------------------------------------------
 //功能：本函数是int_restore_asyn_signal()的姊妹函数，调用本函数使禁止次数增加，
 //      调用一次int_restore_asyn_signal()使禁止次数减少。
@@ -275,14 +209,14 @@ bool_t Int_CheckAsynSignal(void)
 bool_t Int_SaveAsynLine(ufast_t ufl_line)
 {
     if( (ufl_line > CN_INT_LINE_LAST)
-            || (tg_int_lookup_table[ufl_line] == CN_LIMIT_UFAST)
+            || (tg_pIntLineTable[ufl_line] == NULL)
             || (tg_int_global.nest_real != 0) )
         return false;
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type == CN_REAL)
+    if(tg_pIntLineTable[ufl_line]->int_type == CN_REAL)
         return false;
     Int_CutLine(ufl_line);
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].en_counter!=CN_LIMIT_UCPU)//达上限后再加会回绕到0
-        tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].en_counter++;
+    if(tg_pIntLineTable[ufl_line]->en_counter!=CN_LIMIT_UCPU)//达上限后再加会回绕到0
+        tg_pIntLineTable[ufl_line]->en_counter++;
     //原算法是从0->1的过程中才进入，但如果在en_counter != 0的状态下
     //因故障使中断关闭，将使用户后续调用的en_counter起不到作用
     tg_int_global.enable_bitmap[ufl_line/CN_CPU_BITS]
@@ -300,13 +234,13 @@ bool_t Int_SaveAsynLine(ufast_t ufl_line)
 bool_t Int_SaveRealLine(ufast_t ufl_line)
 {
     if( (ufl_line > CN_INT_LINE_LAST)
-            || (tg_int_lookup_table[ufl_line] == CN_LIMIT_UFAST) )
+            || (tg_pIntLineTable[ufl_line] == NULL) )
         return false;
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type == CN_ASYN_SIGNAL)
+    if(tg_pIntLineTable[ufl_line]->int_type == CN_ASYN_SIGNAL)
         return false;
     Int_CutLine(ufl_line);
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].en_counter!=CN_LIMIT_UCPU)//达上限后再加会回绕到0
-        tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].en_counter++;
+    if(tg_pIntLineTable[ufl_line]->en_counter!=CN_LIMIT_UCPU)//达上限后再加会回绕到0
+        tg_pIntLineTable[ufl_line]->en_counter++;
     //原算法是从0->1的过程中才进入，但如果在en_counter != 0的状态下
     //因故障使中断关闭，将使用户后续调用的en_counter起不到作用
     tg_int_global.enable_bitmap[ufl_line/CN_CPU_BITS]
@@ -325,14 +259,14 @@ bool_t Int_SaveRealLine(ufast_t ufl_line)
 bool_t Int_RestoreAsynLine(ufast_t ufl_line)
 {
     if( (ufl_line > CN_INT_LINE_LAST)
-            || (tg_int_lookup_table[ufl_line] == CN_LIMIT_UFAST)
+            || (tg_pIntLineTable[ufl_line] == NULL)
             || (tg_int_global.nest_real != 0) )
         return false;
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type == CN_REAL)
+    if(tg_pIntLineTable[ufl_line]->int_type == CN_REAL)
         return false;
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].en_counter != 0)
-        tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].en_counter--;
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].en_counter==0)
+    if(tg_pIntLineTable[ufl_line]->en_counter != 0)
+        tg_pIntLineTable[ufl_line]->en_counter--;
+    if(tg_pIntLineTable[ufl_line]->en_counter==0)
     {
         tg_int_global.enable_bitmap[ufl_line/CN_CPU_BITS]
                 |= 1<<(ufl_line % CN_CPU_BITS);
@@ -352,13 +286,13 @@ bool_t Int_RestoreAsynLine(ufast_t ufl_line)
 bool_t Int_RestoreRealLine(ufast_t ufl_line)
 {
     if( (ufl_line > CN_INT_LINE_LAST)
-            || (tg_int_lookup_table[ufl_line] == CN_LIMIT_UFAST) )
+            || (tg_pIntLineTable[ufl_line] == NULL) )
         return false;
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type == CN_ASYN_SIGNAL)
+    if(tg_pIntLineTable[ufl_line]->int_type == CN_ASYN_SIGNAL)
         return false;
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].en_counter != 0)
-        tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].en_counter--;
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].en_counter==0)
+    if(tg_pIntLineTable[ufl_line]->en_counter != 0)
+        tg_pIntLineTable[ufl_line]->en_counter--;
+    if(tg_pIntLineTable[ufl_line]->en_counter==0)
     {
         tg_int_global.enable_bitmap[ufl_line/CN_CPU_BITS]
                 |= 1<<(ufl_line % CN_CPU_BITS);
@@ -376,13 +310,13 @@ bool_t Int_RestoreRealLine(ufast_t ufl_line)
 bool_t Int_DisableAsynLine(ufast_t ufl_line)
 {
     if( (ufl_line > CN_INT_LINE_LAST)
-            || (tg_int_lookup_table[ufl_line] == CN_LIMIT_UFAST)
+            || (tg_pIntLineTable[ufl_line] == NULL)
             || (tg_int_global.nest_real != 0) )
         return false;
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type == CN_REAL)
+    if(tg_pIntLineTable[ufl_line]->int_type == CN_REAL)
         return false;
     Int_CutLine(ufl_line);
-    tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].en_counter = 1;
+    tg_pIntLineTable[ufl_line]->en_counter = 1;
     tg_int_global.enable_bitmap[ufl_line/CN_CPU_BITS]
                 &= ~(1<<(ufl_line % CN_CPU_BITS));
     return true;
@@ -397,12 +331,12 @@ bool_t Int_DisableAsynLine(ufast_t ufl_line)
 bool_t Int_DisableRealLine(ufast_t ufl_line)
 {
     if( (ufl_line > CN_INT_LINE_LAST)
-            || (tg_int_lookup_table[ufl_line] == CN_LIMIT_UFAST) )
+            || (tg_pIntLineTable[ufl_line] == NULL) )
         return false;
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type == CN_ASYN_SIGNAL)
+    if(tg_pIntLineTable[ufl_line]->int_type == CN_ASYN_SIGNAL)
         return false;
     Int_CutLine(ufl_line);
-    tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].en_counter = 1;
+    tg_pIntLineTable[ufl_line]->en_counter = 1;
     tg_int_global.enable_bitmap[ufl_line/CN_CPU_BITS]
                 &= ~(1<<(ufl_line % CN_CPU_BITS));
     return true;
@@ -417,12 +351,12 @@ bool_t Int_DisableRealLine(ufast_t ufl_line)
 bool_t Int_EnableAsynLine(ufast_t ufl_line)
 {
     if( (ufl_line > CN_INT_LINE_LAST)
-            || (tg_int_lookup_table[ufl_line] == CN_LIMIT_UFAST)
+            || (tg_pIntLineTable[ufl_line] == NULL)
             || (tg_int_global.nest_real != 0) )
         return false;
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type == CN_REAL)
+    if(tg_pIntLineTable[ufl_line]->int_type == CN_REAL)
         return false;
-    tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].en_counter = 0;
+    tg_pIntLineTable[ufl_line]->en_counter = 0;
     tg_int_global.enable_bitmap[ufl_line/CN_CPU_BITS]
                 |= 1<<(ufl_line % CN_CPU_BITS);
     Int_ContactLine(ufl_line);
@@ -438,12 +372,12 @@ bool_t Int_EnableAsynLine(ufast_t ufl_line)
 bool_t Int_EnableRealLine(ufast_t ufl_line)
 {
     if( (ufl_line > CN_INT_LINE_LAST)
-            || (tg_int_lookup_table[ufl_line] == CN_LIMIT_UFAST) )
+            || (tg_pIntLineTable[ufl_line] == NULL) )
         return false;
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type == CN_ASYN_SIGNAL)
+    if(tg_pIntLineTable[ufl_line]->int_type == CN_ASYN_SIGNAL)
         return false;
 
-    tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].en_counter = 0;
+    tg_pIntLineTable[ufl_line]->en_counter = 0;
     tg_int_global.enable_bitmap[ufl_line/CN_CPU_BITS]
                 |= 1<<(ufl_line % CN_CPU_BITS);
     Int_ContactLine(ufl_line);
@@ -458,9 +392,9 @@ bool_t Int_EnableRealLine(ufast_t ufl_line)
 bool_t Int_CheckLine(ufast_t ufl_line)
 {
     if( (ufl_line > CN_INT_LINE_LAST)
-            || (tg_int_lookup_table[ufl_line] == CN_LIMIT_UFAST) )
+            || (tg_pIntLineTable[ufl_line] == NULL) )
         return false;
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].en_counter == 0)
+    if(tg_pIntLineTable[ufl_line]->en_counter == 0)
         return true;
     else
         return false;
@@ -470,20 +404,19 @@ bool_t Int_CheckLine(ufast_t ufl_line)
 //功能: 设置某中断线的应答方式
 //参数：ufl_line，欲设置的中断线
 //      clear_type, 应答方式，以下三者之一:
-//          CN_INT_CLEAR_USER    系统不应答，由用户在ISR中应答，默认状态
-//          CN_INT_CLEAR_PRE     调用ISR之前应答
-//          CN_INT_CLEAR_POST    调用ISR返回之后、中断返回前应答
+//          CN_INT_CLEAR_AUTO    调用ISR之前应答，默认方式
+//          CN_INT_CLEAR_USER    系统不应答，由用户在ISR中应答
 //返回: true=成功，false=失败，该中断线被设为实时中断，固定为cn_int_clear_user
 //-----------------------------------------------------------------------------
 bool_t Int_SetClearType(ufast_t ufl_line,ufast_t clear_type)
 {
     if( (ufl_line > CN_INT_LINE_LAST)
-            || (tg_int_lookup_table[ufl_line] == CN_LIMIT_UFAST) )
+            || (tg_pIntLineTable[ufl_line] == NULL) )
         return false;
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type == CN_REAL)
+    if(tg_pIntLineTable[ufl_line]->int_type == CN_REAL)
         return false;
     else
-        tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].clear_type = clear_type;
+        tg_pIntLineTable[ufl_line]->clear_type = clear_type;
     return true;
 }
 
@@ -493,12 +426,23 @@ bool_t Int_SetClearType(ufast_t ufl_line,ufast_t clear_type)
 //      isr，中断响应函数，由用户提供，原型：void isr(ufast_t)
 //返回：无
 //-----------------------------------------------------------------------------
-void Int_IsrConnect(ufast_t ufl_line, u32 (*isr)(ufast_t))
+void Int_IsrConnect(ufast_t ufl_line, u32 (*isr)(ptu32_t))
 {
     if( (ufl_line > CN_INT_LINE_LAST)
-            || (tg_int_lookup_table[ufl_line] == CN_LIMIT_UFAST) )
+            || (tg_pIntLineTable[ufl_line] == NULL) )
         return;
-    tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].ISR = isr;
+    tg_pIntLineTable[ufl_line]->ISR = isr;
+    return;
+}
+
+
+void Int_SetIsrPara(ufast_t ufl_line,ptu32_t para)
+{
+
+    if( (ufl_line > CN_INT_LINE_LAST)
+            || (tg_pIntLineTable[ufl_line] == NULL) )
+        return;
+    tg_pIntLineTable[ufl_line]->para = para;
     return;
 }
 
@@ -512,11 +456,11 @@ void Int_IsrConnect(ufast_t ufl_line, u32 (*isr)(ufast_t))
 bool_t Int_EvttConnect(ufast_t ufl_line,uint16_t my_evtt_id)
 {
     if( (ufl_line > CN_INT_LINE_LAST)
-            || (tg_int_lookup_table[ufl_line] == CN_LIMIT_UFAST) )
+            || (tg_pIntLineTable[ufl_line] == NULL) )
         return false;
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type != CN_ASYN_SIGNAL)
+    if(tg_pIntLineTable[ufl_line]->int_type != CN_ASYN_SIGNAL)
         return false;
-    tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].my_evtt_id = my_evtt_id;
+    tg_pIntLineTable[ufl_line]->my_evtt_id = my_evtt_id;
     return true;
 }
 
@@ -528,9 +472,9 @@ bool_t Int_EvttConnect(ufast_t ufl_line,uint16_t my_evtt_id)
 void Int_IsrDisConnect(ufast_t ufl_line)
 {
     if( (ufl_line > CN_INT_LINE_LAST)
-            || (tg_int_lookup_table[ufl_line] == CN_LIMIT_UFAST) )
+            || (tg_pIntLineTable[ufl_line] == NULL) )
         return;
-    tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].ISR = NULL;
+    tg_pIntLineTable[ufl_line]->ISR = NULL;
     return;
 }
 
@@ -542,9 +486,9 @@ void Int_IsrDisConnect(ufast_t ufl_line)
 void Int_EvttDisConnect(ufast_t ufl_line)
 {
     if( (ufl_line > CN_INT_LINE_LAST)
-            || (tg_int_lookup_table[ufl_line] == CN_LIMIT_UFAST) )
+            || (tg_pIntLineTable[ufl_line] == NULL) )
         return;
-    tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].my_evtt_id = CN_EVTT_ID_INVALID;
+    tg_pIntLineTable[ufl_line]->my_evtt_id = CN_EVTT_ID_INVALID;
     return;
 }
 
@@ -566,7 +510,7 @@ void Int_EvttDisConnect(ufast_t ufl_line)
 bool_t Int_AsynSignalSync(ufast_t ufl_line)
 {
     if( (ufl_line > CN_INT_LINE_LAST)
-            || (tg_int_lookup_table[ufl_line] == CN_LIMIT_UFAST) )
+            || (tg_pIntLineTable[ufl_line] == NULL) )
         return false;
     if( !Djy_QuerySch())
     {   //禁止调度，不能进入异步信号同步状态。
@@ -575,8 +519,8 @@ bool_t Int_AsynSignalSync(ufast_t ufl_line)
     }
     Int_SaveAsynSignal();   //在操作就绪队列期间不能发生中断
     //实时中断不能设置同步，一个中断只接受一个同步事件
-    if((tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type == CN_REAL)
-            || (tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].sync_event != NULL))
+    if((tg_pIntLineTable[ufl_line]->int_type == CN_REAL)
+            || (tg_pIntLineTable[ufl_line]->sync_event != NULL))
     {
         Int_RestoreAsynSignal();
         return false; //实时中断或已经有同步事件
@@ -593,7 +537,7 @@ bool_t Int_AsynSignalSync(ufast_t ufl_line)
         g_ptEventRunning->next = NULL;
         g_ptEventRunning->previous = NULL;
         g_ptEventRunning->event_status = CN_STS_WAIT_ASYN_SIGNAL;
-        tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].sync_event = g_ptEventRunning;
+        tg_pIntLineTable[ufl_line]->sync_event = g_ptEventRunning;
     }
     Int_EnableAsynLine(ufl_line);
     Int_RestoreAsynSignal();      //调用本函数将引发线程切换，正在处理的事件被
@@ -602,6 +546,56 @@ bool_t Int_AsynSignalSync(ufast_t ufl_line)
     g_ptEventRunning->wakeup_from = CN_STS_WAIT_ASYN_SIGNAL;
     g_ptEventRunning->event_status = CN_STS_EVENT_READY;
     return true;
+}
+
+//----注册中断到中断模块----------------------------------------------------------
+//功能: 注册中断到操作系统的中断模块，动态分配结构为struct IntLine，并初始化它，赋值对应
+//      的中断位图tg_pIntLineTable[ufl_line ]
+//参数: ufl_line,等待的目标中断线
+//返回: false = 该中断已经被其他线程等待，直接返回。
+//      true = 成功同步，并在该中断发生后返回。
+//说明：必须先注册成功，调用其它中断API才有效
+//-----------------------------------------------------------------------------
+bool_t Int_Register(ufast_t ufl_line)
+{
+	struct IntLine *pIntLine;
+    if(ufl_line > CN_INT_LINE_LAST)
+        return false;
+    if (tg_pIntLineTable[ufl_line] != NULL) //说明已经注册
+	 return true;
+
+    pIntLine = (struct IntLine*)malloc(sizeof(struct IntLine));
+    if(NULL == pIntLine)
+    {
+    	return false;
+    }
+	memset(pIntLine,0x00,sizeof(struct IntLine));
+	pIntLine->para = ufl_line;
+	pIntLine->en_counter = 1;               //禁止中断,计数为1
+	pIntLine->int_type = CN_ASYN_SIGNAL;    //设为异步信号
+	pIntLine->clear_type = CN_INT_CLEAR_AUTO;//设为调用ISR前应答
+	//所有中断函数指针指向空函数
+	pIntLine->ISR = (u32 (*)(ufast_t))NULL_func;
+	pIntLine->sync_event = NULL;                //同步事件空
+	pIntLine->my_evtt_id = CN_EVTT_ID_INVALID;  //不弹出事件
+
+	tg_pIntLineTable[ufl_line] = pIntLine;
+
+	return true;
+}
+
+//原则上，中断函数一经注册，便不能注销，此处只是与Int_Registerd函数成对出现
+bool_t Int_UnRegister(ufast_t ufl_line)
+{
+	struct IntLine *pIntLine;
+    if(ufl_line > CN_INT_LINE_LAST)
+        return false;
+    if (tg_pIntLineTable[ufl_line] == NULL) //
+	 return false;
+
+    pIntLine = tg_pIntLineTable[ufl_line];
+    free(pIntLine);
+	return true;
 }
 //特注: 不提供周期性中断同步功能，因为djyos不提供无条件休眠或者挂起的功能，已周
 //      期性时钟中断为例，一次时钟中断把线程触发进入ready后，到下次时钟中断到来

@@ -63,7 +63,6 @@
 //   新版本号: V1.0.0
 //   修改说明: 原始版本
 //------------------------------------------------------
-#include "config-prj.h"
 #include "stdint.h"
 #include "stddef.h"
 #include "stdio.h"
@@ -72,11 +71,12 @@
 #include "lock.h"
 #include "pool.h"
 #include "djyos.h"
-#include "rsc.h"
+#include "object.h"
 #include "systime.h"
+#include "core_config.h"
 
-static struct tagRscNode *pg_semaphore_rsc=NULL;
-static struct tagRscNode  *pg_mutex_rsc=NULL;
+static struct Object *pg_semaphore_rsc=NULL;
+static struct Object  *pg_mutex_rsc=NULL;
 //说明： gc_u32CfgLockLimit 是用户配置的，由于用户并不知道操作系统需要用多少信号量，
 //      所以操作系统并不占用 gc_u32CfgLockLimit 指标，用户使用的信号量从
 //      tg_semp_pool定义的内存池中分配，操作系统使用的信号量自己定义，两不
@@ -84,15 +84,15 @@ static struct tagRscNode  *pg_mutex_rsc=NULL;
 //      内存泄漏，而且相关操作系统资源也将失去信号量保护，后果不可预料
 //定义信号量结构初始内存池
 static union lock_MCB *g_ptLockMemBlock;
-struct tagMemCellPool *g_ptLockPool;  //信号量结构内存池头指针
+struct MemCellPool *g_ptLockPool;  //信号量结构内存池头指针
 
 //这是在rsc模块中定义的，专供lock模块使用的一个函数
-struct  tagRscNode * __Lock_RscAddLockTree(struct  tagRscNode *node,
-                                u32 size,char *name);
+struct Object *__Lock_RscAddLockTree(struct Object *Obj,
+                                u16 Size, const char *Name);
 
-extern void __Djy_EventReady(struct  tagEventECB *event_ready);
-extern void __Djy_CutReadyEvent(struct tagEventECB *event);
-extern void __Djy_ResumeDelay(struct  tagEventECB *delay_event);
+extern void __Djy_EventReady(struct EventECB *event_ready);
+extern void __Djy_CutReadyEvent(struct EventECB *event);
+extern void __Djy_ResumeDelay(struct EventECB *delay_event);
 extern void ___Djy_AddToDelay(u32 u32l_uS);
 
 //----初始化锁模块模块step1----------------------------------------------------
@@ -105,11 +105,11 @@ extern void ___Djy_AddToDelay(u32 u32l_uS);
 //-----------------------------------------------------------------------------
 ptu32_t ModuleInstall_Lock1(ptu32_t para)
 {
-    static struct tagRscNode semp_root;
-    static struct tagRscNode mutex_root;
+    static struct Object semp_root;
+    static struct Object mutex_root;
     para = para;        //消除编译器告警
-    pg_semaphore_rsc = __Lock_RscAddLockTree(&semp_root,sizeof(struct tagRscNode),"semaphore");
-    pg_mutex_rsc = __Lock_RscAddLockTree(&mutex_root,sizeof(struct tagRscNode),"mutex");
+    pg_semaphore_rsc = __Lock_RscAddLockTree(&semp_root,sizeof(struct Object),"semaphore");
+    pg_mutex_rsc = __Lock_RscAddLockTree(&mutex_root,sizeof(struct Object),"mutex");
     return 1;
 }
 
@@ -121,7 +121,7 @@ ptu32_t ModuleInstall_Lock1(ptu32_t para)
 //-----------------------------------------------------------------------------
 ptu32_t ModuleInstall_Lock2(ptu32_t para)
 {
-    static struct tagMemCellPool lock_pool;
+    static struct MemCellPool lock_pool;
     g_ptLockMemBlock = M_Malloc(gc_u32CfgLockLimit* sizeof(union lock_MCB),0);
     if(g_ptLockMemBlock == NULL)
         return 0;
@@ -144,10 +144,10 @@ ptu32_t ModuleInstall_Lock2(ptu32_t para)
 //          或 CN_SEMP_BLOCK_PRIO
 //返回：新建立的信号量指针
 //-----------------------------------------------------------------------------
-struct tagSemaphoreLCB *Lock_SempCreate(u32 lamps_limit,u32 init_lamp,
-                                        u32 sync_order,char *name)
+struct SemaphoreLCB *Lock_SempCreate(u32 lamps_limit,u32 init_lamp,
+                                        u32 sync_order,const char *name)
 {
-    struct tagSemaphoreLCB *semp;
+    struct SemaphoreLCB *semp;
     if(init_lamp > lamps_limit)
         return NULL;
     semp = Mb_Malloc(g_ptLockPool,0);
@@ -158,8 +158,8 @@ struct tagSemaphoreLCB *Lock_SempCreate(u32 lamps_limit,u32 init_lamp,
     semp->lamp_counter = init_lamp;
     semp->semp_sync = NULL;
     //把新节点挂到信号量根节点下
-    Rsc_AddSon(pg_semaphore_rsc,&semp->node,
-                        sizeof(struct tagSemaphoreLCB),RSC_SEMP,name);
+    OBJ_AddChild(pg_semaphore_rsc,&semp->node,
+                        sizeof(struct SemaphoreLCB),RSC_SEMP,name);
     return semp;
 }
 
@@ -174,8 +174,8 @@ struct tagSemaphoreLCB *Lock_SempCreate(u32 lamps_limit,u32 init_lamp,
 //      name，信号量的名字，所指向的字符串内存区不能是局部变量，可以是空
 //返回：新建立的信号量指针
 //-----------------------------------------------------------------------------
-struct tagSemaphoreLCB *Lock_SempCreate_s( struct tagSemaphoreLCB *semp,
-                       u32 lamps_limit,u32 init_lamp,u32 sync_order,char *name)
+struct SemaphoreLCB *Lock_SempCreate_s( struct SemaphoreLCB *semp,
+                       u32 lamps_limit,u32 init_lamp,u32 sync_order,const char *name)
 {
     if(semp == NULL)
         return NULL;
@@ -184,8 +184,8 @@ struct tagSemaphoreLCB *Lock_SempCreate_s( struct tagSemaphoreLCB *semp,
     semp->lamp_counter = init_lamp;
     semp->semp_sync = NULL;
     //把新节点挂到信号量根节点下
-    Rsc_AddSon(pg_semaphore_rsc,&semp->node,
-                        sizeof(struct tagSemaphoreLCB),RSC_SEMP,name);
+    OBJ_AddChild(pg_semaphore_rsc,&semp->node,
+                        sizeof(struct SemaphoreLCB),RSC_SEMP,name);
 
     return semp;
 }
@@ -195,9 +195,9 @@ struct tagSemaphoreLCB *Lock_SempCreate_s( struct tagSemaphoreLCB *semp,
 //参数：semp,信号量指针
 //返回：无
 //-----------------------------------------------------------------------------
-void Lock_SempPost(struct tagSemaphoreLCB *semp)
+void Lock_SempPost(struct SemaphoreLCB *semp)
 {
-    struct  tagEventECB *event;
+    struct EventECB *event;
 
     if(semp == NULL)
         return;
@@ -245,9 +245,9 @@ void Lock_SempPost(struct tagSemaphoreLCB *semp)
 //      struct pan_device的semp成员设为NULL。
 //      false=没有取得信号(超时返回或其他原因)
 //-----------------------------------------------------------------------------
-bool_t Lock_SempPend(struct tagSemaphoreLCB *semp,u32 timeout)
+bool_t Lock_SempPend(struct SemaphoreLCB *semp,u32 timeout)
 {
-    struct  tagEventECB *event;
+    struct EventECB *event;
     bool_t lamp,sch;
 
     if(semp == NULL)
@@ -345,7 +345,7 @@ bool_t Lock_SempPend(struct tagSemaphoreLCB *semp,u32 timeout)
 //参数：semp，被删除的信号量
 //返回：无
 //-----------------------------------------------------------------------------
-bool_t Lock_SempDelete_s(struct tagSemaphoreLCB *semp)
+bool_t Lock_SempDelete_s(struct SemaphoreLCB *semp)
 {
     bool_t result;
     if(semp == NULL)    //参数错误
@@ -353,7 +353,7 @@ bool_t Lock_SempDelete_s(struct tagSemaphoreLCB *semp)
     Int_SaveAsynSignal();
     if(semp->semp_sync == NULL)     //没有事件在等待信号灯
     {
-        Rsc_DelNode(&semp->node);  //删除信号量结点
+        OBJ_Del(&semp->node);  //删除信号量结点
         result = true;
     }else
         result = false;
@@ -366,7 +366,7 @@ bool_t Lock_SempDelete_s(struct tagSemaphoreLCB *semp)
 //参数：semp，被删除的信号量
 //返回：无
 //-----------------------------------------------------------------------------
-bool_t Lock_SempDelete(struct tagSemaphoreLCB *semp)
+bool_t Lock_SempDelete(struct SemaphoreLCB *semp)
 {
     bool_t result;
     if(semp == NULL)                //参数错误
@@ -374,7 +374,7 @@ bool_t Lock_SempDelete(struct tagSemaphoreLCB *semp)
     Int_SaveAsynSignal();
     if(semp->semp_sync == NULL)     //没有事件在等待信号灯
     {
-        Rsc_DelNode(&semp->node);  //删除信号量结点
+        OBJ_Del(&semp->node);  //删除信号量结点
         Mb_Free(g_ptLockPool,semp); //释放内存
         result = true;
     }else
@@ -388,7 +388,7 @@ bool_t Lock_SempDelete(struct tagSemaphoreLCB *semp)
 //参数：semp，被查询的信号量
 //返回：信号灯总数
 //-----------------------------------------------------------------------------
-u32 Lock_SempQueryCapacital(struct tagSemaphoreLCB *semp)
+u32 Lock_SempQueryCapacital(struct SemaphoreLCB *semp)
 {
     u32 result;
     if(semp == NULL)            //参数错误
@@ -412,7 +412,7 @@ u32 Lock_SempQueryCapacital(struct tagSemaphoreLCB *semp)
 //参数：semp，被查询的信号量
 //返回：信号灯总数
 //-----------------------------------------------------------------------------
-u32 Lock_SempQueryFree(struct tagSemaphoreLCB *semp)
+u32 Lock_SempQueryFree(struct SemaphoreLCB *semp)
 {
     u32 result;
     if(semp == NULL)            //参数错误
@@ -436,7 +436,7 @@ u32 Lock_SempQueryFree(struct tagSemaphoreLCB *semp)
 //参数：mutex，被查询的互斥量
 //返回：true = 有，false = 没有
 //-----------------------------------------------------------------------------
-bool_t Lock_SempCheckBlock(struct tagSemaphoreLCB *Semp)
+bool_t Lock_SempCheckBlock(struct SemaphoreLCB *Semp)
 {
     if(Semp == NULL)    //参数错误
         return false;
@@ -454,7 +454,7 @@ bool_t Lock_SempCheckBlock(struct tagSemaphoreLCB *Semp)
 //      order: CN_SEMP_BLOCK_PRIO=优先级排队，sort_time=先后顺序排队
 //返回: 无
 //-----------------------------------------------------------------------------
-void Lock_SempSetSyncSort(struct tagSemaphoreLCB *semp,u32 order)
+void Lock_SempSetSyncSort(struct SemaphoreLCB *semp,u32 order)
 {
     if(NULL == semp)
         return;
@@ -467,9 +467,9 @@ void Lock_SempSetSyncSort(struct tagSemaphoreLCB *semp,u32 order)
 //参数：name，互斥量的名字，所指向的字符串内存区不能是局部变量，可以是空
 //返回：新建立的互斥量指针
 //-----------------------------------------------------------------------------
-struct tagMutexLCB *Lock_MutexCreate(char *name)
+struct MutexLCB *Lock_MutexCreate(const char *name)
 {
-    struct tagMutexLCB *mutex;
+    struct MutexLCB *mutex;
     mutex = Mb_Malloc(g_ptLockPool,0);
     if(mutex == NULL)
         return NULL;
@@ -478,8 +478,8 @@ struct tagMutexLCB *Lock_MutexCreate(char *name)
     mutex->prio_bak = CN_PRIO_INVALID;
     mutex->owner = NULL;
     //把新节点挂到信号量根节点下
-    Rsc_AddSon(pg_mutex_rsc,&mutex->node,
-                        sizeof(struct tagMutexLCB),RSC_MUTEX,name);
+    OBJ_AddChild(pg_mutex_rsc,&mutex->node,
+                        sizeof(struct MutexLCB),RSC_MUTEX,name);
     return mutex;
 }
 
@@ -492,7 +492,7 @@ struct tagMutexLCB *Lock_MutexCreate(char *name)
 //      name，互斥量的名字，所指向的字符串内存区不能是局部变量，可以是空
 //返回：新建立的互斥量指针
 //-----------------------------------------------------------------------------
-struct tagMutexLCB *Lock_MutexCreate_s( struct tagMutexLCB *mutex,char *name)
+struct MutexLCB *Lock_MutexCreate_s( struct MutexLCB *mutex,const char *name)
 {
     if(mutex == NULL)
         return NULL;
@@ -501,8 +501,8 @@ struct tagMutexLCB *Lock_MutexCreate_s( struct tagMutexLCB *mutex,char *name)
     mutex->prio_bak = CN_PRIO_INVALID;
     mutex->owner = NULL;
     //把新节点挂到信号量根节点下
-    Rsc_AddSon(pg_mutex_rsc,&mutex->node,
-                        sizeof(struct tagMutexLCB),RSC_MUTEX,name);
+    OBJ_AddChild(pg_mutex_rsc,&mutex->node,
+                        sizeof(struct MutexLCB),RSC_MUTEX,name);
     return mutex;
 }
 
@@ -511,9 +511,9 @@ struct tagMutexLCB *Lock_MutexCreate_s( struct tagMutexLCB *mutex,char *name)
 //参数：mutex,互斥量指针
 //返回：无
 //-----------------------------------------------------------------------------
-void Lock_MutexPost(struct tagMutexLCB *mutex)
+void Lock_MutexPost(struct MutexLCB *mutex)
 {
-    struct  tagEventECB *event;
+    struct EventECB *event;
 
     if(mutex == NULL)
         return;
@@ -598,9 +598,9 @@ void Lock_MutexPost(struct tagMutexLCB *mutex)
 //      struct pan_device的semp成员设为NULL。
 //      false=没有取得信号(超时返回或其他原因)
 //-----------------------------------------------------------------------------
-bool_t Lock_MutexPend(struct tagMutexLCB *mutex,u32 timeout)
+bool_t Lock_MutexPend(struct MutexLCB *mutex,u32 timeout)
 {
-    struct  tagEventECB *pl_ecb;
+    struct EventECB *pl_ecb;
     bool_t lamp,sch;
 
     if(mutex == NULL)
@@ -728,7 +728,7 @@ bool_t Lock_MutexPend(struct tagMutexLCB *mutex,u32 timeout)
 //参数：mutex，被删除的互斥量
 //返回：true=成功删除，false=失败
 //-----------------------------------------------------------------------------
-bool_t Lock_MutexDelete_s(struct tagMutexLCB *mutex)
+bool_t Lock_MutexDelete_s(struct MutexLCB *mutex)
 {
     bool_t result;
     if(mutex == NULL)    //参数错误
@@ -736,7 +736,7 @@ bool_t Lock_MutexDelete_s(struct tagMutexLCB *mutex)
     Int_SaveAsynSignal();
     if(mutex->mutex_sync == NULL)     //没有事件在等待互斥量
     {
-        Rsc_DelNode(&mutex->node);  //删除互斥量结点
+        OBJ_Del(&mutex->node);  //删除互斥量结点
         result = true;
     }else
         result = false;
@@ -749,7 +749,7 @@ bool_t Lock_MutexDelete_s(struct tagMutexLCB *mutex)
 //参数：mutex，被删除的互斥量
 //返回：无
 //-----------------------------------------------------------------------------
-bool_t Lock_MutexDelete(struct tagMutexLCB *mutex)
+bool_t Lock_MutexDelete(struct MutexLCB *mutex)
 {
     bool_t result;
     if(mutex == NULL)    //参数错误
@@ -757,7 +757,7 @@ bool_t Lock_MutexDelete(struct tagMutexLCB *mutex)
     Int_SaveAsynSignal();
     if(mutex->mutex_sync == NULL)     //没有事件在等待互斥量
     {
-        Rsc_DelNode(&mutex->node);  //删除互斥量结点
+        OBJ_Del(&mutex->node);  //删除互斥量结点
         Mb_Free(g_ptLockPool,mutex); //释放内存
         result = true;
     }else
@@ -771,7 +771,7 @@ bool_t Lock_MutexDelete(struct tagMutexLCB *mutex)
 //参数：mutex，被查询的互斥量
 //返回：true = 可用，false = 不可用
 //-----------------------------------------------------------------------------
-bool_t Lock_MutexQuery(struct tagMutexLCB *mutex)
+bool_t Lock_MutexQuery(struct MutexLCB *mutex)
 {
     if(mutex == NULL)    //参数错误
         return false;
@@ -783,7 +783,7 @@ bool_t Lock_MutexQuery(struct tagMutexLCB *mutex)
 //参数：mutex，被查询的互斥量
 //返回：true = 有，false = 没有
 //-----------------------------------------------------------------------------
-bool_t Lock_MutexCheckBlock(struct tagMutexLCB *mutex)
+bool_t Lock_MutexCheckBlock(struct MutexLCB *mutex)
 {
     if(mutex == NULL)    //参数错误
         return false;
@@ -798,7 +798,7 @@ bool_t Lock_MutexCheckBlock(struct tagMutexLCB *mutex)
 //参数：mutex，被查询的互斥量
 //返回：拥有者的事件ID
 //-----------------------------------------------------------------------------
-u16 Lock_MutexGetOwner(struct tagMutexLCB *mutex)
+u16 Lock_MutexGetOwner(struct MutexLCB *mutex)
 {
     if(mutex == NULL)    //参数错误
         return CN_EVENT_ID_INVALID;
@@ -810,20 +810,21 @@ u16 Lock_MutexGetOwner(struct tagMutexLCB *mutex)
 
 void __Lock_ShowLock(void)
 {
-    struct tagRscNode *current_node,*lock;
-    struct tagEventECB *pl_ecb;
-    current_node = Rsc_SearchTree("semaphore");
+    struct Object *current_node,*lock;
+    struct EventECB *pl_ecb;
+    char *Name;
+    current_node = OBJ_SearchTree("semaphore");
     lock = current_node;
     printf("信号量 semaphore 列表：\r\n");
     printf("类型  信号数上限  可用信号数  阻塞事件  名字\r\n");
     while(1)
     {
-        current_node = Rsc_TraveScion(lock,current_node);
+        current_node = OBJ_TraveScion(lock,current_node);
         if(current_node == NULL)
         {
             break;
         }
-        if(((struct tagSemaphoreLCB *)current_node)->sync_order
+        if(((struct SemaphoreLCB *)current_node)->sync_order
                                         == CN_SEMP_BLOCK_PRIO)
         {
             printf("prio  ");
@@ -833,46 +834,48 @@ void __Lock_ShowLock(void)
             printf("fifo  ");
         }
         printf("%8d    %8d    ",
-            ((struct tagSemaphoreLCB *)current_node)->lamps_limit,
-            ((struct tagSemaphoreLCB *)current_node)->lamp_counter);
-        pl_ecb = ((struct tagSemaphoreLCB *)current_node)->semp_sync;
+            ((struct SemaphoreLCB *)current_node)->lamps_limit,
+            ((struct SemaphoreLCB *)current_node)->lamp_counter);
+        pl_ecb = ((struct SemaphoreLCB *)current_node)->semp_sync;
         if(pl_ecb)
             printf("%05d     ",pl_ecb->event_id);
         else
             printf("无        ");
-        if(current_node->name != NULL)
+
+        Name = OBJ_Name(current_node);
+        if(Name != NULL)
         {
-            printf("%s\r\n", current_node->name);
+            printf("%s\r\n", Name);
         }else
         {
             printf("无名信号量\r\n");
         }
     }
 
-    current_node = Rsc_SearchTree("mutex");
+    current_node = OBJ_SearchTree("mutex");
     lock = current_node;
     printf("\n\r互斥量 mutex 列表：\r\n");
     printf("状态  拥有者  原优先级  现优先级  阻塞事件  名字\r\n");
     while(1)
     {
-        current_node = Rsc_TraveScion(lock,current_node);
+        current_node = OBJ_TraveScion(lock,current_node);
         if(current_node == NULL)
         {
             break;
         }
-        if(((struct tagMutexLCB *)current_node)->enable == 0)
+        if(((struct MutexLCB *)current_node)->enable == 0)
         {
             printf("可用                              ");
         }
         else
         {
             printf("占用  ");
-            pl_ecb = ((struct tagMutexLCB *)current_node)->owner;
-            if(((struct tagMutexLCB *)current_node)->prio_bak
+            pl_ecb = ((struct MutexLCB *)current_node)->owner;
+            if(((struct MutexLCB *)current_node)->prio_bak
                                     != CN_PRIO_INVALID)
             {
                 printf("%05d   %03d       ",pl_ecb->event_id,
-                        ((struct tagMutexLCB *)current_node)->prio_bak);
+                        ((struct MutexLCB *)current_node)->prio_bak);
                 printf("%03d       ",pl_ecb->prio);
             }
             else
@@ -881,14 +884,16 @@ void __Lock_ShowLock(void)
             }
         }
 
-        pl_ecb = ((struct tagMutexLCB *)current_node)->mutex_sync;
+        pl_ecb = ((struct MutexLCB *)current_node)->mutex_sync;
         if(pl_ecb)
             printf("%05d     ",pl_ecb->event_id);
         else
             printf("无        ");
-        if(current_node->name != NULL)
+
+        Name = OBJ_Name(current_node);
+        if(Name != NULL)
         {
-            printf("%s\r\n", current_node->name);
+            printf("%s\r\n", Name);
         }else
         {
             printf("无名互斥量\r\n");

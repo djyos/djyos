@@ -51,7 +51,7 @@
 
 #ifndef __IICBUS_H__
 #define __IICBUS_H__
-#include "rsc.h"
+#include "object.h"
 #include "lock.h"
 //IIC 底层硬件驱动接口
 // =============================================================================
@@ -73,7 +73,7 @@
 // =============================================================================
 typedef bool_t (*WriteStartFunc)(ptu32_t  SpecificFlag,u8 DevAddr,\
                                 u32 MemAddr,u8 MenAddrLen, u32 Length,\
-                                struct tagSemaphoreLCB *IIC_BusSemp);
+                                struct SemaphoreLCB *IIC_BusSemp);
 // =============================================================================
 // 功能: 启动读时序，启动读时序的过程为：器件地址（写）、存储地址（写）、器件地址（读）
 //       当器件地址（读）完成时，需打开中断，重新配置寄存器为接收模式，之后将会发生
@@ -92,7 +92,7 @@ typedef bool_t (*WriteStartFunc)(ptu32_t  SpecificFlag,u8 DevAddr,\
 // =============================================================================
 typedef bool_t (*ReadStartFunc)(ptu32_t  SpecificFlag,u8 DevAddr,\
                                 u32 MemAddr,u8 MemAddrLen, u32 Length,\
-                                struct tagSemaphoreLCB *IIC_BusSemp);
+                                struct SemaphoreLCB *IIC_BusSemp);
 // =============================================================================
 // 功能: 结束本次读写回调函数，区分读写的不同停止时序，当属于发送时，则直接停止时序，
 //      若为读，则先停止回复ACK，再停止。
@@ -124,7 +124,7 @@ typedef bool_t (*WriteReadPoll)(ptu32_t  SpecificFlag,u8 DevAddr,u32 MemAddr,\
                                 u8 MenAddrLen,u8* Buf, u32 Length,u8 WrRdFlag);
 
 //IIC初始化参数结构体
-struct tagIIC_Param
+struct IIC_Param
 {
     char                *BusName;                   //总线名称，如IIC1
     u8                  *IICBuf;                    //总线缓冲区指针
@@ -138,28 +138,29 @@ struct tagIIC_Param
 };
 
 //IIC总线器件结构体
-struct tagIIC_Device
+struct IIC_Device
 {
-    struct tagRscNode DevNode;
-    u8 DevAddr;                 //七位的器件地址
+    struct Object DevNode;
+
+    u8 DevAddr;                 //七位的器件地址,最低的0~2bit可能是器件内部地址。
     u8 BitOfMemAddrInDevAddr;   //器件地址中内部地址所占比特位数
     u8 BitOfMemAddr;            //器件内部地址寻址总bit数，包含了BitOfMemAddrInDevAddr
 };
 
 //IIC缓冲区结构体
-struct tagIICBuf
+struct IICBuf
 {
     u32    Offset;              //缓冲区指针,指向下一次读的位置
     u32    MaxLen;              //缓冲区最大长度,元素个数.
     u8     *pBuf;               //缓冲区指针,用户自己保证所开辟的缓冲区是否与设定
 };
 //IIC总线控制块结构体,本模块可见
- struct tagIIC_CB
+struct IIC_CB
 {
-    struct tagRscNode        IIC_BusNode;               //总线资源节点
-    struct tagIICBuf         IIC_Buf;                   //缓冲区,用于异步发送
-    struct tagSemaphoreLCB * IIC_BusSemp;               //IIC总线保护信号量
-    struct tagSemaphoreLCB * IIC_BufSemp;               //简易缓冲区保护信号量
+    struct Object        IIC_BusNode;               //总线资源节点
+    struct IICBuf         IIC_Buf;                   //缓冲区,用于异步发送
+    struct SemaphoreLCB * IIC_BusSemp;               //IIC总线保护信号量
+    struct SemaphoreLCB * IIC_BufSemp;               //简易缓冲区保护信号量
     u16                    ErrorPopEvtt;                //出错处理事件的类型
     u32                    Counter;                     //发送/接收计数器
     u8                    *pBuf;                        //发送/接收缓冲区指针
@@ -178,7 +179,7 @@ struct tagIICBuf
 #define CN_IIC_DMA_UNUSED            2  //禁止dma传输
 #define CN_IIC_SET_ERROR_POP_EVENT   3  //弹出错误事件
 #define CN_IIC_SET_POLL              4  //使用轮询方式发送接收
-#define CN_IIC_SET_UNPOLL            5  //使用中断方式发送接收
+#define CN_IIC_SET_INT            5  //使用中断方式发送接收
 #define CN_IIC_OS_USED               0x80
 
 //IIC读写标志
@@ -197,29 +198,30 @@ struct tagIICBuf
 
 
 //IIC模块API函数
-struct tagRscNode *ModuleInstall_IICBus(ptu32_t para);
+struct Object *ModuleInstall_IICBus(ptu32_t para);
 
-struct tagIIC_CB *IIC_BusAdd(struct tagIIC_Param *NewIICParam);
-struct tagIIC_CB *IIC_BusAdd_s(struct tagIIC_Param *NewIICParam,struct tagIIC_CB *NewIIC);
-bool_t IIC_BusDelete(struct tagIIC_CB *DelIIC);
-bool_t IIC_BusDelete_s(struct tagIIC_CB *DelIIC);
-struct tagIIC_CB *IIC_BusFind(char *BusName);
+struct IIC_CB *IIC_BusAdd(struct IIC_Param *NewIICParam);
+struct IIC_CB *IIC_BusAdd_s(struct IIC_CB *NewIIC,struct IIC_Param *NewIICParam);
+bool_t IIC_BusDelete(struct IIC_CB *DelIIC);
+bool_t IIC_BusDelete_s(struct IIC_CB *DelIIC);
+struct IIC_CB *IIC_BusFind(const char *BusName);
 
-struct tagIIC_Device *IIC_DevAdd(char *BusName , char *DevName, u8 DevAddr,
+struct IIC_Device *IIC_DevAdd(const char *BusName , const char *DevName, u8 DevAddr,
                                 u8 BitOfMaddrInDaddr, u8 BitOfMaddr);
-struct tagIIC_Device *IIC_DevAdd_s(char *BusName , char *DevName,
-                                struct tagIIC_Device *NewDev);
-bool_t IIC_DevDelete(struct tagIIC_Device *DelDev);
-bool_t IIC_DevDelete_s(struct tagIIC_Device *DelDev);
-struct tagIIC_Device *IIC_DevFind(char *DevName);
+struct IIC_Device *IIC_DevAdd_s(struct IIC_Device *NewDev,const char *BusName,
+                                   const char *DevName, u8 DevAddr,
+                                   u8 BitOfMaddrInDaddr, u8 BitOfMaddr);
+bool_t IIC_DevDelete(struct IIC_Device *DelDev);
+bool_t IIC_DevDelete_s(struct IIC_Device *DelDev);
+struct IIC_Device *IIC_DevFind(const char *DevName);
 
 
-s32  IIC_Write(struct tagIIC_Device *DelDev, u32 addr,u8 *buf,u32 len,
+s32  IIC_Write(struct IIC_Device *DelDev, u32 addr,u8 *buf,u32 len,
                 bool_t block_option,u32 timeout);
-s32  IIC_Read(struct tagIIC_Device *DelDev,u32 addr,u8 *buf,u32 len,u32 timeout);
-s32  IIC_PortRead( struct tagIIC_CB *IIC,u8 *buf,u32 len);
-s32  IIC_PortWrite(struct tagIIC_CB *IIC,u8 *buf,u32 len);
-s32  IIC_BusCtrl(struct tagIIC_Device *DelDev,u32 cmd,ptu32_t data1,ptu32_t data2);
-s32  IIC_ErrPop(struct tagIIC_CB *IIC, u32 ErrNo);
+s32  IIC_Read(struct IIC_Device *DelDev,u32 addr,u8 *buf,u32 len,u32 timeout);
+s32  IIC_PortRead( struct IIC_CB *IIC,u8 *buf,u32 len);
+s32  IIC_PortWrite(struct IIC_CB *IIC,u8 *buf,u32 len);
+s32  IIC_BusCtrl(struct IIC_Device *DelDev,u32 cmd,ptu32_t data1,ptu32_t data2);
+s32  IIC_ErrPop(struct IIC_CB *IIC, u32 ErrNo);
 
 #endif /* __IICBUS_H__ */

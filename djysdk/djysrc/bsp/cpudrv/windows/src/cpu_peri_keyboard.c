@@ -16,13 +16,14 @@
 //   新版本号: V1.0.0
 //   修改说明: 原始版本
 //------------------------------------------------------
+#include <windows.h>
+#include <tchar.h>
 #include "stdint.h"
+#include "Lcd_Touch_Key.h"
 #include "cpu_peri.h"
 #include "string.h"
 #include "keyboard.h"
 #include "cpu.h"
-#include <windows.h>
-#include <tchar.h>
 #include "cpu_peri_lcd_touch_mouse.h"
 
 TCHAR szKeyDriver[]  =_TEXT("仿真键盘");    // 标题栏文本
@@ -174,10 +175,9 @@ LRESULT CALLBACK WndProc_key(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 }
 
 //----键盘硬件扫描------------------------------------------------------------
-//功能: 共4个键,可读入复合键，最多2个键复合,key0=gpf0,
-//      key1=gpf2,key2=gpg3,key3=gpg11
-//参数: key,键值数组指针,可存放2个单键值
-//返回: 读到的键的个数0,1,2
+//功能: 读入模拟键盘上的按键，但不支持复合键
+//参数: 无
+//返回: 按下的键的键值，没考虑复合键
 //----------------------------------------------------------------------------
 u32 keyboard_scan(void)
 {
@@ -196,12 +196,11 @@ u32 keyboard_scan(void)
 //-----------------------------------------------------------------------------
 ptu32_t ModuleInstall_KeyBoardWindows(ptu32_t para)
 {
-    static struct tagKeyBoardPrivate windows_keyboard;
+    static struct KeyBoardPrivate windows_keyboard;
     key_hard_init();
     windows_keyboard.read_keyboard = keyboard_scan;
     Keyboard_InstallDevice("sim keyboard",&windows_keyboard);
     windows_keyboard.vtime_limit = para;
-    windows_keyboard.vtime_count = 0;
     windows_keyboard.key_bak = 0;
     windows_keyboard.key_now = 0;
     return 1;

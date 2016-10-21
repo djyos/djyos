@@ -80,7 +80,7 @@ extern "C" {
 
 
 #define stmpe811_opmode 1
-ptu32_t ModuleInstall_Touch_Stmpe811(ptu32_t para);
+ptu32_t ModuleInstall_Touch_Stmpe811(void);
 
 #ifdef __cplusplus
 }

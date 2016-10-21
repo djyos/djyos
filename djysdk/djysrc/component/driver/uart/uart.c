@@ -62,17 +62,17 @@
 #include "lock.h"
 #include "djyos.h"
 #include "multiplex.h"
-#include "uart.h"
+#include <driver/include/uart.h>
 
 //串口状态控制结构
- struct tagUartCB
+ struct UartCB
 {
-    struct tagRingBuf SendRingBuf;              //环形发送缓冲区.
-    struct tagRingBuf RecvRingBuf;              //环形接收缓冲区.
+    struct RingBuf SendRingBuf;              //环形发送缓冲区.
+    struct RingBuf RecvRingBuf;              //环形接收缓冲区.
 
-    struct tagSemaphoreLCB *SendRingBufSemp;    //发送缓冲区信号量
-    struct tagSemaphoreLCB *RecvRingBufSemp;    //接收缓冲区信号量
-    struct tagSemaphoreLCB *BlockingSemp;       //阻塞信号量
+    struct SemaphoreLCB *SendRingBufSemp;    //发送缓冲区信号量
+    struct SemaphoreLCB *RecvRingBufSemp;    //接收缓冲区信号量
+    struct SemaphoreLCB *BlockingSemp;       //阻塞信号量
 
     u32 RecvRingTrigLevel;      //串口Ring接收触发水平,即收到多少数据时释放信号量
     u32 SendRingTrigLevel;      //发送Ring发送触发水平，当发送环形缓冲区满，将
@@ -82,10 +82,10 @@
     u32 MplWriteTrigLevel;      //多路复用可写触发水平
     u32 Baud;                   //串口当前波特率
     ptu32_t UartPortTag;        //串口标签
-    struct tagMultiplexObjectCB * pMultiplexUart;      //多路复用目标对象头指针
-    u32 MplUartStatus;          //串口的当前状态，如可读，可写等
+    struct MultiplexObjectCB * pMultiplexUart;      //多路复用目标对象头指针
+    u32 MplUartStatus;          //多路复用的当前状态，如可读，可写等
     UartStartSend StartSend;
-    UartDirectSend DirectlySend;
+//    UartDirectSend DirectlySend;
     UartControl UartCtrl;
 };
 
@@ -112,30 +112,18 @@
 //      timeout,超时量(us).
 //返回: 实际写入环形缓冲区的字符数
 //-----------------------------------------------------------------------------
-ptu32_t UART_AppWrite(struct tagUartCB *UCB,u8* src_buf,u32 len,
+ptu32_t UART_AppWrite(struct UartCB *UCB,u8* src_buf,u32 len,
                     u32 offset,bool_t block_option,u32 timeout)
 {
     u32 completed = 0,written;
-    uint8_t *buf,ch;
+    uint8_t *buf;
     u32 base_time,rel_timeout = timeout;
-    u32 ring_datalen,i;
 
     if((len==0) || ((u8*)src_buf == NULL) || (UCB == NULL))
         return 0;
     buf = (uint8_t*)src_buf;
-    base_time = (u32)DjyGetTime();
+    base_time = (u32)(u32)DjyGetSysTime();
 
-    if(Djy_QuerySch() == false)//如果调度并未开始,采用直接发送方式
-    {
-        if(Ring_Check(&UCB->SendRingBuf))//如果缓冲区有数据，则先发送完
-        {
-            ring_datalen = Ring_Read(&UCB->SendRingBuf,&ch,1);
-            for(i = 0; i < ring_datalen; i++)
-               UCB->DirectlySend(UCB->UartPortTag,&ch,1,rel_timeout);
-
-        }
-        return UCB->DirectlySend(UCB->UartPortTag,buf,len,rel_timeout);
-    }
     while(1)
     {
         written = Ring_Write(&UCB->SendRingBuf,
@@ -147,18 +135,18 @@ ptu32_t UART_AppWrite(struct tagUartCB *UCB,u8* src_buf,u32 len,
             completed += written;
             if(false == Lock_SempPend(UCB->SendRingBufSemp,rel_timeout))
                 break;
-            rel_timeout = (u32)DjyGetTime() - base_time;
+            rel_timeout = (u32)(u32)DjyGetSysTime() - base_time;
             if(rel_timeout > timeout)
                 break;
             else
-                rel_timeout = timeout - ((u32)DjyGetTime() - base_time);
+                rel_timeout = timeout - rel_timeout;
         }else
         {
             if(block_option == true)
             {
                 //先PEND一次信号量，防止事先已经被释放过
                 Lock_SempPend(UCB->BlockingSemp,0);
-                if(Ring_Check(&UCB->SendRingBuf))
+//                if(Ring_Check(&UCB->SendRingBuf))
                 {
                     Lock_SempPend(UCB->BlockingSemp,rel_timeout);
                 }
@@ -191,52 +179,56 @@ ptu32_t UART_AppWrite(struct tagUartCB *UCB,u8* src_buf,u32 len,
 //      timeout,读超时参数,微秒
 //返回: 实际读出长度
 //------------------------------------------------------------------------------
-ptu32_t UART_AppRead(struct tagUartCB *UCB,u8* dst_buf,u32 len,
+ptu32_t UART_AppRead(struct UartCB *UCB,u8* dst_buf,u32 len,
                     u32 offset,u32 timeout)
 {
     uint32_t completed = 0;
-    uint32_t result,triglevel;
-    uint8_t  index = 0,indexlen = 0;
+    uint32_t ReadLen,TrigBak,triglevel;
     u32 base_time,rel_timeout=timeout;
 
     if((len==0) || ((u8*)dst_buf == NULL) || (UCB == NULL))
         return 0;
 
-    base_time = (u32)DjyGetTime();
-    result = Ring_Read(&UCB->RecvRingBuf,(uint8_t*)dst_buf,len);
-    if(result >= len)
+    base_time = (u32)DjyGetSysTime();
+    completed = Ring_Read(&UCB->RecvRingBuf,(uint8_t*)dst_buf,len);
+    if(completed < len)    //缓冲区中数据不够，则等待接收
     {
-        completed = result;
-    }
-    else    //缓冲区中数据不够，则等待接收
-    {
-        completed = result;
-        len = len - completed;
+        //为提高效率，临时提高读缓冲区信号量触发水平，最多为半缓冲容积
+        TrigBak = UCB->RecvRingTrigLevel;
         triglevel = Ring_Capacity(&UCB->RecvRingBuf)/2;
-        //多次接收，最多为半缓冲容积
-        indexlen = (len/triglevel) + (len%triglevel ?1:0);
-        for(index = 0; index < indexlen; index++)
+        ReadLen = len - completed;
+        if(triglevel > ReadLen)
+            triglevel = ReadLen;
+        while(1)
         {
-            if(index == indexlen - 1)
-                UCB->RecvRingTrigLevel = len - triglevel * index;
-            else
-                UCB->RecvRingTrigLevel= triglevel;
-            if(Lock_SempQueryFree(UCB->RecvRingBufSemp) >= 1)//清掉早有的信号
+            UCB->RecvRingTrigLevel = triglevel;
+            if(Ring_Check(&UCB->RecvRingBuf) < triglevel)
             {
-               Lock_SempPend(UCB->RecvRingBufSemp,0);
+            	Lock_SempPend(UCB->RecvRingBufSemp,rel_timeout);
             }
-            Lock_SempPend(UCB->RecvRingBufSemp,rel_timeout);
             completed += Ring_Read(&UCB->RecvRingBuf,
-                               ((u8*)dst_buf) + result + index * triglevel,
-                               UCB->RecvRingTrigLevel);
-            //每次pend的时间要递减
-            rel_timeout = (u32)DjyGetTime() - base_time;
-            if(rel_timeout > timeout)
-                break;
+                               ((u8*)dst_buf) + completed,
+                               ReadLen);
+            if(completed < len)
+            {
+                //每次pend的时间要递减
+                rel_timeout = (u32)DjyGetSysTime() - base_time;
+                if(rel_timeout > timeout)
+                    break;
+                else
+                {
+                    rel_timeout = timeout - rel_timeout;
+                    ReadLen = len - completed;
+                    if(triglevel > ReadLen)
+                        triglevel = ReadLen;
+                }
+            }
             else
-                rel_timeout = timeout - ((u32)DjyGetTime() - base_time);
+                break;
         }
+        UCB->RecvRingTrigLevel = TrigBak;
     }
+    //若缓冲区中不再有数据，清掉多路复用触发状态。
     if(Ring_Check(&UCB->RecvRingBuf) == 0)
     {
         UCB->MplUartStatus &= (~CN_MULTIPLEX_SENSINGBIT_READ);
@@ -258,7 +250,7 @@ ptu32_t UART_AppRead(struct tagUartCB *UCB,u8* dst_buf,u32 len,
 //      len，数据量(bytes)
 //返回: 实际写入环形缓冲区的字符数
 //-----------------------------------------------------------------------------
-ptu32_t UART_PortWrite(struct tagUartCB *UCB,u8* buf,u32 len,u32 res)
+ptu32_t UART_PortWrite(struct UartCB *UCB,u8* buf,u32 len,u32 res)
 {
     uint16_t recv_bytes;
     uint32_t check;
@@ -299,7 +291,7 @@ ptu32_t UART_PortWrite(struct tagUartCB *UCB,u8* buf,u32 len,u32 res)
 //      len,读入长度,
 //返回: 实际读出长度
 //------------------------------------------------------------------------------
-ptu32_t UART_PortRead(struct tagUartCB *UCB,u8* dst_buf,u32 len,u32 res)
+ptu32_t UART_PortRead(struct UartCB *UCB,u8* dst_buf,u32 len,u32 res)
 {
     uint32_t check,result=0;
 
@@ -333,7 +325,7 @@ ptu32_t UART_PortRead(struct tagUartCB *UCB,u8* dst_buf,u32 len,u32 res)
 //      ErrNo,错误标识的比特位，该比特位必须是多路复用模块未用到感觉位，（3-30比特）
 //返回: 0，错误；1，正确
 //------------------------------------------------------------------------------
-ptu32_t UART_ErrHandle(struct tagUartCB *UCB,u32 ErrNo)
+ptu32_t UART_ErrHandle(struct UartCB *UCB,u32 ErrNo)
 {
     u32 Status,result = 0;
     if(NULL != UCB)
@@ -361,7 +353,7 @@ ptu32_t UART_ErrHandle(struct tagUartCB *UCB,u32 ErrNo)
 //      data,含义依cmd而定
 //返回: 无意义.
 //-----------------------------------------------------------------------------
-ptu32_t UART_Ctrl(struct tagUartCB *UCB,u32 cmd,ptu32_t data1,ptu32_t data2)
+ptu32_t UART_Ctrl(struct UartCB *UCB,u32 cmd,ptu32_t data1,ptu32_t data2)
 {
     ptu32_t result = 0;
 
@@ -372,10 +364,6 @@ ptu32_t UART_Ctrl(struct tagUartCB *UCB,u32 cmd,ptu32_t data1,ptu32_t data2)
         case CN_UART_START:
         case CN_UART_STOP:
         case CN_UART_COM_SET:
-        case CN_UART_SEND_DATA:     //设为半双工发送状态
-        //用IO控制半双工通信的发送使能的话,在此转换收发.
-        case CN_UART_RECV_DATA:     //设为半双工接收状态
-        //用IO控制半双工通信的发送使能的话,在此转换收发.
         case CN_UART_RX_PAUSE:      //暂停接收
         case CN_UART_RX_RESUME:     //恢复接收
         case CN_UART_RECV_HARD_LEVEL:    //设置接收fifo触发水平
@@ -447,8 +435,8 @@ ptu32_t UART_Ctrl(struct tagUartCB *UCB,u32 cmd,ptu32_t data1,ptu32_t data2)
 //              bit31表示敏感类型，CN_SENSINGBIT_AND，或者CN_SENSINGBIT_OR
 //返回：true,添加成功；false,添加失败
 //-----------------------------------------------------------------------------
-bool_t UART_MultiplexAdd(struct tagUartCB *UCB,
-                         struct tagMultiplexSetsCB *MultiplexSets,
+bool_t UART_MultiplexAdd(struct UartCB *UCB,
+                         struct MultiplexSetsCB *MultiplexSets,
                          u32 DevAlias,
                          u32 SensingBit)
 {
@@ -473,17 +461,17 @@ bool_t UART_MultiplexAdd(struct tagUartCB *UCB,
 //      Param,包含初始化UART所需参数，具体参数请查看tagUartParam结构体
 //返回：串口控制块指针，NULL失败
 //-----------------------------------------------------------------------------
-struct tagUartCB * UART_InstallPort(struct tagUartParam *Param)
+struct UartCB * UART_InstallPort(struct UartParam *Param)
 {
-    tagDevHandle uart_dev;
-    struct tagUartCB *UCB;
-    struct tagMutexLCB *uart_mutexR,*uart_mutexT;
+    struct DjyDevice * uart_dev;
+    struct UartCB *UCB;
+    struct MutexLCB *uart_mutexR,*uart_mutexT;
     u8 *pRxRingBuf,*pTxRingBuf;
 
     if(Param == NULL)
         return NULL;
 
-    UCB = (struct tagUartCB *)M_Malloc(sizeof(struct tagUartCB),0);
+    UCB = (struct UartCB *)M_Malloc(sizeof(struct UartCB),0);
     if(UCB == NULL)
         goto exit_from_ucb;
     pRxRingBuf = (u8*)M_Malloc(Param->RxRingBufLen,0);
@@ -519,7 +507,7 @@ struct tagUartCB * UART_InstallPort(struct tagUartParam *Param)
     UCB->MplWriteTrigLevel  = (Param->RxRingBufLen)>>2;
     UCB->Baud               = Param->Baud;
     UCB->UartPortTag        = Param->UartPortTag;
-    UCB->DirectlySend       = Param->DirectlySend;
+//    UCB->DirectlySend       = Param->DirectlySend;
     UCB->StartSend          = Param->StartSend;
     UCB->UartCtrl           = Param->UartCtrl;
     UCB->pMultiplexUart     = NULL;                     //初始化时为NULL
@@ -529,10 +517,10 @@ struct tagUartCB * UART_InstallPort(struct tagUartParam *Param)
 
     //添加UART设备
     uart_dev = Driver_DeviceCreate(NULL,(char*)Param->Name,uart_mutexR,uart_mutexT,
-                               (devWriteFunc) UART_AppWrite,
-                               (devReadFunc ) UART_AppRead,
-                               (devCtrlFunc ) UART_Ctrl,
-                               (devMultiplexAddFunc)UART_MultiplexAdd,
+                               (fntDevWrite) UART_AppWrite,
+                               (fntDevRead ) UART_AppRead,
+                               (fntDevCtrl ) UART_Ctrl,
+                               (fntDevMultiplexAdd)UART_MultiplexAdd,
                                (ptu32_t)UCB
                                );
     if(uart_dev == NULL)

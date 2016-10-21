@@ -62,35 +62,35 @@
 //\/
 //y
 
-bool_t __lcd_set_pixel_bm(struct tagStRectBitmap *bitmap,
+bool_t __lcd_set_pixel_bm(struct StRectBitmap *bitmap,
                          s32 x,s32 y,u32 color,u32 r2_code);
-bool_t __lcd_line_bm(struct tagStRectBitmap *bitmap,struct tagStRect *limit,
+bool_t __lcd_line_bm(struct StRectBitmap *bitmap,struct StRect *limit,
                         s32 x1,s32 y1,s32 x2,s32 y2,u32 color,u32 r2_code);
-bool_t __lcd_line_bm_ie(struct tagStRectBitmap *bitmap,struct tagStRect *limit,
+bool_t __lcd_line_bm_ie(struct StRectBitmap *bitmap,struct StRect *limit,
                         s32 x1,s32 y1,s32 x2,s32 y2,u32 color,u32 r2_code);
-bool_t __lcd_fill_rect_bm(struct tagStRectBitmap *dst_bitmap,
-                         struct tagStRect *dst_rect,u32 color);
-bool_t __lcd_blt_bm_to_bm( struct tagStRectBitmap *dst_bitmap,
-                            struct tagStRect *dst_rect,
-                            struct tagStRectBitmap *src_bitmap,s32 xsrc,s32 ysrc,
-                            u8 *pat,struct tagStRectBitmap *mask,u32 rop_code,
-                            u32 transparentcolor);
-bool_t __lcd_get_rect_bm(struct tagStRectBitmap *src,struct tagStRect *rect,
-                        struct tagStRectBitmap *dest);
+bool_t __lcd_fill_rect_bm(struct StRectBitmap *dst_bitmap,
+                         struct StRect *dst_rect,u32 color);
+bool_t __lcd_blt_bm_to_bm( struct StRectBitmap *dst_bitmap,
+                            struct StRect *dst_rect,
+                            struct StRectBitmap *src_bitmap,s32 xsrc,s32 ysrc,
+                            u8 *pat,struct StRectBitmap *mask,struct RopGroup RopCode,
+                            u32 HyalineColor);
+bool_t __lcd_get_rect_bm(struct StRectBitmap *src,struct StRect *rect,
+                        struct StRectBitmap *dest);
 bool_t __lcd_set_pixel_screen(s32 x,s32 y,u32 color,u32 r2_code);
-bool_t __lcd_line_screen(struct tagStRect *limit,
+bool_t __lcd_line_screen(struct StRect *limit,
                     s32 x1,s32 y1,s32 x2,s32 y2,u32 color,u32 r2_code);
-bool_t __lcd_line_screen_ie(struct tagStRect *limit,
+bool_t __lcd_line_screen_ie(struct StRect *limit,
                        s32 x1,s32 y1,s32 x2,s32 y2,u32 color,u32 r2_code);
-bool_t __lcd_fill_rect_screen(struct tagStRect *dst_rect,u32 color);
-bool_t __lcd_bm_to_screen(struct tagStRect *dst_rect,
-            struct tagStRectBitmap *src_bitmap,s32 xsrc,s32 ysrc);
+bool_t __lcd_fill_rect_screen(struct StRect *dst_rect,u32 color);
+bool_t __lcd_bm_to_screen(struct StRect *dst_rect,
+            struct StRectBitmap *src_bitmap,s32 xsrc,s32 ysrc);
 u32 __lcd_get_pixel_screen(s32 x,s32 y);
-bool_t __lcd_get_rect_screen(struct tagStRect *rect,struct tagStRectBitmap *dest);
-bool_t __lcd_disp_ctrl(struct tagDisplayRsc *disp);
+bool_t __lcd_get_rect_screen(struct StRect *rect,struct StRectBitmap *dest);
+bool_t __lcd_disp_ctrl(struct DisplayRsc *disp);
 
 
-struct tagDisplayRsc tg_lcd_display;
+struct DisplayRsc tg_lcd_display;
 
 //size = [CN_PALETTE_SIZE + cn_frame_buffer_size]
 u8 *u8g_dsp_buffer = (u8*)(CN_FRAME_BASE_ADDRESS +CN_PALETTE_SIZE);
@@ -238,36 +238,31 @@ void Lcd_ContrastDown(void)
     s_u16Contrast--;
 }
 
-bool_t __lcd_set_pixel_bm(struct tagStRectBitmap *bitmap,
+bool_t __lcd_set_pixel_bm(struct StRectBitmap *bitmap,
                          s32 x,s32 y,u32 color,u32 r2_code)
 {
     return false;
 }
-bool_t __lcd_line_bm(struct tagStRectBitmap *bitmap,struct tagStRect *limit,
+bool_t __lcd_line_bm(struct StRectBitmap *bitmap,struct StRect *limit,
                         s32 x1,s32 y1,s32 x2,s32 y2,u32 color,u32 r2_code)
 {
     return false;
 }
-bool_t __lcd_line_bm_ie(struct tagStRectBitmap *bitmap,struct tagStRect *limit,
+bool_t __lcd_line_bm_ie(struct StRectBitmap *bitmap,struct StRect *limit,
                         s32 x1,s32 y1,s32 x2,s32 y2,u32 color,u32 r2_code)
 {
     return false;
 }
-bool_t __lcd_fill_rect_bm(struct tagStRectBitmap *dst_bitmap,
-                         struct tagStRect *dst_rect,u32 color)
+bool_t __lcd_fill_rect_bm(struct StRectBitmap *dst_bitmap,
+                         struct StRect *dst_rect,u32 color)
 {
     return false;
 }
-bool_t __lcd_blt_bm_to_bm( struct tagStRectBitmap *dst_bitmap,
-                            struct tagStRect *dst_rect,
-                            struct tagStRectBitmap *src_bitmap,s32 xsrc,s32 ysrc,
-                            u8 *pat,struct tagStRectBitmap *mask,u32 rop_code,
-                            u32 transparentcolor)
-{
-    return false;
-}
-bool_t __lcd_get_rect_bm(struct tagStRectBitmap *src,struct tagStRect *rect,
-                        struct tagStRectBitmap *dest)
+bool_t __lcd_blt_bm_to_bm( struct StRectBitmap *dst_bitmap,
+                            struct StRect *dst_rect,
+                            struct StRectBitmap *src_bitmap,s32 xsrc,s32 ysrc,
+                            u8 *pat,struct StRectBitmap *mask,struct RopGroup RopCode,
+                            u32 HyalineColor)
 {
     return false;
 }
@@ -309,7 +304,7 @@ bool_t __lcd_set_pixel_screen(s32 x,s32 y,u32 color,u32 r2_code)
 //在screen中画一条任意直线，不含端点，如硬件加速不支持在screen上画线，或者有
 //frame_buffer，driver可以简化，直接返回false即可
 //镜像显示器的driver须提供这个函数
-bool_t __lcd_line_screen(struct tagStRect *limit,
+bool_t __lcd_line_screen(struct StRect *limit,
                     s32 x1,s32 y1,s32 x2,s32 y2,u32 color,u32 r2_code)
 {
     return false;
@@ -318,7 +313,7 @@ bool_t __lcd_line_screen(struct tagStRect *limit,
 //在screen中画一条任意直线，含端点，如硬件加速不支持在screen上画线，或者有
 //frame_buffer，driver可以简化，直接返回false即可
 //镜像显示器的driver须提供这个函数
-bool_t __lcd_line_screen_ie(struct tagStRect *limit,
+bool_t __lcd_line_screen_ie(struct StRect *limit,
                        s32 x1,s32 y1,s32 x2,s32 y2,u32 color,u32 r2_code)
 {
     return false;
@@ -326,14 +321,14 @@ bool_t __lcd_line_screen_ie(struct tagStRect *limit,
 //screen中矩形填充，如硬件加速不支持在screen上矩形填充，或者有frame_buffer，
 //driver可以简化，直接返回false即可
 //镜像显示器的driver须提供这个??
-bool_t __lcd_fill_rect_screen(struct tagStRect *dst_rect,u32 color)
+bool_t __lcd_fill_rect_screen(struct StRect *dst_rect,u32 color)
 {
     return false;
 }
 //从内存缓冲区到screen位块传送，只支持块拷贝，不支持rop操作。
 //镜像显示器的driver须提供这个函数
-bool_t __lcd_bm_to_screen(struct tagStRect *dst_rect,
-            struct tagStRectBitmap *src_bitmap,s32 xsrc,s32 ysrc)
+bool_t __lcd_bm_to_screen(struct StRect *dst_rect,
+            struct StRectBitmap *src_bitmap,s32 xsrc,s32 ysrc)
 {
     return false;
 }
@@ -359,7 +354,7 @@ u32 __lcd_get_pixel_screen(s32 x,s32 y)
                 (u8g_dsp_buffer[byteoffset]>>bitoffset)&0x1);
 }
 //把screen内矩形区域的内容复制到bitmap，调用前，先设置好dest的pf_type
-bool_t __lcd_get_rect_screen(struct tagStRect *rect,struct tagStRectBitmap *dest)
+bool_t __lcd_get_rect_screen(struct StRect *rect,struct StRectBitmap *dest)
 {
     return false;
 }
@@ -370,7 +365,7 @@ bool_t __lcd_get_rect_screen(struct tagStRect *rect,struct tagStRectBitmap *dest
 //参数: disp，显示器指针
 //返回: true=成功，false=失败
 //-----------------------------------------------------------------------------
-bool_t __lcd_disp_ctrl(struct tagDisplayRsc *disp)
+bool_t __lcd_disp_ctrl(struct DisplayRsc *disp)
 {
     return true;
 }
@@ -382,41 +377,39 @@ bool_t __lcd_disp_ctrl(struct tagDisplayRsc *disp)
 //-----------------------------------------------------------------------------
 ptu32_t ModuleInstall_Lcd(ptu32_t para)
 {
-    static struct tagGkWinRsc frame_win;
+    static struct GkWinRsc frame_win;
 
     __lcd_hard_init( );
     frame_win.wm_bitmap.bm_bits = u8g_dsp_buffer;
 //    frame_win.wm_bitmap.bm_bits = u8g_frame_buffer;
-    frame_win.wm_bitmap.width = LCD_XSIZE;
-    frame_win.wm_bitmap.height = LCD_YSIZE;
-    frame_win.wm_bitmap.pf_type = cn_lcd_pf;
+    frame_win.wm_bitmap.width = CN_LCD_XSIZE;
+    frame_win.wm_bitmap.height = CN_LCD_YSIZE;
+    frame_win.wm_bitmap.pf_type = CN_LCD_PIXEL_FORMAT;
     frame_win.wm_bitmap.linebytes = cn_lcd_line_size;
     tg_lcd_display.frame_buffer = &frame_win;
 
     tg_lcd_display.xmm = 0;
     tg_lcd_display.ymm = 0;
-    tg_lcd_display.width = LCD_XSIZE;
-    tg_lcd_display.height = LCD_YSIZE;
+    tg_lcd_display.width = CN_LCD_XSIZE;
+    tg_lcd_display.height = CN_LCD_YSIZE;
     tg_lcd_display.patx = 8;
     tg_lcd_display.paty = 8;
     tg_lcd_display.pixel_format = CN_SYS_PF_GRAY1;
     tg_lcd_display.framebuf_direct = true;
     //无须初始化frame_buffer和desktop，z_topmost三个成员
 
-    tg_lcd_display.draw.set_pixel_bm = __lcd_set_pixel_bm;
-    tg_lcd_display.draw.line_bm = __lcd_line_bm;
-    tg_lcd_display.draw.line_bm_ie = __lcd_line_bm_ie;
-    tg_lcd_display.draw.fill_rect_bm = __lcd_fill_rect_bm;
-    tg_lcd_display.draw.blt_bm_to_bm = __lcd_blt_bm_to_bm;
-    tg_lcd_display.draw.get_pixel_bm = NULL;
-    tg_lcd_display.draw.get_rect_bm = __lcd_get_rect_bm;
-    tg_lcd_display.draw.set_pixel_screen = __lcd_set_pixel_screen;
-    tg_lcd_display.draw.line_screen = __lcd_line_screen;
-    tg_lcd_display.draw.line_screen_ie = __lcd_line_screen_ie;
-    tg_lcd_display.draw.fill_rect_screen = __lcd_fill_rect_screen;
-    tg_lcd_display.draw.bm_to_screen = __lcd_bm_to_screen;
-    tg_lcd_display.draw.get_pixel_screen = __lcd_get_pixel_screen;
-    tg_lcd_display.draw.get_rect_screen = __lcd_get_rect_screen;
+    tg_lcd_display.draw.SetPixelToBitmap = __lcd_set_pixel_bm;
+    tg_lcd_display.draw.LineToBitmap = __lcd_line_bm;
+    tg_lcd_display.draw.LineToBitmapIe = __lcd_line_bm_ie;
+    tg_lcd_display.draw.FillRectToBitmap = __lcd_fill_rect_bm;
+    tg_lcd_display.draw.BltBitmapToBitmap = __lcd_blt_bm_to_bm;
+    tg_lcd_display.draw.SetPixelToScreen = __lcd_set_pixel_screen;
+    tg_lcd_display.draw.LineToScreen = __lcd_line_screen;
+    tg_lcd_display.draw.LineToScreenIe = __lcd_line_screen_ie;
+    tg_lcd_display.draw.FillRectToScreen = __lcd_fill_rect_screen;
+    tg_lcd_display.draw.CopyBitmapToScreen = __lcd_bm_to_screen;
+    tg_lcd_display.draw.GetPixelFromScreen = __lcd_get_pixel_screen;
+    tg_lcd_display.draw.GetRectFromScreen = __lcd_get_rect_screen;
 
 //    tg_lcd_display.bmmalloc = lcd_bmmalloc;
     tg_lcd_display.vmalloc = NULL;

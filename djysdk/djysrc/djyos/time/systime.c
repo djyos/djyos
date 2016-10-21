@@ -59,53 +59,129 @@
 //------------------------------------------------------
 #include "stdint.h"
 #include "stddef.h"
+#include "atomic.h"
 #include "int.h"
 #include "systime.h"
 
-s64 __DjyGetTime(void);
-static sysrunningtime  fnSysRunningTime = NULL;
-extern s64  g_s64OsTicks;             //操作系统运行ticks数
+s64 __DjyGetSysTime(void);
+static fntSysTimeHard32  fnSysTimeHard32 = NULL;
+static fntSysTimeHard64  fnSysTimeHard64 = NULL;
+static u32 s_u32SysTimeFreq = 1000000;  //系统时钟的输入时钟频率
+                                        //1000000是tick时基的默认值
+static u32 s_u32SysTimeCycle = CN_CFG_TICK_US;  //系统时钟走时周期，CN_CFG_TICK_US
+                                                //是选tick时基默认值
+static s64 s_s64sysTimeMajor = 0;       //时钟高位
+static u32 s_u32BakCounter = 0;         //计数值的备份
+extern s64  g_s64OsTicks;               //操作系统运行ticks数
 
 // =============================================================================
-// 函数功能：SysTimerConnect
-//        为系统提供运行时间
-// 输入参数：sysrunningtime
+// 函数功能：连接专用定时器到系统时间
+// 输入参数：GetSysTime32，如果硬件定时器时是32位及以下，否则给NULL
+//           GetSysTime64，如果硬件定时器时是64位，否则给NULL
+//           Freq：计时器输入时钟的频率
+//           Cycle：计时器翻转周期，时钟数，64位硬件定时器给0即可
 // 输出参数：
 // 返回值  ：
-// 说明：该函数务必在系统初始化的时候调用，务必不能在系统启动后再调用，除非你和当前系统的运行时间做了同步
+// 说明：该函数务必在系统初始化的时候调用，务必不能在系统启动后再调用
 // =============================================================================
-bool_t SysTimerConnect(sysrunningtime runtime)
+void SysTimeConnect(fntSysTimeHard32 GetSysTime32,fntSysTimeHard64 GetSysTime64,
+                    u32 Freq,u32 Cycle)
 {
-    if(NULL != runtime)
-    {
-        fnSysRunningTime = runtime;
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    //不要判SysTime是否为NULL，NULL也是一个正确选项。
+    fnSysTimeHard32 = GetSysTime32;
+    fnSysTimeHard64 = GetSysTime64;
+    s_u32SysTimeFreq = Freq;
+    s_u32SysTimeCycle = Cycle;
+    return;
 }
 // =============================================================================
-// 函数功能:DjyGetTime
-//       获取系统运行时间
+// 函数功能:获取64位的系统运行时间，单位us
 // 输入参数：空
 // 输出参数：
-// 返回值  ：获取的系统运行时间
-// 说明：当有注册时间系统时，采用时间系统的；否则使用默认的时间系统（BSP移植的时候使用的）
+// 返回值  ：获取的系统运行时间，uS
 // =============================================================================
-s64 DjyGetTime(void)
+s64 DjyGetSysTime(void)
 {
-    if(NULL != fnSysRunningTime)
+    u32 CurrentTime;
+    atom_low_t atom;
+    if((fnSysTimeHard32 == NULL) && (fnSysTimeHard64 == NULL))
+        return __DjyGetSysTime();
+    else if(fnSysTimeHard32 != NULL)
     {
-        return fnSysRunningTime();
+        atom = Int_LowAtomStart();
+        CurrentTime = fnSysTimeHard32( );
+        if(CurrentTime < s_u32BakCounter)
+            s_s64sysTimeMajor += s_u32SysTimeCycle; //此处不需要原子操作
+        s_u32BakCounter = CurrentTime;
+        Int_LowAtomEnd(atom);
+        //从计数值计算uS数
+        return (s_s64sysTimeMajor+CurrentTime)*1000000/s_u32SysTimeFreq;
     }
     else
     {
-        return __DjyGetTime();
+        return fnSysTimeHard64( ) *1000000 / s_u32SysTimeFreq;
     }
 }
 
+// =============================================================================
+// 函数功能:获取64位的系统运行时间，单位cycle，须结合DjyGetSysTimeFreq才能确定
+//          绝对时间
+// 输入参数：空
+// 输出参数：
+// 返回值  ：获取的系统运行时间，周期数
+// =============================================================================
+s64 DjyGetSysTimeCycle(void)
+{
+    u32 CurrentTime;
+    atom_low_t atom;
+    if((fnSysTimeHard32 == NULL) && (fnSysTimeHard64 == NULL))
+        return __DjyGetSysTime();
+    else if(fnSysTimeHard32 != NULL)
+    {
+        atom = Int_LowAtomStart();
+        CurrentTime = fnSysTimeHard32( );
+        if(CurrentTime < s_u32BakCounter)
+            s_s64sysTimeMajor += s_u32SysTimeCycle; //此处不需要原子操作
+        s_u32BakCounter = CurrentTime;
+        Int_LowAtomEnd(atom);
+        return s_s64sysTimeMajor+CurrentTime;
+    }
+    else
+    {
+        return fnSysTimeHard64( );
+    }
+}
+
+// =============================================================================
+// 函数功能:定时器维护，在tick isr中调用，确保当使用非64位机时，读时间的函数经常
+//          被调用，以维护系统时间运转。
+// 输入参数：空
+// 输出参数：
+// 返回值  ：获取的系统运行时间，周期数
+// =============================================================================
+void __DjyMaintainSysTime(void)
+{
+    u32 CurrentTime;
+    if(fnSysTimeHard32 != NULL)
+    {
+        CurrentTime = fnSysTimeHard32( );
+        if(CurrentTime < s_u32BakCounter)
+            s_s64sysTimeMajor += s_u32SysTimeCycle; //此处不需要原子操作
+        s_u32BakCounter = CurrentTime;
+    }
+    return;
+}
+
+// =============================================================================
+// 函数功能:获取系统时钟的计时频率
+// 输入参数：空
+// 输出参数：
+// 返回值  ：时钟频率，如果用ticks，则固定返回1Mhz
+// =============================================================================
+u32 DjyGetSysTimeFreq(void)
+{
+    return s_u32SysTimeFreq;
+}
 //----读取当前ticks-------------------------------------------------------------
 //功能：读取操作系统时钟ticks数
 //      g_s64OsTicks 为64位变量，非64位系统中，读取 g_s64OsTicks 需要超过1个
@@ -113,7 +189,7 @@ s64 DjyGetTime(void)
 //参数：无
 //返回：当前时钟
 //-----------------------------------------------------------------------------
-s64 DjyGetTimeTick(void)
+s64 DjyGetSysTick(void)
 {
     s64 time;
 #if (64 > CN_CPU_BITS)

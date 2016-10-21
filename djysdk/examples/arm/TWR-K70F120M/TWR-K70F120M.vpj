@@ -237,6 +237,7 @@
                 <F N="src/user/main.c"/>
                 <F N="src/user/main_test.c"/>
                 <F N="src/user/module-trim.c"/>
+                <F N="src/user/u_main.c"/>
             </Folder>
         </Folder>
     </Files>

@@ -69,11 +69,11 @@
 //                           主菜单弹出子菜单是从九格弹出垂直菜单
 // =========================================================================
 /*
-static struct tagRectangle   CalDisAreaFromPre_9cell(struct menu_displaypara *pre,struct menu_displaypara  *cur)
+static struct Rectangle   CalDisAreaFromPre_9cell(struct menu_displaypara *pre,struct menu_displaypara  *cur)
 {
 
 
-   struct tagRectangle  result={0,0,0,0};//计算的结果
+   struct Rectangle  result={0,0,0,0};//计算的结果
    //内部调用，无需参数检查
 
    cur->MenuitemSpace=cal_menuitemarea(cur->OperatingMenuitem);
@@ -81,12 +81,12 @@ static struct tagRectangle   CalDisAreaFromPre_9cell(struct menu_displaypara *pr
     return result;
 }
 */
-struct tagRectangle   CalDisAreaFromPre_9cell(struct menu_displaypara *pre,struct menu_displaypara  *cur)
+struct Rectangle   CalDisAreaFromPre_9cell(struct menu_displaypara *pre,struct menu_displaypara  *cur)
 {
 
    u32       menuitem_num;//当前菜单有多少个菜单项
 
-   struct tagRectangle  result={0,0,0,0};//计算的结果
+   struct Rectangle  result={0,0,0,0};//计算的结果
 
    u8        number=0;//用于计算第几个窗口弹出的
 
@@ -358,13 +358,13 @@ void adjustvisualmenuitem_9cell(struct menu_displaypara  *dispara)
 // 返回值  :
 //需要说明的是:位置前面都计算好了，已经没有啥子好说的了
 // =========================================================================
-struct menu_displaypara *createmenudisparabypre_9cell(struct menu_displaypara *pre,struct menu_item *menuitem,struct tagGkWinRsc  *Appwin)
+struct menu_displaypara *createmenudisparabypre_9cell(struct menu_displaypara *pre,struct menu_item *menuitem,struct GkWinRsc  *Appwin)
 {
 
   bool_t  result;
   struct menu_displaypara  *cur=NULL;
-  struct tagRectangle   Disparawin_rec;
- // struct tagGkWinRsc  *win;
+  struct Rectangle   Disparawin_rec;
+ // struct GkWinRsc  *win;
    //简单的根据前一个菜单窗口创建
 
   if((NULL==pre)&&((NULL==menuitem)||(NULL==Appwin)))

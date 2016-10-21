@@ -2,7 +2,7 @@
 <?fileVersion 4.0.0?>
 
 <cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
-	<storageModule moduleId="org.eclipse.cdt.core.settings">
+	<storageModule configRelations="2" moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173" moduleId="org.eclipse.cdt.core.settings" name="release">
 				<macros>
@@ -49,7 +49,6 @@
 								<option id="gnu.c.link.option.paths.1672093484" name="Library search path (-L)" superClass="gnu.c.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;..\libos_release&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;..\libc_release&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${PA_TOOLS_HOME}\..\Cross_Tools\gcc-4.6.3-Ee500v2-eabispe\lib\gcc\powerpc-eabispe\4.6.3&quot;"/>
 								</option>
 								<option id="com.freescale.pa.cdt.gcc.toolchain.linker.mapfile.961531493" name="Map File (-Xlinker -Map)" superClass="com.freescale.pa.cdt.gcc.toolchain.linker.mapfile" value="${ProjName}.map" valueType="string"/>
 								<option id="com.freescale.pa.cdt.gcc.toolchain.eabi.e500v2.linker.lcf.1284526144" name="LCF File" superClass="com.freescale.pa.cdt.gcc.toolchain.eabi.e500v2.linker.lcf" value="${ProjDirPath}\config\release.lds" valueType="string"/>
@@ -59,6 +58,9 @@
 								<option id="gnu.c.link.option.nostdlibs.1128477725" name="No startup or default libs (-nostdlib)" superClass="gnu.c.link.option.nostdlibs" value="true" valueType="boolean"/>
 								<option id="gnu.c.link.option.strip.543212934" name="Omit all symbol information (-s)" superClass="gnu.c.link.option.strip" value="false" valueType="boolean"/>
 								<option id="gnu.c.link.option.ldflags.1376566874" name="Linker flags" superClass="gnu.c.link.option.ldflags" value="" valueType="string"/>
+								<option id="gnu.c.link.option.other.1254086323" name="Other options (-Xlinker [option])" superClass="gnu.c.link.option.other" valueType="stringList">
+									<listOptionValue builtIn="false" value="--gc-sections"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.2075226847" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -70,16 +72,9 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gkernel\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -88,12 +83,11 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv\board\P1020RDB\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\P1020RDB&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1573890719" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="NDEBUG=1"/>
 								</option>
-								<option id="gnu.c.compiler.option.optimization.level.4011967" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" value="gnu.c.optimization.level.more" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.optimization.level.4011967" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" value="gnu.c.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.preprocessor.nostdinc.995058302" name="Do not search system directories (-nostdinc)" superClass="gnu.c.compiler.option.preprocessor.nostdinc" value="true" valueType="boolean"/>
 								<option id="gnu.c.compiler.option.misc.other.551006336" name="Other flags" superClass="gnu.c.compiler.option.misc.other" value="-c -fmessage-length=0  -mabi=spe -mspe -mfloat-gprs=double   -fdata-sections -ffunction-sections -ffreestanding -fno-builtin" valueType="string"/>
 								<inputType id="com.freescale.pa.cdt.gcc.toolchain.c.compiler.eabi.e500v2.input.1310736601" superClass="com.freescale.pa.cdt.gcc.toolchain.c.compiler.eabi.e500v2.input"/>
@@ -105,17 +99,9 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gkernel\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -172,7 +158,7 @@
 								<listOptionValue builtIn="false" value="F:/TRUNK/djyos/djysrc/djyos/driver/include"/>
 								<listOptionValue builtIn="false" value="F:/TRUNK/djyos/djysrc/bsp/board_peripheral/wb8298/include"/>
 							</option>
-							<option id="gnu.c.compiler.option.optimization.level.944929714" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" value="gnu.c.optimization.level.more" valueType="enumerated"/>
+							<option id="gnu.c.compiler.option.optimization.level.944929714" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" value="gnu.c.optimization.level.none" valueType="enumerated"/>
 							<option id="gnu.c.compiler.option.preprocessor.nostdinc.587913220" name="Do not search system directories (-nostdinc)" superClass="gnu.c.compiler.option.preprocessor.nostdinc" value="true" valueType="boolean"/>
 							<option id="gnu.c.compiler.option.misc.other.1331968524" name="Other flags" superClass="gnu.c.compiler.option.misc.other" value="-c -fmessage-length=0  -mabi=spe -mspe -mfloat-gprs=double   -fdata-sections -ffunction-sections -ffreestanding -fno-builtin" valueType="string"/>
 							<inputType id="com.freescale.pa.cdt.gcc.toolchain.c.compiler.eabi.e500v2.input.522959320" superClass="com.freescale.pa.cdt.gcc.toolchain.c.compiler.eabi.e500v2.input"/>
@@ -570,7 +556,7 @@
 						<option id="com.freescale.pa.cdt.gcc.toolchain.sharedoption.arch.480450148" name="Architecture" superClass="com.freescale.pa.cdt.gcc.toolchain.sharedoption.arch" value="com.freescale.pa.cdt.gcc.toolchain.sharedoption.arch.e500v2" valueType="enumerated"/>
 					</backupToolOption>
 					<sourceEntries>
-						<entry excluding="src/vncserver/rfb_auth.c|src/vncserver/vnc_keyboard.c|src/vncserver/vnc_bmp.c|src/OS_code|src/OS_code/libc/libc/search|src/OS_code/libc/libc/locale|src/user/GlobalCell/BPVolJudge.c|src/user/GlobalCell/CalAnaMerge.c|src/user/USER/WB829SMV(未使用)|src/user/GlobalCell/QD7721.c|src/user/GlobalCell/Work7789V2.c|src/OS_code/lib/xmoden/xmodem.c|src/user/Print|src/user/GlobalCell/BrkFailCur.c|src/user/GlobalCell/SCRly.c|src/user/GlobalCell/DIStart.c|CFG/P1020RDB_init_ROM.tcl|src/user/GlobalCell/Phdir45.c|src/user/WB829SMV(未使用)|src/user/CommMon/DbgTool_ModelFile.c|Prefix/lib_ewl.prefix|P1020RDB_README.txt|src/user/USER/EquipCfg/Const_Print.c|src/user/GlobalCell/CalVecThHarm.c|src/user/GlobalCell/CalVecFivHarm.c|src/user/GlobalCell/CalCurState.c|src/user/GlobalCell/CalNegVec.c|src/user/PubServe/Fun_Data.c|src/user/GlobalCell/CalDisRelay.c|src/user/WB825MCPU|src/user/GlobalCell/SelPhaseWT.c|src/user/GlobalCell/CalKOMerge.c|src/user/CommMon/IEC850_Interface.c|src/user/GlobalCell/Work7789V1.c|src/user/GlobalCell/WFRly.c|src/OS_code/exp-component|src/user/NetDrive/Udp.c|src/miniapp|src/user/GlobalCell/GPS.c|src/user/GlobalCell/YT753.c|src/user/GlobalCell/CD723.c|src/user/GlobalCell/Cal2DVec.c|src/user/GlobalCell/KITransKO.c|src/user/GlobalCell/CalZPDir105.c|src/user/USER/EquipCfg/Const_RecMust.c|src/user/GlobalCell/Syn1588V1.c|src/user/GlobalCell/TwinKIChk.c|src/user/CommMon/IEC103_TaskStart.c|src/user/CommMon/PublicLP.c|src/user/GlobalCell/YKRly.c|src/user/CommMon/IEC103_Function.c|src/user/HardDrive/SetVlan.c|src/user/GlobalCell/CalVecSecHarm.c|src/user/GlobalCell/NetWork.c|src/user/GlobalCell/SynDBus.c|src/user/GlobalCell/SwthAna.c|src/OS_code/djyos/djyfs/ramfs|src/user/GlobalCell/CalBPDir.c|Lib/UART2_P1020RDB.UC.a|src/user/CommMon/NetPrn_Function.c|LCF/P1020RDB_ROM.lcf|src/user/CommCPU/MBusC.c|src/user/GlobalCell/OscillateBlock.c|src/OS_code/bsp/cpu_peripheral/elbc|src/user/GlobalCell/CalZeroVec.c|src/user/GlobalCell/Cal3I0ReactRly.c|src/user/GlobalCell/CalLineVec.c|src/user/GlobalCell/IOsysdir.c|src/user/GlobalCell/PhaseSync.c|src/user/GlobalCell/OpenRlyKO.c|src/OS_code/component|src/user/CommMon/IEC850_miscData.c|src/user/GlobalCell/CalBPIdIndex.c|src/user/GlobalCell/CalComCur.c|src/user/GlobalCell/Syn1588V2.c|src/user/GlobalCell/CalSynClose.c|src/user/NetDrive/MiscDrv.c|src/user/GlobalCell/Newton.c|src/user/GlobalCell/CalYcMea.c|src/user/RecQueue/PortFile.c|src/user/CommMon/NetPrn_Interface.c|src/monitor_src|src/user/GlobalCell/CalDudt.c|src/user/GlobalCell/GeWork.c|src/user/GlobalCell/Opti.c|src/user/GlobalCell/CalZLDWMea.c|src/user/PubServe/Hard_SIO.c|src/user/GlobalCell/CalVectorMea.c|Prefix/ROM_Version.prefix|src/user/GlobalCell/CalPosVec.c|src/user/GlobalCell/825Net.c|src/user/GlobalCell/CalBPHum.c|src/user/GlobalCell/CalSoftFr.c|src/user/GlobalCell/FrInter.c|src/OS_code/djyos/djyfs/flashfile|src/user/GlobalCell/IOCdir.c|src/user/GlobalCell/Wave.c|src/user/GlobalCell/CalBPSamIdIr.c|src/user/USER/EquipCfg/Const_IOcfg.c|src/user/GlobalCell/AD.c|src/user/GlobalCell/BusUnitBsMerg.c|src/user/GlobalCell/SttnLvlGoose.c|src/user/GlobalCell/Work761D.c|src/user/CommMon/DbgTool_Interface.c|src/user/GlobalCell/SynSec.c|src/user/USER/EquipCfg/Const_Wave.c|src/user/GlobalCell/CalMemVec.c|src/user/GlobalCell/BPVolOpen.c|Sources/reset.c|src/user/GlobalCell/Simulator.c|src/user/GlobalCell/CalVecHalfBase.c|src/user/CommMon/DbgTool_Function.c|src/user/CommMon/IEC103_ModelFile.c|src/user/CommMon/IEC850_Function.c|src/OS_code/djyos/djyfs/fat32|src/user/USER/EquipCfg/Const_Chk.c|src/user/GlobalCell/SynMU.c|src/user/USER/WB825MCPU|src/user/GlobalCell/BPPTBreak.c|src/user/NetDrive/Tcp.c|src/user/USER/EquipCfg/Const_Else.c|src/user/GlobalCell/FccWork.c|Prefix/Debug_Version.prefix" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/OS_prjcfg/config/exp_record_nor.c|src/vncserver/rfb_auth.c|src/vncserver/vnc_keyboard.c|src/vncserver/vnc_bmp.c|src/OS_code|src/OS_code/libc/libc/search|src/OS_code/libc/libc/locale|src/user/GlobalCell/BPVolJudge.c|src/user/GlobalCell/CalAnaMerge.c|src/user/USER/WB829SMV(未使用)|src/user/GlobalCell/QD7721.c|src/user/GlobalCell/Work7789V2.c|src/OS_code/lib/xmoden/xmodem.c|src/user/Print|src/user/GlobalCell/BrkFailCur.c|src/user/GlobalCell/SCRly.c|src/user/GlobalCell/DIStart.c|CFG/P1020RDB_init_ROM.tcl|src/user/GlobalCell/Phdir45.c|src/user/WB829SMV(未使用)|src/user/CommMon/DbgTool_ModelFile.c|Prefix/lib_ewl.prefix|P1020RDB_README.txt|src/user/USER/EquipCfg/Const_Print.c|src/user/GlobalCell/CalVecThHarm.c|src/user/GlobalCell/CalVecFivHarm.c|src/user/GlobalCell/CalCurState.c|src/user/GlobalCell/CalNegVec.c|src/user/PubServe/Fun_Data.c|src/user/GlobalCell/CalDisRelay.c|src/user/WB825MCPU|src/user/GlobalCell/SelPhaseWT.c|src/user/GlobalCell/CalKOMerge.c|src/user/CommMon/IEC850_Interface.c|src/user/GlobalCell/Work7789V1.c|src/user/GlobalCell/WFRly.c|src/OS_code/exp-component|src/user/NetDrive/Udp.c|src/miniapp|src/user/GlobalCell/GPS.c|src/user/GlobalCell/YT753.c|src/user/GlobalCell/CD723.c|src/user/GlobalCell/Cal2DVec.c|src/user/GlobalCell/KITransKO.c|src/user/GlobalCell/CalZPDir105.c|src/user/USER/EquipCfg/Const_RecMust.c|src/user/GlobalCell/Syn1588V1.c|src/user/GlobalCell/TwinKIChk.c|src/user/CommMon/IEC103_TaskStart.c|src/user/CommMon/PublicLP.c|src/user/GlobalCell/YKRly.c|src/user/CommMon/IEC103_Function.c|src/user/HardDrive/SetVlan.c|src/user/GlobalCell/CalVecSecHarm.c|src/user/GlobalCell/NetWork.c|src/user/GlobalCell/SynDBus.c|src/user/GlobalCell/SwthAna.c|src/OS_code/djyos/djyfs/ramfs|src/user/GlobalCell/CalBPDir.c|Lib/UART2_P1020RDB.UC.a|src/user/CommMon/NetPrn_Function.c|LCF/P1020RDB_ROM.lcf|src/user/CommCPU/MBusC.c|src/user/GlobalCell/OscillateBlock.c|src/OS_code/bsp/cpu_peripheral/elbc|src/user/GlobalCell/CalZeroVec.c|src/user/GlobalCell/Cal3I0ReactRly.c|src/user/GlobalCell/CalLineVec.c|src/user/GlobalCell/IOsysdir.c|src/user/GlobalCell/PhaseSync.c|src/user/GlobalCell/OpenRlyKO.c|src/OS_code/component|src/user/CommMon/IEC850_miscData.c|src/user/GlobalCell/CalBPIdIndex.c|src/user/GlobalCell/CalComCur.c|src/user/GlobalCell/Syn1588V2.c|src/user/GlobalCell/CalSynClose.c|src/user/NetDrive/MiscDrv.c|src/user/GlobalCell/Newton.c|src/user/GlobalCell/CalYcMea.c|src/user/RecQueue/PortFile.c|src/user/CommMon/NetPrn_Interface.c|src/monitor_src|src/user/GlobalCell/CalDudt.c|src/user/GlobalCell/GeWork.c|src/user/GlobalCell/Opti.c|src/user/GlobalCell/CalZLDWMea.c|src/user/PubServe/Hard_SIO.c|src/user/GlobalCell/CalVectorMea.c|Prefix/ROM_Version.prefix|src/user/GlobalCell/CalPosVec.c|src/user/GlobalCell/825Net.c|src/user/GlobalCell/CalBPHum.c|src/user/GlobalCell/CalSoftFr.c|src/user/GlobalCell/FrInter.c|src/OS_code/djyos/djyfs/flashfile|src/user/GlobalCell/IOCdir.c|src/user/GlobalCell/Wave.c|src/user/GlobalCell/CalBPSamIdIr.c|src/user/USER/EquipCfg/Const_IOcfg.c|src/user/GlobalCell/AD.c|src/user/GlobalCell/BusUnitBsMerg.c|src/user/GlobalCell/SttnLvlGoose.c|src/user/GlobalCell/Work761D.c|src/user/CommMon/DbgTool_Interface.c|src/user/GlobalCell/SynSec.c|src/user/USER/EquipCfg/Const_Wave.c|src/user/GlobalCell/CalMemVec.c|src/user/GlobalCell/BPVolOpen.c|Sources/reset.c|src/user/GlobalCell/Simulator.c|src/user/GlobalCell/CalVecHalfBase.c|src/user/CommMon/DbgTool_Function.c|src/user/CommMon/IEC103_ModelFile.c|src/user/CommMon/IEC850_Function.c|src/OS_code/djyos/djyfs/fat32|src/user/USER/EquipCfg/Const_Chk.c|src/user/GlobalCell/SynMU.c|src/user/USER/WB825MCPU|src/user/GlobalCell/BPPTBreak.c|src/user/NetDrive/Tcp.c|src/user/USER/EquipCfg/Const_Else.c|src/user/GlobalCell/FccWork.c|Prefix/Debug_Version.prefix" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -643,17 +629,9 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gkernel\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -678,17 +656,9 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gkernel\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -704,8 +674,8 @@
 							<tool id="com.freescale.pa.cdt.gcc.disassembler.eabi.e500v2.app.release.250506615" name="PowerPC EABI e500v2 Disassembler" superClass="com.freescale.pa.cdt.gcc.disassembler.eabi.e500v2.app.release"/>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.137622613.CFG/P1020RDB_init_ROM.tcl" name="P1020RDB_init_ROM.tcl" rcbsApplicability="disable" resourcePath="CFG/P1020RDB_init_ROM.tcl" toolsToInvoke=""/>
 					<fileInfo id="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.137622613.P1020RDB_README.txt" name="P1020RDB_README.txt" rcbsApplicability="disable" resourcePath="P1020RDB_README.txt" toolsToInvoke=""/>
+					<fileInfo id="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.137622613.CFG/P1020RDB_init_ROM.tcl" name="P1020RDB_init_ROM.tcl" rcbsApplicability="disable" resourcePath="CFG/P1020RDB_init_ROM.tcl" toolsToInvoke=""/>
 					<fileInfo id="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.137622613.src/miniapp/main.c" name="main_test.c" rcbsApplicability="disable" resourcePath="src/miniapp/main.c" toolsToInvoke="com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.debug.1140596046">
 						<tool id="com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.debug.1140596046" name="PowerPC EABI e500v2 C Compiler" superClass="com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.debug">
 							<option id="gnu.c.compiler.option.preprocessor.def.symbols.1814067033" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
@@ -1143,7 +1113,7 @@
 						<option id="com.freescale.pa.cdt.gcc.toolchain.sharedoption.arch.480450148" name="Architecture" superClass="com.freescale.pa.cdt.gcc.toolchain.sharedoption.arch" value="com.freescale.pa.cdt.gcc.toolchain.sharedoption.arch.e500v2" valueType="enumerated"/>
 					</backupToolOption>
 					<sourceEntries>
-						<entry excluding="src/vncserver/rfb_auth.c|src/vncserver/vnc_keyboard.c|src/vncserver/vnc_bmp.c|src/OS_code|src/OS_code/libc/libc/search|src/OS_code/libc/libc/locale|src/user/GlobalCell/BPVolJudge.c|src/user/GlobalCell/CalAnaMerge.c|src/user/USER/WB829SMV(未使用)|src/user/GlobalCell/QD7721.c|src/user/GlobalCell/Work7789V2.c|src/OS_code/lib/xmoden/xmodem.c|src/user/Print|src/user/GlobalCell/BrkFailCur.c|src/user/GlobalCell/SCRly.c|src/user/GlobalCell/DIStart.c|CFG/P1020RDB_init_ROM.tcl|src/user/GlobalCell/Phdir45.c|src/user/WB829SMV(未使用)|src/user/CommMon/DbgTool_ModelFile.c|Prefix/lib_ewl.prefix|P1020RDB_README.txt|src/user/USER/EquipCfg/Const_Print.c|src/user/GlobalCell/CalVecThHarm.c|src/user/GlobalCell/CalVecFivHarm.c|src/user/GlobalCell/CalCurState.c|src/user/GlobalCell/CalNegVec.c|src/user/PubServe/Fun_Data.c|src/user/GlobalCell/CalDisRelay.c|src/user/WB825MCPU|src/user/GlobalCell/SelPhaseWT.c|src/user/GlobalCell/CalKOMerge.c|src/user/CommMon/IEC850_Interface.c|src/user/GlobalCell/Work7789V1.c|src/user/GlobalCell/WFRly.c|src/OS_code/exp-component|src/user/NetDrive/Udp.c|src/miniapp|src/user/GlobalCell/GPS.c|src/user/GlobalCell/YT753.c|src/user/GlobalCell/CD723.c|src/user/GlobalCell/Cal2DVec.c|src/user/GlobalCell/KITransKO.c|src/user/GlobalCell/CalZPDir105.c|src/user/USER/EquipCfg/Const_RecMust.c|src/user/GlobalCell/Syn1588V1.c|src/user/GlobalCell/TwinKIChk.c|src/user/CommMon/IEC103_TaskStart.c|src/user/CommMon/PublicLP.c|src/user/GlobalCell/YKRly.c|src/user/CommMon/IEC103_Function.c|src/user/HardDrive/SetVlan.c|src/user/GlobalCell/CalVecSecHarm.c|src/user/GlobalCell/NetWork.c|src/user/GlobalCell/SynDBus.c|src/user/GlobalCell/SwthAna.c|src/OS_code/djyos/djyfs/ramfs|src/user/GlobalCell/CalBPDir.c|Lib/UART2_P1020RDB.UC.a|src/user/CommMon/NetPrn_Function.c|LCF/P1020RDB_ROM.lcf|src/user/CommCPU/MBusC.c|src/user/GlobalCell/OscillateBlock.c|src/OS_code/bsp/cpu_peripheral/elbc|src/user/GlobalCell/CalZeroVec.c|src/user/GlobalCell/Cal3I0ReactRly.c|src/user/GlobalCell/CalLineVec.c|src/user/GlobalCell/IOsysdir.c|src/user/GlobalCell/PhaseSync.c|src/user/GlobalCell/OpenRlyKO.c|src/OS_code/component|src/user/CommMon/IEC850_miscData.c|src/user/GlobalCell/CalBPIdIndex.c|src/user/GlobalCell/CalComCur.c|src/user/GlobalCell/Syn1588V2.c|src/user/GlobalCell/CalSynClose.c|src/user/NetDrive/MiscDrv.c|src/user/GlobalCell/Newton.c|src/user/GlobalCell/CalYcMea.c|src/user/RecQueue/PortFile.c|src/user/CommMon/NetPrn_Interface.c|src/monitor_src|src/user/GlobalCell/CalDudt.c|src/user/GlobalCell/GeWork.c|src/user/GlobalCell/Opti.c|src/user/GlobalCell/CalZLDWMea.c|src/user/PubServe/Hard_SIO.c|src/user/GlobalCell/CalVectorMea.c|Prefix/ROM_Version.prefix|src/user/GlobalCell/CalPosVec.c|src/user/GlobalCell/825Net.c|src/user/GlobalCell/CalBPHum.c|src/user/GlobalCell/CalSoftFr.c|src/user/GlobalCell/FrInter.c|src/OS_code/djyos/djyfs/flashfile|src/user/GlobalCell/IOCdir.c|src/user/GlobalCell/Wave.c|src/user/GlobalCell/CalBPSamIdIr.c|src/user/USER/EquipCfg/Const_IOcfg.c|src/user/GlobalCell/AD.c|src/user/GlobalCell/BusUnitBsMerg.c|src/user/GlobalCell/SttnLvlGoose.c|src/user/GlobalCell/Work761D.c|src/user/CommMon/DbgTool_Interface.c|src/user/GlobalCell/SynSec.c|src/user/USER/EquipCfg/Const_Wave.c|src/user/GlobalCell/CalMemVec.c|src/user/GlobalCell/BPVolOpen.c|Sources/reset.c|src/user/GlobalCell/Simulator.c|src/user/GlobalCell/CalVecHalfBase.c|src/user/CommMon/DbgTool_Function.c|src/user/CommMon/IEC103_ModelFile.c|src/user/CommMon/IEC850_Function.c|src/OS_code/djyos/djyfs/fat32|src/user/USER/EquipCfg/Const_Chk.c|src/user/GlobalCell/SynMU.c|src/user/USER/WB825MCPU|src/user/GlobalCell/BPPTBreak.c|src/user/NetDrive/Tcp.c|src/user/USER/EquipCfg/Const_Else.c|src/user/GlobalCell/FccWork.c|Prefix/Debug_Version.prefix" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/OS_prjcfg/config/exp_record_nor.c|src/vncserver/rfb_auth.c|src/vncserver/vnc_keyboard.c|src/vncserver/vnc_bmp.c|src/OS_code|src/OS_code/libc/libc/search|src/OS_code/libc/libc/locale|src/user/GlobalCell/BPVolJudge.c|src/user/GlobalCell/CalAnaMerge.c|src/user/USER/WB829SMV(未使用)|src/user/GlobalCell/QD7721.c|src/user/GlobalCell/Work7789V2.c|src/OS_code/lib/xmoden/xmodem.c|src/user/Print|src/user/GlobalCell/BrkFailCur.c|src/user/GlobalCell/SCRly.c|src/user/GlobalCell/DIStart.c|CFG/P1020RDB_init_ROM.tcl|src/user/GlobalCell/Phdir45.c|src/user/WB829SMV(未使用)|src/user/CommMon/DbgTool_ModelFile.c|Prefix/lib_ewl.prefix|P1020RDB_README.txt|src/user/USER/EquipCfg/Const_Print.c|src/user/GlobalCell/CalVecThHarm.c|src/user/GlobalCell/CalVecFivHarm.c|src/user/GlobalCell/CalCurState.c|src/user/GlobalCell/CalNegVec.c|src/user/PubServe/Fun_Data.c|src/user/GlobalCell/CalDisRelay.c|src/user/WB825MCPU|src/user/GlobalCell/SelPhaseWT.c|src/user/GlobalCell/CalKOMerge.c|src/user/CommMon/IEC850_Interface.c|src/user/GlobalCell/Work7789V1.c|src/user/GlobalCell/WFRly.c|src/OS_code/exp-component|src/user/NetDrive/Udp.c|src/miniapp|src/user/GlobalCell/GPS.c|src/user/GlobalCell/YT753.c|src/user/GlobalCell/CD723.c|src/user/GlobalCell/Cal2DVec.c|src/user/GlobalCell/KITransKO.c|src/user/GlobalCell/CalZPDir105.c|src/user/USER/EquipCfg/Const_RecMust.c|src/user/GlobalCell/Syn1588V1.c|src/user/GlobalCell/TwinKIChk.c|src/user/CommMon/IEC103_TaskStart.c|src/user/CommMon/PublicLP.c|src/user/GlobalCell/YKRly.c|src/user/CommMon/IEC103_Function.c|src/user/HardDrive/SetVlan.c|src/user/GlobalCell/CalVecSecHarm.c|src/user/GlobalCell/NetWork.c|src/user/GlobalCell/SynDBus.c|src/user/GlobalCell/SwthAna.c|src/OS_code/djyos/djyfs/ramfs|src/user/GlobalCell/CalBPDir.c|Lib/UART2_P1020RDB.UC.a|src/user/CommMon/NetPrn_Function.c|LCF/P1020RDB_ROM.lcf|src/user/CommCPU/MBusC.c|src/user/GlobalCell/OscillateBlock.c|src/OS_code/bsp/cpu_peripheral/elbc|src/user/GlobalCell/CalZeroVec.c|src/user/GlobalCell/Cal3I0ReactRly.c|src/user/GlobalCell/CalLineVec.c|src/user/GlobalCell/IOsysdir.c|src/user/GlobalCell/PhaseSync.c|src/user/GlobalCell/OpenRlyKO.c|src/OS_code/component|src/user/CommMon/IEC850_miscData.c|src/user/GlobalCell/CalBPIdIndex.c|src/user/GlobalCell/CalComCur.c|src/user/GlobalCell/Syn1588V2.c|src/user/GlobalCell/CalSynClose.c|src/user/NetDrive/MiscDrv.c|src/user/GlobalCell/Newton.c|src/user/GlobalCell/CalYcMea.c|src/user/RecQueue/PortFile.c|src/user/CommMon/NetPrn_Interface.c|src/monitor_src|src/user/GlobalCell/CalDudt.c|src/user/GlobalCell/GeWork.c|src/user/GlobalCell/Opti.c|src/user/GlobalCell/CalZLDWMea.c|src/user/PubServe/Hard_SIO.c|src/user/GlobalCell/CalVectorMea.c|Prefix/ROM_Version.prefix|src/user/GlobalCell/CalPosVec.c|src/user/GlobalCell/825Net.c|src/user/GlobalCell/CalBPHum.c|src/user/GlobalCell/CalSoftFr.c|src/user/GlobalCell/FrInter.c|src/OS_code/djyos/djyfs/flashfile|src/user/GlobalCell/IOCdir.c|src/user/GlobalCell/Wave.c|src/user/GlobalCell/CalBPSamIdIr.c|src/user/USER/EquipCfg/Const_IOcfg.c|src/user/GlobalCell/AD.c|src/user/GlobalCell/BusUnitBsMerg.c|src/user/GlobalCell/SttnLvlGoose.c|src/user/GlobalCell/Work761D.c|src/user/CommMon/DbgTool_Interface.c|src/user/GlobalCell/SynSec.c|src/user/USER/EquipCfg/Const_Wave.c|src/user/GlobalCell/CalMemVec.c|src/user/GlobalCell/BPVolOpen.c|Sources/reset.c|src/user/GlobalCell/Simulator.c|src/user/GlobalCell/CalVecHalfBase.c|src/user/CommMon/DbgTool_Function.c|src/user/CommMon/IEC103_ModelFile.c|src/user/CommMon/IEC850_Function.c|src/OS_code/djyos/djyfs/fat32|src/user/USER/EquipCfg/Const_Chk.c|src/user/GlobalCell/SynMU.c|src/user/USER/WB825MCPU|src/user/GlobalCell/BPPTBreak.c|src/user/NetDrive/Tcp.c|src/user/USER/EquipCfg/Const_Else.c|src/user/GlobalCell/FccWork.c|Prefix/Debug_Version.prefix" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -1196,17 +1166,9 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gkernel\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -1238,8 +1200,8 @@
 							<tool command="powerpc-eabispe-objdump" commandLinePattern="&quot;${PAGccEabiE500v2Dir}/${COMMAND}&quot; ${INPUTS} ${FLAGS}" errorParsers="" id="com.freescale.pa.cdt.gcc.disassembler.eabi.e500v2.static.lib.debug.1297905436" name="PowerPC EABI e500v2 Disassembler" superClass="com.freescale.pa.cdt.gcc.disassembler.eabi.e500v2.static.lib.debug"/>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.139883890.1889149906.CFG/P1020RDB_init_ROM.tcl" name="P1020RDB_init_ROM.tcl" rcbsApplicability="disable" resourcePath="CFG/P1020RDB_init_ROM.tcl" toolsToInvoke=""/>
 					<fileInfo id="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.139883890.1889149906.P1020RDB_README.txt" name="P1020RDB_README.txt" rcbsApplicability="disable" resourcePath="P1020RDB_README.txt" toolsToInvoke=""/>
+					<fileInfo id="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.139883890.1889149906.CFG/P1020RDB_init_ROM.tcl" name="P1020RDB_init_ROM.tcl" rcbsApplicability="disable" resourcePath="CFG/P1020RDB_init_ROM.tcl" toolsToInvoke=""/>
 					<fileInfo id="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.139883890.1889149906.src/miniapp/main.c" name="main_test.c" rcbsApplicability="disable" resourcePath="src/miniapp/main.c" toolsToInvoke="com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.debug.1022183491">
 						<tool errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.debug.1022183491" name="PowerPC EABI e500v2 C Compiler" superClass="com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.debug">
 							<option id="gnu.c.compiler.option.preprocessor.def.symbols.697374492" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
@@ -1299,17 +1261,9 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gkernel\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -1769,16 +1723,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\stdlib&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -1812,16 +1756,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -2009,16 +1943,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\stdlib&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -2062,16 +1986,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -2165,16 +2079,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\stdlib&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -2218,16 +2122,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -2238,7 +2132,7 @@
 						</option>
 					</backupToolOption>
 					<sourceEntries>
-						<entry excluding="src/vncserver|src/OS_code/exp_component|src/OS_code/bsp/boarddrv/exp_record_nor|src/OS_code/bsp/cpudrv/elbc|src/OS_code/component/gui|src/OS_prjcfg|src/OS_code/component/menu|src/OS_code/libc|src/OS_code/libc/libc/search|src/OS_code/libc/libc/locale|src/user|src/OS_code/exp-component|src/user/GlobalCell/BPVolJudge.c|src/user/GlobalCell/CalAnaMerge.c|src/user/USER/WB829SMV(未使用)|src/user/GlobalCell/QD7721.c|src/user/GlobalCell/Work7789V2.c|src/OS_code/lib/xmoden/xmodem.c|src/user/Print|src/user/GlobalCell/BrkFailCur.c|src/user/GlobalCell/SCRly.c|src/user/GlobalCell/DIStart.c|CFG/P1020RDB_init_ROM.tcl|src/user/GlobalCell/Phdir45.c|src/user/WB829SMV(未使用)|src/user/CommMon/DbgTool_ModelFile.c|Prefix/lib_ewl.prefix|P1020RDB_README.txt|src/user/USER/EquipCfg/Const_Print.c|src/user/GlobalCell/CalVecThHarm.c|src/user/GlobalCell/CalVecFivHarm.c|src/user/GlobalCell/CalCurState.c|src/user/critical|src/user/GlobalCell/CalNegVec.c|src/user/PubServe/Fun_Data.c|src/user/GlobalCell/CalDisRelay.c|src/user/WB825MCPU|src/user/GlobalCell/SelPhaseWT.c|src/user/GlobalCell/CalKOMerge.c|src/user/CommMon/IEC850_Interface.c|src/user/GlobalCell/Work7789V1.c|src/user/GlobalCell/WFRly.c|src/user/NetDrive/Udp.c|src/miniapp|src/user/GlobalCell/GPS.c|src/user/GlobalCell/YT753.c|src/user/GlobalCell/CD723.c|src/user/GlobalCell/Cal2DVec.c|src/user/GlobalCell/KITransKO.c|src/user/GlobalCell/CalZPDir105.c|src/user/USER/EquipCfg/Const_RecMust.c|src/user/GlobalCell/Syn1588V1.c|src/user/GlobalCell/TwinKIChk.c|src/user/CommMon/IEC103_TaskStart.c|src/user/CommMon/PublicLP.c|src/user/GlobalCell/YKRly.c|src/user/CommMon/IEC103_Function.c|src/user/HardDrive/SetVlan.c|src/user/GlobalCell/CalVecSecHarm.c|src/user/GlobalCell/NetWork.c|src/user/GlobalCell/SynDBus.c|src/user/GlobalCell/SwthAna.c|src/OS_code/djyos/djyfs/ramfs|src/user/GlobalCell/CalBPDir.c|Lib/UART2_P1020RDB.UC.a|src/user/CommMon/NetPrn_Function.c|LCF/P1020RDB_ROM.lcf|src/user/CommCPU/MBusC.c|src/user/GlobalCell/OscillateBlock.c|src/OS_code/bsp/cpu_peripheral/elbc|src/user/GlobalCell/CalZeroVec.c|src/user/GlobalCell/Cal3I0ReactRly.c|src/user/GlobalCell/CalLineVec.c|src/user/GlobalCell/IOsysdir.c|src/user/GlobalCell/PhaseSync.c|src/user/GlobalCell/OpenRlyKO.c|src/user/CommMon/IEC850_miscData.c|src/user/GlobalCell/CalBPIdIndex.c|src/user/GlobalCell/CalComCur.c|src/user/GlobalCell/Syn1588V2.c|src/user/GlobalCell/CalSynClose.c|src/user/NetDrive/MiscDrv.c|src/user/GlobalCell/Newton.c|src/user/GlobalCell/CalYcMea.c|src/user/RecQueue/PortFile.c|src/user/CommMon/NetPrn_Interface.c|src/monitor_src|src/user/GlobalCell/CalDudt.c|src/user/GlobalCell/GeWork.c|src/user/GlobalCell/Opti.c|src/user/GlobalCell/CalZLDWMea.c|src/user/PubServe/Hard_SIO.c|src/user/GlobalCell/CalVectorMea.c|Prefix/ROM_Version.prefix|src/user/GlobalCell/CalPosVec.c|src/user/GlobalCell/825Net.c|src/user/GlobalCell/CalBPHum.c|src/user/GlobalCell/CalSoftFr.c|src/user/GlobalCell/FrInter.c|src/OS_code/djyos/djyfs/flashfile|src/user/GlobalCell/IOCdir.c|src/user/GlobalCell/Wave.c|src/user/GlobalCell/CalBPSamIdIr.c|src/user/USER/EquipCfg/Const_IOcfg.c|src/user/GlobalCell/SttnLvlGoose.c|src/user/GlobalCell/Work761D.c|src/user/GlobalCell/BusUnitBsMerg.c|src/user/GlobalCell/AD.c|src/user/CommMon/DbgTool_Interface.c|src/user/GlobalCell/SynSec.c|src/user/USER/EquipCfg/Const_Wave.c|src/user/GlobalCell/CalMemVec.c|Sources/reset.c|src/user/GlobalCell/BPVolOpen.c|src/user/GlobalCell/Simulator.c|src/user/CommMon/DbgTool_Function.c|src/user/GlobalCell/CalVecHalfBase.c|src/OS_code/djyos/djyfs/fat32|src/user/CommMon/IEC850_Function.c|src/user/CommMon/IEC103_ModelFile.c|src/user/USER/EquipCfg/Const_Chk.c|src/user/GlobalCell/SynMU.c|src/user/USER/WB825MCPU|src/user/GlobalCell/BPPTBreak.c|src/user/USER/EquipCfg/Const_Else.c|src/user/NetDrive/Tcp.c|src/user/GlobalCell/FccWork.c|Prefix/Debug_Version.prefix" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/OS_code/bsp/cpudrv/net|src/OS_code/component/djyfs/yaffs2|src/OS_code/component/djyfs/fat|src/vncserver|src/OS_code/exp_component|src/OS_code/bsp/boarddrv/exp_record_nor|src/OS_code/bsp/cpudrv/elbc|src/OS_code/component/gui|src/OS_prjcfg|src/OS_code/component/menu|src/OS_code/libc|src/OS_code/libc/libc/search|src/OS_code/libc/libc/locale|src/user|src/OS_code/exp-component|src/user/GlobalCell/BPVolJudge.c|src/user/GlobalCell/CalAnaMerge.c|src/user/USER/WB829SMV(未使用)|src/user/GlobalCell/QD7721.c|src/user/GlobalCell/Work7789V2.c|src/OS_code/lib/xmoden/xmodem.c|src/user/Print|src/user/GlobalCell/BrkFailCur.c|src/user/GlobalCell/SCRly.c|src/user/GlobalCell/DIStart.c|CFG/P1020RDB_init_ROM.tcl|src/user/GlobalCell/Phdir45.c|src/user/WB829SMV(未使用)|src/user/CommMon/DbgTool_ModelFile.c|Prefix/lib_ewl.prefix|P1020RDB_README.txt|src/user/USER/EquipCfg/Const_Print.c|src/user/GlobalCell/CalVecThHarm.c|src/user/GlobalCell/CalVecFivHarm.c|src/user/GlobalCell/CalCurState.c|src/user/critical|src/user/GlobalCell/CalNegVec.c|src/user/PubServe/Fun_Data.c|src/user/GlobalCell/CalDisRelay.c|src/user/WB825MCPU|src/user/GlobalCell/SelPhaseWT.c|src/user/GlobalCell/CalKOMerge.c|src/user/CommMon/IEC850_Interface.c|src/user/GlobalCell/Work7789V1.c|src/user/GlobalCell/WFRly.c|src/user/NetDrive/Udp.c|src/miniapp|src/user/GlobalCell/GPS.c|src/user/GlobalCell/YT753.c|src/user/GlobalCell/CD723.c|src/user/GlobalCell/Cal2DVec.c|src/user/GlobalCell/KITransKO.c|src/user/GlobalCell/CalZPDir105.c|src/user/USER/EquipCfg/Const_RecMust.c|src/user/GlobalCell/Syn1588V1.c|src/user/GlobalCell/TwinKIChk.c|src/user/CommMon/IEC103_TaskStart.c|src/user/CommMon/PublicLP.c|src/user/GlobalCell/YKRly.c|src/user/CommMon/IEC103_Function.c|src/user/HardDrive/SetVlan.c|src/user/GlobalCell/CalVecSecHarm.c|src/user/GlobalCell/NetWork.c|src/user/GlobalCell/SynDBus.c|src/user/GlobalCell/SwthAna.c|src/OS_code/djyos/djyfs/ramfs|src/user/GlobalCell/CalBPDir.c|Lib/UART2_P1020RDB.UC.a|src/user/CommMon/NetPrn_Function.c|LCF/P1020RDB_ROM.lcf|src/user/CommCPU/MBusC.c|src/user/GlobalCell/OscillateBlock.c|src/OS_code/bsp/cpu_peripheral/elbc|src/user/GlobalCell/CalZeroVec.c|src/user/GlobalCell/Cal3I0ReactRly.c|src/user/GlobalCell/CalLineVec.c|src/user/GlobalCell/IOsysdir.c|src/user/GlobalCell/PhaseSync.c|src/user/GlobalCell/OpenRlyKO.c|src/user/CommMon/IEC850_miscData.c|src/user/GlobalCell/CalBPIdIndex.c|src/user/GlobalCell/CalComCur.c|src/user/GlobalCell/Syn1588V2.c|src/user/GlobalCell/CalSynClose.c|src/user/NetDrive/MiscDrv.c|src/user/GlobalCell/Newton.c|src/user/GlobalCell/CalYcMea.c|src/user/RecQueue/PortFile.c|src/user/CommMon/NetPrn_Interface.c|src/monitor_src|src/user/GlobalCell/CalDudt.c|src/user/GlobalCell/GeWork.c|src/user/GlobalCell/Opti.c|src/user/GlobalCell/CalZLDWMea.c|src/user/PubServe/Hard_SIO.c|src/user/GlobalCell/CalVectorMea.c|Prefix/ROM_Version.prefix|src/user/GlobalCell/CalPosVec.c|src/user/GlobalCell/825Net.c|src/user/GlobalCell/CalBPHum.c|src/user/GlobalCell/CalSoftFr.c|src/user/GlobalCell/FrInter.c|src/OS_code/djyos/djyfs/flashfile|src/user/GlobalCell/IOCdir.c|src/user/GlobalCell/Wave.c|src/user/GlobalCell/CalBPSamIdIr.c|src/user/USER/EquipCfg/Const_IOcfg.c|src/user/GlobalCell/SttnLvlGoose.c|src/user/GlobalCell/Work761D.c|src/user/GlobalCell/BusUnitBsMerg.c|src/user/GlobalCell/AD.c|src/user/CommMon/DbgTool_Interface.c|src/user/GlobalCell/SynSec.c|src/user/USER/EquipCfg/Const_Wave.c|src/user/GlobalCell/CalMemVec.c|Sources/reset.c|src/user/GlobalCell/BPVolOpen.c|src/user/GlobalCell/Simulator.c|src/user/CommMon/DbgTool_Function.c|src/user/GlobalCell/CalVecHalfBase.c|src/OS_code/djyos/djyfs/fat32|src/user/CommMon/IEC850_Function.c|src/user/CommMon/IEC103_ModelFile.c|src/user/USER/EquipCfg/Const_Chk.c|src/user/GlobalCell/SynMU.c|src/user/USER/WB825MCPU|src/user/GlobalCell/BPPTBreak.c|src/user/USER/EquipCfg/Const_Else.c|src/user/NetDrive/Tcp.c|src/user/GlobalCell/FccWork.c|Prefix/Debug_Version.prefix" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -2291,16 +2185,9 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gkernel\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -2309,8 +2196,6 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\cpudrv\p1020\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv\board\P1020RDB\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;F:\TRUNK\djyos\djysrc\bsp\chipdrv\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1625005147" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="NDBEUG=1"/>
@@ -2333,8 +2218,8 @@
 							<tool command="powerpc-eabispe-objdump" commandLinePattern="&quot;${PAGccEabiE500v2Dir}/${COMMAND}&quot; ${INPUTS} ${FLAGS}" errorParsers="" id="com.freescale.pa.cdt.gcc.disassembler.eabi.e500v2.static.lib.debug.2000566978" name="PowerPC EABI e500v2 Disassembler" superClass="com.freescale.pa.cdt.gcc.disassembler.eabi.e500v2.static.lib.debug"/>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.139883890.713596908.P1020RDB_README.txt" name="P1020RDB_README.txt" rcbsApplicability="disable" resourcePath="P1020RDB_README.txt" toolsToInvoke=""/>
 					<fileInfo id="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.139883890.713596908.CFG/P1020RDB_init_ROM.tcl" name="P1020RDB_init_ROM.tcl" rcbsApplicability="disable" resourcePath="CFG/P1020RDB_init_ROM.tcl" toolsToInvoke=""/>
+					<fileInfo id="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.139883890.713596908.P1020RDB_README.txt" name="P1020RDB_README.txt" rcbsApplicability="disable" resourcePath="P1020RDB_README.txt" toolsToInvoke=""/>
 					<fileInfo id="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.139883890.713596908.src/miniapp/main.c" name="main_test.c" rcbsApplicability="disable" resourcePath="src/miniapp/main.c" toolsToInvoke="com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.debug.1300248303">
 						<tool errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.debug.1300248303" name="PowerPC EABI e500v2 C Compiler" superClass="com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.debug">
 							<option id="gnu.c.compiler.option.preprocessor.def.symbols.383628355" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
@@ -2394,16 +2279,9 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gkernel\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -2412,8 +2290,6 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\cpudrv\p1020\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv\board\P1020RDB\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;F:\TRUNK\djyos\djysrc\bsp\chipdrv\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1722977358" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="release"/>
@@ -2864,16 +2740,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\stdlib&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -2907,16 +2773,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -3104,16 +2960,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\stdlib&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -3157,16 +3003,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -3260,16 +3096,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\stdlib&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -3313,16 +3139,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -3333,7 +3149,7 @@
 						</option>
 					</backupToolOption>
 					<sourceEntries>
-						<entry excluding="src/vncserver|src/OS_code/exp_component|src/OS_code/bsp/boarddrv/exp_record_nor|src/OS_code/bsp/cpudrv/elbc|src/OS_code/component/gui|src/OS_prjcfg|src/OS_code/component/menu|src/OS_code/libc|src/OS_code/libc/libc/search|src/OS_code/libc/libc/locale|src/user|src/OS_code/exp-component|src/user/GlobalCell/BPVolJudge.c|src/user/GlobalCell/CalAnaMerge.c|src/user/USER/WB829SMV(未使用)|src/user/GlobalCell/QD7721.c|src/user/GlobalCell/Work7789V2.c|src/OS_code/lib/xmoden/xmodem.c|src/user/Print|src/user/GlobalCell/BrkFailCur.c|src/user/GlobalCell/SCRly.c|src/user/GlobalCell/DIStart.c|CFG/P1020RDB_init_ROM.tcl|src/user/GlobalCell/Phdir45.c|src/user/WB829SMV(未使用)|src/user/CommMon/DbgTool_ModelFile.c|Prefix/lib_ewl.prefix|P1020RDB_README.txt|src/user/USER/EquipCfg/Const_Print.c|src/user/GlobalCell/CalVecThHarm.c|src/user/GlobalCell/CalVecFivHarm.c|src/user/GlobalCell/CalCurState.c|src/user/critical|src/user/GlobalCell/CalNegVec.c|src/user/PubServe/Fun_Data.c|src/user/GlobalCell/CalDisRelay.c|src/user/WB825MCPU|src/user/GlobalCell/SelPhaseWT.c|src/user/GlobalCell/CalKOMerge.c|src/user/CommMon/IEC850_Interface.c|src/user/GlobalCell/Work7789V1.c|src/user/GlobalCell/WFRly.c|src/user/NetDrive/Udp.c|src/miniapp|src/user/GlobalCell/GPS.c|src/user/GlobalCell/YT753.c|src/user/GlobalCell/CD723.c|src/user/GlobalCell/Cal2DVec.c|src/user/GlobalCell/KITransKO.c|src/user/GlobalCell/CalZPDir105.c|src/user/USER/EquipCfg/Const_RecMust.c|src/user/GlobalCell/Syn1588V1.c|src/user/GlobalCell/TwinKIChk.c|src/user/CommMon/IEC103_TaskStart.c|src/user/CommMon/PublicLP.c|src/user/GlobalCell/YKRly.c|src/user/CommMon/IEC103_Function.c|src/user/HardDrive/SetVlan.c|src/user/GlobalCell/CalVecSecHarm.c|src/user/GlobalCell/NetWork.c|src/user/GlobalCell/SynDBus.c|src/user/GlobalCell/SwthAna.c|src/OS_code/djyos/djyfs/ramfs|src/user/GlobalCell/CalBPDir.c|Lib/UART2_P1020RDB.UC.a|src/user/CommMon/NetPrn_Function.c|LCF/P1020RDB_ROM.lcf|src/user/CommCPU/MBusC.c|src/user/GlobalCell/OscillateBlock.c|src/OS_code/bsp/cpu_peripheral/elbc|src/user/GlobalCell/CalZeroVec.c|src/user/GlobalCell/Cal3I0ReactRly.c|src/user/GlobalCell/CalLineVec.c|src/user/GlobalCell/IOsysdir.c|src/user/GlobalCell/PhaseSync.c|src/user/GlobalCell/OpenRlyKO.c|src/user/CommMon/IEC850_miscData.c|src/user/GlobalCell/CalBPIdIndex.c|src/user/GlobalCell/CalComCur.c|src/user/GlobalCell/Syn1588V2.c|src/user/GlobalCell/CalSynClose.c|src/user/NetDrive/MiscDrv.c|src/user/GlobalCell/Newton.c|src/user/GlobalCell/CalYcMea.c|src/user/RecQueue/PortFile.c|src/user/CommMon/NetPrn_Interface.c|src/monitor_src|src/user/GlobalCell/CalDudt.c|src/user/GlobalCell/GeWork.c|src/user/GlobalCell/Opti.c|src/user/GlobalCell/CalZLDWMea.c|src/user/PubServe/Hard_SIO.c|src/user/GlobalCell/CalVectorMea.c|Prefix/ROM_Version.prefix|src/user/GlobalCell/CalPosVec.c|src/user/GlobalCell/825Net.c|src/user/GlobalCell/CalBPHum.c|src/user/GlobalCell/CalSoftFr.c|src/user/GlobalCell/FrInter.c|src/OS_code/djyos/djyfs/flashfile|src/user/GlobalCell/IOCdir.c|src/user/GlobalCell/Wave.c|src/user/GlobalCell/CalBPSamIdIr.c|src/user/USER/EquipCfg/Const_IOcfg.c|src/user/GlobalCell/SttnLvlGoose.c|src/user/GlobalCell/Work761D.c|src/user/GlobalCell/BusUnitBsMerg.c|src/user/GlobalCell/AD.c|src/user/CommMon/DbgTool_Interface.c|src/user/GlobalCell/SynSec.c|src/user/USER/EquipCfg/Const_Wave.c|src/user/GlobalCell/CalMemVec.c|Sources/reset.c|src/user/GlobalCell/BPVolOpen.c|src/user/GlobalCell/Simulator.c|src/user/CommMon/DbgTool_Function.c|src/user/GlobalCell/CalVecHalfBase.c|src/OS_code/djyos/djyfs/fat32|src/user/CommMon/IEC850_Function.c|src/user/CommMon/IEC103_ModelFile.c|src/user/USER/EquipCfg/Const_Chk.c|src/user/GlobalCell/SynMU.c|src/user/USER/WB825MCPU|src/user/GlobalCell/BPPTBreak.c|src/user/USER/EquipCfg/Const_Else.c|src/user/NetDrive/Tcp.c|src/user/GlobalCell/FccWork.c|Prefix/Debug_Version.prefix" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/OS_code/bsp/cpudrv/net|src/OS_code/component/djyfs/yaffs2|src/OS_code/component/djyfs/fat|src/vncserver|src/OS_code/exp_component|src/OS_code/bsp/boarddrv/exp_record_nor|src/OS_code/bsp/cpudrv/elbc|src/OS_code/component/gui|src/OS_prjcfg|src/OS_code/component/menu|src/OS_code/libc|src/OS_code/libc/libc/search|src/OS_code/libc/libc/locale|src/user|src/OS_code/exp-component|src/user/GlobalCell/BPVolJudge.c|src/user/GlobalCell/CalAnaMerge.c|src/user/USER/WB829SMV(未使用)|src/user/GlobalCell/QD7721.c|src/user/GlobalCell/Work7789V2.c|src/OS_code/lib/xmoden/xmodem.c|src/user/Print|src/user/GlobalCell/BrkFailCur.c|src/user/GlobalCell/SCRly.c|src/user/GlobalCell/DIStart.c|CFG/P1020RDB_init_ROM.tcl|src/user/GlobalCell/Phdir45.c|src/user/WB829SMV(未使用)|src/user/CommMon/DbgTool_ModelFile.c|Prefix/lib_ewl.prefix|P1020RDB_README.txt|src/user/USER/EquipCfg/Const_Print.c|src/user/GlobalCell/CalVecThHarm.c|src/user/GlobalCell/CalVecFivHarm.c|src/user/GlobalCell/CalCurState.c|src/user/critical|src/user/GlobalCell/CalNegVec.c|src/user/PubServe/Fun_Data.c|src/user/GlobalCell/CalDisRelay.c|src/user/WB825MCPU|src/user/GlobalCell/SelPhaseWT.c|src/user/GlobalCell/CalKOMerge.c|src/user/CommMon/IEC850_Interface.c|src/user/GlobalCell/Work7789V1.c|src/user/GlobalCell/WFRly.c|src/user/NetDrive/Udp.c|src/miniapp|src/user/GlobalCell/GPS.c|src/user/GlobalCell/YT753.c|src/user/GlobalCell/CD723.c|src/user/GlobalCell/Cal2DVec.c|src/user/GlobalCell/KITransKO.c|src/user/GlobalCell/CalZPDir105.c|src/user/USER/EquipCfg/Const_RecMust.c|src/user/GlobalCell/Syn1588V1.c|src/user/GlobalCell/TwinKIChk.c|src/user/CommMon/IEC103_TaskStart.c|src/user/CommMon/PublicLP.c|src/user/GlobalCell/YKRly.c|src/user/CommMon/IEC103_Function.c|src/user/HardDrive/SetVlan.c|src/user/GlobalCell/CalVecSecHarm.c|src/user/GlobalCell/NetWork.c|src/user/GlobalCell/SynDBus.c|src/user/GlobalCell/SwthAna.c|src/OS_code/djyos/djyfs/ramfs|src/user/GlobalCell/CalBPDir.c|Lib/UART2_P1020RDB.UC.a|src/user/CommMon/NetPrn_Function.c|LCF/P1020RDB_ROM.lcf|src/user/CommCPU/MBusC.c|src/user/GlobalCell/OscillateBlock.c|src/OS_code/bsp/cpu_peripheral/elbc|src/user/GlobalCell/CalZeroVec.c|src/user/GlobalCell/Cal3I0ReactRly.c|src/user/GlobalCell/CalLineVec.c|src/user/GlobalCell/IOsysdir.c|src/user/GlobalCell/PhaseSync.c|src/user/GlobalCell/OpenRlyKO.c|src/user/CommMon/IEC850_miscData.c|src/user/GlobalCell/CalBPIdIndex.c|src/user/GlobalCell/CalComCur.c|src/user/GlobalCell/Syn1588V2.c|src/user/GlobalCell/CalSynClose.c|src/user/NetDrive/MiscDrv.c|src/user/GlobalCell/Newton.c|src/user/GlobalCell/CalYcMea.c|src/user/RecQueue/PortFile.c|src/user/CommMon/NetPrn_Interface.c|src/monitor_src|src/user/GlobalCell/CalDudt.c|src/user/GlobalCell/GeWork.c|src/user/GlobalCell/Opti.c|src/user/GlobalCell/CalZLDWMea.c|src/user/PubServe/Hard_SIO.c|src/user/GlobalCell/CalVectorMea.c|Prefix/ROM_Version.prefix|src/user/GlobalCell/CalPosVec.c|src/user/GlobalCell/825Net.c|src/user/GlobalCell/CalBPHum.c|src/user/GlobalCell/CalSoftFr.c|src/user/GlobalCell/FrInter.c|src/OS_code/djyos/djyfs/flashfile|src/user/GlobalCell/IOCdir.c|src/user/GlobalCell/Wave.c|src/user/GlobalCell/CalBPSamIdIr.c|src/user/USER/EquipCfg/Const_IOcfg.c|src/user/GlobalCell/SttnLvlGoose.c|src/user/GlobalCell/Work761D.c|src/user/GlobalCell/BusUnitBsMerg.c|src/user/GlobalCell/AD.c|src/user/CommMon/DbgTool_Interface.c|src/user/GlobalCell/SynSec.c|src/user/USER/EquipCfg/Const_Wave.c|src/user/GlobalCell/CalMemVec.c|Sources/reset.c|src/user/GlobalCell/BPVolOpen.c|src/user/GlobalCell/Simulator.c|src/user/CommMon/DbgTool_Function.c|src/user/GlobalCell/CalVecHalfBase.c|src/OS_code/djyos/djyfs/fat32|src/user/CommMon/IEC850_Function.c|src/user/CommMon/IEC103_ModelFile.c|src/user/USER/EquipCfg/Const_Chk.c|src/user/GlobalCell/SynMU.c|src/user/USER/WB825MCPU|src/user/GlobalCell/BPPTBreak.c|src/user/USER/EquipCfg/Const_Else.c|src/user/NetDrive/Tcp.c|src/user/GlobalCell/FccWork.c|Prefix/Debug_Version.prefix" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -3386,12 +3202,13 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}\src\OS_prjcfg\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\P1020RDB&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.614560398" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="NDEBUG=1"/>
@@ -3406,16 +3223,9 @@
 								<option id="gnu.both.asm.option.include.paths.1062449375" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -3492,12 +3302,13 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}\src\OS_prjcfg\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\P1020RDB&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1355538653" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="release"/>
@@ -3514,16 +3325,9 @@
 								<option id="gnu.both.asm.option.include.paths.459099784" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -3979,16 +3783,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -4183,16 +3977,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\stdlib&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -4234,16 +4018,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -4332,16 +4106,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\stdlib&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -4383,16 +4147,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -4441,16 +4195,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\stdlib&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -4492,16 +4236,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -4725,16 +4459,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\stdlib&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -4776,16 +4500,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -4849,12 +4563,13 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}\src\OS_prjcfg\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\P1020RDB&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.359009148" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
@@ -4869,17 +4584,9 @@
 								<option id="gnu.both.asm.option.include.paths.56727252" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -4898,8 +4605,8 @@
 							<tool command="powerpc-eabispe-objdump" commandLinePattern="&quot;${PAGccEabiE500v2Dir}/${COMMAND}&quot; ${INPUTS} ${FLAGS}" errorParsers="" id="com.freescale.pa.cdt.gcc.disassembler.eabi.e500v2.static.lib.debug.1708805183" name="PowerPC EABI e500v2 Disassembler" superClass="com.freescale.pa.cdt.gcc.disassembler.eabi.e500v2.static.lib.debug"/>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.1954387317.270413106.65366993.P1020RDB_README.txt" name="P1020RDB_README.txt" rcbsApplicability="disable" resourcePath="P1020RDB_README.txt" toolsToInvoke=""/>
 					<fileInfo id="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.1954387317.270413106.65366993.CFG/P1020RDB_init_ROM.tcl" name="P1020RDB_init_ROM.tcl" rcbsApplicability="disable" resourcePath="CFG/P1020RDB_init_ROM.tcl" toolsToInvoke=""/>
+					<fileInfo id="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.1954387317.270413106.65366993.P1020RDB_README.txt" name="P1020RDB_README.txt" rcbsApplicability="disable" resourcePath="P1020RDB_README.txt" toolsToInvoke=""/>
 					<fileInfo id="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.1954387317.270413106.65366993.src/miniapp/main.c" name="main_test.c" rcbsApplicability="disable" resourcePath="src/miniapp/main.c" toolsToInvoke="com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.debug.1607494928">
 						<tool errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.debug.1607494928" name="PowerPC EABI e500v2 C Compiler" superClass="com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.debug">
 							<option id="gnu.c.compiler.option.preprocessor.def.symbols.1613511327" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
@@ -4956,12 +4663,13 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}\src\OS_prjcfg\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\P1020RDB&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.166567156" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="release"/>
@@ -4978,17 +4686,9 @@
 								<option id="gnu.both.asm.option.include.paths.1025717493" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -5444,16 +5144,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -5648,16 +5338,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\stdlib&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -5699,16 +5379,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -5797,16 +5467,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\stdlib&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -5848,16 +5508,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -5906,16 +5556,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\stdlib&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -5957,16 +5597,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -6190,16 +5820,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\stdlib&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -6241,16 +5861,6 @@
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\easynorflash\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyfs\flashfile\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip\&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gkernel\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\menu\include&quot;"/>
-							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\wdt\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si\&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\common\include&quot;"/>
 							<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\ppc\freescale\E500V2\P10XX\P1020\include&quot;"/>
@@ -6344,19 +5954,6 @@
 				</scannerInfoProvider>
 			</profile>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.freescale.ppc.debug.toolchain.configuration.1200547750;com.freescale.ppc.debug.toolchain.configuration.1200547750.;com.freescale.pa.cdt.gcc.elf.compiler.debug.1934500134;cdt.managedbuild.tool.gnu.c.compiler.input.896730690">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.freescale.pa.cdt.toolchain.elf.discoveryProfile"/>
-			<profile id="com.freescale.pa.cdt.toolchain.elf.discoveryProfile">
-				<buildOutputProvider>
-					<openAction enabled="true" filePath=""/>
-					<parser enabled="false"/>
-				</buildOutputProvider>
-				<scannerInfoProvider id="specsFile">
-					<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="C:\Program Files\Ronetix\powerpc-eabi\bin\powerpc-eabi-gcc.exe" useDefault="true"/>
-					<parser enabled="true"/>
-				</scannerInfoProvider>
-			</profile>
-		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="com.freescale.ppc.debug.toolchain.configuration.1200547750.1020159349;com.freescale.ppc.debug.toolchain.configuration.1200547750.1020159349.;com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.debug.540195535;com.freescale.pa.cdt.gcc.toolchain.c.compiler.eabi.e500v2.input.1970728857">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.freescale.pa.cdt.toolchain.eabi.e500v2.discoveryProfile"/>
 			<profile id="com.freescale.pa.cdt.toolchain.eabi.e500v2.discoveryProfile">
@@ -6376,6 +5973,19 @@
 				</buildOutputProvider>
 				<scannerInfoProvider id="specsFile">
 					<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="${PAGccLinuxDir}/powerpc-linux-gnu-gcc" useDefault="true"/>
+					<parser enabled="true"/>
+				</scannerInfoProvider>
+			</profile>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.freescale.ppc.debug.toolchain.configuration.1200547750;com.freescale.ppc.debug.toolchain.configuration.1200547750.;com.freescale.pa.cdt.gcc.elf.compiler.debug.1934500134;cdt.managedbuild.tool.gnu.c.compiler.input.896730690">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.freescale.pa.cdt.toolchain.elf.discoveryProfile"/>
+			<profile id="com.freescale.pa.cdt.toolchain.elf.discoveryProfile">
+				<buildOutputProvider>
+					<openAction enabled="true" filePath=""/>
+					<parser enabled="false"/>
+				</buildOutputProvider>
+				<scannerInfoProvider id="specsFile">
+					<runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="C:\Program Files\Ronetix\powerpc-eabi\bin\powerpc-eabi-gcc.exe" useDefault="true"/>
 					<parser enabled="true"/>
 				</scannerInfoProvider>
 			</profile>
@@ -6448,7 +6058,7 @@
 				</scannerInfoProvider>
 			</profile>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.1954387317;com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.1954387317.;com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.static.lib.debug.1833936658;com.freescale.pa.cdt.gcc.toolchain.c.compiler.eabi.e500v2.input.40383659">
+		<scannerConfigBuildInfo instanceId="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.139883890;com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.139883890.;com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.static.lib.debug.1688373468;com.freescale.pa.cdt.gcc.toolchain.c.compiler.eabi.e500v2.input.802472912">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.freescale.pa.cdt.toolchain.eabi.e500v2.discoveryProfile"/>
 			<profile id="com.freescale.pa.cdt.toolchain.eabi.e500v2.discoveryProfile">
 				<buildOutputProvider>
@@ -6471,7 +6081,7 @@
 				</scannerInfoProvider>
 			</profile>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.139883890;com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.139883890.;com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.static.lib.debug.1688373468;com.freescale.pa.cdt.gcc.toolchain.c.compiler.eabi.e500v2.input.802472912">
+		<scannerConfigBuildInfo instanceId="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.1954387317;com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.1954387317.;com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.static.lib.debug.1833936658;com.freescale.pa.cdt.gcc.toolchain.c.compiler.eabi.e500v2.input.40383659">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.freescale.pa.cdt.toolchain.eabi.e500v2.discoveryProfile"/>
 			<profile id="com.freescale.pa.cdt.toolchain.eabi.e500v2.discoveryProfile">
 				<buildOutputProvider>
@@ -6677,7 +6287,7 @@
 				</scannerInfoProvider>
 			</profile>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.1937138643;com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.1937138643.;com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.release.122482994;com.freescale.pa.cdt.gcc.toolchain.c.compiler.eabi.e500v2.input.2113155593">
+		<scannerConfigBuildInfo instanceId="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.869312658;com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.869312658.;com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.debug.801501357;com.freescale.pa.cdt.gcc.toolchain.c.compiler.eabi.e500v2.input.1028350981">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.freescale.pa.cdt.toolchain.eabi.e500v2.discoveryProfile"/>
 			<profile id="com.freescale.pa.cdt.toolchain.eabi.e500v2.discoveryProfile">
 				<buildOutputProvider>
@@ -6700,7 +6310,7 @@
 				</scannerInfoProvider>
 			</profile>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.869312658;com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.869312658.;com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.debug.801501357;com.freescale.pa.cdt.gcc.toolchain.c.compiler.eabi.e500v2.input.1028350981">
+		<scannerConfigBuildInfo instanceId="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.1937138643;com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.1937138643.;com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.release.122482994;com.freescale.pa.cdt.gcc.toolchain.c.compiler.eabi.e500v2.input.2113155593">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.freescale.pa.cdt.toolchain.eabi.e500v2.discoveryProfile"/>
 			<profile id="com.freescale.pa.cdt.toolchain.eabi.e500v2.discoveryProfile">
 				<buildOutputProvider>
@@ -6752,6 +6362,9 @@
 				</scannerInfoProvider>
 			</profile>
 		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.1360482871;com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.1360482871.;com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.release.829529053;com.freescale.pa.cdt.gcc.toolchain.c.compiler.eabi.e500v2.input.1215356875">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.freescale.pa.cdt.toolchain.eabi.e500v2.discoveryProfile"/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="com.freescale.ppc.debug.toolchain.configuration.1200547750;com.freescale.ppc.debug.toolchain.configuration.1200547750.;com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.debug.1366582120;com.freescale.pa.cdt.gcc.toolchain.c.compiler.eabi.e500v2.input.664705309">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.freescale.pa.cdt.toolchain.eabi.e500v2.discoveryProfile"/>
 			<profile id="com.freescale.pa.cdt.toolchain.eabi.e500v2.discoveryProfile">
@@ -6774,9 +6387,6 @@
 					<parser enabled="true"/>
 				</scannerInfoProvider>
 			</profile>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.1360482871;com.freescale.ppc.debug.toolchain.configuration.1200547750.217486173.1360482871.;com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.release.829529053;com.freescale.pa.cdt.gcc.toolchain.c.compiler.eabi.e500v2.input.1215356875">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.freescale.pa.cdt.toolchain.eabi.e500v2.discoveryProfile"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="com.freescale.ppc.debug.toolchain.configuration.1200547750.1020159349.1414429718;com.freescale.ppc.debug.toolchain.configuration.1200547750.1020159349.1414429718.;com.freescale.pa.cdt.gcc.compiler.eabi.e500v2.app.debug.1554453998;com.freescale.pa.cdt.gcc.toolchain.c.compiler.eabi.e500v2.input.1360152146">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.freescale.pa.cdt.toolchain.eabi.e500v2.discoveryProfile"/>

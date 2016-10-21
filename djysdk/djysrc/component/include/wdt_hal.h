@@ -57,11 +57,11 @@
 #include "stdint.h"
 
 //看门狗硬件的基本信息
- struct tagWdtHalChipInfo
+ struct WdtHalChipInfo
 {
-	char*  wdtchip_name;             //chip名字             
-	u32    wdtchip_cycle;            //chip cycle,硬件周期
-	bool_t (*wdtchip_feed)(void);    //chip feed	
+    char*  wdtchip_name;             //chip名字             
+    u32    wdtchip_cycle;            //chip cycle,硬件周期
+    bool_t (*wdtchip_feed)(void);    //chip feed    
 };
 
 //在启动阶段，实时中断都可以使用，因此用户完全可以自己申请使用硬件定时来喂狗
@@ -72,10 +72,10 @@ typedef bool_t (*fnWdtBootFeedEnd)(void);                //在启动阶段喂狗结束HOO
  
 bool_t WdtHal_BootStart(u32 bootfeedtimes);
 bool_t WdtHal_BootEnd(void);
-bool_t WdtHal_GetChipPara(struct tagWdtHalChipInfo *hardpara);
+bool_t WdtHal_GetChipPara(struct WdtHalChipInfo *hardpara);
 bool_t WdtHal_RegisterWdtChip(char *chipname, u32 yipcycle,\
-		                      bool_t (*wdtchip_feed)(void),\
-		                      fnWdtBootFeedStart bootfeedstart,\
-		                      fnWdtBootFeedEnd   bootfeedend);
+                              bool_t (*wdtchip_feed)(void),\
+                              fnWdtBootFeedStart bootfeedstart,\
+                              fnWdtBootFeedEnd   bootfeedend);
 
 #endif /* WDT_HAL_H_ */

@@ -59,7 +59,7 @@
 */
 .syntax		unified
 .cpu		cortex-m4
-.fpu		softvfp
+//.fpu        fpv4-sp-d16  //定义到IDE配置里面，不定义到源码
 .thumb
 .file	"ints.S"
 
@@ -75,16 +75,28 @@
 .thumb
 .thumb_func
 __start_asyn_signal:
-    push    {r0,lr}				/* r0只是为了满足栈指针8字节对齐的填充物 */
+    push    {r0,lr}		/* r0只是为了满足栈指针8字节对齐的填充物 */
+
     mrs     r0,psp
+    tst r14, #0x10              /* 压栈FPU寄存器*/
+    it eq
+    vstmdbeq r0!, {s16-s31}
     stmfd   r0!,{r4-r11}        /* 保护寄存器,以及返回地址 */
+    stmfd   r0!,{r14}
     msr     psp,r0
+
     mrs     r0,ipsr             /* 取异常号 */
     sub     r0,r0,#16
     bl      __Int_EngineAsynSignal
     pop     {r0,lr}
     mrs     r0,psp
+
+    ldmfd   r0!,{r14}
     ldmfd   r0!,{r4-r11}
+
+    tst r14, #0x10              /* 出栈FPU寄存器*/
+    it eq
+    vldmiaeq r0!, {s16-s31}
     msr     psp,r0
     bx      lr
 
@@ -94,17 +106,29 @@ __start_asyn_signal:
 .thumb
 .thumb_func
 __start_real:
-    push    {r0,lr}				/* r0只是为了满足栈指针8字节对齐的填充物 */
-    mrs     r0,psp
-    stmfd   r0!,{r4-r11}        /* 保护寄存器,以及返回地址 */
-    msr     psp,r0
+    tst r14, #0x10              /* 压栈FPU寄存器*/
+    it eq
+    vstmdbeq r13!, {s16-s31}
+    push    {r0,lr}		/* r0只是为了满足栈指针8字节对齐的填充物 */
+//    mrs     r0,psp
+//把他们压入psp，是为了可能的事件切换，而实时中断不允许事件切换。
+//    stmfd   r0!,{r4-r11}        /* 保护寄存器,以及返回地址 */
+//    stmfd   r0!,{r14}
+
+//    msr     psp,r0
     mrs     r0,ipsr             /* 取异常号 */
     sub     r0,r0,#16
     bl      __Int_EngineReal
+//    mrs     r0,psp
+
+//    ldmfd   r0!,{r14}
+//    ldmfd   r0!,{r4-r11}
+
     pop     {r0,lr}
-    mrs     r0,psp
-    ldmfd   r0!,{r4-r11}
-    msr     psp,r0
+    tst r14, #0x10              /* 出栈FPU寄存器*/
+    it eq
+    vldmiaeq r13!, {s16-s31}
+//    msr     psp,r0
     bx      lr
 
 /*

@@ -42,11 +42,10 @@
 // 于替代商品或劳务之购用、使用损失、资料损失、利益损失、业务中断等等），
 // 不负任何责任，即在该种使用已获事前告知可能会造成此类损害的情形下亦然。
 //-----------------------------------------------------------------------------
-//所属模块:shell模块
+//所属模块:ymodem模块
 //作者:  贺敏.
-//版本：V1.0.0
-//文件描述:为djyos的shell命令中增加下载文件的功能，可以将文件下
-//         载到指定文件和指定地址
+//版本：V2.0.0
+//文件描述:ymodem模块，利用ymodem协议上传或下载文件
 //其他说明:
 //修订历史:
 //2. ...
@@ -55,131 +54,135 @@
 //   新版本号: V1.0.0
 //   修改说明: 原始版本
 //------------------------------------------------------
-//todo: 把指定位置读写的功能拆出去,本文件保留标准文件系统传输的功能.
-//todo: 须在初始化参数中指定通信设备,不能限于标准输入输出设备
-#include "config-prj.h"
-#include "stdint.h"
-#include "stdlib.h"
-#include "stdio.h"
-#include "file.h"
-#include "char_term.h"
-#include "string.h"
-#include "djyos.h"
-#include "systime.h"
+
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "os.h"
 #include "shell.h"
 #include "driver.h"
 #include "verify.h"
-#include "stddev.h"
+
 #include "ymodem.h"
+#include <cfg/ymodemcfg.h>
 
-extern const char *gc_pCfgStddevName;  //标准终端名字
-                                    //
-#define CN_YMODEM_SOH     1         //128字节起始符
-#define CN_YMODEM_STX     2         //1028字节起始符
-#define CN_YMODEM_EOT     4
-#define CN_YMODEM_ACK     6
-#define CN_YMODEM_NAK     0x15
-#define CN_YMODEM_C       0x43          //大写字母C
-#define CN_YMODEM_CAN     0x18
-#define CN_YMODEM_ERR     0xff
+//#define CN_MAX_PACKNUM    32            //定义最大包个数，超过该数，则需要写入文件
+//#define CN_YMODEM_FILEBUF_SIZE   ((CN_MAX_PACKNUM + 1)*1024) //定义缓冲区大小，由函数动态分配
 
-#define CN_YMODEM_PACK_SIZE  1024       //ymodem的数据包大小
-#define CN_YMODEM_HEAD_SIZE  128        //ymodem包关大小为128
-#define CN_YMODEM_PACK_ZERO  00         //第一包
+#define CN_YMODEM_PKGBUF_SIZE         	(1029)
+#define CN_YMODEM_NAME_LENGTH  			(256)
 
-#define CN_FILEBUF_SIZE   (33*1024) //定义缓冲区大小，由函数动态分配
-#define CN_MAX_PACKNUM    32            //定义最大包个数，超过该数，则需要写入文件
-#define CN_DATABUF_SIZE    (32*1024)   //定义缓冲区大小
-
-bool_t Sh_DownloadFile(char *param);
-bool_t Sh_DownloadFileAt(char *param);
-bool_t Sh_UploadFile(char *param);
-bool_t Sh_UploadFileFrom(char *param);
-bool_t Sh_ModifyFlash(char *param);
-
-u32 (*fn_pWriteTo)(uint32_t addr, uint8_t *buf, uint32_t len) = NULL;
-u32 (*fn_pReadFrom)(uint32_t addr, uint8_t *buf, uint32_t len) = NULL;
-
-struct tagShellCmdTab const ymodem_cmd_table[] =
+struct ShellCmdTab const ymodem_cmd_table[] =
 {
     {
         "download",
-        Sh_DownloadFile,
+		Ymodem_DownloadFile,
         "下载文件",
         "命令格式: download"
     },
     {
-        "download_at",
-        Sh_DownloadFileAt,
-        "下载文件到指定地址",
-        "命令格式: download_at 地址"
-    },
-    {
         "upload",
-        Sh_UploadFile,
+		Ymodem_UploadFile,
         "上传文件",
         "命令格式: upload 文件名"
-    },
-    {
-        "upload_from",
-        Sh_UploadFileFrom,
-        "读指定地址的数据，并上传为文件",
-        "命令格式: upload_from 地址 长度 文件名"
-    },
-    {
-        "flash",
-        Sh_ModifyFlash,
-        "修改flash中指定地址数据,最大不超16byte",
-        "命令格式：flash 地址  长度 数据"
     }
 };
 
-static struct tagShellCmdRsc tg_ymodem_cmd_rsc
-                        [sizeof(ymodem_cmd_table)/sizeof(struct tagShellCmdTab)];
+static struct ShellCmdRsc tg_ymodem_cmd_rsc
+                        [sizeof(ymodem_cmd_table)/sizeof(struct ShellCmdTab)];
+static struct DjyDevice *s_ptYmodemDevice;
 
+static tagYmodem *pYmodem = NULL;
 //----ymodem模型初始化---------------------------------------
-//功能: ymodem下载文件模块接口函数，供module_init调用，
-//      该函数初始化xmodem，装入shell下载文件命令
+//功能: ymodem下载文件模块接口函数，在module_trim中调用
 //参数: 无
 //返回: 无
 //-----------------------------------------------------------
-ptu32_t Ymodem_ModuleInit(ptu32_t para)
+ptu32_t ModuleInstall_Ymodem(struct DjyDevice *para)
 {
-    if(Sh_InstallCmd(ymodem_cmd_table,tg_ymodem_cmd_rsc,
-            sizeof(ymodem_cmd_table)/sizeof(struct tagShellCmdTab)))
-        return true;
+    if(para == NULL)
+        s_ptYmodemDevice = ToDev(stdin);
     else
-        return false;
+        s_ptYmodemDevice = para;
+
+    pYmodem = (tagYmodem *)malloc(sizeof(tagYmodem));
+    if(NULL != pYmodem)
+    {
+    	pYmodem->FileName = (char *)malloc(CN_YMODEM_NAME_LENGTH);
+    	if(NULL == pYmodem->FileName)
+    	{
+    		free(pYmodem);
+    		return false;
+    	}
+    	pYmodem->pYmodemMutex = Lock_MutexCreate("YMODEM_MUTEX");
+    	if(NULL != pYmodem->pYmodemMutex)
+    	{
+    		pYmodem->Path = NULL;
+			if(Sh_InstallCmd(ymodem_cmd_table,tg_ymodem_cmd_rsc,
+					sizeof(ymodem_cmd_table)/sizeof(struct ShellCmdTab)))
+				return true;
+    	}
+    	else
+    	{
+    		free(pYmodem->FileName);
+    		free(pYmodem);
+    	}
+    }
+    return false;
+}
+
+// ============================================================================
+// 功能：配置ymodem下载文件的绝对路径，该函数选择性调用，
+//      1.若应用需要变更下载路径，则不调用该函数，通过其他方式（如shell）修改路径;
+//      2.调用该函数后，通过Ymodem下载的路径则不可变换;
+//      3.举例说明：如利用iboot升级，下载路径不需变，因此Path = "/iboot"
+// 参数：Path，通过Ymodem存放的绝对路径
+// 返回：true,成功，否则，失败
+// ============================================================================
+bool_t Ymodem_PathSet(const char *Path)
+{
+	bool_t Ret = false;
+
+	if( (pYmodem != NULL) && (NULL != Path) )
+	{
+		Lock_MutexPend(pYmodem->pYmodemMutex,CN_TIMEOUT_FOREVER);
+		pYmodem->Path = Path;
+
+		Lock_MutexPost(pYmodem->pYmodemMutex);
+		Ret = true;
+	}
+	return Ret;
 }
 
 //----获取下载数据-------------------------------------------
-//功能：ymodem下载时，获取下载数据函数，与djy_getchar相似，是
-//      它的修改版本，以适应本模块应用需求
-//参数：buf：缓冲区指针
-//返回：实际读到的大小,cn_limit_uint32超时
+//函数：__Ymodem_Gets，获取多字节数据
+//     __Ymodem_Get，获取一单字数据
+//     __Ymodem_Puts，传输多字节数据
+//     __Ymodem_Put，传输一字节数据
+//功能：YMODEM数据接口通道，通过这两对通道获取和传送数据
+//参数：
+//返回：
 //-----------------------------------------------------------
-u32 __Ymodem_Gets(u8 *buf)
+static u32 __Ymodem_Gets(u8 *buf,u32 len, u32 timeout)
 {
-    struct tagInputDeviceMsg input_msg;
-    struct tagCharTermineralMsg *char_msg;
+   return Driver_ReadDevice(s_ptYmodemDevice,buf,len,0,timeout);
+}
+static u32 __Ymodem_Get(u8 *buf)
+{
+   return __Ymodem_Gets(buf,1,gYmodemPkgTimeOut);
+}
 
-    if(! Stddev_ReadDefaultMsg(&input_msg,5000*mS))
-    {
-        return CN_LIMIT_UINT32;
-    }
-//  input_msg = (struct tagInputDeviceMsg *)Djy_GetEventPara(NULL,NULL);
-//  if(input_msg == NULL)
-//  {
-//      evttid = Djy_MyEvttId();
-//      if(Djy_WaitEvttPop(evttid,NULL,5000*mS) == CN_SYNC_TIMEOUT)
-//          return CN_LIMIT_UINT32;
-//      input_msg = (struct tagInputDeviceMsg *)Djy_GetEventPara(NULL,NULL);
-//  }
-    char_msg = &(input_msg.input_data.char_termineral);
-    memcpy(buf,char_msg->input_char,char_msg->num);
-//  Djy_ParaUsed(0);
-
-    return char_msg->num;
+static u32 __Ymodem_Puts(u8 *buf,u32 len,u32 timeout)
+{
+    return Driver_WriteDevice(s_ptYmodemDevice,buf,len,0,
+                                CN_BLOCK_BUFFER,timeout);
+}
+static u32 __Ymodem_Put(u8 Char)
+{
+    u8 ch = Char;
+    return __Ymodem_Puts(&ch,1,500*mS);
 }
 
 //----提取单词----------------------------------------------
@@ -189,7 +192,8 @@ u32 __Ymodem_Gets(u8 *buf)
 //      next，返回下一个单词指针
 //返回: 提取的单词指针，已将单词后面的分隔符换成串结束符'\0'
 //-----------------------------------------------------------
-char *__Ymodem_GetWord(char *buf,char **next)
+//todo:shell.c中Sh_GetWord函数与此函数雷同。
+static char *__Ymodem_GetWord(char *buf,char **next)
 {
     uint32_t i=0;
     *next = NULL;
@@ -224,11 +228,11 @@ char *__Ymodem_GetWord(char *buf,char **next)
 //参数：无
 //返回：无
 //-----------------------------------------------------------
-void __Ymodem_CancelTrans(void)
+static void __Ymodem_CancelTrans(void)
 {
-    Djy_PutChar(CN_YMODEM_CAN);                 //取消传输
-    Djy_PutChar(CN_YMODEM_CAN);
-    Djy_PutChar(CN_YMODEM_CAN);
+    __Ymodem_Put(CN_YMODEM_CAN);
+    __Ymodem_Put(CN_YMODEM_CAN);
+    __Ymodem_Put(CN_YMODEM_CAN);
 }
 
 //------校验ymodem数据包-------------------------------------
@@ -238,895 +242,682 @@ void __Ymodem_CancelTrans(void)
 //返回：true:  数据包校验正确
 //      false: 数据包校验错误
 //----------------------------------------------------------
-bool_t __Ymodem_PackCheck(u8* buf, u32 pack_len)
+static bool_t __Ymodem_PackCheck(u8* buf, u32 pack_len)
 {
-    u16 checksum;
+    u16 checksum,check;
     if((buf[1] + buf[2]) != 0xff)               //校验包号正反码
     {
-        Djy_PutChar(CN_YMODEM_NAK);                 //应答nak，请求重发
+        __Ymodem_Put(CN_YMODEM_NAK);                    //应答nak，请求重发
         return false;
     }
-    checksum = Crc_16(buf+3, pack_len);
-    if(checksum != *(u16 *)&buf[pack_len+3])    //CRC校验错误
+    checksum = crc16(buf+3, pack_len);
+    if(CN_CFG_BYTE_ORDER == CN_CFG_LITTLE_ENDIAN)
     {
-        Djy_PutChar(CN_YMODEM_NAK);                 //应答nak，请求重发
+        check = (buf[pack_len+3]<<8) + buf[pack_len+4];
+    }
+    else
+    {
+        check = *(u16 *)&buf[pack_len+3];
+    }
+    if(checksum != check)    //CRC校验错误
+    {
+        __Ymodem_Put(CN_YMODEM_NAK);                    //应答nak，请求重发
         return false;
     }
 
     return true;
 }
 
-//------ymodem下载文件---------------------------------------
-//功能：下载文件的shell命令
-//参数：param: 参数字符串
-//返回：true:  操作成功
-//      false: 操作失败
-//----------------------------------------------------------
-bool_t Sh_DownloadFile(char *param)
+static void __Ymodem_WriteCrc16(u8 *package, u32 pack_len)
 {
-    u8 package[1029];
-    u32 over=0,readed=0,reads=0;
-    u32 write_len=0,file_size=0,completed=0;
-    u32 offset=0,pack_no=0,pack_len=0; //包号从0开始计算
-    u32 i=0,sum=0;
+	u16 checksum;
 
-    char* filebuf;
-    FILE *file=NULL;
+	checksum = crc16(package+3, pack_len);
+	if(CN_CFG_BYTE_ORDER == CN_CFG_LITTLE_ENDIAN)
+	{
+		package[3+pack_len] = (checksum >> 8) & 0xFF;
+		package[3+pack_len + 1] = (checksum) & 0xFF;
 
-    char *filename,*nextparam,*str_filesize;
+	}
+	else
+	{
+		package[3+pack_len] = (checksum) & 0xFF;
+		package[3+pack_len + 1] = (checksum >> 8) & 0xFF;
+	}
+}
 
-    //缓冲区设为32K
-    if((filebuf=(char*)M_MallocLc(CN_FILEBUF_SIZE,0))==NULL)
+// 获取完整的YMODEM数据包，包括数据包和ACK、CAN等包
+static YMRESULT __Ymodem_GetPkg(tagYmodem *ym)
+{
+	YMRESULT Ret = YMODEM_OK;
+	u32 bytes;
+
+	if(ym->PkgBufCnt == 0)
+	{
+		if(1 != __Ymodem_Get(ym->PkgBuf) )
+			Ret = YMODEM_TIMEOUT;
+	}
+
+	switch(ym->PkgBuf[0])
+	{
+	case CN_YMODEM_SOH:
+		ym->PkgSize = CN_YMODEM_SOH_SIZE;
+		break;
+	case CN_YMODEM_STX:
+		ym->PkgSize = CN_YMODEM_STX_SIZE;
+		break;
+	case CN_YMODEM_ACK:
+	case CN_YMODEM_NAK:
+	case CN_YMODEM_C:
+	case CN_YMODEM_CAN:
+	case CN_YMODEM_EOT:
+		ym->PkgSize = 1;
+		break;
+	default:
+		ym->PkgSize = 1;
+		Ret = YMODEM_UNKNOW_ERR;
+		break;
+	}
+
+	if(ym->PkgSize > 1)
+	{
+		bytes = __Ymodem_Gets(ym->PkgBuf + 1,ym->PkgSize + 4,gYmodemPkgTimeOut);
+		if(bytes != ym->PkgSize + 4)
+			Ret = YMODEM_TIMEOUT;
+	}
+
+	return Ret;
+}
+
+static bool_t __Ymodem_FilePathMerge(char *dst,const char *path,char *name)
+{
+	u32 PathLen,NameLen;
+
+	if(NULL != name)
+	{
+		PathLen = strlen(path);
+		NameLen = strlen(name);
+		if( NULL != path )
+		{
+			if(PathLen + NameLen + 1 < CN_YMODEM_NAME_LENGTH)
+			{
+				strcpy(dst,path);
+				dst[PathLen] = '/';
+				strcpy(dst + PathLen + 1,name);
+				dst[PathLen + NameLen + 1] = '\0';
+				return true;
+			}
+		}
+		else
+		{
+			strcpy(dst,name);
+			dst[NameLen] = '\0';
+			return true;
+		}
+	}
+	return false;
+}
+static bool_t __Ymodem_InfoPkg(tagYmodem *ym)
+{
+	char *NextParam,*strFileSize,*FileName;
+
+	FileName = __Ymodem_GetWord((char*)&ym->PkgBuf[3],&NextParam);
+	strFileSize = __Ymodem_GetWord(NextParam,&NextParam);
+
+	if(__Ymodem_FilePathMerge(ym->FileName,ym->Path,FileName))
+	{
+		ym->FileSize = strtol(strFileSize, (char **)NULL, 0);
+		ym->FileOps = YMODEM_FILE_OPEN;
+		ym->Status = CN_YMODEM_SOH;
+		ym->PkgNo = 1;
+		return true;
+	}
+	return false;
+}
+
+static bool_t __Ymodem_IsZeroPkg(tagYmodem *ym)
+{
+	u8 i;
+
+	if( (ym->PkgBuf[1] == 0x00) && (ym->PkgBuf[2] == 0xFF) )
+	{
+		for(i = 0; i < 128; i++)
+		{
+			if(ym->PkgBuf[3+i] != 0x00)
+			{
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+
+static YMRESULT __Ymodem_FileOps(tagYmodem *ym, u8 flag)
+{
+	YMRESULT Ret = YMODEM_OK;
+    struct stat FpInfo;
+	u32 FileOpsLen;
+
+	//对文件进行操作
+	switch(ym->FileOps)
+	{
+	case YMODEM_FILE_OPEN:
+		if(flag)
+		{
+			ym->File = fopen(ym->FileName,"w+");		//打开文件，不存在则创建
+			__Ymodem_Put(CN_YMODEM_ACK);
+			__Ymodem_Put(CN_YMODEM_C);
+		}
+		else
+		{
+			ym->File = fopen(ym->FileName,"r");		//打开文件，不存在则创建
+		}
+		if(ym->File == NULL)
+		{
+			Ret = YMODEM_FILE_ERR;
+		}
+		break;
+	case YMODEM_FILE_WRITE:
+        memcpy(ym->FileBuf + ym->FileBufCnt,ym->PkgBuf + 3,ym->PkgSize);
+        ym->FileBufCnt += ym->PkgSize;
+        if((ym->FileBufCnt >= ym->FileSize - ym->FileCnt) ||
+        		(ym->FileBufCnt >= gYmodemBufPkgNum*1024)) //如果足够大，写入flash
+        {
+            if(ym->FileBufCnt >= ym->FileSize - ym->FileCnt)                                   //判断本次写入大小
+            	FileOpsLen = ym->FileSize - ym->FileCnt;
+            else
+            	FileOpsLen = ym->FileBufCnt;
+            ym->FileBufCnt = 0;
+            if(FileOpsLen != fwrite(ym->FileBuf,FileOpsLen,1,ym->File))
+            {
+            	Ret = YMODEM_FILE_ERR;
+            }
+            ym->FileCnt += FileOpsLen;
+        }
+        __Ymodem_Put(CN_YMODEM_ACK);
+		break;
+	case YMODEM_FILE_READ:
+		memset(ym->PkgBuf,0x00,CN_YMODEM_STX_SIZE);
+		FileOpsLen = (ym->FileSize - ym->FileCnt > CN_YMODEM_STX_SIZE) ?
+				(CN_YMODEM_STX_SIZE) : ym->FileSize - ym->FileCnt;
+		ym->PkgSize = CN_YMODEM_STX_SIZE;
+		ym->PkgBuf[0] = CN_YMODEM_STX;
+		ym->PkgBuf[1] = ym->PkgNo - 1;
+		ym->PkgBuf[2] = 0xFF - ym->PkgBuf[1];
+
+		if(FileOpsLen != fread(ym->PkgBuf + 3,1,FileOpsLen,ym->File))
+		{
+			Ret = YMODEM_FILE_ERR;
+		}
+        __Ymodem_WriteCrc16(ym->PkgBuf,ym->PkgSize);
+        ym->FileCnt += ym->PkgSize;
+		break;
+	case YMODEM_FILE_STAT:
+		if(0 == stat(ym->FileName,&FpInfo))
+		{
+			ym->FileSize = (u32)FpInfo.st_size;
+		}
+		else
+		{
+			Ret = YMODEM_FILE_ERR;
+		}
+		break;
+	case YMODEM_FILE_CLOSE:
+		fclose(ym->File);
+		break;
+	default:
+		break;
+	}
+	ym->FileOps = YMODEM_FILE_NOOPS;
+	return Ret;
+}
+
+static YMRESULT __Ymodem_ReceiveProcess(tagYmodem *ym)
+{
+	YMRESULT Ret = YMODEM_OK;
+	s64 CurrentTime;
+
+	while(1)
+	{
+		Ret = __Ymodem_GetPkg(ym);
+		if(Ret != YMODEM_OK)
+		{
+			__Ymodem_CancelTrans();
+			break;
+		}
+		CurrentTime = DjyGetSysTime();					//总超时处理
+		if(CurrentTime - ym->StartTime >= ym->TimeOut)
+		{
+			Ret = YMODEM_TIMEOUT;
+			__Ymodem_CancelTrans();
+			break;
+		}
+		//数据包处理
+		switch(ym->PkgBuf[0])
+		{
+		case CN_YMODEM_SOH:
+			if(!__Ymodem_PackCheck(ym->PkgBuf,ym->PkgSize))	//need retry load
+				break;
+			if(ym->Status == ENUM_YMODEM_STA_INFO)			//info pkg
+			{
+				__Ymodem_InfoPkg(ym);
+			}
+			else if(ym->Status == CN_YMODEM_EOT)
+			{
+				if(__Ymodem_IsZeroPkg(ym))
+				{
+					__Ymodem_Put(CN_YMODEM_ACK);//全零包，所有传输结束
+					goto YMODEM_RECVEXIT;
+				}
+				else
+				{
+					__Ymodem_InfoPkg(ym);		//继续传下一个文件
+				}
+			}
+			else							//收到128字节大小的数据包
+			{
+	            if(ym->PkgBuf[1] == (ym->PkgNo & 0xff))
+	            {
+	            	ym->PkgNo ++;
+	            	ym->FileOps = YMODEM_FILE_WRITE;
+	            }
+	            else
+	            {
+	            	__Ymodem_Put(CN_YMODEM_NAK);	//包号错误，需重传
+	            }
+	            ym->Status = CN_YMODEM_SOH;
+			}
+			break;
+		case CN_YMODEM_STX:
+			if(!__Ymodem_PackCheck(ym->PkgBuf,ym->PkgSize))	//need retry load
+				break;
+            if(ym->PkgBuf[1] == (ym->PkgNo & 0xff))
+            {
+            	ym->PkgNo ++;
+            	ym->FileOps = YMODEM_FILE_WRITE;
+            }
+            else
+            {
+            	__Ymodem_Put(CN_YMODEM_NAK);//包号错误，需重传
+            }
+            ym->Status = CN_YMODEM_STX;
+			break;
+		case CN_YMODEM_EOT:
+	        if( (ym->Status == CN_YMODEM_SOH) || (ym->Status == CN_YMODEM_STX))	//	第一个EOT
+	        {
+	        	__Ymodem_Put(CN_YMODEM_NAK);                         //接收到结束符，回复ACK
+	        	ym->Status = CN_YMODEM_EOT;
+	        }
+	        else if(ym->Status == CN_YMODEM_EOT)
+	        {
+	        	__Ymodem_Put(CN_YMODEM_ACK);                         //接收到结束符，回复ACK
+	        	__Ymodem_Put(CN_YMODEM_C);                           //接收到结束符，回复C
+	        }
+			break;
+		case CN_YMODEM_CAN:
+        	Ret = YMODEM_CAN_TRANS;
+        	goto YMODEM_RECVEXIT;
+			break;
+		default:
+        	Ret = YMODEM_UNKNOW_ERR;
+			break;
+		}
+		ym->PkgBufCnt = 0;
+
+		Ret = __Ymodem_FileOps(ym,1);
+		if(Ret != YMODEM_OK)			//可能情况 1.case 2.file ops
+		{
+			__Ymodem_CancelTrans();
+			break;
+		}
+	}
+YMODEM_RECVEXIT:
+	ym->FileOps = YMODEM_FILE_CLOSE;
+	__Ymodem_FileOps(ym,1);					//close file
+	return Ret;
+}
+
+// ============================================================================
+// 功能：Ymodem下载文件，无参数，因为文件名已经在ymodem协议数据名里面
+// 参数：无，需通过shell配置当前路径，或者调用Ymodem_PathSet配置路径
+// 返回：true,下载成功，否则，失败
+// ============================================================================
+bool_t Ymodem_DownloadFile(char *Param)
+{
+	YMRESULT Ret = YMODEM_OK;
+    u32 CntOver = 0;
+
+    if(NULL == pYmodem)
     {
-        printf("申请内存失败!\r\n");
-        return false;
+    	Ret = YMODEM_MEM_ERR;
+    	goto YMODEM_EXIT;
+    }
+    Lock_MutexPend(pYmodem->pYmodemMutex,CN_TIMEOUT_FOREVER);
+
+    pYmodem->File 	= NULL;
+    pYmodem->FileOps  = YMODEM_FILE_NOOPS;
+    pYmodem->FileSize = 0;
+    pYmodem->FileCnt  = 0;
+    pYmodem->PkgNo    = 0;
+    pYmodem->PkgSize  = CN_YMODEM_SOH_SIZE;
+    pYmodem->TimeOut  = gYmodemTotalTimeOut;
+    pYmodem->PkgBufCnt = 0;
+    pYmodem->FileBufCnt = 0;
+    pYmodem->Status   = ENUM_YMODEM_STA_INFO;
+    pYmodem->FileBuf  = (u8*)malloc((gYmodemBufPkgNum + 1)*1024);
+    pYmodem->PkgBuf   = (u8*)malloc(CN_YMODEM_PKGBUF_SIZE);
+
+    if( (NULL == pYmodem->FileBuf) || (NULL == pYmodem->PkgBuf)  )
+    {
+    	Ret = YMODEM_MEM_ERR;
+    	goto YMODEM_EXIT;
     }
 
-    Djy_PutChar(CN_YMODEM_C);
+    __Ymodem_Put(CN_YMODEM_C);
 
     //等待主机发送数据，超时返回
     printf("下载倒计时：     ");
-    while (Djy_WaitEvttPop(Djy_MyEvttId(), NULL,
-            1000 * mS) == CN_SYNC_TIMEOUT)
+    while(!__Ymodem_Gets(pYmodem->PkgBuf,1,1000*mS))
     {
-        if (over++ < 30)
+        if (CntOver++ < 60)
         {
-            printf("\b\b\b\b\b%2dS ",30-over);
-            Djy_PutChar(CN_YMODEM_C); //超时则重新发送C
+        	__Ymodem_Put(CN_YMODEM_C); //超时则重新发送C
+            printf("\b\b\b\b\b%2dS ",60-CntOver);
             continue;
         }
         else
         {
-            printf("超时未操作\r\n");
-            free(filebuf);
-            return false;
+        	Ret = YMODEM_TIMEOUT;
+        	goto YMODEM_EXIT;
         }
     }
-    //已经开始传送文件
-    while(1)
-    {
-        reads = __Ymodem_Gets(package + readed);            //读取数
-        readed += reads;
-        if(reads == CN_LIMIT_UINT32)                        //接收超时
-        {
-            __Ymodem_CancelTrans();
-            printf("\r\n传输超时或选择协议错误！\r\n");
-            printf("请选择Ymodem！\r\n");
-            fclose(file);
-            free(filebuf);
-            return false;
-        }
 
-        switch(package[0])
-        {
-        case CN_YMODEM_SOH:                                 //128字节帧（包括起始帧、结束帧、部分数据帧）
-            pack_len = CN_YMODEM_HEAD_SIZE;
-            if(readed >= pack_len+5)
-            {
-                readed = 0;
-                if(__Ymodem_PackCheck(package,pack_len) == false)
-                    break;
-                if(package[1] == CN_YMODEM_PACK_ZERO)               //包号为0，则表示为起始包或结束包
-                {
-                    if(pack_no == 0)    //pack_no为0时，表示该包为起始包,否则为结束包
-                    {
-                        //获取名称和大小
-                        filename = __Ymodem_GetWord((char*)&package[3],&nextparam);         //获取文件名
-                        str_filesize = __Ymodem_GetWord(nextparam,&nextparam);
-                        file_size = strtol(str_filesize, (char **)NULL, 0);
+    pYmodem->PkgBufCnt = 1;
+    pYmodem->StartTime = DjyGetSysTime();
+    Ret = __Ymodem_ReceiveProcess(pYmodem);
 
-                        //打开文件
-                        file=fopen(filename,"r+b");
-                        if(file == NULL)
-                        {
-                            __Ymodem_CancelTrans();
-                            printf("\r\n打开文件失败或文件不存在!\r\n");
-                            free(filebuf);
-                            return false;
-                        }
-                        if(file_size > Djyfs_Fcubage(file))
-                        {
-                            __Ymodem_CancelTrans();
-                            printf("\r\n下载的文件超过该文件的最大尺寸!\r\n");
-                            free(filebuf);
-                            return false;
-                        }
-                        Djy_PutChar(CN_YMODEM_ACK);                                             //首包回复ACK
-                        Djy_PutChar(CN_YMODEM_C);
-                    }
-                    else
-                    {
-                        for(i=3; i < 130; i++)
-                            sum += package[i];
-                        if(sum == 0)                                //传输结束
-                        {
-                            Djy_PutChar(CN_YMODEM_ACK);
-                            printf("\r\n下载完成\r\n");
-                            Djyfs_Ftruncate(file, completed);
-                            fclose(file);//-----todo
-                            free(filebuf);
-                            return true;
-                        }
-                        else                            //既非起始，也非结束，则错误
-                        {
-                            __Ymodem_CancelTrans();
-                            printf("\r\n传输错误或选择协议错误！\r\n");
-                            printf("请选择Ymodem！\r\n");
-                            free(filebuf);
-                            return false;
-                        }
-                    }
-                }
-                else                                        //该包为普通128字节数据包
-                {
-                    if(package[1] != (pack_no & 0xff))
-                    {
-                        __Ymodem_CancelTrans();
-                        printf("\r\n传输错误或选择协议错误！\r\n");
-                        printf("请选择Ymodem！\r\n");
-                        fclose(file);
-                        free(filebuf);
-                        return false;
-                    }
+YMODEM_EXIT:
+	if( NULL != pYmodem->FileBuf)
+		free(pYmodem->FileBuf);
+	if( NULL != pYmodem->PkgBuf)
+		free(pYmodem->PkgBuf);
 
-                    memcpy(&filebuf[offset],(const char*)package+3,pack_len);
-                    offset += pack_len;
-                    if((offset >= file_size-completed) || (offset >= CN_FILEBUF_SIZE-1024)) //如果足够大，写入flash
-                    {
-                        if(offset >= file_size-completed)                                   //判断本次写入大小
-                            write_len = file_size - completed;
-                        else
-                            write_len = CN_FILEBUF_SIZE - 1024;
-                        offset = 0;
-                        fwrite_r(file, filebuf,write_len, completed);
-                        completed += write_len;
-                    }
-                    Djy_PutChar(CN_YMODEM_ACK);
-                }
-                pack_no++;
-            }
-            break;
-        case CN_YMODEM_STX:                                 //数据帧，1024字节
-            pack_len = CN_YMODEM_PACK_SIZE;
-            if(readed >= pack_len+5)
-            {
-                readed = 0;
-                if(__Ymodem_PackCheck(package,pack_len) == false)
-                    break;
-                if(package[1] != (pack_no & 0xff))
-                {
-                    __Ymodem_CancelTrans();
-                    printf("\r\n传输错误！\r\n");
-                    fclose(file);
-                    free(filebuf);
-                    return false;
-                }
-                memcpy(&filebuf[offset],(const char*)package+3,pack_len);
-                offset += pack_len;
-                if((offset >= file_size-completed) || (offset >= CN_FILEBUF_SIZE-1024)) //如果足够大，写入flash
-                {
-                    if(offset >= file_size-completed)                                   //判断本次写入大小
-                        write_len = file_size - completed;
-                    else
-                        write_len = CN_FILEBUF_SIZE-1024;
-                    offset = 0;
-                    fwrite_r(file, filebuf,write_len, completed);
-                    completed += write_len;
-                }
-                Djy_PutChar(CN_YMODEM_ACK);
-                pack_no++;
-            }
-            break;
-        case CN_YMODEM_EOT:                                 //结束符,后面还有全0数据帧
-            readed = 0;
-            Djy_PutChar(CN_YMODEM_ACK);                         //接收到结束符，回复ACK
-            Djy_PutChar(CN_YMODEM_C);                           //接收到结束符，回复C
-            break;
-        case CN_YMODEM_CAN:                                 //取消传输
-            printf("\r\n取消传输成功\r\n");
-            fclose(file);
-            free(filebuf);
-            return true;
-        default:
-            __Ymodem_CancelTrans();
-            printf("\r\n传输错误或选择协议错误！\r\n");
-            printf("请选择Ymodem！\r\n");
-            fclose(file);
-            free(filebuf);
-            return false;
-        }
-    }
-    return true;
+	Lock_MutexPost(pYmodem->pYmodemMutex);
+	if(Ret != YMODEM_OK)						//打印输出信息
+	{
+		if(Ret == YMODEM_PARAM_ERR)
+		{
+			printf("\r\nYMODEM PARAMETER ERR !\r\n");
+		}
+		else if(Ret == YMODEM_FILE_ERR)
+		{
+			printf("\r\nYMODEM FILE OPERATION ERR !\r\n");
+		}
+		else if(Ret == YMODEM_TIMEOUT)
+		{
+			printf("\r\nYMODEM OPERATION TIMEOUT ERR !\r\n");
+		}
+		else if(Ret == YMODEM_MEM_ERR)
+		{
+			printf("\r\nYMODEM NOT ENOUGH MEMORY !\r\n");
+		}
+		else if(Ret == YMODEM_CAN_TRANS)
+		{
+			printf("\r\nYMODEM BE CANCELED !\r\n");
+		}
+		else
+		{
+			printf("\r\nYMODEM UNKNOW ERR !\r\n");
+		}
+		return false;
+	}
+	else
+	{
+		printf("\r\nYMODEM SUCCESSED !\r\n");
+		return true;
+	}
 }
 
-//-------ymodem下载文件到指定地址----------------------------
-//功能：下载文件到指定的地址，地址通过参数指定
-//参数：param: 参数字符串
-//返回：true:  操作成功
-//      false: 操作失败
-//----------------------------------------------------------
-bool_t Sh_DownloadFileAt(char *param)
+static YMRESULT __Ymodem_SendProcess(tagYmodem *ym)
 {
-    u8 package[1029];
-    u32 over=0,readed=0,reads=0;
-    u32 write_len=0,file_size=0,completed=0;
-    u32 offset=0,pack_no=0,pack_len=0; //包号从0开始计算
-    u32 i=0,sum=0;
-    u32 result= 0;
+	YMRESULT Ret = YMODEM_OK;
+	s64 CurrentTime;
+	u8 Cmd[8];
+	u32 temp;
+	char *FileName;
 
-    char* filebuf;
-    char *str_addr,*next_param;
-    u32 addr;
+	while(1)
+	{
+		if(ym->PkgBufCnt == 1)
+		{
+			Cmd[0] = ym->PkgBuf[0];
+		}
+		else if(!__Ymodem_Get(Cmd))
+		{
+			Ret = YMODEM_TIMEOUT;
+			__Ymodem_CancelTrans();
+			break;
+		}
+		CurrentTime = DjyGetSysTime();				//总超时处理
+		if(CurrentTime - ym->StartTime >= ym->TimeOut)
+		{
+			Ret = YMODEM_TIMEOUT;
+			__Ymodem_CancelTrans();
+			break;
+		}
+		//开始发送数据包
+		switch(Cmd[0])
+		{
+		case CN_YMODEM_C:
+			if(ym->Status == ENUM_YMODEM_STA_INFO )			//写首包
+			{
+				FileName = strrchr(ym->FileName,'\\');
+				if(NULL == FileName)
+					FileName = ym->FileName;
+				temp = strlen(FileName);
+				ym->PkgSize = CN_YMODEM_SOH_SIZE;
+                memset(ym->PkgBuf,0x00,ym->PkgSize + 5);
+                ym->PkgBuf[0] = CN_YMODEM_SOH;
+                ym->PkgBuf[1] = 0x00;
+                ym->PkgBuf[2] = 0xFF;
+                memcpy(ym->PkgBuf + 3,FileName,temp);
+                ym->PkgBuf[temp + 3] = 0x00;
+                itoa(ym->FileSize,(char*)(ym->PkgBuf + temp + 4),10);
+                __Ymodem_WriteCrc16(ym->PkgBuf,ym->PkgSize);
+                ym->Status = CN_YMODEM_C;		//开始发数据
+                ym->PkgNo = 1;
+			}
+            else if(ym->PkgNo == 1)		//发送第一包
+            {
+            	ym->Status = ENUM_YMODEM_STA_SOH;
+            	ym->FileOps = YMODEM_FILE_READ;
+            	ym->PkgNo ++;
+            }
+            else if(ym->Status == CN_YMODEM_EOT)
+            {
+            	ym->PkgSize = CN_YMODEM_SOH_SIZE;
+                memset(ym->PkgBuf,0x00,ym->PkgSize + 5);
+                ym->PkgBuf[0] = CN_YMODEM_SOH;
+                ym->PkgBuf[1] = 0x00;
+                ym->PkgBuf[2] = 0xFF;
+                __Ymodem_WriteCrc16(ym->PkgBuf,ym->PkgSize);
+            	ym->Status = ENUM_YMODEM_STA_ZERO;
+            }
+			break;
+		case CN_YMODEM_NAK:						//重发数据包
+			break;
+		case CN_YMODEM_CAN:
+			Ret = YMODEM_CAN_TRANS;
+			break;
+		case CN_YMODEM_ACK:
+            if( (ym->PkgNo == 1) )				//刚刚发送完首包信息包
+            {
+            	continue;
+            }
+            else if(ym->Status == ENUM_YMODEM_STA_ZERO)	//传输结束
+            {
+            	Ret = YMODEM_OK;
+            	goto YMODEM_SENDEXIT;
+            }
+            else if(ym->FileCnt >= ym->FileSize)
+            {
+                __Ymodem_Put(CN_YMODEM_EOT);
+                ym->Status = CN_YMODEM_EOT;
+                continue;
+            }
+            else
+            {
+            	ym->PkgNo ++;
+            	ym->Status = ENUM_YMODEM_STA_STX;
+            	ym->FileOps = YMODEM_FILE_READ;
+            }
+			break;
+		default:
+			Ret = YMODEM_UNKNOW_ERR;
+			break;
+		}
 
-    char *nextparam,*str_filesize;
+		ym->PkgBufCnt = 0;
+		Ret = __Ymodem_FileOps(ym,0);
+		if(Ret == YMODEM_OK)
+		{
+			temp = __Ymodem_Puts(ym->PkgBuf,ym->PkgSize + 5,CN_TIMEOUT_FOREVER);
+			if(temp != ym->PkgSize + 5)
+			{
+				Ret = YMODEM_MEDIA_ERR;
+			}
+		}
+		if(Ret != YMODEM_OK)		//可能情况1.case 2.file 3.__Ymodem_Puts
+		{
+			__Ymodem_CancelTrans();
+			break;
+		}
+	}
+YMODEM_SENDEXIT:
+	return Ret;
+}
 
-    if(fn_pWriteTo == NULL)
-        return false;
-    str_addr = Sh_GetWord(param,&next_param);
-    addr = strtol(str_addr, (char **)NULL, 0);
+// ============================================================================
+// 功能：Ymodem上载API，调用者传入文件名作为参数，读取文件
+// 参数：文件名路径或文件名，
+//      1.当Ymodem_PathSet被调用时，使用绝对路径；
+//      2.否则使用的是相对路径，可通过shell等方式改变路径；
+// 返回：true,上载成功，否则，失败
+// ============================================================================
+bool_t Ymodem_UploadFile(char *Param)
+{
+	YMRESULT Ret = YMODEM_OK;
+    u32 CntOver = 0;
+    char *NextParam,*FileName;
 
-    if(addr == 0)
+    if(NULL == pYmodem)
     {
-        printf("请输入地址\r\n");
-        printf("正确的命令:download_at 地址");
-        return false;
+    	Ret = YMODEM_MEM_ERR;
+    	goto YMODEM_EXIT;
+    }
+    Lock_MutexPend(pYmodem->pYmodemMutex,CN_TIMEOUT_FOREVER);
+
+    FileName = (char *)Sh_GetWord(Param, &NextParam);
+    if(NULL == FileName)
+    {
+    	Ret = YMODEM_PARAM_ERR;
+    	goto YMODEM_EXIT;
+    }
+    __Ymodem_FilePathMerge(pYmodem->FileName,pYmodem->Path,FileName);
+    pYmodem->File 	= NULL;
+    pYmodem->FileOps  = YMODEM_FILE_OPEN;
+    pYmodem->FileSize = 0;
+    pYmodem->FileCnt  = 0;
+    pYmodem->PkgNo    = 0;
+    pYmodem->PkgSize  = CN_YMODEM_SOH_SIZE;
+    pYmodem->TimeOut  = gYmodemTotalTimeOut;
+    pYmodem->PkgBufCnt = 0;
+    pYmodem->FileBufCnt = 0;
+    pYmodem->Status   = ENUM_YMODEM_STA_INFO;
+    pYmodem->FileBuf  = NULL;
+    pYmodem->PkgBuf   = (u8*)malloc(CN_YMODEM_PKGBUF_SIZE);
+
+    if( (NULL == pYmodem->PkgBuf)  )
+    {
+    	Ret = YMODEM_MEM_ERR;
+    	goto YMODEM_EXIT;
+    }
+    Ret = __Ymodem_FileOps(pYmodem,0);			//open the file,must be exist
+    if(Ret != YMODEM_OK)
+    {
+    	goto YMODEM_EXIT;
+    }
+    pYmodem->FileOps  = YMODEM_FILE_STAT;
+    Ret = __Ymodem_FileOps(pYmodem,0);			//GET THE FILE SIZE
+    if(Ret != YMODEM_OK)
+    {
+    	goto YMODEM_EXIT;
     }
 
-    //缓冲区设为32K
-    if((filebuf=(char*)M_MallocLc(CN_FILEBUF_SIZE,0))==NULL)
+    printf("上载倒计时：     ");
+    while(!__Ymodem_Gets(pYmodem->PkgBuf,1,1000*mS))//等待主机发送数据，超时返回
     {
-        printf("申请内存失败!\r\n");
-        return false;
-    }
-
-    Djy_PutChar(CN_YMODEM_C);
-
-    //等待主机发送数据，超时返回
-    printf("下载倒计时：     ");
-    while (Djy_WaitEvttPop(Djy_MyEvttId(), NULL,
-            1000 * mS) == CN_SYNC_TIMEOUT)
-    {
-        if (over++ < 30)
+        if (CntOver++ < 60)
         {
-            printf("\b\b\b\b\b%2ds ",30-over);
-            Djy_PutChar(CN_YMODEM_C); //超时则重新发送C
+            printf("\b\b\b\b%2d s",60-CntOver);
             continue;
         }
         else
         {
-            printf("超时未操作\r\n");
-            free(filebuf);
-            return false;
-        }
-    }
-    //已经开始传送文件
-    while(1)
-    {
-        reads = __Ymodem_Gets(package + readed);            //读取数
-        readed += reads;
-        if(reads == CN_LIMIT_UINT32)                        //接收超时
-        {
-            __Ymodem_CancelTrans();
-            printf("\r\n传输超时或选择协议错误！\r\n");
-            printf("请选择Ymodem！\r\n");
-            free(filebuf);
-            return false;
-        }
-
-        switch(package[0])
-        {
-        case CN_YMODEM_SOH:                                 //128字节帧（包括起始帧、结束帧、部分数据帧）
-            pack_len = CN_YMODEM_HEAD_SIZE;
-            if(readed >= pack_len+5)
-            {
-                readed = 0;
-                if(__Ymodem_PackCheck(package,pack_len) == false)
-                    break;
-                if(package[1] == CN_YMODEM_PACK_ZERO)               //包号为0，则表示为起始包或结束包
-                {
-                    if(pack_no == 0)    //pack_no为0时，表示该包为起始包,否则为结束包
-                    {
-                        //获取名称和大小
-                        __Ymodem_GetWord((char*)&package[3],&nextparam);            //获取文件名
-                        str_filesize = __Ymodem_GetWord(nextparam,&nextparam);
-                        file_size = strtol(str_filesize, (char **)NULL, 0);
-
-                        Djy_PutChar(CN_YMODEM_ACK);                                             //首包回复ACK
-                        Djy_PutChar(CN_YMODEM_C);
-                    }
-                    else
-                    {
-                        for(i=3; i < 130; i++)
-                            sum += package[i];
-                        if(sum == 0)                                //传输结束
-                        {
-                            Djy_PutChar(CN_YMODEM_ACK);
-                            printf("\r\n下载完成\r\n");
-                            free(filebuf);
-                            return true;
-                        }
-                        else                            //既非起始，也非结束，则错误
-                        {
-                            __Ymodem_CancelTrans();
-                            printf("\r\n传输错误或选择协议错误！\r\n");
-                            printf("请选择Ymodem！\r\n");
-                            free(filebuf);
-                            return false;
-                        }
-                    }
-                }
-                else                                        //该包为普通128字节数据包
-                {
-                    if(package[1] != (pack_no & 0xff))
-                    {
-                        __Ymodem_CancelTrans();
-                        printf("\r\n传输错误或选择协议错误！\r\n");
-                        printf("请选择Ymodem！\r\n");
-                        free(filebuf);
-                        return false;
-                    }
-
-                    memcpy(&filebuf[offset],(const char*)package+3,pack_len);
-                    offset += pack_len;
-                    if((offset >= file_size-completed) || (offset >= CN_FILEBUF_SIZE-1024)) //如果足够大，写入flash
-                    {
-                        if(offset >= file_size-completed)                                   //判断本次写入大小
-                            write_len = file_size - completed;
-                        else
-                            write_len = CN_FILEBUF_SIZE - 1024;
-                        offset = 0;
-                        result = fn_pWriteTo(addr+completed,(u8 *)filebuf,write_len);
-                        if(result != write_len)
-                        {
-                            __Ymodem_CancelTrans();
-                            if(result == 0)
-                                printf("\r\n写入不成功\r\n");
-                            else if(result == CN_LIMIT_UINT32)
-                                printf("\r\n输入的地址不正确\r\n");
-                            free(filebuf);
-                            return false;
-                        }
-                        completed += write_len;
-                    }
-                    Djy_PutChar(CN_YMODEM_ACK);
-                }
-                pack_no++;
-            }
-            break;
-        case CN_YMODEM_STX:                                 //数据帧，1024字节
-            pack_len = CN_YMODEM_PACK_SIZE;
-            if(readed >= pack_len+5)
-            {
-                readed = 0;
-                if(__Ymodem_PackCheck(package,pack_len) == false)
-                    break;
-                if(package[1] != (pack_no & 0xff))
-                {
-                    __Ymodem_CancelTrans();
-                    printf("\r\n传输错误！\r\n");
-                    free(filebuf);
-                    return false;
-                }
-                memcpy(&filebuf[offset],(const char*)package+3,pack_len);
-                offset += pack_len;
-                if((offset >= file_size-completed) || (offset >= CN_FILEBUF_SIZE-1024)) //如果足够大，写入flash
-                {
-                    if(offset >= file_size-completed)                                   //判断本次写入大小
-                        write_len = file_size - completed;
-                    else
-                        write_len = CN_FILEBUF_SIZE - 1024;
-                    offset = 0;
-                    result = fn_pWriteTo(addr+completed,(u8 *)filebuf,write_len);
-                    if(result != write_len)
-                    {
-                        __Ymodem_CancelTrans();
-                        if(result == 0)
-                            printf("\r\n写入不成功\r\n");
-                        else if(result == CN_LIMIT_UINT32)
-                            printf("\r\n输入的地址不正确\r\n");
-                        free(filebuf);
-                        return false;
-                    }
-                    completed += write_len;
-                }
-                Djy_PutChar(CN_YMODEM_ACK);
-                pack_no++;
-            }
-            break;
-        case CN_YMODEM_EOT:                                 //结束符,后面还有全0数据帧
-            readed = 0;
-            Djy_PutChar(CN_YMODEM_ACK);                         //接收到结束符，回复ACK
-            Djy_PutChar(CN_YMODEM_C);                           //接收到结束符，回复C
-            break;
-        case CN_YMODEM_CAN:                                 //取消传输
-            printf("\r\n取消传输成功\r\n");
-            free(filebuf);
-            return true;
-        default:
-            __Ymodem_CancelTrans();
-            printf("\r\n传输错误或选择协议错误！\r\n");
-            printf("请选择Ymodem！\r\n");
-            free(filebuf);
-            return false;
-        }
-    }
-    return true;
-}
-
-bool_t __sh_WriteFile(u8 *pData,u32 length,u32 timeout)
-{
-    tagDevHandle char_term_hdl;
-    u32 stdinout;
-    bool_t result = false;
-
-    stdinout = Driver_FindDevice((char*)gc_pCfgStddevName);
-    char_term_hdl = Driver_OpenDeviceAlias(stdinout,O_RDWR,0);
-    if(NULL != char_term_hdl)
-    {
-        Driver_WriteDevice(char_term_hdl,pData,length,0,CN_BLOCK_BUFFER,timeout);
-        Driver_CloseDevice(char_term_hdl);
-        result = true;
-    }
-
-    return result;
-}
-//----------------------------------------------------------
-//功能：上传文件的shell命令
-//参数：param: 参数字符串
-//返回：true:  操作成功
-//      false: 操作失败
-//----------------------------------------------------------
-bool_t Sh_UploadFile(char *param)
-{
-    char *filebuf = NULL;
-    FILE *file=NULL;
-    char *filename,*nextparam;
-
-    u32 over = 0,readed = 0,reads = 0,pack_no = 0;
-    u32 sendsum = 0,sendlen=0,completed = 0,checklen = 0;
-    u32 filenamelen = 0;
-    u8 command[32],package[1029];
-    u16 checksum = 0;
-
-    filename = Sh_GetWord(param, &nextparam);
-    if(filename == NULL)
-    {
-        printf("命令格式错误!\r\n");
-        printf("正确的命令格式:upload 文件名\r\n");
-        return false;
-    }
-    file = fopen(filename,"r+b");//打开方式-------todo
-    if(file == NULL)
-    {
-        printf("文件不存在或打开失败\r\n");
-        return false;
-    }
-
-    filenamelen = strlen(filename);
-    sendsum = (u32)(file->file_size);
-    //等待接收发送文件请求
-    while (Djy_WaitEvttPop(Djy_MyEvttId(), NULL,
-            1000 * mS) == CN_SYNC_TIMEOUT)
-    {
-        if (over++ < 30)
-        {
-            printf("\b\b\b\b%2d s",30-over);
-            continue;
-        }
-        else
-        {
-            printf("超时未操作\r\n");
-            free(filebuf);
-            return false;
+        	Ret = YMODEM_TIMEOUT;
+        	goto YMODEM_EXIT;
         }
     }
 
-    filebuf = (char *)M_MallocLc(sendsum,0);
-    if(filebuf == NULL)
-    {
-        printf("申请内存失败!\r\n");
-        return false;
-    }
-    fread_r(file, filebuf, sendsum, 0);
+    pYmodem->PkgBufCnt = 1;
+    pYmodem->StartTime = DjyGetSysTime();
+    Ret = __Ymodem_SendProcess(pYmodem);
 
-    while(1)
-    {
-        reads = __Ymodem_Gets(command + readed);            //读取数
-        readed += reads;
-        if(reads == CN_LIMIT_UINT32)                        //接收超时
-        {
-            __Ymodem_CancelTrans();
-            printf("\r\n传输超时或选择协议错误！\r\n");
-            printf("请选择Ymodem！\r\n");
-            fclose(file);
-            free(filebuf);
-            return false;
-        }
-        switch(command[0])
-        {
-        case CN_YMODEM_C:
-            readed = 0;
-            if(pack_no == 0)                                //首包
-            {
-                memset(package,0x00,CN_YMODEM_HEAD_SIZE+5);
-                package[0] = CN_YMODEM_SOH;
-                package[1] = 0x00;
-                package[2] = 0xFF;
-                memcpy(package+3,filename,filenamelen);
-                package[filenamelen+3] = 0x00;
-                itoa(sendsum,(char*)&package[filenamelen+4],10);
-                checksum = Crc_16(package+3,CN_YMODEM_HEAD_SIZE);
-                memcpy(package+CN_YMODEM_HEAD_SIZE+3,&checksum, 2);
+    pYmodem->FileOps = YMODEM_FILE_CLOSE;		//关闭文件
+    __Ymodem_FileOps(pYmodem,0);
 
-                //send the start package
-//                Driver_DevWriteLeft(pg_char_term_lhdl,(ptu32_t)package,
-//                              CN_YMODEM_HEAD_SIZE+5,CN_TIMEOUT_FOREVER);
-                __sh_WriteFile(package,CN_YMODEM_HEAD_SIZE+5,CN_TIMEOUT_FOREVER);
-            }
-            pack_no++;
-            break;
-        case CN_YMODEM_NAK:
-            __Ymodem_CancelTrans();
-            printf("请选择ymodem\r\n");
-            fclose(file);
-            free(filebuf);
-            return false;
-            break;
-        case CN_YMODEM_CAN:
-            fclose(file);
-            free(filebuf);
-            return false;
-            break;
-        case CN_YMODEM_ACK:
-            readed = 0;
-            if(completed < sendsum)//继续发送数据包
-            {
-                if(sendsum - completed <= CN_YMODEM_HEAD_SIZE)//不够128，则取128bytes
-                {
-                    memset(package,0x00,CN_YMODEM_HEAD_SIZE+5);
-                    sendlen = sendsum-completed;
-                    checklen = CN_YMODEM_HEAD_SIZE;
-                    package[0] = CN_YMODEM_SOH;
-                }
-                else if(sendsum - completed <= CN_YMODEM_PACK_SIZE)//大于128，不够1024
-                {
-                    memset(package,0x00,CN_YMODEM_PACK_SIZE+5);
-                    sendlen = sendsum-completed;
-                    checklen = CN_YMODEM_PACK_SIZE;
-                    package[0] = CN_YMODEM_STX;
-                }
-                else    //足够1024，则包大小为1024
-                {
-                    memset(package,0x00,CN_YMODEM_PACK_SIZE+5);
-                    sendlen = CN_YMODEM_PACK_SIZE;
-                    checklen = CN_YMODEM_PACK_SIZE;
-                    package[0] = CN_YMODEM_STX;
-                }
-                package[1] = pack_no;
-                package[2] = 0xFF - pack_no;
-                memcpy(package+3,filebuf+completed,sendlen);
-                checksum = Crc_16(package+3,checklen);
-                memcpy(package+checklen+3,&checksum,2);
-                //send the start package
-//                Driver_DevWriteLeft(pg_char_term_lhdl,(ptu32_t)package,
-//                              checklen+5,CN_TIMEOUT_FOREVER);
-                __sh_WriteFile(package,checklen+5,CN_TIMEOUT_FOREVER);
-                completed += sendlen;
-            }
-            else    //数据包传输完毕，可结束
-            {
-                Djy_PutChar(CN_YMODEM_EOT);
-                memset(package,0x00,CN_YMODEM_HEAD_SIZE+5);
-                package[0] = CN_YMODEM_SOH;
-                package[1] = 0x00;
-                package[2] = 0xFF;
-                checksum = Crc_16(package+3,CN_YMODEM_HEAD_SIZE);
-                memcpy(package+CN_YMODEM_HEAD_SIZE+3,&checksum, 2);
-                //send the start package
-//                Driver_DevWriteLeft(pg_char_term_lhdl,(ptu32_t)package,
-//                              CN_YMODEM_HEAD_SIZE+5,CN_TIMEOUT_FOREVER);
-                __sh_WriteFile(package,CN_YMODEM_HEAD_SIZE+5,CN_TIMEOUT_FOREVER);
+YMODEM_EXIT:
+	if( NULL != pYmodem->FileBuf)
+		free(pYmodem->FileBuf);
+	if( NULL != pYmodem->PkgBuf)
+		free(pYmodem->PkgBuf);
 
-                printf("传输结束\r\n");
-                fclose(file);
-                free(filebuf);
-                return true;
-            }
-            pack_no++;
-            break;
-        default:
-            fclose(file);
-            free(filebuf);
-            return false;
-            break;
-        }
-    }
-}
+	Lock_MutexPost(pYmodem->pYmodemMutex);
+	if(Ret != YMODEM_OK)						//打印输出信息
+	{
+		if(Ret == YMODEM_PARAM_ERR)
+		{
+			printf("\r\nYMODEM PARAMETER ERR, PLEASE ENTER FILE NAME !\r\n");
+		}
+		else if(Ret == YMODEM_FILE_ERR)
+		{
+			printf("\r\nYMODEM FILE OPERATION ERR !\r\n");
+		}
+		else if(Ret == YMODEM_TIMEOUT)
+		{
+			printf("\r\nYMODEM OPERATION TIMEOUT ERR !\r\n");
+		}
+		else if(Ret == YMODEM_MEM_ERR)
+		{
+			printf("\r\nYMODEM NOT ENOUGH MEMORY !\r\n");
+		}
+		else if(Ret == YMODEM_CAN_TRANS)
+		{
+			printf("\r\nYMODEM BE CANCELED !\r\n");
+		}
+		else
+		{
+			printf("YMODEM UNKNOW ERR !\r\n");
+		}
+		return false;
+	}
+	else
+	{
+		printf("\r\nYMODEM SUCCESSED !\r\n");
+		return true;
+	}
 
-//-------ymodem从指定地址读取数据并保存到一个文件-----------
-//功能：从指定的位置读取指定长度的数据，并以文件的形式传送
-//参数：param: 参数字符串，param中包含如下参数
-//      1.addr,读取数据的起始地址，如0xffc00000
-//      2.len, 读取数据的长度，字节为单位，如128
-//      3.filename,文件名，将读取的数据存放的文件，包括后缀
-//返回：true:  操作成功
-//      false: 操作失败
-//----------------------------------------------------------
-bool_t Sh_UploadFileFrom(char *param)
-{
-    u8 *databuf = NULL;
-    char *addr_str,*len_str,*filename,*nextparam;
-
-    u32 read_addr,read_len,filename_len;
-    u32 loop,read_flash_times = 0,temp_read_len;
-    u32 read_cp = 0;
-
-    u32 over = 0,readed = 0,reads = 0,pack_no = 0;
-    u32 sendlen=0,completed = 0,checklen = 0;
-    u8 command[32],package[1029];
-    u16 checksum = 0;
-
-    if(fn_pReadFrom == NULL)
-        return false;
-    addr_str = Sh_GetWord(param, &nextparam);
-    len_str  = Sh_GetWord(nextparam, &nextparam);
-    filename = Sh_GetWord(nextparam, &nextparam);
-    if((addr_str == NULL) || (len_str == NULL) || (filename == NULL))
-    {
-        printf("\r\n正确的命令格式: upload_from 地址 长度 文件名\r\n");
-        return false;
-    }
-
-    read_addr    = strtol(addr_str, (char **)NULL, 0);
-    read_len     = strtol(len_str, (char **)NULL, 0);
-    filename_len = strlen(filename);
-    read_flash_times = read_len/CN_DATABUF_SIZE + (read_len%CN_DATABUF_SIZE?1:0);
-
-    databuf = (u8 *)M_MallocLc(CN_DATABUF_SIZE,0);
-    if(databuf == NULL)
-    {
-        printf("申请内存失败!\r\n");
-        return false;
-    }
-    //等待接收发送文件请求
-    while (Djy_WaitEvttPop(Djy_MyEvttId(), NULL,
-            1000 * mS) == CN_SYNC_TIMEOUT)
-    {
-        if (over++ < 30)
-        {
-            printf("\b\b\b\b%2d s",30-over);
-            continue;
-        }
-        else
-        {
-            printf("超时未操作\r\n");
-            free(databuf);
-            return false;
-        }
-    }
-
-    for(loop = 0; loop < read_flash_times;loop++ )
-    {
-        completed = 0;
-        if(loop == read_flash_times - 1)
-            temp_read_len = read_len - loop * CN_DATABUF_SIZE;
-        else
-            temp_read_len = CN_DATABUF_SIZE;
-        read_cp += fn_pReadFrom(read_addr + read_cp,
-                                        databuf, temp_read_len);
-        if(loop >0)
-            goto continue_send;
-        while(1)
-        {
-            reads = __Ymodem_Gets(command + readed);            //读取数
-            readed += reads;
-            if(reads == CN_LIMIT_UINT32)                        //接收超时
-            {
-                __Ymodem_CancelTrans();
-                printf("\r\n传输超时或选择协议错误！\r\n");
-                printf("请选择Ymodem！\r\n");
-                free(databuf);
-                return false;
-            }
-            switch(command[0])
-            {
-            case CN_YMODEM_C:
-                readed = 0;
-                if(pack_no == 0)                                //首包
-                {
-                    memset(package,0x00,CN_YMODEM_HEAD_SIZE+5);
-                    package[0] = CN_YMODEM_SOH;
-                    package[1] = 0x00;
-                    package[2] = 0xFF;
-                    memcpy(package+3,filename,filename_len);
-                    package[filename_len+3] = 0x00;              //文件名
-                    itoa(read_len,(char*)&package[filename_len+4],10);
-                    checksum = Crc_16(package+3,CN_YMODEM_HEAD_SIZE);
-                    memcpy(package+CN_YMODEM_HEAD_SIZE+3,&checksum, 2);
-
-                    //send the start package
-//                    Driver_DevWriteLeft(pg_char_term_lhdl,(ptu32_t)package,
-//                                  CN_YMODEM_HEAD_SIZE+5,CN_TIMEOUT_FOREVER);
-                    __sh_WriteFile(package,CN_YMODEM_HEAD_SIZE+5,CN_TIMEOUT_FOREVER);
-                }
-                pack_no++;
-                break;
-            case CN_YMODEM_NAK:       //包重发，还没做-----todo
-                __Ymodem_CancelTrans();
-                printf("请选择ymodem\r\n");
-                free(databuf);
-                return false;
-                break;
-            case CN_YMODEM_CAN:        //取消发送
-                free(databuf);
-                return false;
-                break;
-            case CN_YMODEM_ACK:        //应答，继续发送包
-continue_send:
-                readed = 0;
-                if(completed < temp_read_len) //继续发送数据包
-                {
-                    if(temp_read_len - completed <= CN_YMODEM_HEAD_SIZE)//不足128
-                    {
-                        memset(package,0x00,CN_YMODEM_HEAD_SIZE+5);
-                        sendlen = temp_read_len - completed;
-                        checklen = CN_YMODEM_HEAD_SIZE;
-                        package[0] = CN_YMODEM_SOH;
-                    }
-                    else if(temp_read_len - completed <= CN_YMODEM_PACK_SIZE)//不足1024
-                    {
-                        memset(package,0x00,CN_YMODEM_PACK_SIZE+5);
-                        sendlen = temp_read_len-completed;
-                        checklen = CN_YMODEM_PACK_SIZE;
-                        package[0] = CN_YMODEM_STX;
-                    }
-                    else        //1024/pack
-                    {
-                        memset(package,0x00,CN_YMODEM_PACK_SIZE+5);
-                        sendlen = CN_YMODEM_PACK_SIZE;
-                        checklen = CN_YMODEM_PACK_SIZE;
-                        package[0] = CN_YMODEM_STX;
-                    }
-                    package[1] = pack_no;
-                    package[2] = 0xFF - pack_no;
-                    memcpy(package+3,databuf+completed,sendlen);
-                    checksum = Crc_16(package+3,checklen);
-                    memcpy(package+checklen+3,&checksum,2);
-                    //send the start package
-//                    Driver_DevWriteLeft(pg_char_term_lhdl,(ptu32_t)package,
-//                                  checklen+5,CN_TIMEOUT_FOREVER);
-                    __sh_WriteFile(package,checklen+5,CN_TIMEOUT_FOREVER);
-                    completed += sendlen;
-                }
-                else if(loop == read_flash_times - 1)//传输已经全部完成，可结束
-                {
-                    Djy_PutChar(CN_YMODEM_EOT);
-                    memset(package,0x00,CN_YMODEM_HEAD_SIZE+5);
-                    package[0] = CN_YMODEM_SOH;
-                    package[1] = 0x00;
-                    package[2] = 0xFF;
-                    checksum = Crc_16(package+3,CN_YMODEM_HEAD_SIZE);
-                    memcpy(package+CN_YMODEM_HEAD_SIZE+3,&checksum, 2);
-                    //send the start package
-//                    Driver_DevWriteLeft(pg_char_term_lhdl,(ptu32_t)package,
-//                                  CN_YMODEM_HEAD_SIZE+5,CN_TIMEOUT_FOREVER);
-                    __sh_WriteFile(package,CN_YMODEM_HEAD_SIZE+5,CN_TIMEOUT_FOREVER);
-
-                    printf("传输结束\r\n");
-                    free(databuf);
-                    return true;
-                }
-                else                //databuf中的数据传输完成
-                    goto read_loop;
-                pack_no++;
-                break;
-            default:
-                free(databuf);
-                return false;
-                break;
-            }
-        }
-        //for loop
-read_loop:
-        completed = 0;
-    }
-    return true;
-}
-
-//-------ymodem修改flash数据--------------------------------
-//功能：修改FLASH中指定地址的数据，只支持修改指定地址1字节、2字节
-//      和4字节长度
-//参数：param: 参数字符串
-//返回：true:  操作成功
-//      false: 操作失败
-//----------------------------------------------------------
-bool_t Sh_ModifyFlash(char *param)
-{
-    ptu32_t addr;
-    uint32_t data,length;
-    uint8_t buf[16],i;
-    char *word_addr,*len,*word_byte,*next_param;
-
-    if(fn_pWriteTo == NULL)
-        return false;
-    //提取3个参数
-    word_addr = Sh_GetWord(param,&next_param);
-    len = Sh_GetWord(next_param,&next_param);
-    if((word_addr == NULL)||(len == NULL))
-    {
-        printf("\r\n格式错误，正确格式是：\r\n>flash 地址 长度 数据\r\n");
-        return false;
-    }
-
-    addr = strtol(word_addr, (char **)NULL, 0);
-    length = strtol(len, (char **)NULL, 0);
-
-    if(length > 16)
-    {
-        printf("\r\n输入错误，输入长度大于16字节最大长度！\r\n");
-        return false;
-    }
-
-    for(i = 0; i < length; i++)
-    {
-        word_byte = Sh_GetWord(next_param,&next_param);
-        if(word_byte == NULL)
-        {
-            printf("\r\n输入错误，数据与长度不一致！\r\n");
-            return false;
-        }
-        data = strtol(word_byte, (char **)NULL, 0);
-        if(data > 0xFF)
-        {
-            printf("\r\n输入错误，字节数据大于255！\r\n");
-            return 0;
-        }
-        buf[i] = (u8)data;
-    }
-
-    if(fn_pWriteTo(addr,(u8*)buf,length) != length)
-    {
-        printf("\r\n写入flash错误\r\n");
-    }
-    return 0;
-}
-
-//----注册读写函数-------------------------------------------------------------
-//功能: 往指定的地址都/写的功能,与文件传输不一样,文件操作有标准函数可用.由于芯片
-//      型号各异、板子配置不同,无法给出标准的操作函数.于是ymodem模块定义了两个
-//      函数指针,由用户实现相关函数后,调用本函数注册到这两个指针里.
-//参数: pWriteTo,写数据到指定地址的函数指针
-//      pReadFrom, 从制定地址读数据的函数指针。
-//返回: 无
-//-----------------------------------------------------------------------------
-void ymodem_RegisterFn  (
-                u32 (*pWriteTo)(uint32_t addr, uint8_t *buf, uint32_t len),
-                u32 (*pReadFrom)(uint32_t addr, uint8_t *buf, uint32_t len)
-                        )
-{
-    if(pWriteTo != NULL)
-        fn_pWriteTo = pWriteTo;
-    if(pReadFrom != NULL)
-        fn_pReadFrom = pReadFrom;
-    return;
+	return true;
 }

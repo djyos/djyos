@@ -65,7 +65,7 @@
 // 说明    :
 // ==============================================================================================
 
-bool_t JudgeCoordinatePointInRec(struct tagRectangle rec, struct coordinate_point myCoordinatePoint)
+bool_t JudgeCoordinatePointInRec(struct Rectangle rec, struct coordinate_point myCoordinatePoint)
 {
     if((rec.left<=myCoordinatePoint.x)&&(rec.right>=myCoordinatePoint.x)&&\
        (rec.top<=myCoordinatePoint.y)&&(rec.bottom>=myCoordinatePoint.y))
@@ -93,7 +93,7 @@ struct menu_displaypara *touchlcdactionhorizontal(struct menu_displaypara *opera
     s8              step=0;//跳转的步长
     u8              FNumber=0;
     u8              ONumber=0;
-    struct tagRectangle  temp_rec={0,0,0,0};
+    struct Rectangle  temp_rec={0,0,0,0};
     //内部使用，不用做参数检查
 
 
@@ -149,7 +149,7 @@ struct menu_displaypara *touchlcdactionhorizontal(struct menu_displaypara *opera
 struct menu_displaypara *touchlcdactionvertical(struct menu_displaypara *operatingDispara,\
                                                 struct coordinate_point myCoordinatePoint)
 {
-    struct tagRectangle  temp_rec={0,0,0,0};
+    struct Rectangle  temp_rec={0,0,0,0};
     u8              menuNum=0,menuitemNumber=0;
     s8              step=0;//跳转的步长
     u8              FNumber=0;
@@ -210,7 +210,7 @@ struct menu_displaypara *touchlcdactionvertical(struct menu_displaypara *operati
 struct menu_displaypara *touchlcdaction3by3(struct menu_displaypara *operatingDispara,\
                                             struct coordinate_point myCoordinatePoint)
 {
-    struct tagRectangle  temp_rec={0,0,0,0};
+    struct Rectangle  temp_rec={0,0,0,0};
     s8              menuNum=0,menuitemNumber=0;
     s8              step=0;//跳转的步长
     s8              FNumber=0;

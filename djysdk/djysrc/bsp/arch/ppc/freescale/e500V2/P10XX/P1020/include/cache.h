@@ -57,7 +57,6 @@
 extern "C" {
 #endif
 
-#include "config-prj.h"
 #include "stdint.h"
 
 #if CN_CFG_CACHE_USED == 1

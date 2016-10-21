@@ -59,7 +59,7 @@
 #include "Menuitem.h"
 
 // 用户菜单数据声明
-typedef struct _tagMenuitemModel
+typedef struct MenuitemModel
 {
     u8            byClass;                        // 菜单分级标志;
 
@@ -76,8 +76,8 @@ typedef struct _tagMenuitemModel
 
 
 
-struct menu_item*  append_menu_branch(struct menu_item * menuitem_tree, const struct _tagMenuitemModel * tab_list);
+struct menu_item*  append_menu_branch(struct menu_item * menuitem_tree, const struct MenuitemModel * tab_list);
 
-struct menu_item*  create_menu_tree(const char * treename, const struct _tagMenuitemModel * tab_list);
+struct menu_item*  create_menu_tree(const char * treename, const struct MenuitemModel * tab_list);
 
 #endif

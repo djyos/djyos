@@ -51,7 +51,6 @@
 // 创建时间: 9/12.2014
 // =============================================================================
 
-#include "config-prj.h"
 #include "string.h"
 #include "cpu_peri.h"
 #include "spibus.h"
@@ -62,29 +61,29 @@
 //定义中断中需使用的静态量结构体
 struct SPI_IntParamSet
 {
-//	struct semaphore_LCB *pDrvPostSemp;	//信号量
-	u32 SendDataLen;
-	u32 RecvDataLen;
-	u32 RecvOffset;
-//	u8 CurrentCS;
-//	u8 block_option;
+//  struct semaphore_LCB *pDrvPostSemp; //信号量
+    u32 SendDataLen;
+    u32 RecvDataLen;
+    u32 RecvOffset;
+//  u8 CurrentCS;
+//  u8 block_option;
 };
 // =============================================================================
 //定义SPI控制块和中断静态量
-#define CN_SPI_BUF_LEN      		128
-#define CN_SPI_DMA_BUF_LEN  		128
-static struct tagSPI_CB s_SPI_CB;
+#define CN_SPI_BUF_LEN              128
+#define CN_SPI_DMA_BUF_LEN          128
+static struct SPI_CB s_SPI_CB;
 static u8 s_SPI_Buf[CN_SPI_BUF_LEN];
 static u8 s_SPI_DmaSendBuf[CN_SPI_DMA_BUF_LEN];
 static u8 s_SPI_DmaRecvBuf[CN_SPI_DMA_BUF_LEN];
 struct SPI_IntParamSet IntParamset0;
 
 static const Pin SPI_PINS[] = {
-	{PIO_PA12A_MISO,  PIOA, ID_PIOA, PIO_PERIPH_A, PIO_PULLUP},
-	{PIO_PA13A_MOSI,  PIOA, ID_PIOA, PIO_PERIPH_A, PIO_PULLUP},
-	{PIO_PA14A_SPCK,  PIOA, ID_PIOA, PIO_PERIPH_A, PIO_PULLUP},
-	{PIO_PA11A_NPCS0, PIOA, ID_PIOA, PIO_PERIPH_A, PIO_PULLUP},
-	{PIO_PB14A_NPCS1, PIOB, ID_PIOB, PIO_PERIPH_A, PIO_PULLUP}
+    {PIO_PA12A_MISO,  PIOA, ID_PIOA, PIO_PERIPH_A, PIO_PULLUP},
+    {PIO_PA13A_MOSI,  PIOA, ID_PIOA, PIO_PERIPH_A, PIO_PULLUP},
+    {PIO_PA14A_SPCK,  PIOA, ID_PIOA, PIO_PERIPH_A, PIO_PULLUP},
+    {PIO_PA11A_NPCS0, PIOA, ID_PIOA, PIO_PERIPH_A, PIO_PULLUP},
+    {PIO_PB14A_NPCS1, PIOB, ID_PIOB, PIO_PERIPH_A, PIO_PULLUP}
 };
 
 //static u8 s_ChipSelect = 0x00;
@@ -96,11 +95,11 @@ static const Pin SPI_PINS[] = {
 // =============================================================================
 static void __SPI_IntEnable(volatile tagSpiReg *Reg,u32 IntSrc)
 {
-	Reg->SPI_IER = IntSrc;
+    Reg->SPI_IER = IntSrc;
 }
 static void __SPI_IntDisable(volatile tagSpiReg *Reg,u32 IntSrc)
 {
-	Reg->SPI_IDR = IntSrc;
+    Reg->SPI_IDR = IntSrc;
 }
 
 // =============================================================================
@@ -110,14 +109,14 @@ static void __SPI_IntDisable(volatile tagSpiReg *Reg,u32 IntSrc)
 //      spiclk，欲配置的时钟速度，单位为Hz
 // 返回：true=成功，false=失败
 // 说明：此驱动固定SCR = 1;而根据手册，CPSDVSR必须为2-254的偶数，因此，频率范围为
-//		 12.5M ~ 100kHz
+//       12.5M ~ 100kHz
 // =============================================================================
 static void __SPI_SetClk(volatile tagSpiReg *Reg,u8 cs,u32 Fre)
 {
-	if(cs > CN_CS_MAX)
-		return;
+    if(cs > CN_CS_MAX)
+        return;
 
-	Reg->SPI_CSR[cs] |= SPI_CSR_SCBR(CN_CFG_MCLK/Fre);
+    Reg->SPI_CSR[cs] |= SPI_CSR_SCBR(CN_CFG_MCLK/Fre);
 }
 
 // =============================================================================
@@ -127,8 +126,8 @@ static void __SPI_SetClk(volatile tagSpiReg *Reg,u8 cs,u32 Fre)
 // =============================================================================
 static void __SPI_GpioInit(void)
 {
-//	GPIO_CfgPinFunc(SPI_PINS,PIO_LISTSIZE(SPI_PINS));
-	PIO_Configure(SPI_PINS,PIO_LISTSIZE(SPI_PINS));
+//  GPIO_CfgPinFunc(SPI_PINS,PIO_LISTSIZE(SPI_PINS));
+    PIO_Configure(SPI_PINS,PIO_LISTSIZE(SPI_PINS));
 }
 
 // =============================================================================
@@ -139,34 +138,34 @@ static void __SPI_GpioInit(void)
 // =============================================================================
 static void __SPI_Config(volatile tagSpiReg *Reg,u8 cs,tagSpiConfig *ptr)
 {
-	if(cs > CN_CS_MAX)
-		return;
-	__SPI_SetClk(Reg,cs,ptr->Freq);
+    if(cs > CN_CS_MAX)
+        return;
+    __SPI_SetClk(Reg,cs,ptr->Freq);
 
-	//set the PHA
-	if(ptr->Mode & SPI_CPHA)
-	{
-		Reg->SPI_CSR[cs] |= SPI_CSR_NCPHA;
-	}
-	else
-	{
-		Reg->SPI_CSR[cs] &= ~SPI_CSR_NCPHA;
-	}
-	//set the cpol
-	if(ptr->Mode & SPI_CPOL)
-	{
-		Reg->SPI_CSR[cs] |= SPI_CSR_CPOL;
-	}
-	else
-	{
-		Reg->SPI_CSR[cs] &= ~SPI_CSR_CPOL;
-	}
+    //set the PHA
+    if(ptr->Mode & SPI_CPHA)
+    {
+        Reg->SPI_CSR[cs] |= SPI_CSR_NCPHA;
+    }
+    else
+    {
+        Reg->SPI_CSR[cs] &= ~SPI_CSR_NCPHA;
+    }
+    //set the cpol
+    if(ptr->Mode & SPI_CPOL)
+    {
+        Reg->SPI_CSR[cs] |= SPI_CSR_CPOL;
+    }
+    else
+    {
+        Reg->SPI_CSR[cs] &= ~SPI_CSR_CPOL;
+    }
 
-	if(ptr->CharLen <= 16 && ptr->CharLen >= 4)
-	{
-		Reg->SPI_CSR[cs] &= ~SPI_CSR_BITS_Msk;
-		Reg->SPI_CSR[cs] |= ptr->CharLen - 8;
-	}
+    if(ptr->CharLen <= 16 && ptr->CharLen >= 4)
+    {
+        Reg->SPI_CSR[cs] &= ~SPI_CSR_BITS_Msk;
+        Reg->SPI_CSR[cs] |= ptr->CharLen - 8;
+    }
 }
 
 // =============================================================================
@@ -183,23 +182,141 @@ static void __SPI_HardConfig(void)
     //配置SPI使用GPIO引脚
     __SPI_GpioInit();
 
-    Reg->SPI_CR = SPI_CR_SPIDIS|SPI_CR_SWRST;			//复位控制器
+    Reg->SPI_CR = SPI_CR_SPIDIS|SPI_CR_SWRST;           //复位控制器
     Reg->SPI_MR = SPI_MR_MSTR|SPI_MR_MODFDIS|SPI_MR_DLYBCS(128);
 
-	//默认使用4M波特率
-	Fre = 4*1000*1000;
+    //默认使用4M波特率
+    Fre = 4*1000*1000;
     for(temp = 0; temp < 4; temp ++)
     {
-    	Reg->SPI_CSR[temp] = SPI_CSR_CSAAT|SPI_CSR_SCBR(CN_CFG_MCLK/Fre);
+        Reg->SPI_CSR[temp] = SPI_CSR_CSAAT|SPI_CSR_SCBR(CN_CFG_MCLK/Fre);
     }
     //使用DMA方式
 //    Reg->SPI_PTCR = SPI_PTCR_RXTEN | SPI_PTCR_TXTEN;
-	Reg->SPI_TCR   = 0;
-	Reg->SPI_TNCR  = 0;
+    Reg->SPI_TCR   = 0;
+    Reg->SPI_TNCR  = 0;
     Reg->SPI_RCR   = 0;
-	Reg->SPI_RNCR  = 0;
+    Reg->SPI_RNCR  = 0;
 
     Reg->SPI_CR = SPI_CR_SPIEN;
+}
+
+// =============================================================================
+// 功能：SPI接收与发送中断服务函数。该函数实现的功能如下：
+//       1.由于收发一体，因此发送空中断中也收到了数据；
+//       2.SPI_PortRead()中读不到数据时，说明发送的数据已经完成，可关发送中断
+//       3.若param->RecvDataLen大于0，即需要接收数据，则从接收到数据领衔offset字节
+//         开始存储数据，即调用SPI_PortRead()
+//       4.
+// 参数：spi_int_line,中断号，本函数没用到
+// 返回：无意义
+// =============================================================================
+u32 SPI_ISR(ptu32_t IntLine)
+{
+    struct SPI_CB *pSCB=NULL;
+    struct SPI_IntParamSet *param;
+    tagSpiReg *Reg;
+    u32 spi_sr,spi_imr,temp;
+
+    if(IntLine != CN_INT_LINE_SPI)
+        return 0;
+
+    pSCB = &s_SPI_CB;
+    Reg = (tagSpiReg *)CN_SPI_BASE;
+    param = &IntParamset0;
+
+    spi_sr = Reg->SPI_SR;
+    spi_imr = Reg->SPI_IMR;
+    //发送中断
+    if( (spi_imr & SPI_IMR_TXBUFE) && (spi_sr & SPI_SR_TXBUFE)) //使能了发送中断，且TXRIS
+    {
+        Reg->SPI_PTCR = SPI_PTCR_TXTDIS|SPI_PTCR_RXTDIS;
+        temp = SPI_PortRead(pSCB,s_SPI_DmaSendBuf,CN_SPI_DMA_BUF_LEN);//是否还有数据需要发送
+
+        if(temp >0)
+        {
+            param->SendDataLen -= CN_SPI_DMA_BUF_LEN;
+            param->RecvOffset  -= CN_SPI_DMA_BUF_LEN;
+
+            Reg->SPI_TPR = (u32)s_SPI_DmaSendBuf;
+            Reg->SPI_TCR = temp;
+            Reg->SPI_RPR = (u32)s_SPI_DmaRecvBuf;
+            Reg->SPI_RCR = temp;
+            Reg->SPI_PTCR = SPI_PTCR_TXTEN|SPI_PTCR_RXTEN;
+        }
+        else                                            //表明发送结束
+        {
+            //关发送中断
+            while(!(Reg->SPI_SR & SPI_SR_TXEMPTY));
+            while(Reg->SPI_SR & SPI_SR_RDRF)
+            {
+                temp = Reg->SPI_RDR;
+            }
+            __SPI_IntDisable(Reg,SPI_IDR_TXBUFE);
+            param->RecvOffset -= param->SendDataLen;
+            param->SendDataLen = 0;
+            //发送完成了，判断是否需要接收
+            if(param->RecvDataLen > 0)
+            {
+                //MASTER模式下，发送和接收同时进行
+                memset(s_SPI_DmaSendBuf,0x00,CN_SPI_DMA_BUF_LEN);
+                if(param->RecvDataLen > CN_SPI_DMA_BUF_LEN)
+                    temp = CN_SPI_DMA_BUF_LEN;
+                else
+                    temp = param->RecvDataLen;
+
+                Reg->SPI_TPR = (u32)s_SPI_DmaSendBuf;
+                Reg->SPI_TCR = temp;
+                Reg->SPI_RPR = (u32)s_SPI_DmaRecvBuf;
+                Reg->SPI_RCR = temp;
+
+                //同时使能接收和发送DMA
+                Reg->SPI_PTCR = SPI_PTCR_TXTEN | SPI_PTCR_RXTEN;
+                __SPI_IntEnable(Reg,SPI_IER_RXBUFF);    //使能接收中断
+            }
+        }
+    }
+    else if((spi_imr & SPI_IMR_RXBUFF) && (spi_sr & SPI_SR_RXBUFF))    //接收中断
+    {
+        Reg->SPI_PTCR = SPI_PTCR_TXTDIS|SPI_PTCR_RXTDIS;
+        //计算接收了多少数据
+        if(param->RecvDataLen > CN_SPI_DMA_BUF_LEN)
+            temp = CN_SPI_DMA_BUF_LEN;
+        else
+            temp = param->RecvDataLen;
+
+        SPI_PortWrite(pSCB,s_SPI_DmaRecvBuf,temp);
+        param->RecvDataLen -= temp;
+
+        //判断是否还需接收数据
+        if(param->RecvDataLen > 0)
+        {
+            if(param->RecvDataLen > CN_SPI_DMA_BUF_LEN)
+                temp = CN_SPI_DMA_BUF_LEN;
+            else
+                temp = param->RecvDataLen;
+            Reg->SPI_TPR = (u32)s_SPI_DmaSendBuf;
+            Reg->SPI_TCR = temp;
+            Reg->SPI_RPR = (u32)s_SPI_DmaRecvBuf;
+            Reg->SPI_RCR = temp;
+
+            //同时使能接收和发送DMA
+            Reg->SPI_PTCR = SPI_PTCR_TXTEN | SPI_PTCR_RXTEN;
+        }
+        else                    //表明接收已经完成
+        {
+            param->RecvDataLen = 0;
+            __SPI_IntDisable(Reg,SPI_IDR_RXBUFF);
+            Reg->SPI_PTCR = SPI_PTCR_TXTDIS | SPI_PTCR_RXTDIS;
+        }
+    }
+
+    if(param->RecvDataLen + param->SendDataLen == 0)
+    {
+
+    }
+
+    return 0;
 }
 
 // =============================================================================
@@ -209,12 +326,12 @@ static void __SPI_HardConfig(void)
 // =============================================================================
 static void __SPI_IntConfig(void)
 {
-	u8 IntLine;
+    u8 IntLine;
 
-	IntLine = CN_INT_LINE_SPI;
+    IntLine = CN_INT_LINE_SPI;
     //中断线的初始化
-	u32 SPI_ISR(ufast_t IntLine);
-    Int_SetClearType(IntLine,CN_INT_CLEAR_PRE);
+    Int_Register(IntLine);
+    Int_SetClearType(IntLine,CN_INT_CLEAR_AUTO);
     Int_IsrConnect(IntLine,SPI_ISR);
     Int_SettoAsynSignal(IntLine);
     Int_ClearLine(IntLine);
@@ -230,11 +347,11 @@ static void __SPI_IntConfig(void)
 // =============================================================================
 static bool_t __SPI_BusCsActive(tagSpiReg *Reg, u8 cs)
 {
-//	s_ChipSelect = cs;
-	Reg->SPI_TDR |= SPI_TDR_PCS(cs);
-	Reg->SPI_MR  &= ~SPI_MR_PCS(0x0F);
-	Reg->SPI_MR  |= SPI_MR_PCS(cs);
-	return true;
+//  s_ChipSelect = cs;
+    Reg->SPI_TDR |= SPI_TDR_PCS(cs);
+    Reg->SPI_MR  &= ~SPI_MR_PCS(0x0F);
+    Reg->SPI_MR  |= SPI_MR_PCS(cs);
+    return true;
 }
 
 // =============================================================================
@@ -245,8 +362,8 @@ static bool_t __SPI_BusCsActive(tagSpiReg *Reg, u8 cs)
 // =============================================================================
 static bool_t __SPI_BusCsInActive(tagSpiReg *Reg, u8 cs)
 {
-	Reg->SPI_CR = SPI_CR_LASTXFER | SPI_CR_SPIDIS;
-	return false;
+    Reg->SPI_CR = SPI_CR_LASTXFER | SPI_CR_SPIDIS;
+    return false;
 }
 
 // =============================================================================
@@ -258,27 +375,27 @@ static bool_t __SPI_BusCsInActive(tagSpiReg *Reg, u8 cs)
 // =============================================================================
 static s32 __SPI_BusCtrl(tagSpiReg *Reg,u32 cmd,ptu32_t data1,ptu32_t data2)
 {
-	s32 result = 1;
-	if((u32)Reg != CN_SPI_BASE)
-		return 0;
+    s32 result = 1;
+    if((u32)Reg != CN_SPI_BASE)
+        return 0;
 
-	switch(cmd)
-	{
-	case CN_SPI_SET_CLK:
-		__SPI_SetClk(Reg,data1,data2);
-		break;
-	case CN_SPI_CS_CONFIG:
-		__SPI_Config(Reg,data1,(tagSpiConfig *)data2);
-		break;
-	case CN_SPI_SET_AUTO_CS_EN:
-		// 硬件上如果有自动产生CS的配置
-		break;
-	case CN_SPI_SET_AUTO_CS_DIS:
-		break;
-	default:
-		break;
-	}
-	return result;
+    switch(cmd)
+    {
+    case CN_SPI_SET_CLK:
+        __SPI_SetClk(Reg,data1,data2);
+        break;
+    case CN_SPI_CS_CONFIG:
+        __SPI_Config(Reg,data1,(tagSpiConfig *)data2);
+        break;
+    case CN_SPI_SET_AUTO_CS_EN:
+        // 硬件上如果有自动产生CS的配置
+        break;
+    case CN_SPI_SET_AUTO_CS_DIS:
+        break;
+    default:
+        break;
+    }
+    return result;
 }
 
 // =============================================================================
@@ -313,29 +430,29 @@ static void __SPI_Write( tagSpiReg * Reg, uint32_t dwNpcs, uint16_t wData )
 // 返回：true,正确；false,错误
 // =============================================================================
 static bool_t __SPI_TxRxPoll(tagSpiReg *Reg,u8 *srcAddr,u32 wrSize,
-		u8 *destAddr, u32 rdSize,u32 recvoff)
+        u8 *destAddr, u32 rdSize,u32 recvoff,u8 cs)
 {
-	u32 i;
-	if(!srcAddr)
-		return false;
+    u32 i;
+    if(!srcAddr)
+        return false;
 
-	Reg->SPI_CR |= SPI_CR_SPIEN;
-	for (i=0;i<(wrSize+rdSize);i++)
-	{
-		if (i<wrSize)
-		{
-			__SPI_Write(Reg,0x0,srcAddr[i]);
-			__SPI_Read(Reg);
-		}
-		else if((i>=wrSize)&&(i<(wrSize+rdSize)))
-		{
-		  __SPI_Write(Reg,0x0,0);
-		  if(destAddr)
-		  	destAddr[i-wrSize] = __SPI_Read(Reg);
-		}
-	}
+    Reg->SPI_CR |= SPI_CR_SPIEN;
+    for (i=0;i<(wrSize+rdSize);i++)
+    {
+        if (i<wrSize)
+        {
+            __SPI_Write(Reg,cs,srcAddr[i]);
+            __SPI_Read(Reg);
+        }
+        else if((i>=wrSize)&&(i<(wrSize+rdSize)))
+        {
+          __SPI_Write(Reg,cs,0);
+          if(destAddr)
+            destAddr[i-wrSize] = __SPI_Read(Reg);
+        }
+    }
 
-	return true;
+    return true;
 }
 
 // =============================================================================
@@ -352,18 +469,18 @@ static bool_t __SPI_TxRxPoll(tagSpiReg *Reg,u8 *srcAddr,u32 wrSize,
 // 返回：true,无错误;false,失败
 // =============================================================================
 static bool_t __SPI_TransferTxRx(tagSpiReg *Reg,u32 sendlen,u32 recvlen,
-								u32 recvoff)
+                                u32 recvoff)
 {
-	struct SPI_IntParamSet *Param=NULL;
-	u32 temp;
+    struct SPI_IntParamSet *Param=NULL;
+    u32 temp;
 
-	if((u32)Reg != CN_SPI_BASE)
-		return false;
+    if((u32)Reg != CN_SPI_BASE)
+        return false;
 
-	Param = &IntParamset0;
-	Param->SendDataLen = sendlen;
-	Param->RecvDataLen = recvlen;
-	Param->RecvOffset  = recvoff;
+    Param = &IntParamset0;
+    Param->SendDataLen = sendlen;
+    Param->RecvDataLen = recvlen;
+    Param->RecvOffset  = recvoff;
 
     __SPI_IntDisable(Reg,SPI_IDR_TXBUFE|SPI_IDR_ENDRX);
 
@@ -371,151 +488,34 @@ static bool_t __SPI_TransferTxRx(tagSpiReg *Reg,u32 sendlen,u32 recvlen,
     //绝大多数的通信，都是发送完成再接收，因此优先发送
     if(sendlen > 0)
     {
-		if(sendlen > CN_SPI_DMA_BUF_LEN)
-			temp = CN_SPI_DMA_BUF_LEN;
-		else
-			temp = sendlen;
+        if(sendlen > CN_SPI_DMA_BUF_LEN)
+            temp = CN_SPI_DMA_BUF_LEN;
+        else
+            temp = sendlen;
 
-		SPI_PortRead(&s_SPI_CB,s_SPI_DmaSendBuf,temp);
-		Reg->SPI_TPR = (u32)s_SPI_DmaSendBuf;
-		Reg->SPI_TCR = temp;
-		Reg->SPI_RPR = (u32)s_SPI_DmaRecvBuf;
-		Reg->SPI_RCR = temp;
-		Reg->SPI_PTCR = SPI_PTCR_TXTEN|SPI_PTCR_RXTEN;
-		__SPI_IntEnable(Reg,SPI_IER_TXBUFE);
+        SPI_PortRead(&s_SPI_CB,s_SPI_DmaSendBuf,temp);
+        Reg->SPI_TPR = (u32)s_SPI_DmaSendBuf;
+        Reg->SPI_TCR = temp;
+        Reg->SPI_RPR = (u32)s_SPI_DmaRecvBuf;
+        Reg->SPI_RCR = temp;
+        Reg->SPI_PTCR = SPI_PTCR_TXTEN|SPI_PTCR_RXTEN;
+        __SPI_IntEnable(Reg,SPI_IER_TXBUFE);
     }
     else
     {
-		if(recvlen > CN_SPI_DMA_BUF_LEN)
-			temp = CN_SPI_DMA_BUF_LEN;
-		else
-			temp = recvlen;
-		Reg->SPI_TPR = (u32)s_SPI_DmaSendBuf;
-		Reg->SPI_TCR = temp;
-		Reg->SPI_RPR = (u32)s_SPI_DmaRecvBuf;
-		Reg->SPI_RCR = temp;
-		Reg->SPI_PTCR = SPI_PTCR_TXTEN|SPI_PTCR_RXTEN;
-		__SPI_IntEnable(Reg,SPI_IER_RXBUFF);
+        if(recvlen > CN_SPI_DMA_BUF_LEN)
+            temp = CN_SPI_DMA_BUF_LEN;
+        else
+            temp = recvlen;
+        Reg->SPI_TPR = (u32)s_SPI_DmaSendBuf;
+        Reg->SPI_TCR = temp;
+        Reg->SPI_RPR = (u32)s_SPI_DmaRecvBuf;
+        Reg->SPI_RCR = temp;
+        Reg->SPI_PTCR = SPI_PTCR_TXTEN|SPI_PTCR_RXTEN;
+        __SPI_IntEnable(Reg,SPI_IER_RXBUFF);
     }
 
-	return true;
-}
-// =============================================================================
-// 功能：SPI接收与发送中断服务函数。该函数实现的功能如下：
-//       1.由于收发一体，因此发送空中断中也收到了数据；
-//       2.SPI_PortRead()中读不到数据时，说明发送的数据已经完成，可关发送中断
-//       3.若param->RecvDataLen大于0，即需要接收数据，则从接收到数据领衔offset字节
-//         开始存储数据，即调用SPI_PortRead()
-//       4.
-// 参数：spi_int_line,中断号，本函数没用到
-// 返回：无意义
-// =============================================================================
-u32 SPI_ISR(ufast_t IntLine)
-{
-	struct tagSPI_CB *pSCB=NULL;
-	struct SPI_IntParamSet *param;
-	tagSpiReg *Reg;
-    u32 spi_sr,spi_imr,temp;
-
-    if(IntLine != CN_INT_LINE_SPI)
-    	return 0;
-
-    pSCB = &s_SPI_CB;
-	Reg = (tagSpiReg *)CN_SPI_BASE;
-	param = &IntParamset0;
-
-	spi_sr = Reg->SPI_SR;
-    spi_imr = Reg->SPI_IMR;
-    //发送中断
-    if( (spi_imr & SPI_IMR_TXBUFE) && (spi_sr & SPI_SR_TXBUFE))	//使能了发送中断，且TXRIS
-    {
-    	Reg->SPI_PTCR = SPI_PTCR_TXTDIS|SPI_PTCR_RXTDIS;
-    	temp = SPI_PortRead(pSCB,s_SPI_DmaSendBuf,CN_SPI_DMA_BUF_LEN);//是否还有数据需要发送
-
-    	if(temp >0)
-    	{
-    		param->SendDataLen -= CN_SPI_DMA_BUF_LEN;
-    		param->RecvOffset  -= CN_SPI_DMA_BUF_LEN;
-
-    		Reg->SPI_TPR = (u32)s_SPI_DmaSendBuf;
-    		Reg->SPI_TCR = temp;
-    		Reg->SPI_RPR = (u32)s_SPI_DmaRecvBuf;
-    		Reg->SPI_RCR = temp;
-    		Reg->SPI_PTCR = SPI_PTCR_TXTEN|SPI_PTCR_RXTEN;
-    	}
-    	else											//表明发送结束
-    	{
-    		//关发送中断
-    		while(!(Reg->SPI_SR & SPI_SR_TXEMPTY));
-    		while(Reg->SPI_SR & SPI_SR_RDRF)
-    		{
-    			temp = Reg->SPI_RDR;
-    		}
-    		__SPI_IntDisable(Reg,SPI_IDR_TXBUFE);
-    		param->RecvOffset -= param->SendDataLen;
-    		param->SendDataLen = 0;
-    		//发送完成了，判断是否需要接收
-    		if(param->RecvDataLen > 0)
-    		{
-    			//MASTER模式下，发送和接收同时进行
-    			memset(s_SPI_DmaSendBuf,0x00,CN_SPI_DMA_BUF_LEN);
-    			if(param->RecvDataLen > CN_SPI_DMA_BUF_LEN)
-    				temp = CN_SPI_DMA_BUF_LEN;
-    			else
-    				temp = param->RecvDataLen;
-
-    			Reg->SPI_TPR = (u32)s_SPI_DmaSendBuf;
-    			Reg->SPI_TCR = temp;
-    			Reg->SPI_RPR = (u32)s_SPI_DmaRecvBuf;
-    			Reg->SPI_RCR = temp;
-
-    			//同时使能接收和发送DMA
-    			Reg->SPI_PTCR = SPI_PTCR_TXTEN | SPI_PTCR_RXTEN;
-    			__SPI_IntEnable(Reg,SPI_IER_RXBUFF);	//使能接收中断
-    		}
-    	}
-    }
-    else if((spi_imr & SPI_IMR_RXBUFF) && (spi_sr & SPI_SR_RXBUFF))    //接收中断
-    {
-    	Reg->SPI_PTCR = SPI_PTCR_TXTDIS|SPI_PTCR_RXTDIS;
-    	//计算接收了多少数据
-    	if(param->RecvDataLen > CN_SPI_DMA_BUF_LEN)
-    		temp = CN_SPI_DMA_BUF_LEN;
-    	else
-    		temp = param->RecvDataLen;
-
-    	SPI_PortWrite(pSCB,s_SPI_DmaRecvBuf,temp);
-    	param->RecvDataLen -= temp;
-
-    	//判断是否还需接收数据
-    	if(param->RecvDataLen > 0)
-    	{
-			if(param->RecvDataLen > CN_SPI_DMA_BUF_LEN)
-				temp = CN_SPI_DMA_BUF_LEN;
-			else
-				temp = param->RecvDataLen;
-			Reg->SPI_TPR = (u32)s_SPI_DmaSendBuf;
-			Reg->SPI_TCR = temp;
-			Reg->SPI_RPR = (u32)s_SPI_DmaRecvBuf;
-			Reg->SPI_RCR = temp;
-
-			//同时使能接收和发送DMA
-			Reg->SPI_PTCR = SPI_PTCR_TXTEN | SPI_PTCR_RXTEN;
-    	}
-    	else 					//表明接收已经完成
-    	{
-    		param->RecvDataLen = 0;
-    		__SPI_IntDisable(Reg,SPI_IDR_RXBUFF);
-    		Reg->SPI_PTCR = SPI_PTCR_TXTDIS | SPI_PTCR_RXTDIS;
-    	}
-    }
-
-    if(param->RecvDataLen + param->SendDataLen == 0)
-    {
-
-    }
-
-    return 0;
+    return true;
 }
 
 // =============================================================================
@@ -529,26 +529,26 @@ u32 SPI_ISR(ufast_t IntLine)
 // =============================================================================
 bool_t SPI_Init(void)
 {
-	struct tagSPI_Param SPI_Config;
+    struct SPI_Param SPI_Config;
 
-	SPI_Config.BusName 		   	= "SPI";
-	SPI_Config.SPIBuf 		   	= (u8*)&s_SPI_Buf;
-	SPI_Config.SPIBufLen 	  	= CN_SPI_BUF_LEN;
-	SPI_Config.SpecificFlag 	= CN_SPI_BASE;
-	SPI_Config.MultiCSRegFlag   = true;
-	SPI_Config.pTransferPoll    = (TransferPoll)__SPI_TxRxPoll;
-	SPI_Config.pTransferTxRx    = (TransferFunc)__SPI_TransferTxRx;
-	SPI_Config.pCsActive        = (CsActiveFunc)__SPI_BusCsActive;
-	SPI_Config.pCsInActive 		= (CsInActiveFunc)__SPI_BusCsInActive;
-	SPI_Config.pBusCtrl         = (SPIBusCtrlFunc)__SPI_BusCtrl;
+    SPI_Config.BusName          = "SPI";
+    SPI_Config.SPIBuf           = (u8*)&s_SPI_Buf;
+    SPI_Config.SPIBufLen        = CN_SPI_BUF_LEN;
+    SPI_Config.SpecificFlag     = CN_SPI_BASE;
+    SPI_Config.MultiCSRegFlag   = true;
+    SPI_Config.pTransferPoll    = (TransferPoll)__SPI_TxRxPoll;
+    SPI_Config.pTransferTxRx    = (TransferFunc)__SPI_TransferTxRx;
+    SPI_Config.pCsActive        = (CsActiveFunc)__SPI_BusCsActive;
+    SPI_Config.pCsInActive      = (CsInActiveFunc)__SPI_BusCsInActive;
+    SPI_Config.pBusCtrl         = (SPIBusCtrlFunc)__SPI_BusCtrl;
 
-	__SPI_HardConfig();
-	__SPI_IntConfig();
-	PMC_EnablePeripheral(CN_INT_LINE_SPI);
+    __SPI_HardConfig();
+    __SPI_IntConfig();
+    PMC_EnablePeripheral(CN_INT_LINE_SPI);
 
-	if(NULL == SPI_BusAdd_r(&SPI_Config,&s_SPI_CB))
-		return 0;
-	return 1;
+    if(NULL == SPI_BusAdd_s(&s_SPI_CB,&SPI_Config))
+        return 0;
+    return 1;
 }
 
 

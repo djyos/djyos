@@ -63,7 +63,6 @@
 #ifndef __UTF8_H__
 #define __UTF8_H__
 
-#define CN_NLS_CHARSET_UTF8             "utf8"
 
 #define ENCODING_UTF8_MAX_LEN 6
 

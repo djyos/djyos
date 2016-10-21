@@ -56,8 +56,8 @@
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.usepreprocessor.1085789402" name="Use preprocessor" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.usepreprocessor" value="true" valueType="boolean"/>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.paths.992234689" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\arm\cortex-m\armv7e-m\cortex-m4\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\exp-component\firmware\AtmelSam4s&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4s\wb7292&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\extern-component\firmware\AtmelSam4s&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\boarddrv\wb7292\include&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs.1308190582" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__ARM_ARCH_7EM__=1"/>
@@ -74,18 +74,16 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src/OS_prjcfg/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\arm\cortex-m\armv7e-m\cortex-m4\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\exp-component\firmware\CMSIS\CM4\CoreSupport&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\exp-component\firmware\CMSIS\CM4&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\exp-component\firmware\AtmelSam4s&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\cpudrv\AtmelSam4s\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4s\wb7292&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\extern-component\firmware\CMSIS\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\extern-component\firmware\AtmelSam4s&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\boarddrv\wb7292\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4s&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.1933137114" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
@@ -140,55 +138,6 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
-					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.310691604" name="/" resourcePath="src/OS_code/exp-component/firmware/CMSIS/CM4">
-						<toolChain id="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug.1953346070" name="Cross ARM GCC" superClass="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug" unusedChildren="">
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.1208013092.1508891078" name="Optimization Level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.1208013092"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.messagelength.1369301694.1787787999" name="Message length (-fmessage-length=0)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.messagelength.1369301694"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.signedchar.2138396378.1434856892" name="'char' is signed (-fsigned-char)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.signedchar.2138396378"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.functionsections.1752089796.244571200" name="Function sections (-ffunction-sections)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.functionsections.1752089796"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.datasections.1365776956.2048813958" name="Data sections (-fdata-sections)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.datasections.1365776956"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.debugging.level.399748656.1574824916" name="Debug level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.debugging.level.399748656"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.debugging.format.1003319233.317419328" name="Debug format" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.debugging.format.1003319233"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.toolchain.name.410116613.1468581978" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.toolchain.name.410116613"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.architecture.30654600.118414513" name="Architecture" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.architecture.30654600"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.family.325108395.957225351" name="ARM family" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.family.325108395"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.instructionset.1600844048.234416073" name="Instruction set" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.instructionset.1600844048"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.command.prefix.128932741.1855989930" name="Prefix" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.command.prefix.128932741"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.command.c.99243695.183399955" name="C compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.command.c.99243695"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.command.cpp.1231170544.812651393" name="C++ compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.command.cpp.1231170544"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.command.ar.1288451266.830082479" name="Archiver" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.command.ar.1288451266"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.command.objcopy.271280496.1652440741" name="Hex/Bin converter" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.command.objcopy.271280496"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.command.objdump.178257120.2078309076" name="Listing generator" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.command.objdump.178257120"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.command.size.421284328.1188204021" name="Size command" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.command.size.421284328"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.command.make.1873002005.314355110" name="Build command" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.command.make.1873002005"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.command.rm.183768711.1567873255" name="Remove command" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.command.rm.183768711"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.createflash.281947605.1908169437" name="Create flash image" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.createflash.281947605"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.printsize.845897945.1144778020" name="Print size" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.printsize.845897945"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.noinlinefunctions.96808453.584795124" name="Do not inline functions (-fno-inline-functions)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.noinlinefunctions.96808453"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.freestanding.1497316203.998587676" name="Assume freestanding environment (-ffreestanding)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.freestanding.1497316203"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.nobuiltin.2141461840.2102127815" name="Disable builtin (-fno-builtin)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.nobuiltin.2141461840"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.spconstant.23765176.1944290856" name="Single precision constants (-fsingle-precision-constant)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.spconstant.23765176"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.lto.436854252.294283623" name="Link-time optimizer (-flto)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.lto.436854252"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.warnings.extrawarn.1409617654.153108408" name="Enable extra warnings (-Wextra)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.warnings.extrawarn.1409617654"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.warnings.allwarn.2036571243.315192909" name="Enable all common warnings (-Wall)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.warnings.allwarn.2036571243"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.createlisting.515301483.1596390710" name="Create extended listing" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.createlisting.515301483"/>
-							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="ilg.gnuarmeclipse.managedbuild.cross.targetPlatform" isAbstract="false" osList="all" superClass="ilg.gnuarmeclipse.managedbuild.cross.targetPlatform"/>
-							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.1627410129" name="Cross ARM GNU Assembler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.1609614267">
-								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.input.1678438968" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.input"/>
-							</tool>
-							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.886416979" name="Cross ARM C Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.797657411">
-								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.otheroptimizations.120484729" name="Other optimization flags" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.otheroptimizations" value="-O2" valueType="string"/>
-								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.514919681" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input"/>
-							</tool>
-							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler.18161778" name="Cross ARM C++ Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler.943054151"/>
-							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.linker.861535145" name="Cross ARM C Linker" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.linker.398562767"/>
-							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.linker.417155196" name="Cross ARM C++ Linker" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.linker.245291037"/>
-							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.archiver.252751904" name="Cross ARM GNU Archiver" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.archiver.1198010784"/>
-							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.createflash.2059477580" name="Cross ARM GNU Create Flash Image" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.createflash.1410514102"/>
-							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.createlisting.717297522" name="Cross ARM GNU Create Listing" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.createlisting.488044487"/>
-							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.printsize.1035637659" name="Cross ARM GNU Print Size" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.printsize.246320813"/>
-						</toolChain>
-					</folderInfo>
 					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1157918270" name="/" resourcePath="src/OS_code/bsp/startup">
 						<toolChain id="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug.459341643" name="Cross ARM GCC" superClass="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug" unusedChildren="">
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.1208013092.1871854558" name="Optimization Level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.1208013092"/>
@@ -238,7 +187,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src/OS_code/djyos|src/OS_code/libc|src/OS_code/loader|src/OS_code/component|src/OS_code/bsp|src/OS_code/exp-component" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/OS_code/extern-component|src/OS_code/bsp|src/OS_code/libc|src/OS_code/component|src/OS_code/djyos|src/OS_code/loader|src/OS_code/exp-component" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -280,7 +229,7 @@
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.command.objdump.2074095612" name="Listing generator" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.command.objdump" value="objdump" valueType="string"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.command.size.2083837413" name="Size command" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.command.size" value="size" valueType="string"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.command.make.1739127182" name="Build command" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.command.make" value="make" valueType="string"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.command.rm.732303762" name="Remove command" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.command.rm" value="del" valueType="string"/>
+							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.command.rm.732303762" name="Remove command" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.command.rm" value="rm" valueType="string"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.createflash.428253536" name="Create flash image" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.createflash" value="true" valueType="boolean"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.printsize.1071010460" name="Print size" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.printsize" value="true" valueType="boolean"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.noinlinefunctions.1490464121" name="Do not inline functions (-fno-inline-functions)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.noinlinefunctions" value="false" valueType="boolean"/>
@@ -297,8 +246,8 @@
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.usepreprocessor.49404495" name="Use preprocessor" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.usepreprocessor" value="true" valueType="boolean"/>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.paths.2143633170" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\arm\cortex-m\armv7-m\cortex-m3\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\exp-component\firmware\AtmelSam4s&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4s&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\extern-component\firmware\AtmelSam4s&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs.1566922907" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__ARM_ARCH_7EM__=1"/>
@@ -314,18 +263,17 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src/OS_prjcfg/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\arm\cortex-m\armv7e-m\cortex-m4\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\exp-component\firmware\CMSIS\CM4\CoreSupport&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\exp-component\firmware\CMSIS\CM4&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\exp-component\firmware\AtmelSam4s&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4s\wb7292&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\cpudrv\AtmelSam4s\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\extern-component\firmware\CMSIS\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\extern-component\firmware\AtmelSam4s&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\boarddrv\wb7292\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4s&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.1758384790" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__ARM_ARCH_7EM__=1"/>
@@ -429,7 +377,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src/OS_code/djyos|src/OS_code/libc|src/OS_code/loader|src/OS_code/component|src/OS_code/bsp|src/OS_code/exp-component" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/OS_code/extern-component|src/OS_code/bsp|src/OS_code/libc|src/OS_code/component|src/OS_code/djyos|src/OS_code/loader|src/OS_code/exp-component" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -442,8 +390,10 @@
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/TWR-K60F120M"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/AtmelSam4s"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/AtmelSAM4S"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/TWR-K60F120M/libc-debug"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/AtmelSam4s/libc-debug"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/AtmelSAM4S/libc-debug"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="libc-debug" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -513,9 +463,12 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\arm\cortex-m\armv7e-m\cortex-m4\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4s\wb7292&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\boarddrv\wb7292\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4s&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.173444416" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
@@ -615,9 +568,12 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\arm\cortex-m\armv7e-m\cortex-m4\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4s\wb7292&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\boarddrv\wb7292\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4s&quot;"/>
 								</option>
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.1091903929" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input"/>
 							</tool>
@@ -631,7 +587,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src/user|src/OS_prjcfg|src/OS_code/djyos|src/OS_code/libc/libm/test|src/OS_code/libc/libc/search|src/OS_code/loader|src/app_src|src/OS_code/component|src/OS_code/bsp|src/OS_code/libc/libc/locale|src/OS_code/exp-component|src/OS_code/test" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/OS_code/extern-component|src/app_src|src/OS_code/bsp|src/OS_prjcfg|src/OS_code/libc/libc/locale|src/user|src/OS_code/component|src/OS_code/djyos|src/OS_code/libc/libm/test|src/OS_code/loader|src/OS_code/libc/libc/search|src/OS_code/exp-component|src/OS_code/test" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -643,8 +599,10 @@
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/TWR-K60F120M"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/AtmelSam4s"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/AtmelSAM4S"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/TWR-K60F120M/libc-release"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/AtmelSam4s/libc-release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/AtmelSAM4S/libc-release"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="libc-release" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -711,9 +669,12 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\arm\cortex-m\armv7e-m\cortex-m4\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4s\wb7292&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\boarddrv\wb7292\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4s&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.1829260691" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__ARM_ARCH_7EM__=1"/>
@@ -813,9 +774,12 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\arm\cortex-m\armv7e-m\cortex-m4\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4s\wb7292&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\boarddrv\wb7292\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4s&quot;"/>
 								</option>
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.216430213" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input"/>
 							</tool>
@@ -829,7 +793,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src/user|src/OS_prjcfg|src/OS_code/djyos|src/OS_code/libc/libm/test|src/OS_code/libc/libc/search|src/OS_code/loader|src/app_src|src/OS_code/component|src/OS_code/bsp|src/OS_code/libc/libc/locale|src/OS_code/exp-component|src/OS_code/test" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/OS_code/extern-component|src/app_src|src/OS_code/bsp|src/OS_prjcfg|src/OS_code/libc/libc/locale|src/user|src/OS_code/component|src/OS_code/djyos|src/OS_code/libc/libm/test|src/OS_code/loader|src/OS_code/libc/libc/search|src/OS_code/exp-component|src/OS_code/test" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -837,15 +801,7 @@
 		</cconfiguration>
 		<cconfiguration id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116.1609436261.893578978">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116.1609436261.893578978" moduleId="org.eclipse.cdt.core.settings" name="libOS-debug">
-				<externalSettings>
-					<externalSetting>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/TWR-K60F120M"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/AtmelSam4s"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/TWR-K60F120M/libOS-debug"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/AtmelSam4s/libOS-debug"/>
-						<entry flags="RESOLVED" kind="libraryFile" name="libOS-debug" srcPrefixMapping="" srcRootPath=""/>
-					</externalSetting>
-				</externalSettings>
+				<externalSettings/>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
@@ -892,13 +848,35 @@
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.unit.1304128397" name="FPU Type" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.unit" value="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.unit.default" valueType="enumerated"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.target.other.84227645" name="Other target flags" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.target.other" value="" valueType="string"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="ilg.gnuarmeclipse.managedbuild.cross.targetPlatform.2122853249" isAbstract="false" osList="all" superClass="ilg.gnuarmeclipse.managedbuild.cross.targetPlatform"/>
-							<builder autoBuildTarget="all" buildPath="${workspace_loc:/qh_1}/libOS" cleanBuildTarget="clean" command="${cross_make}" id="org.eclipse.cdt.build.core.internal.builder.1010636072" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" parallelBuildOn="true" parallelizationNumber="4" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<builder autoBuildTarget="all" buildPath="${workspace_loc:/qh_1}/libOS" cleanBuildTarget="clean" command="${cross_make}" id="org.eclipse.cdt.build.core.internal.builder.1010636072" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" parallelBuildOn="true" parallelizationNumber="4" superClass="org.eclipse.cdt.build.core.internal.builder">
+								<outputEntries>
+									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Debug"/>
+									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="release"/>
+									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="libc-debug"/>
+									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="libc-release"/>
+									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="libOS-debug"/>
+									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="libOS-release"/>
+								</outputEntries>
+							</builder>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.230302969" name="Cross ARM GNU Assembler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler">
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.usepreprocessor.914121331" name="Use preprocessor" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.usepreprocessor" value="true" valueType="boolean"/>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.paths.924440735" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\arm\cortex-m\armv7e-m\cortex-m4\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\exp-component\firmware\AtmelSam4s&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4s\wb7292&quot;"/>
+									<listOptionValue builtIn="false" value="D:/djysdk/djysrc/bsp/arch/arm/cortex-m/armv7e-m/cortex-m4/include"/>
+									<listOptionValue builtIn="false" value="D:/djysdk/djysrc/extern-component/firmware/AtmelSam4s"/>
+									<listOptionValue builtIn="false" value="D:/djysdk/djysrc/bsp/boarddrv/wb7292/include"/>
+									<listOptionValue builtIn="false" value="D:/djysdk/djysrc/libc/libc/include"/>
+									<listOptionValue builtIn="false" value="D:/djysdk/djysrc/libc/libm/common"/>
+									<listOptionValue builtIn="false" value="D:/djysdk/djysrc/libc/libc/include/sys"/>
+									<listOptionValue builtIn="false" value="D:/djysdk/djysrc/djyos/include"/>
+									<listOptionValue builtIn="false" value="D:/djysdk/djysrc/component"/>
+									<listOptionValue builtIn="false" value="D:/djysdk/djysrc/component/include"/>
+									<listOptionValue builtIn="false" value="D:/djysdk/djysrc/component/tcpip/comport"/>
+									<listOptionValue builtIn="false" value="D:/djysdk/examples/arm/AtmelSam4s/src/OS_prjcfg/include"/>
+									<listOptionValue builtIn="false" value="D:/djysdk/djysrc/bsp/cpudrv/include"/>
+									<listOptionValue builtIn="false" value="D:/djysdk/djysrc/bsp/chipdrv/include"/>
+									<listOptionValue builtIn="false" value="D:/djysdk/djysrc/bsp/cpudrv/AtmelSam4s/include"/>
+									<listOptionValue builtIn="false" value="D:/djysdk/djysrc/extern-component/firmware/CMSIS/Include"/>
+									<listOptionValue builtIn="false" value="D:/djysdk/djysrc/bsp/startup/AtmelSam4s"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs.466026918" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__ARM_ARCH_7EM__=1"/>
@@ -910,29 +888,26 @@
 							</tool>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1904892020" name="Cross ARM C Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler">
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.include.paths.1215191054" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\arm\cortex-m\armv7e-m\cortex-m4\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\extern-component\firmware\AtmelSam4s”"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\boarddrv\wb7292\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include”"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src/OS_prjcfg/include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\arm\cortex-m\armv7e-m\cortex-m4\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\exp-component\firmware\CMSIS\CM4\CoreSupport&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\exp-component\firmware\CMSIS\CM4&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\cpudrv\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}\src\OS_prjcfg\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\cpudrv\include”"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\exp-component\firmware\AtmelSam4s&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\cpudrv\AtmelSam4s\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4s\wb7292&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\extern-component\firmware\CMSIS\Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4s&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.1342252667" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="DEBUG=1"/>
 									<listOptionValue builtIn="false" value="__ARM_ARCH_7EM__=1"/>
+									<listOptionValue builtIn="false" value="DEBUG=1"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.nostdinc.605316604" name="Do not search system directories (-nostdinc)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.nostdinc" useByScannerDiscovery="true" value="true" valueType="boolean"/>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std.913485827" name="Language standard" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std" useByScannerDiscovery="true" value="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std.gnu99" valueType="enumerated"/>
@@ -1032,9 +1007,8 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src/user|src/OS_prjcfg|src/OS_code/bsp/boarddrv/dm9000a|src/OS_code/libc|src/OS_code/loader/si/check_text_code.c|src/app_src|src/OS_code/component/menu|src/OS_code/exp-component|src/OS_code/test|src/OS_code/component/driver/pci" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src/OS_code/exp-component/firmware/AtmelSam4s"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src/OS_code/exp-component/firmware/CMSIS/CM4"/>
+						<entry excluding="src/OS_prjcfg|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/u-boot|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_attribs.c|src/OS_code/extern-component|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_mtdif_single.c|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_mtdif_multi.c|src/OS_code/extern-component/firmware/CMSIS/CM4|src/app_src|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_vfs_single.c|src/OS_code/component/menu|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/utils|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_vfs_multi.c|src/OS_code/component/driver/pci|src/OS_code/exp-component|src/user|src/OS_code/bsp/boarddrv/dm9000a|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework|src/OS_code/libc|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/linux-tests|src/OS_code/loader/si/check_text_code.c|src/OS_code/extern-component/firmware/AtmelSam4s|src/OS_code/test|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/mtdemul|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/patches" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src/OS_code/extern-component/firmware/AtmelSam4s"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -1047,8 +1021,10 @@
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/TWR-K60F120M"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/AtmelSam4s"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/AtmelSAM4S"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/TWR-K60F120M/libOS-release"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/AtmelSam4s/libOS-release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/AtmelSAM4S/libOS-release"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="libOS-release" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -1100,7 +1076,7 @@
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.paths.865846199" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\arm\cortex-m\armv7e-m\cortex-m4\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4s&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\exp-component\firmware\AtmelSam4s&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\extern-component\firmware\AtmelSam4s&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs.464442283" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__ARM_ARCH_7EM__=1"/>
@@ -1115,21 +1091,19 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libm\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\libc\libc\include\sys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\driver\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src/OS_prjcfg/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\arm\cortex-m\armv7e-m\cortex-m4\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\exp-component\firmware\CMSIS\CM4\CoreSupport&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djybus&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\exp-component\firmware\CMSIS\CM4&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\cpudrv\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\djyip&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\exp-component\firmware\AtmelSam4s&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\cpudrv\AtmelSam4s\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4s\wb7292&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\extern-component\firmware\CMSIS\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\extern-component\firmware\AtmelSam4s&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\boarddrv\wb7292\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4s&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.217945721" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__ARM_ARCH_7EM__=1"/>
@@ -1233,9 +1207,8 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src/user|src/OS_prjcfg|src/OS_code/bsp/boarddrv/dm9000a|src/OS_code/libc|src/OS_code/loader/si/check_text_code.c|src/app_src|src/OS_code/component/menu|src/OS_code/exp-component|src/OS_code/test|src/OS_code/component/driver/pci" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src/OS_code/exp-component/firmware/AtmelSam4s"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src/OS_code/exp-component/firmware/CMSIS/CM4"/>
+						<entry excluding="src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_vfs_single.c|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_vfs_multi.c|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_mtdif_single.c|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_mtdif_multi.c|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_attribs.c|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/utils|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/patches|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/mtdemul|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/linux-tests|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/u-boot|src/OS_code/component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework|src/OS_code/extern-component|src/OS_code/extern-component/firmware/AtmelSam4s|src/OS_code/extern-component/firmware/CMSIS/CM4|src/OS_code/loader/si/check_text_code.c|src/app_src|src/OS_code/libc|src/OS_code/component/menu|src/OS_code/bsp/boarddrv/dm9000a|src/OS_prjcfg|src/user|src/OS_code/exp-component|src/OS_code/test|src/OS_code/component/driver/pci" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src/OS_code/extern-component/firmware/AtmelSam4s"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -1279,10 +1252,10 @@
 		<scannerConfigBuildInfo instanceId="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1217979223;ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1217979223.;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1648993659;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.1323963066">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116.1609436261.893578978;ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116.1609436261.893578978.;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1904892020;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.1910558477">
+		<scannerConfigBuildInfo instanceId="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116.1312445350;ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116.1312445350.;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.179477422;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.481575091">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116.1312445350;ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116.1312445350.;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.179477422;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.481575091">
+		<scannerConfigBuildInfo instanceId="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116.1609436261.893578978;ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116.1609436261.893578978.;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1904892020;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.1910558477">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116.741198417;ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116.741198417.;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.427768293;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.1359572210">
@@ -1291,10 +1264,10 @@
 		<scannerConfigBuildInfo instanceId="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346;ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.797657411;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.1428694304">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116.1609436261;ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116.1609436261.;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1026293344;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.327367002">
+		<scannerConfigBuildInfo instanceId="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116;ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116.;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1144105772;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.490194976">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116;ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116.;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1144105772;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.490194976">
+		<scannerConfigBuildInfo instanceId="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116.1609436261;ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116.1609436261.;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1026293344;ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.327367002">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 	</storageModule>

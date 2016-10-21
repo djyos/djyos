@@ -58,16 +58,15 @@
 
 #include "os.h"
 
-#include "config-prj.h"
 #include "E500v2RegBits.h"
 extern s64  g_s64OsTicks;             //操作系统运行ticks数
 u32 g_u32CycleSpeed; //for(i=j;i>0;i--);每循环纳秒数*1.024
-void Exp_ConnectSystick(void (*tick)(void));
+void HardExp_ConnectSystick(void (*tick)(void));
 extern void __asm_init_Dtimer(u32 value_tick);
 extern void __asm_get_tb_value(u32 *value_h32, u32 *value_l32);
 extern void __asm_reset_the_tb(void);
 extern ptu32_t __asm_reset_thread(ptu32_t (*thread_routine)(void),
-                           struct  tagThreadVm  *vm);
+                           struct ThreadVm  *vm);
 
 
 // =============================================================================
@@ -78,33 +77,31 @@ extern ptu32_t __asm_reset_thread(ptu32_t (*thread_routine)(void),
 // 返回值  :
 // 说明    :将evtt中的内容恢复到创建的VM当中
 // =============================================================================
-struct  tagThreadVm *__CreateThread(struct  tagEventType *evtt,u32 *stack_size)
+struct ThreadVm *__CreateThread(struct EventType *evtt,u32 *stack_size)
 {
-    struct  tagThreadVm  *result;
+    struct ThreadVm  *result;
     ptu32_t  len;
 
     //计算虚拟机栈:线程+最大单个api需求的栈
-    len = evtt->stack_size+CN_KERNEL_STACK+sizeof(struct  tagThreadVm);
+    len = evtt->stack_size;
     //栈顶需要对齐，malloc函数能保证栈底是对齐的，对齐长度可以使栈顶对齐
     len = align_up_sys(len);
-    result=(struct  tagThreadVm  *)(__MallocStack(len));
+    result=(struct ThreadVm  *)(__MallocStack(len));
     *stack_size = len;
     if(result==NULL)
     {
         Djy_SaveLastError(EN_MEM_TRIED);   //内存不足，返回错误
         return result;
     }
-#if CN_CFG_STACK_FILL != 0
-    memset(result,CN_CFG_STACK_FILL,len);
-#endif
+    memset(result,'d',len);
     result->stack_top = (u32*)((ptu32_t)result+len); //栈顶地址，移植敏感
     result->next = NULL;
-    result->stack_size = len - sizeof(struct tagThreadVm); //保存栈深度
+    result->stack_size = len - sizeof(struct ThreadVm); //保存栈深度
     result->host_vm = NULL;
     //复位虚拟机并重置线程
     __asm_reset_thread(evtt->thread_routine,result);
     return result;
-}
+} 
 
 //----静态创建线程-------------------------------------------------------------
 //功能：为事件类型创建线程，初始化上下文环境，安装执行函数，构成完整线程
@@ -112,16 +109,14 @@ struct  tagThreadVm *__CreateThread(struct  tagEventType *evtt,u32 *stack_size)
 //返回：新创建的线程指针
 //注: 移植敏感函数
 //-----------------------------------------------------------------------------
-struct  tagThreadVm *__CreateStaticThread(struct  tagEventType *evtt,void *Stack,
+struct ThreadVm *__CreateStaticThread(struct EventType *evtt,void *Stack,
                                     u32 StackSize)
 {
-    struct  tagThreadVm  *result;
+    struct ThreadVm  *result;
 
-    result = (struct  tagThreadVm  *)align_up_sys(Stack);
+    result = (struct ThreadVm  *)align_up_sys(Stack);
 
-#if CN_CFG_STACK_FILL != 0
-    memset(Stack,CN_CFG_STACK_FILL,StackSize);
-#endif
+    memset(Stack, 'd', StackSize-((ptu32_t)result - (ptu32_t)Stack)); 
 
     //看实际分配了多少内存，djyos内存分配使用块相联策略，如果分配的内存量大于
     //申请量，可以保证其实际尺寸是对齐的。之所以注释掉，是因为当len大于申请量时，
@@ -131,7 +126,7 @@ struct  tagThreadVm *__CreateStaticThread(struct  tagEventType *evtt,void *Stack
     result->stack_top = (u32 *)(align_down_sys((ptu32_t)Stack+StackSize)); //栈顶地址，移植敏感
     result->next = NULL;
     result->stack_size = (ptu32_t)(result->stack_top) - (ptu32_t)result
-                            - sizeof(struct  tagThreadVm);       //保存栈深度
+                            - sizeof(struct ThreadVm);       //保存栈深度
     result->host_vm = NULL;
     //复位线程并重置线程
     __asm_reset_thread(evtt->thread_routine,result);
@@ -177,7 +172,7 @@ void __DjySetDelay(void)
 // 返回值  :
 // 说明    :该函数主要是用来完成delay队列的计算
 // =============================================================================
-void __DjyIsrTick(void)
+u32 __DjyIsrTick(ptu32_t LineNo)
 {
     //todo: 优化时加上实际ticks数
     Djy_IsrTick( 1 );
@@ -202,7 +197,7 @@ void __DjyInitTick(void)
     //使用的是CORE implete clk, ccb/8
     counter_value =cfg_core_tb_clk/CN_CFG_TICK_HZ;//compute the count number
 
-    Exp_ConnectSystick(__DjyIsrTick);//connect to the tick server
+    HardExp_ConnectSystick(__DjyIsrTick);//connect to the tick server
 
     __asm_init_Dtimer(counter_value);
 
@@ -218,9 +213,9 @@ void __DjyInitTick(void)
 //参数:无
 //输出:无
 //返回:64位时间
-//说明: 这是一个桩函数,被rtc.c文件的 DjyGetTime 函数调用
+//说明: 这是一个桩函数,被rtc.c文件的 DjyGetSysTime 函数调用
 // =============================================================================
-s64 __DjyGetTime(void)
+s64 __DjyGetSysTime(void)
 {
 //PPC use the TB as the 64 bits time, so it could lasts many many years when
 //it turns back
@@ -228,14 +223,14 @@ s64 __DjyGetTime(void)
     u32 time_low;
     u64 time_need;
     u32 time_div;
-    
+
     __asm_get_tb_value(&time_high, &time_low);
 
     time_need = ((u64)time_high<<32)|(time_low);
     time_div = cfg_core_tb_clk/1000/1000;
 
     time_need = time_need/time_div;
-    
+
     return time_need;
 }
 
@@ -250,13 +245,13 @@ s64 __DjyGetTime(void)
 // =============================================================================
 void LockSysCode(void)
 {
-	u32 property;
-	//protect the mem code from overwriting
-	property = __AsmGetTlbMas3Pro(CN_DDR_CODEADDR);
-	property = property &(~MAS3_SW);
-	__AsmSetTlbMas3Pro(property, CN_DDR_CODEADDR);
+    u32 property;
+    //protect the mem code from overwriting
+    property = __AsmGetTlbMas3Pro(CN_DDR_CODEADDR);
+    property = property &(~MAS3_SW);
+    __AsmSetTlbMas3Pro(property, CN_DDR_CODEADDR);
 
-	return;
+    return;
 }
 
 

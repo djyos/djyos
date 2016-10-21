@@ -55,12 +55,12 @@
 
 //djybusÄ£¿é³õÊ¼»¯
 bool_t ModuleInstall_DjyBus (ptu32_t para);
-struct tagRscNode * DjyBus_BusTypeAdd (char* NewBusTypeName);
-struct tagRscNode * DjyBus_BusTypeAdd_s(char* NewBusTypeName,
-                                      struct tagRscNode * NewBusType);
-bool_t            DjyBus_BusTypeDelete(struct tagRscNode * DelBusType);
-bool_t            DjyBus_BusTypeDelete_s(struct tagRscNode * DelBusType);
-struct tagRscNode * DjyBus_BusTypeFind(char * BusTypeName);
+struct Object * DjyBus_BusTypeAdd (const char* NewBusTypeName);
+struct Object * DjyBus_BusTypeAdd_s(struct Object * NewBusType,
+                                        const char* NewBusTypeName);
+bool_t            DjyBus_BusTypeDelete(struct Object * DelBusType);
+bool_t            DjyBus_BusTypeDelete_s(struct Object * DelBusType);
+struct Object * DjyBus_BusTypeFind(const char * BusTypeName);
 
 
 #endif

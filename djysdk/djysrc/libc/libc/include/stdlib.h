@@ -176,8 +176,8 @@ extern ptu32_t (*M_GetFreeMem)(void);
 extern ptu32_t (*M_GetFreeMemHeap)(pHeap_t Heap);
 extern ptu32_t (*M_CheckSize)(void * mp);
 
-#define malloc(x) M_Malloc(x,CN_TIMEOUT_FOREVER)
-#define realloc(p,size) M_Realloc(p,size,CN_TIMEOUT_FOREVER)
+#define malloc(x) M_Malloc(x,0)
+#define realloc(p,size) M_Realloc(p,size,0)
 #define malloc_usable_size(ptr) M_CheckSize(ptr)
 
 extern void * calloc (ptu32_t, ptu32_t);

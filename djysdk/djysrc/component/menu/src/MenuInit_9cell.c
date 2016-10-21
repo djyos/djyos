@@ -63,7 +63,7 @@
 // 输出参数：
 // 返回值  :九宫格模式的初始显示参数
 // =========================================================================
-struct menu_displaypara  *module_menu_init_9cell(struct menu_item *menuitem, struct tagGkWinRsc *win)
+struct menu_displaypara  *module_menu_init_9cell(struct menu_item *menuitem, struct GkWinRsc *win)
 {
   struct menu_displaypara  *dispara=NULL;
    //参数检查

@@ -25,7 +25,8 @@
 #include <cpu_peri.h>
 #include "phy_88e1512.h"
 #include "cpu_peri_tsec.h"
-#include "pkg.h"
+
+#include <tcpip/pkg.h>
 
 #define TSECDEBUG
 #ifdef TSECDEBUG
@@ -35,11 +36,11 @@
 #endif
 
 
-typedef struct _tagTsecSndPkgBuf
+typedef struct TsecSndPkgBuf
 {
-	struct _tagTsecSndPkgBuf *nxt;
-	tagNetPkg *plst;
-	u8 pkgnum;
+    struct TsecSndPkgBuf *nxt;
+    tagNetPkg *plst;
+    u8 pkgnum;
 }tagTsecSndPkgBuf;
 
 struct tsec_info_struct
@@ -1110,19 +1111,19 @@ u32  Net_SendPacket(u8 bychip,u8* packet, u16 length)
 //-----------------------------------------------------------------
 bool_t module_tsec_init(s32 num,u8 last_mac)
 {
-	s32 count;
-	if(num > ARRAY_SIZE(tsec_info))
-		return false;
-	
-	//初始化tsec网口结构体参数函数
-	if(tsec_initialize(&tsec_info[num],num,last_mac))	
-	{
-		//tsec网口硬件初始化函数
-		count = tsec_init(&tsec_info[num]);	
-		if(count == 0)
-		return true;
-	}
-	
+    s32 count;
+    if(num > ARRAY_SIZE(tsec_info))
+        return false;
+    
+    //初始化tsec网口结构体参数函数
+    if(tsec_initialize(&tsec_info[num],num,last_mac))   
+    {
+        //tsec网口硬件初始化函数
+        count = tsec_init(&tsec_info[num]); 
+        if(count == 0)
+        return true;
+    }
+    
     return false;
 }
 

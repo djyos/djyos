@@ -66,7 +66,6 @@
 extern "C" {
 #endif
 
-#define CN_NLS_CHARSET_GB2312           "gb2312"
 
 ptu32_t ModuleInstall_CharsetGb2312(ptu32_t para);
 

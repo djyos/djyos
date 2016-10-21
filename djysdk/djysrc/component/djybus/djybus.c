@@ -55,9 +55,9 @@
 #include "stddef.h"
 #include "stdio.h"
 #include "stdlib.h"
-#include "rsc.h"
+#include "object.h"
 
-static struct tagRscNode tg_djybus_root;                //定义静态变量DjyBus的根结点
+static struct Object tg_djybus_root;                //定义静态变量DjyBus的根结点
 // =============================================================================
 // 功能：建立并初始化DjyBus总线根节点，它是总线类型节点的父结点
 // 参数：para,无实际意义
@@ -66,7 +66,7 @@ static struct tagRscNode tg_djybus_root;                //定义静态变量DjyBus的根
 bool_t ModuleInstall_DjyBus (ptu32_t Para)
 {
     //在资源链表中建立一个根结点，所有建立的总线结点都挂在该结点上。
-    if(Rsc_AddTree(&tg_djybus_root,sizeof(struct  tagRscNode),RSC_RSCNODE,"DjyBus"))
+    if(OBJ_AddTree(&tg_djybus_root,sizeof(struct  Object),RSC_RSCNODE,"DjyBus"))
     {
         printk("DjyBus Install Successed !\r\n");
         return true;
@@ -80,20 +80,20 @@ bool_t ModuleInstall_DjyBus (ptu32_t Para)
 // 参数：NewBusTypeName,总线类型名称
 // 返回：返回建立的资源结点指针，失败时返回NULL
 // =============================================================================
-struct tagRscNode * DjyBus_BusTypeAdd (char* NewBusTypeName)
+struct Object * DjyBus_BusTypeAdd (const char* NewBusTypeName)
 {
-    struct tagRscNode * NewBusType;
+    struct Object * NewBusType;
 
-    NewBusType = (struct tagRscNode *)M_Malloc(sizeof(struct tagRscNode),0);
+    NewBusType = (struct Object *)M_Malloc(sizeof(struct Object),0);
     if(NewBusType == NULL)
         return NULL;
 
     //避免重复创建同名的总线类型
-    if(NULL != Rsc_SearchSon(&tg_djybus_root,NewBusTypeName))
+    if(NULL != OBJ_SearchChild(&tg_djybus_root,NewBusTypeName))
         return NULL;
 
-    Rsc_AddSon(&tg_djybus_root,NewBusType,
-                sizeof(struct tagRscNode),RSC_RSCNODE,NewBusTypeName);
+    OBJ_AddChild(&tg_djybus_root,NewBusType,
+                sizeof(struct Object),RSC_RSCNODE,NewBusTypeName);
 
     return NewBusType;
 }
@@ -105,18 +105,18 @@ struct tagRscNode * DjyBus_BusTypeAdd (char* NewBusTypeName)
 //       NewBusType,创建总线类型结点，用记定义
 // 返回：返回建立的资源结点指针，失败时返回NULL
 // =============================================================================
-struct tagRscNode * DjyBus_BusTypeAdd_s(char* NewBusTypeName,
-                                      struct tagRscNode * NewBusType)
+struct Object * DjyBus_BusTypeAdd_s(struct Object * NewBusType,
+                                    const char* NewBusTypeName)
 {
     if((NewBusType == NULL) && (NewBusTypeName == NULL))
         return NULL;
 
     //避免重复创建同名的总线类型
-    if(NULL != Rsc_SearchSon(&tg_djybus_root,NewBusTypeName))
+    if(NULL != OBJ_SearchChild(&tg_djybus_root,NewBusTypeName))
         return NULL;
 
-    Rsc_AddSon(&tg_djybus_root,NewBusType,
-                sizeof(struct tagRscNode),RSC_RSCNODE,NewBusTypeName);
+    OBJ_AddChild(&tg_djybus_root,NewBusType,
+                sizeof(struct Object),RSC_RSCNODE,NewBusTypeName);
 
     return NewBusType;
 }
@@ -127,13 +127,13 @@ struct tagRscNode * DjyBus_BusTypeAdd_s(char* NewBusTypeName,
 // 参数：DelBusType,待删除的总线类型结点
 // 返回：TRUE,删除成功;false,删除失败
 // =============================================================================
-bool_t DjyBus_BusTypeDelete(struct tagRscNode * DelBusType)
+bool_t DjyBus_BusTypeDelete(struct Object * DelBusType)
 {
     bool_t result;
     if(DelBusType == NULL)
         return false;
 
-    if(NULL == Rsc_DelNode(DelBusType))
+    if(NULL == OBJ_Del(DelBusType))
     {
         result = false;
     }
@@ -150,13 +150,13 @@ bool_t DjyBus_BusTypeDelete(struct tagRscNode * DelBusType)
 // 参数：DelBusType,待删除的总线类型结点
 // 返回：TRUE,删除成功;false,删除失败
 // =============================================================================
-bool_t DjyBus_BusTypeDelete_s(struct tagRscNode * DelBusType)
+bool_t DjyBus_BusTypeDelete_s(struct Object * DelBusType)
 {
     bool_t result;
     if(DelBusType == NULL)
         return false;
 
-    if(NULL == Rsc_DelNode(DelBusType))
+    if(NULL == OBJ_Del(DelBusType))
     {
         result = false;
     }
@@ -172,8 +172,8 @@ bool_t DjyBus_BusTypeDelete_s(struct tagRscNode * DelBusType)
 // 参数：BusTypeName,待查找的总线类型结点名称
 // 返回：结点指针，NULL时查找失败
 // =============================================================================
-struct tagRscNode * DjyBus_BusTypeFind(char * BusTypeName)
+struct Object * DjyBus_BusTypeFind(const char * BusTypeName)
 {
-    return Rsc_SearchSon(&tg_djybus_root,BusTypeName);
+    return OBJ_SearchChild(&tg_djybus_root,BusTypeName);
 }
 

@@ -68,10 +68,9 @@ extern "C" {
 #define CN_CFG_TICK_HZ 1000  //内核时钟频率，单位为hz。
 #define CN_CFG_MCLK    1000  //windows版本并不能使用硬件定时，此定义纯粹为了让定时器组件编译通过
 
-#define LCD_XSIZE 320
-#define LCD_YSIZE 240
-
-
+//内核相关配置
+#define CN_CFG_DYNAMIC_MEM 1  //是否支持动态内存分配，即使不支持，也允许使用malloc-free分配内存，
+                              //但使用有差别，详见《……用户手册》内存分配章节
 #ifdef __cplusplus
 }
 #endif

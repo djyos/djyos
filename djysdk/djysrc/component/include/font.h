@@ -67,16 +67,16 @@
 extern "C" {
 #endif
 
-struct tagRectBitmap;
+struct RectBitmap;
 #define CN_FONT_RSC_TREE            "font"
 
 /* 字体类型 */
 #define CN_FONT_TYPE_DOT            1       // 点阵字体
 #define CN_FONT_TYPE_TRUETYPE       2       //矢量字体
 
-struct tagFontRsc
+struct FontRsc
 {
-    struct  tagRscNode node;
+    struct  Object node;
 
     s32 MaxWidth;       //最宽字符的宽度,纵向显示时可用作为竖行宽
     s32 MaxHeight;      //最高字符的高度
@@ -94,21 +94,21 @@ struct tagFontRsc
 // resv,保留参数。
 // 返回: true = 成功执行，false=不支持字符
     bool_t (*GetBitmap)(u32 charcode, u32 size, u32 resv,
-                        struct tagRectBitmap *font_bitmap);
+                        struct RectBitmap *font_bitmap);
     s32 (*GetCharWidth)(u32 Charcode);      //获取某字符宽度
     s32 (*GetCharHeight)(u32 CharCode);     //获取某字符高度
 };
 
-bool_t Font_InstallFont(struct tagFontRsc *font,char *name);
+bool_t Font_InstallFont(struct FontRsc *font,const char *name);
 
 ptu32_t ModuleInstall_Font(ptu32_t para);
 
-struct tagFontRsc* Font_GetCurFont(void);
-struct tagFontRsc* Font_SetCurFont(struct tagFontRsc* font);
-struct tagFontRsc* Font_SearchFont(const char* name);
-s32 Font_GetFontLineHeight(struct tagFontRsc* font);
-s32 Font_GetFontLineWidth(struct tagFontRsc* font);
-s32 Font_GetFontAttr(struct tagFontRsc* font);
+struct FontRsc* Font_GetCurFont(void);
+struct FontRsc* Font_SetCurFont(struct FontRsc* font);
+struct FontRsc* Font_SearchFont(const char* name);
+s32 Font_GetFontLineHeight(struct FontRsc* font);
+s32 Font_GetFontLineWidth(struct FontRsc* font);
+s32 Font_GetFontAttr(struct FontRsc* font);
 
 #ifdef __cplusplus
 }

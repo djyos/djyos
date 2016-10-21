@@ -67,10 +67,10 @@
 #include "gb2312.h"
 #include "gkernel.h"    //todo: 这里定义了安装字符集的出错信息，要移到别的地方去
 
-s32 __Charset_Gb2312MbToUcs4 (u32 *pwc, const char *mbs, s32 n);
-s32 __Charset_Gb2312MbsToUcs4s(u32* pwcs, const char* mbs, s32 n);
-s32 __Charset_Gb2312Ucs4ToMb(char* s, s32 wc);
-s32 __Charset_Gb2312Ucs4sToMbs(char* mbs, const u32* pwcs, s32 n);
+s32 GB2312MbToUcs4 (u32 *pwc, const char *mbs, s32 n);
+s32 GB2312MbsToUcs4s(u32* pwcs, const char* mbs, s32 n);
+s32 GB2312Ucs4ToMb(char* s, s32 wc);
+s32 GB2312Ucs4sToMbs(char* mbs, const u32* pwcs, s32 n);
 
 typedef struct {
   u16 indx; /* index into big table */
@@ -1142,27 +1142,75 @@ static const u16 cg_gb2312_2uni_16_87[6768] = {
   0x9f2f, 0x9f39, 0x9f37, 0x9f3d, 0x9f3e, 0x9f44,
 };
 
-// 注释参照 encoding.h-> tagCharset -> mb_to_ucs4
-s32 __Charset_Gb2312MbToUcs4 (u32 *pwc, const char *mbs, s32 n)
+// 注释参照 charset.h-> struct Charset -> GetOneMb
+s32 GB2312GetOneMb(const char* mbs,s32 n)
 {
-    u8 c1;
-    u8 c2;
+    u8 c1,c2;
     u32 i;
     u32 wc;
 
+    if(mbs == NULL)
+    {
+        return 0;
+    }
+    c1 = mbs[0];
+
+    if(c1 < 0x80)       //串结束符也是合法字符
+    {
+        return 1;
+    }
+    if((n >= 2) || (n == -1) )
+        c2 = mbs[1];
+    else
+        return -1;
+
+    if((c1>=0xa1) && (c2 >=0xa0))
+    {
+
+        c1 -= 0xa1;
+        c2 -= 0xa1;
+
+        i = 94 * c1 + c2;
+        if ( (i < 831) || ((i>=1410) && (i < 8178)) )
+        {
+            return 2;
+        } else
+        {
+            return -1;
+        }
+    }
+    else
+        return -1;
+}
+
+// 注释参照 charset.h-> struct Charset -> MbToUcs4
+s32 GB2312MbToUcs4 (u32 *pwc, const char *mbs, s32 n)
+{
+    u8 c1,c2;
+    u32 i;
+    u32 wc;
+
+    if(mbs == NULL)
+    {
+        return 0;
+    }
     c1 = mbs[0];
 
     //是个ascii码
-    if(c1 < 0x80)
+    if(c1 == 0)
     {
-        *pwc = (u32)c1;
+        return 0;
+    }
+    else if(c1 < 0x80)
+    {
+        if(pwc != NULL)
+            *pwc = (u32)c1;
         return 1;
     }
-
-    // 中文字符(GB2312-1980)
-    if(n < 2)
-        goto __illegal;
-    c2 = mbs[1];
+    if((n >= 2) || (n == -1) )
+        c2 = mbs[1];
+    else
+        return -1;
 
     if((c1>=0xa1) && (c2 >=0xa0))
     {
@@ -1183,18 +1231,17 @@ s32 __Charset_Gb2312MbToUcs4 (u32 *pwc, const char *mbs, s32 n)
         }
         if (wc != 0xfffd)
         {
-            *pwc = (u32) wc;
-
-            return 2;
+            if(pwc != NULL)
+                *pwc = (u32) wc;
         }
+        return 2;
     }
-
-__illegal:
-    return -1;
+    else
+        return -1;
 }
 
-// 注释参照 encoding.h-> tagCharset -> mbs_to_uc4s
-s32 __Charset_Gb2312MbsToUcs4s(u32* pwcs, const char* mbs, s32 n)
+// 注释参照 charset.h-> struct Charset -> MbsToUcs4s
+s32 GB2312MbsToUcs4s(u32* pwcs, const char* mbs, s32 n)
 {
     return 0;
 }
@@ -2624,8 +2671,8 @@ static const Summary16 gb2312_uni2indx_pageff[15] = {
   { 7441, 0x0000 }, { 7441, 0x0000 }, { 7441, 0x002b },
 };
 
-// 注释参照 encoding.h-> tagCharset -> ucs4_to_mb
-s32 __Charset_Gb2312Ucs4ToMb (char* mb, s32 wc)
+// 注释参照 charset.h-> struct Charset -> Ucs4ToMb
+s32 GB2312Ucs4ToMb (char* mb, s32 wc)
 {
     u16 used;
     u16 i, c;
@@ -2676,8 +2723,8 @@ __illegal:
     return -1;
 }
 
-// 注释参照 encoding.h-> tagCharset -> ucs4s_to_mbs
-s32 __Charset_Gb2312Ucs4sToMbs(char* mbs, const u32* pwcs, s32 n)
+// 注释参照 charset.h-> struct Charset -> Ucs4sToMbs
+s32 GB2312Ucs4sToMbs(char* mbs, const u32* pwcs, s32 n)
 {
     return 0;
 }
@@ -2691,13 +2738,15 @@ s32 __Charset_Gb2312Ucs4sToMbs(char* mbs, const u32* pwcs, s32 n)
 //-----------------------------------------------------------------------------
 ptu32_t ModuleInstall_CharsetGb2312(ptu32_t para)
 {
-    static struct tagCharset encoding;
+    static struct Charset encoding;
 
     encoding.max_len = 2;
-    encoding.mb_to_ucs4 = __Charset_Gb2312MbToUcs4;
-    encoding.ucs4_to_mb = __Charset_Gb2312Ucs4ToMb;
-    encoding.mbs_to_ucs4s = __Charset_Gb2312MbsToUcs4s;
-    encoding.ucs4s_to_mbs = __Charset_Gb2312Ucs4sToMbs;
+    encoding.EOC_Size = 1;
+    encoding.GetOneMb = GB2312GetOneMb;
+    encoding.MbToUcs4 = GB2312MbToUcs4;
+    encoding.Ucs4ToMb = GB2312Ucs4ToMb;
+    encoding.MbsToUcs4s = GB2312MbsToUcs4s;
+    encoding.Ucs4sToMbs = GB2312Ucs4sToMbs;
     if( Charset_NlsInstallCharset(&encoding, CN_NLS_CHARSET_GB2312))
     {
         printf("gb2312 encoding install sucess\n\r");

@@ -29,7 +29,7 @@
 #include "easynorflash\easynorflash.h"
 
 
-static struct tagEasynorFlashChip norflash_chip;
+static struct EasynorFlashChip norflash_chip;
 static u8 *chip_sector_buf;
 
 #define cn_flash_size                   0x280000    //20Mbits / 2.5MByte (专门分配给文件系统使用的空间:block31~block70)

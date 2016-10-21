@@ -58,16 +58,9 @@
 #ifndef __STDDEF_H__
 #define __STDDEF_H__
 
-  #ifndef __STDDEF_DECLS
-  #define __STDDEF_DECLS
-    #undef __CLIBNS
-    #ifdef __cplusplus
-        namespace std {
-        #define __CLIBNS ::std::
-        extern "C" {
-    #else
-      #define __CLIBNS
-    #endif  /* __cplusplus */
+#ifdef  __cplusplus
+extern "C"{
+#endif
 
 #include "stdint.h"
 
@@ -77,6 +70,21 @@ typedef size_t off_t;
 typedef s32 ssize_t;
 typedef s32 mode_t;
 void NULL_func(void);
+
+#ifndef true
+  #define true  1
+#endif
+#ifndef false
+  #define false (ufast_t)0
+#endif
+#ifndef FALSE
+    #define FALSE             0
+#endif
+#ifndef TRUE
+    #define TRUE              1
+#endif
+
+typedef ufast_t         bool_t;
 
 #ifndef __cplusplus  /* wchar_t is a builtin type for C++ */
   #if !defined(__STRICT_ANSI__)
@@ -105,13 +113,21 @@ void NULL_func(void);
     * as the lone character in an integer character constant.
     */
   #endif
+#else
+#if defined(__WCHAR32)
+  typedef   u32 wint_t;
+#else
+  typedef   u16 wint_t;
+#endif
 #endif
 
-#define     NULL ((void*) 0)
-#define     false   0
-#define     true    1
-#define     FALSE   0
-#define     TRUE    1
+#ifndef __cplusplus
+#ifndef NULL
+    #define     NULL ((void*) 0)
+#endif
+#else   /* C++ */
+#define NULL 0
+#endif
 
 typedef struct
 {
@@ -126,23 +142,14 @@ typedef struct
    /* null pointer constant. */
 
   /* EDG uses __INTADDR__ to avoid errors when strict */
-//lst 有__INTADDR__ , 在minGW下无法编译
+//lst 有__INTADDR__ 和__CLIBNS, 在minGW下无法编译
 //  #define offsetof(t, memb) ((__CLIBNS size_t)__INTADDR__(&(((t *)0)->memb)))
-  #define offsetof(t, memb) ((__CLIBNS size_t)(&(((t *)0)->memb)))
-
-    #ifdef __cplusplus
-         }  /* extern "C" */
-      }  /* namespace std */
-    #endif /* __cplusplus */
-  #endif /* __STDDEF_DECLS */
+  #define offsetof(t, memb) ((size_t)(&(((t *)0)->memb)))
 
 
-  #ifdef __cplusplus
-    #ifndef __STDDEF_NO_EXPORTS
-      using ::std::size_t;
-      using ::std::ptrdiff_t;
-    #endif
-  #endif /* __cplusplus */
+#ifdef  __cplusplus
+}
+#endif
 
 #endif
 

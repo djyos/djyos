@@ -80,20 +80,20 @@
 #include "djyos.h"
 #include "cpu_peri.h"
 
-ptu32_t Uart_Ctrl(struct  tagPanDevice *uart_dev,u32 cmd,
+ptu32_t Uart_Ctrl(struct PanDevice *uart_dev,u32 cmd,
                    ptu32_t data1,ptu32_t data2);
-ptu32_t uart_left_write(struct  tagPanDevice *uart_dev,ptu32_t src_buf,
+ptu32_t uart_left_write(struct PanDevice *uart_dev,ptu32_t src_buf,
                             ptu32_t res,ptu32_t len);
-ptu32_t uart_right_write(struct  tagPanDevice *uart_dev,ptu32_t src_buf,
+ptu32_t uart_right_write(struct PanDevice *uart_dev,ptu32_t src_buf,
                             ptu32_t res,ptu32_t len);
-ptu32_t uart_left_read(struct  tagPanDevice *uart_dev,ptu32_t src_buf,
+ptu32_t uart_left_read(struct PanDevice *uart_dev,ptu32_t src_buf,
                             ptu32_t res,ptu32_t len);
-ptu32_t uart_right_read(struct  tagPanDevice *uart_dev,ptu32_t src_buf,
+ptu32_t uart_right_read(struct PanDevice *uart_dev,ptu32_t src_buf,
                             ptu32_t res,ptu32_t len);
-u32  Uart0_Int(ufast_t uart_int_line);
-u32  Uart1_Int(ufast_t uart_int_line);
-u32  Uart2_Int(ufast_t uart_int_line);
-u32  uart3_int(ufast_t uart_int_line);
+u32  Uart0_Int(ptu32_t uart_int_line);
+u32  Uart1_Int(ptu32_t uart_int_line);
+u32  Uart2_Int(ptu32_t uart_int_line);
+u32  uart3_int(ptu32_t uart_int_line);
 ptu32_t uart0_error_service(void);
 ptu32_t uart1_error_service(void);
 ptu32_t uart2_error_service(void);
@@ -105,7 +105,7 @@ extern struct st_int_reg volatile * const pg_int_reg;
 static djy_handle_t pg_uart0_rhdl;
 static djy_handle_t pg_uart1_rhdl;
 static djy_handle_t pg_uart2_rhdl;
-static struct tagUartUCB tg_uart0_CB,tg_uart1_CB,tg_uart2_CB;
+static struct UartUCB tg_uart0_CB,tg_uart1_CB,tg_uart2_CB;
 
 uint16_t u16g_evtt_uart0_error;
 uint16_t u16g_evtt_uart1_error;
@@ -204,8 +204,8 @@ bool_t uart_tx_tran_empty(volatile tag_UartReg *uart_reg)
 //-----------------------------------------------------------------------------
 ptu32_t module_init_uart0(ptu32_t para)
 {
-    struct tagSemaphoreLCB *left_semp,*right_semp;
-    struct  tagPanDevice   *uart_dev;
+    struct SemaphoreLCB *left_semp,*right_semp;
+    struct PanDevice   *uart_dev;
     uint16_t uart_send_evtt;
     vu32 temp;
     //保护缓冲区的信号量，使缓冲区中数据量为0时阻塞写入线程，读取线程使缓冲区中
@@ -280,6 +280,7 @@ ptu32_t module_init_uart0(ptu32_t para)
     if(uart_send_evtt == CN_INVALID_EVTT_ID)
         goto exit_from_send_evtt;
     Driver_DevCtrlRight(pg_uart0_rhdl,cn_uart_connect_send_evtt,uart_send_evtt,0);
+    Int_Register(cn_int_line_uart0); 
     Int_IsrConnect(cn_int_line_uart0,Uart0_Int);
     Int_SettoAsynSignal(cn_int_line_uart0);
     Int_ClearLine(cn_int_line_uart0);       //清掉初始化产生的发送fifo空的中断
@@ -308,8 +309,8 @@ exit_from_left_buf_semp:
 //-----------------------------------------------------------------------------
 ptu32_t module_init_uart1(ptu32_t para)
 {
-    struct tagSemaphoreLCB *left_semp,*right_semp;
-    struct  tagPanDevice   *uart_dev;
+    struct SemaphoreLCB *left_semp,*right_semp;
+    struct PanDevice   *uart_dev;
     uint16_t uart_send_evtt;
     vu32 temp;
     //保护缓冲区的信号量，使缓冲区中数据量为0时阻塞写入线程，读取线程使缓冲区中
@@ -385,6 +386,7 @@ ptu32_t module_init_uart1(ptu32_t para)
     if(uart_send_evtt == CN_INVALID_EVTT_ID)
         goto exit_from_send_evtt;
     Driver_DevCtrlRight(pg_uart1_rhdl,cn_uart_connect_send_evtt,uart_send_evtt,0);
+    Int_Register(cn_int_line_uart1); 
     Int_IsrConnect(cn_int_line_uart1,Uart1_Int);
     Int_SettoAsynSignal(cn_int_line_uart1);
     Int_ClearLine(cn_int_line_uart1);       //清掉初始化产生的发送fifo空的中断
@@ -413,8 +415,8 @@ exit_from_left_buf_semp:
 //-----------------------------------------------------------------------------
 ptu32_t module_init_uart2(ptu32_t para)
 {
-    struct tagSemaphoreLCB *left_semp,*right_semp;
-    struct  tagPanDevice   *uart_dev;
+    struct SemaphoreLCB *left_semp,*right_semp;
+    struct PanDevice   *uart_dev;
     uint16_t uart_send_evtt;
     vu32 temp;
     //保护缓冲区的信号量，使缓冲区中数据量为0时阻塞写入线程，读取线程使缓冲区中
@@ -489,6 +491,7 @@ ptu32_t module_init_uart2(ptu32_t para)
     if(uart_send_evtt == CN_INVALID_EVTT_ID)
         goto exit_from_send_evtt;
     Driver_DevCtrlRight(pg_uart2_rhdl,cn_uart_connect_send_evtt,uart_send_evtt,0);
+    Int_Register(cn_int_line_uart2); 
     Int_IsrConnect(cn_int_line_uart2,Uart2_Int);
     Int_SettoAsynSignal(cn_int_line_uart2);
     Int_ClearLine(cn_int_line_uart2);       //清掉初始化产生的发送fifo空的中断
@@ -542,7 +545,7 @@ ptu32_t uart2_error_service(void)
 //参数: 中断号.
 //返回: 0.
 //-----------------------------------------------------------------------------
-uint32_t Uart0_Int(ufast_t uart_int_line)
+uint32_t Uart0_Int(ptu32_t uart_int_line)
 {
     uint32_t recv_trans,num;
     uint32_t IIR;
@@ -592,7 +595,7 @@ uint32_t Uart0_Int(ufast_t uart_int_line)
 //参数: 中断号.
 //返回: 0.
 //-----------------------------------------------------------------------------
-uint32_t Uart1_Int(ufast_t uart_int_line)
+uint32_t Uart1_Int(ptu32_t uart_int_line)
 {
     uint32_t recv_trans,num;
     uint32_t IIR;
@@ -642,7 +645,7 @@ uint32_t Uart1_Int(ufast_t uart_int_line)
 //参数: 中断号.
 //返回: 0.
 //-----------------------------------------------------------------------------
-uint32_t Uart2_Int(ufast_t uart_int_line)
+uint32_t Uart2_Int(ptu32_t uart_int_line)
 {
     uint32_t recv_trans,num;
     uint32_t IIR;
@@ -696,14 +699,14 @@ uint32_t Uart2_Int(ufast_t uart_int_line)
 //      len，数据量(bytes)
 //返回: 实际写入环形缓冲区的字符数
 //-----------------------------------------------------------------------------
-ptu32_t uart_right_write(struct  tagPanDevice *uart_dev,ptu32_t buf,
+ptu32_t uart_right_write(struct PanDevice *uart_dev,ptu32_t buf,
                             ptu32_t len,u32 res)
 {
-    struct tagUartUCB *uart_port;
+    struct UartUCB *uart_port;
     uint16_t recv_bytes,valid_bytes,error_evtt;
     enum _UART_ERROR_NO_ uart_error;
 
-    uart_port = (struct tagUartUCB*)Driver_DevGetMyTag(uart_dev);
+    uart_port = (struct UartUCB*)Driver_DevGetMyTag(uart_dev);
 
     //copy整个硬件缓冲区到协议缓冲区
     recv_bytes = Ring_Write(&uart_port->recv_ring_buf, (uint8_t*)buf,len);
@@ -747,16 +750,16 @@ ptu32_t uart_right_write(struct  tagPanDevice *uart_dev,ptu32_t buf,
 //      len,要发送的序列长度
 //返回: 实际写入环形缓冲区的字符数
 //-----------------------------------------------------------------------------
-ptu32_t uart_left_write(struct  tagPanDevice *uart_dev,ptu32_t src_buf,
+ptu32_t uart_left_write(struct PanDevice *uart_dev,ptu32_t src_buf,
                             ptu32_t len,u32 res)
 {
     uint32_t result;
-    struct tagUartUCB *uart_port;
+    struct UartUCB *uart_port;
     uint32_t completed = 0;
 
     if(len == 0)
         return 0;
-    uart_port = (struct tagUartUCB*)Driver_DevGetMyTag(uart_dev);
+    uart_port = (struct UartUCB*)Driver_DevGetMyTag(uart_dev);
     while(1)
     {
         __Uart_SendIntDisable((tag_UartReg *)uart_port->my_reg);
@@ -781,12 +784,12 @@ ptu32_t uart_left_write(struct  tagPanDevice *uart_dev,ptu32_t src_buf,
 //      len,读入长度,
 //返回: 实际读出长度
 //----------------------------------------------------------------------------
-ptu32_t uart_left_read(struct  tagPanDevice *uart_dev,ptu32_t dst_buf,
+ptu32_t uart_left_read(struct PanDevice *uart_dev,ptu32_t dst_buf,
                                         ptu32_t len,u32 res)
 {
-    struct tagUartUCB *uart_port;
+    struct UartUCB *uart_port;
     uint32_t result;
-    uart_port = (struct tagUartUCB*)Driver_DevGetMyTag(uart_dev);
+    uart_port = (struct UartUCB*)Driver_DevGetMyTag(uart_dev);
     __Uart_RecvIntDisable((tag_UartReg *)uart_port->my_reg);
     result = Ring_Read(&uart_port->recv_ring_buf,(uint8_t*)dst_buf,len);
     __Uart_RecvIntEnable((tag_UartReg *)uart_port->my_reg);
@@ -801,12 +804,12 @@ ptu32_t uart_left_read(struct  tagPanDevice *uart_dev,ptu32_t dst_buf,
 //      len,读入长度,
 //返回: 实际读出长度
 //----------------------------------------------------------------------------
-ptu32_t uart_right_read(struct  tagPanDevice *uart_dev,ptu32_t dst_buf,
+ptu32_t uart_right_read(struct PanDevice *uart_dev,ptu32_t dst_buf,
                                         ptu32_t len,u32 res)
 {
-    struct tagUartUCB *uart_port;
+    struct UartUCB *uart_port;
     uint32_t result;
-    uart_port = (struct tagUartUCB*)Driver_DevGetMyTag(uart_dev);
+    uart_port = (struct UartUCB*)Driver_DevGetMyTag(uart_dev);
     result = (ptu32_t)Ring_Read(&uart_port->send_ring_buf,(uint8_t *)dst_buf,len);
     if(Ring_Check(&uart_port->send_ring_buf) <= uart_port->send_trigger_level)
         Lock_SempPost(uart_port->send_buf_semp);
@@ -820,13 +823,13 @@ ptu32_t uart_right_read(struct  tagPanDevice *uart_dev,ptu32_t dst_buf,
 //      data,含义依cmd而定
 //返回: 无意义.
 //-----------------------------------------------------------------------------
-ptu32_t Uart_Ctrl(struct tagPanDevice *uart_dev,uint32_t cmd,
+ptu32_t Uart_Ctrl(struct PanDevice *uart_dev,uint32_t cmd,
                    uint32_t data1,uint32_t data2)
 {
-    struct tagUartUCB *uart_port;
+    struct UartUCB *uart_port;
     ptu32_t result = 0;
 
-    uart_port = (struct tagUartUCB*)Driver_DevGetMyTag(uart_dev);
+    uart_port = (struct UartUCB*)Driver_DevGetMyTag(uart_dev);
     switch(cmd)
     {
         case cn_uart_connect_recv_evtt:
@@ -918,8 +921,8 @@ ptu32_t Uart_Ctrl(struct tagPanDevice *uart_dev,uint32_t cmd,
 //-----------------------------------------------------------------------------
 ptu32_t uart_send_service(void)
 {
-    struct tagUartUCB uart_port;
-    struct tagPanDevice ser_dev;
+    struct UartUCB uart_port;
+    struct PanDevice ser_dev;
     djy_handle_t uart_rhdl;
     void *my_para;
     uint8_t ch[16];
@@ -928,9 +931,9 @@ ptu32_t uart_send_service(void)
     while(1)
     {
         Djy_GetEventPara(&my_para,NULL);
-        memcpy(&ser_dev,my_para,sizeof(struct tagPanDevice));
-//      ser_dev = (struct  tagPanDevice *)(*(void**)my_para);
-        uart_port = (struct tagUartUCB *)Driver_DevGetMyTag(ser_dev);
+        memcpy(&ser_dev,my_para,sizeof(struct PanDevice));
+//      ser_dev = (struct PanDevice *)(*(void**)my_para);
+        uart_port = (struct UartUCB *)Driver_DevGetMyTag(ser_dev);
         __Uart_SendIntDisable((tag_UartReg *)uart_port->my_reg);
         if( uart_tx_tran_empty((tag_UartReg *)uart_port->my_reg))
         {

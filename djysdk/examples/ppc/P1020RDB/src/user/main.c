@@ -12,12 +12,6 @@ void djy_main(void)
 #else
 	printk("P1020rdb_release\n\r");
 #endif
-//	extern void djyip_main(void);
-//	djyip_main();	
-//	extern void timertest(void);
-//	timertest();
-//	extern int VncServer_Main();
-//	VncServer_Main();	
 	while(1)
     { 
     	Djy_EventDelay(1000*1000);

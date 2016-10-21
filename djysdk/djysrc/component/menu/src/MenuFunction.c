@@ -98,9 +98,9 @@ void  CheckEquipment(struct menu_item *menuitem)//查看装置信息
 
     struct draw_wintext_para para;
 
-    struct tagInputDeviceMsg *input_msg;
-    struct tagGkWinRsc  CheckWin_text;
-    struct tagGkWinRsc  *Appwin=NULL;
+    struct InputDeviceMsg *input_msg;
+    struct GkWinRsc  CheckWin_text;
+    struct GkWinRsc  *Appwin=NULL;
     char*   content="装置名称:/装置参数:/软件RCR :/工程日期:";
 
     if((NULL==menuitem)||(NULL==menuitem->myprivate))
@@ -108,7 +108,7 @@ void  CheckEquipment(struct menu_item *menuitem)//查看装置信息
        printf("Invalid parameter---CheckEquipment\n");
        return ;
     }
-    Appwin=(struct tagGkWinRsc*)(menuitem->myprivate);
+    Appwin=(struct GkWinRsc*)(menuitem->myprivate);
 
     width=Appwin->right-Appwin->left;
     height=Appwin->bottom-Appwin->top;
@@ -130,16 +130,16 @@ void  CheckEquipment(struct menu_item *menuitem)//查看装置信息
 
     for ( ; ; )
     {
-//      input_msg = (struct tagInputDeviceMsg *)Djy_GetEventPara(NULL,NULL);
-        if(Stddev_ReadDefaultMsg(&input_msg,20*mS))
+//      input_msg = (struct InputDeviceMsg *)Djy_GetEventPara(NULL,NULL);
+        if(HmiIn_ReadDefaultMsg(&input_msg,20*mS))
         {
             //查看是否单点触摸屏
-            if(input_msg->input_type == EN_STDIN_SINGLE_TOUCH)
+            if(input_msg->input_type == EN_HMIIN_SINGLE_TOUCH)
             {
 
 
             }
-            else if(input_msg->input_type == EN_STDIN_KEYBOARD)//查看是否键盘
+            else if(input_msg->input_type == EN_HMIIN_KEYBOARD)//查看是否键盘
             {
                 //按键松开才确认，因此先判断是否断码
                 if(input_msg->input_data.key_board.key_value[1] != CN_BREAK_CODE)

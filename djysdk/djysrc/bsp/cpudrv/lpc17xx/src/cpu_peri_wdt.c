@@ -88,7 +88,7 @@ bool_t WDT_HardWdtInit(void)
 {
     //配置WDT模式
     tagWdtReg->WDMOD = 0;//清相关位
-    tagWdtReg->WDTV = 0xBEBC20;//配置定时时间2s = 0xBEBC20 * 4 /25M
+    tagWdtReg->WDTC = 0xBEBC20;//配置定时时间2s = 0xBEBC20 * 4 /25M
     tagWdtReg->WDMOD |= (1<<0);//使能开始狗
 
     return true;

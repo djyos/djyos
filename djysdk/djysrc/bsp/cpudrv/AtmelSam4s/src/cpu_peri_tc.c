@@ -52,7 +52,7 @@
 // =============================================================================
 // ±¸×¢£ºÓÉÓÚÌá¹©¸øtimer_core.cÊ¹ÓÃ£¬ËùÒÔ²»ÔÙ×ö²ÎÊý¼ì²éÖ®ÀàµÄ
 
-#include "config-prj.h"
+#include "misc_config.h"
 #if (CN_CFG_SYSTIMER == 1)
 #include "cpu_peri.h"
 #include "int.h"
@@ -66,42 +66,42 @@
 #define TC_CCR_SWTRG       (1<<2)
 #define TC_CMR_CPCTRG      (1<<14)
 #define TC_SR_CPCR         (1<<4)
-#define TC_IDR_CPCS		   (1<<4)
-#define TC_IER_CPCS		   (1<<4)
+#define TC_IDR_CPCS        (1<<4)
+#define TC_IER_CPCS        (1<<4)
 
-#define CN_RATIO_UPTO_US    50	//¶¨Ê±Æ÷Ê±ÖÓÎªMCK/2=100M/2=50M,Ôò50¸öÊ±ÖÓÖÜÆÚÎª1us
+#define CN_RATIO_UPTO_US    50  //¶¨Ê±Æ÷Ê±ÖÓÎªMCK/2=100M/2=50M,Ôò50¸öÊ±ÖÓÖÜÆÚÎª1us
 #define CN_TIMER_MAX_CYCLE (0xFFFF/CN_RATIO_UPTO_US)
 
 // =============================================================================
-#define CN_TC0_BASE        	0x40010000U
-#define CN_TC1_BASE        	0x40014000U
+#define CN_TC0_BASE         0x40010000U
+#define CN_TC1_BASE         0x40014000U
 // =============================================================================
 static tagTcReg volatile * const tg_TIMER_Reg[] = {
-											(tagTcReg *)CN_TC0_BASE,
-											(tagTcReg *)CN_TC1_BASE};
+                                            (tagTcReg *)CN_TC0_BASE,
+                                            (tagTcReg *)CN_TC1_BASE};
 
 enum ENUM_ATMEL_TIMER
 {
-	EN_TC0CH_0=0,
-	EN_TC0CH_1,
-	EN_TC0CH_2,
-	EN_TC1CH_0,
-	EN_TC1CH_1,
-	EN_TC1CH_2,
+    EN_TC0CH_0=0,
+    EN_TC0CH_1,
+    EN_TC0CH_2,
+    EN_TC1CH_0,
+    EN_TC1CH_1,
+    EN_TC1CH_2,
 };
 
 //¸÷¸ö¶¨Ê±Æ÷Ð¾Æ¬µÄ¶¨Ê±Æ÷Ó¦¸ÃÓÐ×Ô¼ºµÄ¾ä±ú
-struct tagAtTimerHandle
+struct AtTimerHandle
 {
-	u32     timerno;          //¶¨Ê±Æ÷ºÅ
-	u32     irqline;          //ÖÐ¶ÏºÅ
-	u32     cycle;            //¶¨Ê±ÖÜÆÚ
-	u32     timerstate;       //¶¨Ê±Æ÷±êÊ¶
+    u32     timerno;          //¶¨Ê±Æ÷ºÅ
+    u32     irqline;          //ÖÐ¶ÏºÅ
+    u32     cycle;            //¶¨Ê±ÖÜÆÚ
+    u32     timerstate;       //¶¨Ê±Æ÷±êÊ¶
 };
 #define CN_ATTIMER_NUM   (EN_TC1CH_2 +1)
 
 
-static struct tagAtTimerHandle  stgTimerHandle[CN_ATTIMER_NUM];
+static struct AtTimerHandle  stgTimerHandle[CN_ATTIMER_NUM];
 
 //×î¸ßÎ»´ú±ítimer0 ÒÀ´ÎÀàÍÆ
 static u32  gs_dwAtTimerBitmap;  //¶ÔÓÚ¶¨Ê±Æ÷ÕâÖÖ¶«Î÷£¬Ò»°ãµÄ²»»áºÜ¶à£¬32¸öÓ¦¸Ã×ã¹»
@@ -109,21 +109,21 @@ static u32  gs_dwAtTimerBitmap;  //¶ÔÓÚ¶¨Ê±Æ÷ÕâÖÖ¶«Î÷£¬Ò»°ãµÄ²»»áºÜ¶à£¬32¸öÓ¦¸Ã×
 
 //timer0..timernµÄirq
 static u32 sgHaltimerIrq[CN_ATTIMER_NUM]={CN_INT_LINE_TC0,\
-											CN_INT_LINE_TC1,\
-											CN_INT_LINE_TC2,\
-											CN_INT_LINE_TC3,\
-											CN_INT_LINE_TC4,\
-											CN_INT_LINE_TC5};
+                                            CN_INT_LINE_TC1,\
+                                            CN_INT_LINE_TC2,\
+                                            CN_INT_LINE_TC3,\
+                                            CN_INT_LINE_TC4,\
+                                            CN_INT_LINE_TC5};
 //»ñÈ¡32Î»ÊýµÚÒ»¸ö0bitÎ»ÖÃ(´Ó¸ßÎ»µ½µÍÎ»ËãÆð)
 u8 __AtTimer_GetFirstZeroBit(u32 para)
 {
-	u8 i;
-	for(i = 0; i < 32; i++)
-	{
-		if(!(para & (1<<(31-i))))
-			break;
-	}
-	return i;
+    u8 i;
+    for(i = 0; i < 32; i++)
+    {
+        if(!(para & (1<<(31-i))))
+            break;
+    }
+    return i;
 }
 // =============================================================================
 // º¯Êý¹¦ÄÜ:__AtTimer_PauseCount
@@ -133,29 +133,29 @@ u8 __AtTimer_GetFirstZeroBit(u32 para)
 // ·µ»ØÖµ  :true³É¹¦ fasleÊ§°Ü
 // ËµÃ÷    :
 // =============================================================================
-bool_t __AtTimer_PauseCount(struct tagAtTimerHandle  *timer)
+bool_t __AtTimer_PauseCount(struct AtTimerHandle  *timer)
 {
-	u8 timerno;
-	if(timer->timerstate & CN_TIMER_ENUSE)
-	{
-		timerno = timer->timerno;
-		if(timerno > EN_TC1CH_2)
-		{
-			return false;
-		}
-		else
-		{
-			tg_TIMER_Reg[timerno/3]->TC_CHANNEL[timerno%3].TC_CCR = TC_CCR_CLKDIS;
-			tg_TIMER_Reg[timerno/3]->TC_CHANNEL[timerno%3].TC_SR;
-			tg_TIMER_Reg[timerno/3]->TC_CHANNEL[timerno%3].TC_IDR = TC_IDR_CPCS;
-			timer->timerstate = (timer->timerstate)&(~CN_TIMER_ENCOUNT);
-			return true;
-		}
-	}
-	else
-	{
-		return false;
-	}
+    u8 timerno;
+    if(timer->timerstate & CN_TIMER_ENUSE)
+    {
+        timerno = timer->timerno;
+        if(timerno > EN_TC1CH_2)
+        {
+            return false;
+        }
+        else
+        {
+            tg_TIMER_Reg[timerno/3]->TC_CHANNEL[timerno%3].TC_CCR = TC_CCR_CLKDIS;
+            tg_TIMER_Reg[timerno/3]->TC_CHANNEL[timerno%3].TC_SR;
+            tg_TIMER_Reg[timerno/3]->TC_CHANNEL[timerno%3].TC_IDR = TC_IDR_CPCS;
+            timer->timerstate = (timer->timerstate)&(~CN_TIMER_ENCOUNT);
+            return true;
+        }
+    }
+    else
+    {
+        return false;
+    }
 }
 // =============================================================================
 // º¯Êý¹¦ÄÜ:__AtTimer_StartCount
@@ -165,32 +165,32 @@ bool_t __AtTimer_PauseCount(struct tagAtTimerHandle  *timer)
 // ·µ»ØÖµ  :true³É¹¦ fasleÊ§°Ü
 // ËµÃ÷    :
 // =============================================================================
-bool_t __AtTimer_StartCount(struct tagAtTimerHandle  *timer)
+bool_t __AtTimer_StartCount(struct AtTimerHandle  *timer)
 {
-	u8 timerno;
-	if(timer->timerstate & CN_TIMER_ENUSE)
-	{
-		timerno = timer->timerno;
-		if(timerno > EN_TC1CH_2)
-		{
-			return false;
-		}
-		else
-		{
-			tg_TIMER_Reg[timerno/3]->TC_CHANNEL[timerno%3].TC_SR;
-			tg_TIMER_Reg[timerno/3]->TC_CHANNEL[timerno%3].TC_IMR = TC_CMR_CPCTRG;
-			tg_TIMER_Reg[timerno/3]->TC_CHANNEL[timerno%3].TC_IER = TC_IER_CPCS;
-			tg_TIMER_Reg[timerno/3]->TC_CHANNEL[timerno%3].TC_CCR
-					= TC_CCR_CLKEN | TC_CCR_SWTRG;
-			timer->timerstate = (timer->timerstate)| (CN_TIMER_ENCOUNT);
+    u8 timerno;
+    if(timer->timerstate & CN_TIMER_ENUSE)
+    {
+        timerno = timer->timerno;
+        if(timerno > EN_TC1CH_2)
+        {
+            return false;
+        }
+        else
+        {
+            tg_TIMER_Reg[timerno/3]->TC_CHANNEL[timerno%3].TC_SR;
+            tg_TIMER_Reg[timerno/3]->TC_CHANNEL[timerno%3].TC_IMR = TC_CMR_CPCTRG;
+            tg_TIMER_Reg[timerno/3]->TC_CHANNEL[timerno%3].TC_IER = TC_IER_CPCS;
+            tg_TIMER_Reg[timerno/3]->TC_CHANNEL[timerno%3].TC_CCR
+                    = TC_CCR_CLKEN | TC_CCR_SWTRG;
+            timer->timerstate = (timer->timerstate)| (CN_TIMER_ENCOUNT);
 
-			return true;
-		}
-	}
-	else
-	{
-		return false;
-	}
+            return true;
+        }
+    }
+    else
+    {
+        return false;
+    }
 
 }
 
@@ -204,31 +204,31 @@ bool_t __AtTimer_StartCount(struct tagAtTimerHandle  *timer)
 // ·µ»ØÖµ  :true³É¹¦ fasleÊ§°Ü
 // ËµÃ÷    :Èç¹ûÉèÖÃÖÜÆÚÌ«´ó£¨³¬¹ý×î´ó¶¨Ê±Æ÷ÄÜÁ¦£©£¬ÔòÉèÖÃÎª¶¨Ê±Æ÷µÄ×î´óÖÜÆÚ
 // =============================================================================
-bool_t  __AtTimer_SetCycle(struct tagAtTimerHandle  *timer, u32 cycle)
+bool_t  __AtTimer_SetCycle(struct AtTimerHandle  *timer, u32 cycle)
 {
-	u8 timerno;
-	if(timer->timerstate & CN_TIMER_ENUSE)
-	{
-		timerno = timer->timerno;
-		if(timerno > EN_TC1CH_2)
-		{
-			return false;
-		}
-		else
-		{
-			if(cycle > CN_TIMER_MAX_CYCLE)
-				cycle = CN_TIMER_MAX_CYCLE;
-			tg_TIMER_Reg[timerno/3]->TC_CHANNEL[timerno%3].TC_RC =
-					cycle *CN_RATIO_UPTO_US;	//Éè¶¨ÖÜÆÚ
-			timer->cycle = cycle;
+    u8 timerno;
+    if(timer->timerstate & CN_TIMER_ENUSE)
+    {
+        timerno = timer->timerno;
+        if(timerno > EN_TC1CH_2)
+        {
+            return false;
+        }
+        else
+        {
+            if(cycle > CN_TIMER_MAX_CYCLE)
+                cycle = CN_TIMER_MAX_CYCLE;
+            tg_TIMER_Reg[timerno/3]->TC_CHANNEL[timerno%3].TC_RC =
+                    cycle *CN_RATIO_UPTO_US;    //Éè¶¨ÖÜÆÚ
+            timer->cycle = cycle;
 
-			return true;
-		}
-	}
-	else
-	{
-		return false;
-	}
+            return true;
+        }
+    }
+    else
+    {
+        return false;
+    }
 }
 // =============================================================================
 // º¯Êý¹¦ÄÜ:__AtTimer_SetAutoReload
@@ -238,91 +238,91 @@ bool_t  __AtTimer_SetCycle(struct tagAtTimerHandle  *timer, u32 cycle)
 // Êä³ö²ÎÊý:
 // ·µ»ØÖµ  :true³É¹¦ fasleÊ§°Ü
 // =============================================================================
-bool_t  __AtTimer_SetAutoReload(struct tagAtTimerHandle  *timer, bool_t autoreload)
+bool_t  __AtTimer_SetAutoReload(struct AtTimerHandle  *timer, bool_t autoreload)
 {
-	bool_t result;
-	u8 timerno;
-	if(timer->timerstate & CN_TIMER_ENUSE)
-	{
-		timerno = timer->timerno;
-		if(timerno < EN_TC1CH_2)
-		{
-			if(autoreload == true)
-			{
-//				tg_TIMER_Reg[timerno]->MCR |= MCR_MR0R_MASK;//MR0R,reset PC
-//				tg_TIMER_Reg[timerno]->MCR &= ~MCR_MR0S_MASK;
-			}
-			else
-			{
-//				tg_TIMER_Reg[timerno]->MCR &= ~MCR_MR0R_MASK;
-//				tg_TIMER_Reg[timerno]->MCR |= MCR_MR0S_MASK;
-			}
-		}
-		else
-		{
-			result = false;
-		}
-	}
-	else
-	{
-		result = false;
-	}
+    bool_t result;
+    u8 timerno;
+    if(timer->timerstate & CN_TIMER_ENUSE)
+    {
+        timerno = timer->timerno;
+        if(timerno < EN_TC1CH_2)
+        {
+            if(autoreload == true)
+            {
+//              tg_TIMER_Reg[timerno]->MCR |= MCR_MR0R_MASK;//MR0R,reset PC
+//              tg_TIMER_Reg[timerno]->MCR &= ~MCR_MR0S_MASK;
+            }
+            else
+            {
+//              tg_TIMER_Reg[timerno]->MCR &= ~MCR_MR0R_MASK;
+//              tg_TIMER_Reg[timerno]->MCR |= MCR_MR0S_MASK;
+            }
+        }
+        else
+        {
+            result = false;
+        }
+    }
+    else
+    {
+        result = false;
+    }
 
-	return result;
+    return result;
 }
 // =============================================================================
 // º¯Êý¹¦ÄÜ:__AtTimer_Alloc
 //          ·ÖÅä¶¨Ê±Æ÷
-// ÊäÈë²ÎÊý:cycle£¬¶¨Ê±Æ÷ÖÜÆÚ
-//          timerisr,¶¨Ê±Æ÷µÄÖÐ¶Ï´¦Àíº¯Êý
+// ÊäÈë²ÎÊý:timerisr,¶¨Ê±Æ÷µÄÖÐ¶Ï´¦Àíº¯Êý
 // Êä³ö²ÎÊý:
 // ·µ»ØÖµ  :·ÖÅäµÄ¶¨Ê±Æ÷¾ä±ú£¬NULLÔò·ÖÅä²»³É¹¦
 // ËµÃ÷    :
 // =============================================================================
-ptu32_t __AtTimer_Alloc(u32 cycle,fnTimerIsr timerisr)
+ptu32_t __AtTimer_Alloc(fntTimerIsr timerisr)
 {
-	u8 timerno;
-	u8 irqline;
-	struct tagAtTimerHandle  *timer;
-	ptu32_t timerhandle;
-	//Ô­×Ó²Ù×÷£¬·ÀÖ¹×ÊÔ´¾ºÕù
-	atom_low_t  timeratom;
-	timeratom = Int_LowAtomStart();
+    u8 timerno;
+    u8 irqline;
+    struct AtTimerHandle  *timer;
+    ptu32_t timerhandle;
+    //Ô­×Ó²Ù×÷£¬·ÀÖ¹×ÊÔ´¾ºÕù
+    atom_low_t  timeratom;
+    timeratom = Int_LowAtomStart();
 
-	//Ñ°ÕÒ¿ÕÏÐµÄtimer
-	timerno = __AtTimer_GetFirstZeroBit(gs_dwAtTimerBitmap);
-	if(timerno < CN_ATTIMER_NUM)//»¹ÓÐ¿ÕÏÐµÄ£¬ÔòÉèÖÃ±êÖ¾Î»
-	{
-		gs_dwAtTimerBitmap = gs_dwAtTimerBitmap | (CN_ATTIMER_BITMAP_MSK<< timerno);
-		Int_LowAtomEnd(timeratom);	//Ô­×Ó²Ù×÷Íê±Ï
-	}
-	else//Ã»ÓÐµÄ»°Ö±½Ó·µ»Ø¾Í¿ÉÒÔÁË£¬ÓÃ²»×ÅÔÙ†ªàÂÁË
-	{
-		Int_LowAtomEnd(timeratom);	 //Ô­×Ó²Ù×÷Íê±Ï
-		return NULL;
-	}
+    //Ñ°ÕÒ¿ÕÏÐµÄtimer
+    timerno = __AtTimer_GetFirstZeroBit(gs_dwAtTimerBitmap);
+    if(timerno < CN_ATTIMER_NUM)//»¹ÓÐ¿ÕÏÐµÄ£¬ÔòÉèÖÃ±êÖ¾Î»
+    {
+        gs_dwAtTimerBitmap = gs_dwAtTimerBitmap | (CN_ATTIMER_BITMAP_MSK<< timerno);
+        Int_LowAtomEnd(timeratom);  //Ô­×Ó²Ù×÷Íê±Ï
+    }
+    else//Ã»ÓÐµÄ»°Ö±½Ó·µ»Ø¾Í¿ÉÒÔÁË£¬ÓÃ²»×ÅÔÙ†ªàÂÁË
+    {
+        Int_LowAtomEnd(timeratom);   //Ô­×Ó²Ù×÷Íê±Ï
+        return NULL;
+    }
 
-	PMC_EnablePeripheral(CN_PERI_ID_TC0 + timerno);
+    PMC_EnablePeripheral(CN_PERI_ID_TC0 + timerno);
 
-	irqline = sgHaltimerIrq[timerno];
-	timer = &stgTimerHandle[timerno];
-	timer->cycle = cycle;
-	timer->timerno = timerno;
-	timer->irqline = irqline;
-	timer->timerstate = CN_TIMER_ENUSE;
-	//ºÃÁË£¬ÖÐ¶ÏºÅºÍ¶¨Ê±Æ÷ºÅÂë¶¼ÓÐÁË£¬¸Ã¸ÉÂï¾Í¸ÉÂïÁË¡£
-	//ÏÈÉèÖÃºÃ¶¨Ê±Æ÷ÖÜÆÚ
-	__AtTimer_PauseCount(timer);
-	__AtTimer_SetCycle(timer,cycle);
-	//ÉèÖÃ¶¨Ê±Æ÷ÖÐ¶Ï,ÏÈ½áÊøµô¸ÃÖÐ¶ÏËùÓÐµÄ¹ØÁªÏà¹ØÄÚÈÝ
-	Int_CutLine(irqline);
-	Int_IsrDisConnect(irqline);
-	Int_EvttDisConnect(irqline);
-	Int_SettoAsynSignal(irqline);
-	Int_IsrConnect(irqline, timerisr);
-	timerhandle = (ptu32_t)timer;
+    irqline = sgHaltimerIrq[timerno];
+    timer = &stgTimerHandle[timerno];
+    timer->cycle = 0;
+    timer->timerno = timerno;
+    timer->irqline = irqline;
+    timer->timerstate = CN_TIMER_ENUSE;
+    //ºÃÁË£¬ÖÐ¶ÏºÅºÍ¶¨Ê±Æ÷ºÅÂë¶¼ÓÐÁË£¬¸Ã¸ÉÂï¾Í¸ÉÂïÁË¡£
+    //ÏÈÉèÖÃºÃ¶¨Ê±Æ÷ÖÜÆÚ
+    __AtTimer_PauseCount(timer);
+//    __AtTimer_SetCycle(timer,cycle);
+    //ÉèÖÃ¶¨Ê±Æ÷ÖÐ¶Ï,ÏÈ½áÊøµô¸ÃÖÐ¶ÏËùÓÐµÄ¹ØÁªÏà¹ØÄÚÈÝ
+    Int_Register(irqline);
+    Int_CutLine(irqline);
+    Int_IsrDisConnect(irqline);
+    Int_EvttDisConnect(irqline);
+    Int_SettoAsynSignal(irqline);
+    Int_IsrConnect(irqline, timerisr);
+    timerhandle = (ptu32_t)timer;
 
-	return timerhandle;
+    return timerhandle;
 }
 
 
@@ -336,40 +336,40 @@ ptu32_t __AtTimer_Alloc(u32 cycle,fnTimerIsr timerisr)
 // =============================================================================
 bool_t  __AtTimer_Free(ptu32_t timerhandle)
 {
-	u8 timerno;
-	u8 irqline;
-	atom_low_t  timeratom;	//±£»¤¹«ÓÃ×ÊÔ´
-	struct tagAtTimerHandle  *timer;
-	timer = (struct tagAtTimerHandle  *)timerhandle;
+    u8 timerno;
+    u8 irqline;
+    atom_low_t  timeratom;  //±£»¤¹«ÓÃ×ÊÔ´
+    struct AtTimerHandle  *timer;
+    timer = (struct AtTimerHandle  *)timerhandle;
 
-	if(timer->timerstate & CN_TIMER_ENUSE)
-	{
-		timerno = timer->timerno;
-		irqline = timer->irqline;
-		if(timerno < CN_ATTIMER_NUM)//»¹ÓÐ¿ÕÏÐµÄ£¬ÔòÉèÖÃ±êÖ¾Î»
-		{	    //ÐÞ¸ÄÈ«¾Ö±êÖ¾Ò»¶¨ÊÇÔ­×ÓÐÔµÄ
-			timeratom = Int_LowAtomStart();
-			gs_dwAtTimerBitmap = gs_dwAtTimerBitmap &(~(CN_ATTIMER_BITMAP_MSK<< timerno));
-			//½â³ýµôÖÐ¶ÏËù¹ØÁªµÄÄÚÈÝ
-			timer->timerstate = 0;
-			Int_CutLine(irqline);
-			Int_IsrDisConnect(irqline);
-			Int_EvttDisConnect(irqline);
+    if(timer->timerstate & CN_TIMER_ENUSE)
+    {
+        timerno = timer->timerno;
+        irqline = timer->irqline;
+        if(timerno < CN_ATTIMER_NUM)//»¹ÓÐ¿ÕÏÐµÄ£¬ÔòÉèÖÃ±êÖ¾Î»
+        {       //ÐÞ¸ÄÈ«¾Ö±êÖ¾Ò»¶¨ÊÇÔ­×ÓÐÔµÄ
+            timeratom = Int_LowAtomStart();
+            gs_dwAtTimerBitmap = gs_dwAtTimerBitmap &(~(CN_ATTIMER_BITMAP_MSK<< timerno));
+            //½â³ýµôÖÐ¶ÏËù¹ØÁªµÄÄÚÈÝ
+            timer->timerstate = 0;
+            Int_CutLine(irqline);
+            Int_IsrDisConnect(irqline);
+            Int_EvttDisConnect(irqline);
+			Int_UnRegister(irqline);
+            Int_LowAtomEnd(timeratom);  //Ô­×Ó²Ù×÷Íê±Ï
 
-			Int_LowAtomEnd(timeratom);	//Ô­×Ó²Ù×÷Íê±Ï
+            return true;
+        }
+        else//Ã»ÓÐµÄ»°Ö±½Ó·µ»Ø¾Í¿ÉÒÔÁË£¬ÓÃ²»×ÅÔÙ†ªàÂÁË
+        {
+            return false;
+        }
 
-			return true;
-		}
-		else//Ã»ÓÐµÄ»°Ö±½Ó·µ»Ø¾Í¿ÉÒÔÁË£¬ÓÃ²»×ÅÔÙ†ªàÂÁË
-		{
-			return false;
-		}
-
-	}
-	else
-	{
-		return false;
-	}
+    }
+    else
+    {
+        return false;
+    }
 }
 
 
@@ -382,26 +382,26 @@ bool_t  __AtTimer_Free(ptu32_t timerhandle)
 // ·µ»ØÖµ  :·ÖÅäµÄ¶¨Ê±Æ÷£¬NULLÔò·ÖÅä²»³É¹¦
 // ËµÃ÷    :
 // =============================================================================
-bool_t  __AtTimer_SetIntPro(struct tagAtTimerHandle  *timer, bool_t real_prior)
+bool_t  __AtTimer_SetIntPro(struct AtTimerHandle  *timer, bool_t real_prior)
 {
-	if(timer->timerstate & CN_TIMER_ENUSE)
-	{
-		if(real_prior)
-		{
-			timer->timerstate = (timer->timerstate)| (CN_TIMER_REALINT);
-			Int_EvttDisConnect(timer->irqline);
-			return Int_SettoReal(timer->irqline);
-		}
-		else
-		{
-			timer->timerstate = (timer->timerstate)&(~CN_TIMER_REALINT);
-			return Int_SettoAsynSignal(timer->irqline);
-		}
-	}
-	else
-	{
-		return false;
-	}
+    if(timer->timerstate & CN_TIMER_ENUSE)
+    {
+        if(real_prior)
+        {
+            timer->timerstate = (timer->timerstate)| (CN_TIMER_REALINT);
+            Int_EvttDisConnect(timer->irqline);
+            return Int_SettoReal(timer->irqline);
+        }
+        else
+        {
+            timer->timerstate = (timer->timerstate)&(~CN_TIMER_REALINT);
+            return Int_SettoAsynSignal(timer->irqline);
+        }
+    }
+    else
+    {
+        return false;
+    }
 }
 
 // =============================================================================
@@ -412,17 +412,17 @@ bool_t  __AtTimer_SetIntPro(struct tagAtTimerHandle  *timer, bool_t real_prior)
 // ·µ»ØÖµ  :true³É¹¦falseÊ§°Ü
 // ËµÃ÷    :
 // =============================================================================
-bool_t  __AtTimer_EnInt(struct tagAtTimerHandle  *timer)
+bool_t  __AtTimer_EnInt(struct AtTimerHandle  *timer)
 {
-	if(timer->timerstate & CN_TIMER_ENUSE)
-	{
-		timer->timerstate = (timer->timerstate)| (CN_TIMER_ENINT);
-		return Int_ContactLine(timer->irqline);
-	}
-	else
-	{
-		return false;
-	}
+    if(timer->timerstate & CN_TIMER_ENUSE)
+    {
+        timer->timerstate = (timer->timerstate)| (CN_TIMER_ENINT);
+        return Int_ContactLine(timer->irqline);
+    }
+    else
+    {
+        return false;
+    }
 }
 // =============================================================================
 // º¯Êý¹¦ÄÜ:__AtTimer_DisInt
@@ -432,20 +432,20 @@ bool_t  __AtTimer_EnInt(struct tagAtTimerHandle  *timer)
 // ·µ»ØÖµ  :true³É¹¦falseÊ§°Ü
 // ËµÃ÷    :
 // =============================================================================
-bool_t  __AtTimer_DisInt(struct tagAtTimerHandle  *timer)
+bool_t  __AtTimer_DisInt(struct AtTimerHandle  *timer)
 {
-	u8 timerno;
-	timerno = timer->timerno;
+    u8 timerno;
+    timerno = timer->timerno;
 
-	if(timer->timerstate & CN_TIMER_ENUSE)
-	{
-		timer->timerstate = (timer->timerstate)&(~CN_TIMER_ENINT);
-		return Int_CutLine(timer->irqline);
-	}
-	else
-	{
-		return false;
-	}
+    if(timer->timerstate & CN_TIMER_ENUSE)
+    {
+        timer->timerstate = (timer->timerstate)&(~CN_TIMER_ENINT);
+        return Int_CutLine(timer->irqline);
+    }
+    else
+    {
+        return false;
+    }
 }
 // =============================================================================
 // º¯Êý¹¦ÄÜ:__AtTimer_GetTime
@@ -455,27 +455,27 @@ bool_t  __AtTimer_DisInt(struct tagAtTimerHandle  *timer)
 // ·µ»ØÖµ  :true³É¹¦falseÊ§°Ü
 // ËµÃ÷    :´ÓÉè¶¨µÄÖÜÆÚËãÆð£¬¼´cycle-Ê£ÓàÊ±¼ä,±íÊ¾ÒÑ¾­×ßµôµÄÊ±¼ä
 // =============================================================================
-bool_t __AtTimer_GetTime(struct tagAtTimerHandle  *timer, u32 *time)
+bool_t __AtTimer_GetTime(struct AtTimerHandle  *timer, u32 *time)
 {
-	u8 timerno;
-	u32 counter;
-	if(timer->timerstate & CN_TIMER_ENUSE)
-	{
-		timerno = timer->timerno;
-		if(timerno > EN_TC1CH_2)
-		{
-			return false;
-		}
+    u8 timerno;
+    u32 counter;
+    if(timer->timerstate & CN_TIMER_ENUSE)
+    {
+        timerno = timer->timerno;
+        if(timerno > EN_TC1CH_2)
+        {
+            return false;
+        }
 
-		counter = tg_TIMER_Reg[timerno/3]->TC_CHANNEL[timerno%3].TC_RC;
-		counter = timer->cycle - counter * CN_RATIO_UPTO_US;
+        counter = tg_TIMER_Reg[timerno/3]->TC_CHANNEL[timerno%3].TC_RC;
+        counter = timer->cycle - counter * CN_RATIO_UPTO_US;
 
-		return counter;
-	}
-	else
-	{
-		return false;
-	}
+        return counter;
+    }
+    else
+    {
+        return false;
+    }
 }
 // =============================================================================
 // º¯Êý¹¦ÄÜ:__AtTimer_CheckTimeout
@@ -485,37 +485,37 @@ bool_t __AtTimer_GetTime(struct tagAtTimerHandle  *timer, u32 *time)
 // ·µ»ØÖµ  :true³É¹¦ falseÊ§°Ü
 // ËµÃ÷    :
 // =============================================================================
-bool_t __AtTimer_CheckTimeout(struct tagAtTimerHandle  *timer, bool_t *timeout)
+bool_t __AtTimer_CheckTimeout(struct AtTimerHandle  *timer, bool_t *timeout)
 {
-	bool_t result=true;
-	u8 timerno;
-	u32 temp;
-	u32 status;
-	if(timer->timerstate & CN_TIMER_ENUSE)
-	{
-		timerno = timer->timerno;
-		if(timerno > EN_TC1CH_2)
-		{
-			result = false;
-		}
-		else
-		{
-			status = tg_TIMER_Reg[timerno/3]->TC_CHANNEL[temp%3].TC_SR;
-			if(status & TC_SR_CPCR)
-			{
-				*timeout = true;
-			}
-			else
-			{
-				*timeout = false;
-			}
-		}
-	}
-	else
-	{
-		result = false;
-	}
-	return result;
+    bool_t result=true;
+    u8 timerno;
+    u32 temp;
+    u32 status;
+    if(timer->timerstate & CN_TIMER_ENUSE)
+    {
+        timerno = timer->timerno;
+        if(timerno > EN_TC1CH_2)
+        {
+            result = false;
+        }
+        else
+        {
+            status = tg_TIMER_Reg[timerno/3]->TC_CHANNEL[temp%3].TC_SR;
+            if(status & TC_SR_CPCR)
+            {
+                *timeout = true;
+            }
+            else
+            {
+                *timeout = false;
+            }
+        }
+    }
+    else
+    {
+        result = false;
+    }
+    return result;
 }
 
 // =============================================================================
@@ -526,22 +526,22 @@ bool_t __AtTimer_CheckTimeout(struct tagAtTimerHandle  *timer, bool_t *timeout)
 // ·µ»ØÖµ  £ºtrue ³É¹¦ falseÊ§°Ü
 // ËµÃ÷    : ±¾²ãÊµÏÖ
 // =============================================================================
-bool_t __AtTimer_GetID(struct tagAtTimerHandle   *timer,u32 *timerId)
+bool_t __AtTimer_GetID(struct AtTimerHandle   *timer,u32 *timerId)
 {
-	u16 irqno;
-	u16 timerno;
+    u16 irqno;
+    u16 timerno;
 
-	if(NULL == timer)
-	{
-		return false;
-	}
-	else
-	{
-		irqno = (u16)timer->timerno;
-		timerno = (u16)timer->irqline;
-		*timerId = (timerno<<16)|(irqno);
-		return true;
-	}
+    if(NULL == timer)
+    {
+        return false;
+    }
+    else
+    {
+        irqno = (u16)timer->timerno;
+        timerno = (u16)timer->irqline;
+        *timerId = (timerno<<16)|(irqno);
+        return true;
+    }
 }
 
 // =============================================================================
@@ -551,17 +551,17 @@ bool_t __AtTimer_GetID(struct tagAtTimerHandle   *timer,u32 *timerId)
 // Êä³ö²ÎÊý£ºcycle£¬¶¨Ê±Æ÷ÖÜÆÚ(Î¢Ãë)
 // ·µ»ØÖµ  £ºtrue ³É¹¦ falseÊ§°Ü
 // =============================================================================
-bool_t __AtTimer_GetCycle(struct tagAtTimerHandle   *timer, u32 *cycle)
+bool_t __AtTimer_GetCycle(struct AtTimerHandle   *timer, u32 *cycle)
 {
-	if(NULL == timer)
-	{
-		return false;
-	}
-	else
-	{
-		*cycle = timer->cycle;
-		return true;
-	}
+    if(NULL == timer)
+    {
+        return false;
+    }
+    else
+    {
+        *cycle = timer->cycle;
+        return true;
+    }
 }
 // =============================================================================
 // º¯Êý¹¦ÄÜ£º__AtTimer_GetState
@@ -571,18 +571,18 @@ bool_t __AtTimer_GetCycle(struct tagAtTimerHandle   *timer, u32 *cycle)
 // ·µ»ØÖµ  £ºtrue ³É¹¦ falseÊ§°Ü
 // ËµÃ÷    : ±¾²ãÊµÏÖ
 // =============================================================================
-bool_t __AtTimer_GetState(struct tagAtTimerHandle   *timer, u32 *timerflag)
+bool_t __AtTimer_GetState(struct AtTimerHandle   *timer, u32 *timerflag)
 {
 
-	if(NULL == timer)
-	{
-		return false;
-	}
-	else
-	{
-		*timerflag = timer->timerstate;
-		return true;
-	}
+    if(NULL == timer)
+    {
+        return false;
+    }
+    else
+    {
+        *timerflag = timer->timerstate;
+        return true;
+    }
 }
 // =============================================================================
 // º¯Êý¹¦ÄÜ:__AtTimer_Ctrl
@@ -594,59 +594,59 @@ bool_t __AtTimer_GetState(struct tagAtTimerHandle   *timer, u32 *timerflag)
 // ËµÃ÷    :
 // =============================================================================
 bool_t __AtTimer_Ctrl(ptu32_t timerhandle, \
-                         enum _ENUM_TIMER_CTRL_TYPE_ ctrlcmd, \
+                         enum TimerCmdCode ctrlcmd, \
                          ptu32_t inoutpara)
 {
-	bool_t result;
-	struct tagAtTimerHandle  *timer;
-	timer = (struct tagAtTimerHandle  *)timerhandle;
-	if(NULL == timer)
-	{
-		result = false;
-	}
-	else
-	{
-		switch(ctrlcmd)
-		{
-			case EN_TIMER_STARTCOUNT:
-				result = __AtTimer_StartCount(timer);
-				break;
-			case EN_TIMER_PAUSECOUNT:
-				result = __AtTimer_PauseCount(timer);
-				break;
-			case EN_TIMER_SETCYCLE:
-				result = __AtTimer_SetCycle(timer,(u32)inoutpara);
-				break;
-			case EN_TIMER_SETRELOAD:
-				result = __AtTimer_SetAutoReload(timer, (bool_t)inoutpara);
-				break;
-			case EN_TIMER_ENINT:
-				result = __AtTimer_EnInt(timer);
-				break;
-			case EN_TIMER_DISINT:
-				result = __AtTimer_DisInt(timer);
-				break;
-			case EN_TIMER_SETINTPRO:
-				result = __AtTimer_SetIntPro(timer, (bool_t)inoutpara);
-				break;
-			case EN_TIMER_GETTIME:
-				result = __AtTimer_GetTime(timer, (u32 *)inoutpara);
-				break;
-			case EN_TIMER_GETCYCLE:
-				result = __AtTimer_GetCycle(timer, (u32 *)inoutpara);
-				break;
-			case EN_TIMER_GETID:
-				result = __AtTimer_GetID(timer, (u32 *)inoutpara);
-				break;
-			case EN_TIMER_GETSTATE:
-				result = __AtTimer_GetState(timer, (u32 *)inoutpara);
-				break;
-			default:
-				break;
-		};
-	}
+    bool_t result;
+    struct AtTimerHandle  *timer;
+    timer = (struct AtTimerHandle  *)timerhandle;
+    if(NULL == timer)
+    {
+        result = false;
+    }
+    else
+    {
+        switch(ctrlcmd)
+        {
+            case EN_TIMER_STARTCOUNT:
+                result = __AtTimer_StartCount(timer);
+                break;
+            case EN_TIMER_PAUSECOUNT:
+                result = __AtTimer_PauseCount(timer);
+                break;
+            case EN_TIMER_SETCYCLE:
+                result = __AtTimer_SetCycle(timer,(u32)inoutpara);
+                break;
+            case EN_TIMER_SETRELOAD:
+                result = __AtTimer_SetAutoReload(timer, (bool_t)inoutpara);
+                break;
+            case EN_TIMER_ENINT:
+                result = __AtTimer_EnInt(timer);
+                break;
+            case EN_TIMER_DISINT:
+                result = __AtTimer_DisInt(timer);
+                break;
+            case EN_TIMER_SETINTPRO:
+                result = __AtTimer_SetIntPro(timer, (bool_t)inoutpara);
+                break;
+            case EN_TIMER_GETTIME:
+                result = __AtTimer_GetTime(timer, (u32 *)inoutpara);
+                break;
+            case EN_TIMER_GETCYCLE:
+                result = __AtTimer_GetCycle(timer, (u32 *)inoutpara);
+                break;
+            case EN_TIMER_GETID:
+                result = __AtTimer_GetID(timer, (u32 *)inoutpara);
+                break;
+            case EN_TIMER_GETSTATE:
+                result = __AtTimer_GetState(timer, (u32 *)inoutpara);
+                break;
+            default:
+                break;
+        };
+    }
 
-	return result;
+    return result;
 }
 
 // =============================================================================
@@ -657,26 +657,26 @@ bool_t __AtTimer_Ctrl(ptu32_t timerhandle, \
 // ·µ»ØÖµ  :
 // ËµÃ÷    :
 // =============================================================================
-void Timer_ModuleInit(void)
+void ModuleInstall_Timer(void)
 {
-	struct tagTimerChip  LPCtimer;
-	u32 temp,temp1;
+    struct TimerChip  LPCtimer;
+    u32 temp,temp1;
 
-	for(temp1 = 0; temp1 < 2; temp1++)
-	{
-		for(temp = 0; temp < 3; temp++)
-		{
-			tg_TIMER_Reg[temp1]->TC_CHANNEL[temp].TC_CCR = TC_CCR_CLKDIS;
-			tg_TIMER_Reg[temp1]->TC_CHANNEL[temp].TC_IDR = 0xFFFFFFFF;
-			tg_TIMER_Reg[temp1]->TC_CHANNEL[temp].TC_SR;
-			tg_TIMER_Reg[temp1]->TC_CHANNEL[temp].TC_IMR = TC_CMR_CPCTRG;
-		}
-	}
+    for(temp1 = 0; temp1 < 2; temp1++)
+    {
+        for(temp = 0; temp < 3; temp++)
+        {
+            tg_TIMER_Reg[temp1]->TC_CHANNEL[temp].TC_CCR = TC_CCR_CLKDIS;
+            tg_TIMER_Reg[temp1]->TC_CHANNEL[temp].TC_IDR = 0xFFFFFFFF;
+            tg_TIMER_Reg[temp1]->TC_CHANNEL[temp].TC_SR;
+            tg_TIMER_Reg[temp1]->TC_CHANNEL[temp].TC_IMR = TC_CMR_CPCTRG;
+        }
+    }
 
-	LPCtimer.chipname = "ATTIMER";
-	LPCtimer.timerhardalloc = __AtTimer_Alloc;
-	LPCtimer.timerhardfree = __AtTimer_Free;
-	LPCtimer.timerhardctrl = __AtTimer_Ctrl;
+    LPCtimer.chipname = "ATTIMER";
+    LPCtimer.TimerHardAlloc = __AtTimer_Alloc;
+    LPCtimer.TimerHardFree = __AtTimer_Free;
+    LPCtimer.TimerHardCtrl = __AtTimer_Ctrl;
     TimerHard_RegisterChip(&LPCtimer);
 
     return ;

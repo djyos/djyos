@@ -5,11 +5,12 @@
 #include "os.h"
 
 #include "timer.h"
+#include "timer_hard.h"
 
 
 void timerisr(tagTimerSoft *timer)
 {
-	printk("Timername = %s\n\r", timer->name);
+    printk("Timername = %s\n\r", TimerSoft_GetName(timer));
 }
 
 

@@ -1,4 +1,3 @@
-/*
 //----------------------------------------------------
 // Copyright (c) 2014, SHENZHEN PENGRUI SOFT CO LTD. All rights reserved.
 
@@ -43,20 +42,19 @@
 // 于替代商品或劳务之购用、使用损失、资料损失、利益损失、业务中断等等），
 // 不负任何责任，即在该种使用已获事前告知可能会造成此类损害的情形下亦然。
 //-----------------------------------------------------------------------------
-@所属模块:调度器
-@作者：lst
-@版本：V1.0.0
-@文件描述:调度器中与CPU直接相关的汇编代码，主要是线程切换方面的代码。
-@其他说明:
-@修订历史:
-@2. ...
-@1. 日期: 2009-01-04
-@   作者: lst
-@   新版本号: V1.0.0
-@   修改说明: 原始版本
-@------------------------------------------------------
-@ 注: psp并不保存在栈中，而是在vm->stack中!!
-*/
+//所属模块:调度器
+//作者：lst
+//版本：V1.0.0
+//文件描述:调度器中与CPU直接相关的汇编代码，主要是线程切换方面的代码。
+//其他说明:
+//修订历史:
+//1. 日期: 2014-01-20
+//   作者: lst
+//   新版本号: V1.0.0
+//   修改说明: 原始版本
+//------------------------------------------------------
+// 注: psp并不保存在栈中，而是在vm->stack中!!
+
 
 .syntax         unified
 .cpu            cortex-m3
@@ -68,7 +66,7 @@
 @----重置线程-----------------------------------------------------------------
 @功能:  初始化线程的栈，并挂上线程执行函数，新创建线程时将会调用本函数
 @参数:  thread_routine，被重置的线程函数
-@       vm，线程指针
+@       vm，线程控制块指针
 @返回:  初始化结束后的当前栈指针
 @函数原型:void * __asm_reset_thread(void (*thread_routine)(struct event_script *),
 @                                        struct  tagThreadVm  *vm)@
@@ -82,12 +80,12 @@
 __asm_reset_thread:
     ldr     r2,[r1,#4]          /* 取线程栈顶指针 */
     mov     r12,#0x01000000     /* xpsr的初始值 */
-    ldr     r3,=__Djy_VmEngine /* 取线程引擎指针 */
+    ldr     r3,=__Djy_VmEngine  /* 取线程引擎指针 */
     stmfd   r2!,{r3,r12}        /* 存pc，xpsr */
     sub     r2,r2,#14*4         /* 后退14个寄存器,初始状态r0-r12中，除r0外均无意义， */
                                 /* __vm_engine函数不返回，lr也无意义 */
     /* 存在r0中的thread_routine是__vm_engine的参数，切换上下文时，thread_routine将
-        恢复到r0中，根据调用约定，r0的值就是__vm_engine函数的参数。 */
+       恢复到r0中，根据调用约定，r0的值就是__vm_engine函数的参数。 */
     str     r0,[r2,#8*4]        /* 保存 thread_routine指针到r0的位置. */
     str     r2,[r1]             /* 保存vm的当前栈指针到vm->stack中 */
     bx      lr
@@ -100,8 +98,8 @@ __asm_reset_thread:
 @       该线程，然后切换到其他就绪线程，这时候就需要调用本函数。因此本函数在
 @       被复位的线程上下文里面执行。
 @参数:  thread_routine，被重置的线程函数
-@       new_vm，目标线程的线程
-@       old_vm，被复位的线程
+@       new_vm，目标线程的控制块指针
+@       old_vm，被复位线程的控制块指针
 @返回:  无
 @函数原型:void __asm_reset_switch(void (*thread_routine)(void),
 @                           struct  tagThreadVm *new_vm,struct  tagThreadVm *old_vm)@
@@ -125,11 +123,12 @@ __asm_reset_switch:
     ldr     sp,[r1]             /* 取得新上下文指针 */
 @    bl      Int_HalfEnableAsynSignal /* 对应done函数开头的 __Int_ResetAsynSignal 调用 */
     svc     0                   /* 切入新上下文 */
+    bx      lr
 
 /*
 @----启动多事件调度-----------------------------------------------------------
 @功能: 系统初始化完成后，启动多事件调度并切入第一个事件.
-@参数: new_vm，首次启动的线程控制块指针
+@参数: new_vm，首次启动的线程的控制块指针
 @返回: 无
 @函数原型: void __asm_start_thread(struct  tagThreadVm  *new_vm)@
 @-----------------------------------------------------------------------------
@@ -147,11 +146,12 @@ __asm_start_thread:
     ldr     sp,[r0]             /* 取得新上下文指针 */
 @    bl      Int_HalfEnableAsynSignal /* 线程启动后，调度应该是允许的 */
     svc     0                   /* 切入新上下文 */
+    bx      lr
 
 /*
 @----切入上下文---------------------------------------------------------------
 @功能:  不保存原上下文，直接切入新的上下文执行
-@参数:  new_vm，待切入的线程控制块指针
+@参数:  new_vm，待切入线程的控制块指针
 @返回:  无
 @函数原型: void __asm_turnto_context(struct  tagThreadVm  *new_vm)@
 @说明:  当事件完成,就没有必要保存旧事件的上下文,直接切换到新事件即可.
@@ -166,13 +166,13 @@ __asm_turnto_context:
     ldr     sp,[r0]             /* 取得新上下文指针 */
 @    bl      Int_HalfEnableAsynSignal /* 对应done函数开头的 Int_SaveAsynSignal 调用 */
     svc     0                   /* 切入新上下文 */
+    bx      lr
 
 /*
 @----上下文切换---------------------------------------------------------------
 @功能:  保存当前线程的上下文，切换到新线程的上下文中继续执行。
-@参数:  new_sp，新上下文的栈指针
-@参数:  old_sp，旧上下文的栈指针的指针，即&vm->stack。无需提供旧上下文栈指针，
-@               sp寄存器的当前值就是
+@参数:  new_vm，切入线程的控制块指针
+@参数:  old_vm，切离线程的控制块指针，即&vm->stack。无需提供旧上下文栈指针，sp寄存器的当前值就是
 @返回:  无
 @函数原型: void __asm_switch_context(struct  tagThreadVm *new_vm,struct  tagThreadVm *old_vm)@
 @-----------------------------------------------------------------------------
@@ -195,14 +195,14 @@ __asm_switch_context:
     ldr     sp,[r0]             /* 取得新上下文指针 */
 @    bl      Int_HalfEnableAsynSignal
     svc     0                   /* 切入新上下文 */
-
+    bx      lr
 /*
 @----中断中的上下文切换-------------------------------------------------------
 @功能:  保存被中断线程的上下文，切换到新线程的上下文中继续执行。本函数虽然在中
 @       断服务函数(非用户用int_isr_connect函数连接的中断服务函数)中，但在ARM
 @       中，却运行在svc态
-@参数:  new_sp，切换目标线程
-@参数:  old_sp，被中断线程
+@参数:  new_vm，切入线程的控制块指针
+@参数:  old_vm，被中断线程的控制块指针
 @返回:  无
 @函数原型: void __asm_switch_context_int(struct tagThreadVm *new_vm,struct tagThreadVm *old_vm)@
 @-----------------------------------------------------------------------------
@@ -218,6 +218,36 @@ __asm_switch_context_int:
     str     r2,[r1]     /* 把psp写入线程数据结构中 */
     ldr     r2,[r0]     /* 取待切入线程的psp */
     msr     psp,r2      /* 待切入线程的当前栈指针写入psp，中断返回恢复上下文将以此为准 */
+    bx      lr
+
+/*
+@----保存上下文---------------------------------------------------------------
+@功能: 保存当前线程的上下文，但不切换,专用于进入CN_SLEEP_L3之前调用.
+@参数: running_vm，当前线程的控制块指针，即&vm->stack。
+@参数: WakeUpAddr, 唤醒后的返回地址.
+@返回:  无
+@函数原型: void __LP_BSP_AsmSaveReg(struct tagThreadVm *running_vm，
+				    bool_t (*SaveRamL3)(void),
+				    void (*EntrySleepL3)(void))
+@-----------------------------------------------------------------------------
+*/
+.text
+.align 2
+.global __LP_BSP_AsmSaveReg
+.thumb
+.thumb_func
+__LP_BSP_AsmSaveReg:
+    mrs     r3,xpsr
+    orr     r3,#0x01000000      /* xpsr的T标志读不出来，得手工置位。 */
+    push    {r3}                /* 保存xpsr */
+    push    {lr}                /* 保存PC,退出L3低功耗后,将从本函数返回地址处继续运行*/
+    push    {r0-r3,r12,lr}      /* 保存r0-r3,r12,lr */
+    push    {r4-r11}
+    str     sp,[r0]             /* 保存旧上下文栈指针到vm->stack */
+    push    {r2}
+    blx      r1                  /* 调用保存RAM到非易失存储器的函数*/
+    pop     {r2}
+    blx      r2                  /* 调用进入SLEEP3的函数 */
     bx      lr
 
 .text

@@ -19,11 +19,11 @@
 #define FRAM1_Address                 (0x54)//铁电设备的地址,根据物理地址定
 #define FRAM_MAX_ADDR                 (0x20000) //铁电大小，字节单位
 
-struct tagMutexLCB *  ptSemID_Fram0;       // IIC操作互斥标志
-struct tagMutexLCB *  ptSemID_Fram1;
+struct MutexLCB *  ptSemID_Fram0;       // IIC操作互斥标志
+struct MutexLCB *  ptSemID_Fram1;
 
-static struct tagIIC_Device pg_FRAM0_Dev;
-static struct tagIIC_Device pg_FRAM1_Dev;
+static struct IIC_Device pg_FRAM0_Dev;
+static struct IIC_Device pg_FRAM1_Dev;
 
 u32 timeout = CN_TIMEOUT_FOREVER;//2000*mS;//;100*mS
 
@@ -360,7 +360,7 @@ u32 FRAM_Write_Data_r(u8 fram_no, u16 wAddress, u8 *pbyBuf, u32 dwLen)
 // =============================================================================
 ptu32_t ModuleInit_Fram(ptu32_t para)
 {
-    struct tagIIC_Device *Dev;
+    struct IIC_Device *Dev;
     char *BusName,*DevName;
     switch(para)
     {

@@ -52,7 +52,7 @@
 
 #include "stdint.h"
 #include "stdio.h"
-#include "rsc.h"
+#include "object.h"
 #include "lock.h"
 #include "stdlib.h"
 #include "driver.h"
@@ -61,7 +61,7 @@
 #include "iicbus.h"
 #include "djyos.h"
 
-static struct tagRscNode s_tIICBusType;
+static struct Object s_tIICBusType;
 
 //ICB的成员FLAG的位标记
 #define CN_IIC_FLAG_R    (1<<0)         //读写标志位
@@ -72,10 +72,10 @@ static struct tagRscNode s_tIICBusType;
 // 参数：para,无实际意义
 // 返回：返回建立的资源结点指针，失败时返回NULL
 // =============================================================================
-struct tagRscNode *ModuleInstall_IICBus(ptu32_t Para)
+struct Object *ModuleInstall_IICBus(ptu32_t Para)
 {
-    struct tagRscNode *BusTypeIIC = NULL;
-    BusTypeIIC = DjyBus_BusTypeAdd_s("BusTypeIIC",&s_tIICBusType);
+    struct Object *BusTypeIIC = NULL;
+    BusTypeIIC = DjyBus_BusTypeAdd_s(&s_tIICBusType,"BusTypeIIC");
     if(NULL != BusTypeIIC)
         printk("BUS Type IIC Added Succeeded!\r\n");
     return BusTypeIIC;
@@ -86,23 +86,23 @@ struct tagRscNode *ModuleInstall_IICBus(ptu32_t Para)
 // 参数：NewIICParam,新增总线参数，参数说明详细请参照IIC_Param结构体
 // 返回：返回建立的资源结点指针，失败时返回NULL
 // =============================================================================
-struct tagIIC_CB *IIC_BusAdd(struct tagIIC_Param *NewIICParam)
+struct IIC_CB *IIC_BusAdd(struct IIC_Param *NewIICParam)
 {
-    struct tagIIC_CB *NewIIC;
+    struct IIC_CB *NewIIC;
     if(NULL == NewIICParam)
         goto exit_from_param;
 
     //避免重复建立同名的IIC总线
-    if(NULL != Rsc_SearchSon(&s_tIICBusType,NewIICParam->BusName))
+    if(NULL != OBJ_SearchChild(&s_tIICBusType,(const char*)(NewIICParam->BusName)))
         goto exit_from_readd;
 
-    NewIIC = (struct tagIIC_CB *)M_Malloc(sizeof(struct tagIIC_CB),0);
+    NewIIC = (struct IIC_CB *)M_Malloc(sizeof(struct IIC_CB),0);
     if(NewIIC == NULL)
         goto exit_from_malloc;
 
     //将总线结点挂接到总线类型结点的子结点
-    Rsc_AddSon(&s_tIICBusType,&NewIIC->IIC_BusNode,
-                sizeof(struct tagIIC_CB),RSC_IICBUS,NewIICParam->BusName);
+    OBJ_AddChild(&s_tIICBusType,&NewIIC->IIC_BusNode,
+                sizeof(struct IIC_CB),RSC_IICBUS,(const char*)(NewIICParam->BusName));
     if(&NewIIC->IIC_BusNode == NULL)
         goto exit_from_add_node;
 
@@ -136,7 +136,7 @@ struct tagIIC_CB *IIC_BusAdd(struct tagIIC_Param *NewIICParam)
 exit_from_iic_buf_semp:
     Lock_SempDelete(NewIIC->IIC_BusSemp);
 exit_from_iic_bus_semp:
-    Rsc_DelNode(&NewIIC->IIC_BusNode);
+    OBJ_Del(&NewIIC->IIC_BusNode);
 exit_from_add_node:
     free(NewIIC);
 exit_from_malloc:
@@ -152,18 +152,18 @@ exit_from_param:
 //       NewIIC,新增IIC控制块指针
 // 返回：返回建立的资源结点指针，失败时返回NULL
 // =============================================================================
-struct tagIIC_CB *IIC_BusAdd_s(struct tagIIC_Param *NewIICParam,struct tagIIC_CB *NewIIC)
+struct IIC_CB *IIC_BusAdd_s(struct IIC_CB *NewIIC,struct IIC_Param *NewIICParam)
 {
     if((NULL == NewIIC) || (NULL == NewIICParam))
         goto exit_from_param;
 
     //避免重复建立同名的IIC总线
-    if(NULL != Rsc_SearchSon(&s_tIICBusType,NewIICParam->BusName))
+    if(NULL != OBJ_SearchChild(&s_tIICBusType,(const char*)(NewIICParam->BusName)))
         goto exit_from_readd;
 
     //将总线结点挂接到总线类型结点的子结点
-    Rsc_AddSon(&s_tIICBusType,&NewIIC->IIC_BusNode,
-                sizeof(struct tagIIC_CB),RSC_IICBUS,NewIICParam->BusName);
+    OBJ_AddChild(&s_tIICBusType,&NewIIC->IIC_BusNode,
+                sizeof(struct IIC_CB),RSC_IICBUS,(const char*)(NewIICParam->BusName));
     if(&NewIIC->IIC_BusNode == NULL)
         goto exit_from_add_node;
 
@@ -197,7 +197,7 @@ struct tagIIC_CB *IIC_BusAdd_s(struct tagIIC_Param *NewIICParam,struct tagIIC_CB
 exit_from_iic_buf_semp:
     Lock_SempDelete(NewIIC->IIC_BusSemp);
 exit_from_iic_bus_semp:
-    Rsc_DelNode(&NewIIC->IIC_BusNode);
+    OBJ_Del(&NewIIC->IIC_BusNode);
 exit_from_add_node:
 exit_from_readd:
 exit_from_param:
@@ -210,12 +210,12 @@ exit_from_param:
 // 参数：DelIIC,删除IIC控制块指针
 // 返回：true,删除成功;false,删除失败
 // =============================================================================
-bool_t IIC_BusDelete(struct tagIIC_CB *DelIIC)
+bool_t IIC_BusDelete(struct IIC_CB *DelIIC)
 {
     bool_t result;
     if(NULL == DelIIC)
         return false;
-    if(NULL == Rsc_DelNode(&DelIIC->IIC_BusNode))
+    if(NULL == OBJ_Del(&DelIIC->IIC_BusNode))
     {
         result = false;
     }
@@ -232,12 +232,12 @@ bool_t IIC_BusDelete(struct tagIIC_CB *DelIIC)
 // 参数：DelIIC,删除IIC控制块指针
 // 返回：true,删除成功;false,删除失败
 // =============================================================================
-bool_t IIC_BusDelete_s(struct tagIIC_CB *DelIIC)
+bool_t IIC_BusDelete_s(struct IIC_CB *DelIIC)
 {
     bool_t result;
     if(NULL == DelIIC)
         return false;
-    if(NULL == Rsc_DelNode(&DelIIC->IIC_BusNode))
+    if(NULL == OBJ_Del(&DelIIC->IIC_BusNode))
     {
         result = false;
     }
@@ -253,27 +253,25 @@ bool_t IIC_BusDelete_s(struct tagIIC_CB *DelIIC)
 // 参数：BusName,查找的总线名称
 // 返回：查找的控制块结点指针，未找到时返回NULL
 // =============================================================================
-struct tagIIC_CB *IIC_BusFind(char *BusName)
+struct IIC_CB *IIC_BusFind(const char *BusName)
 {
-    return (struct tagIIC_CB*)Rsc_SearchSon(&s_tIICBusType,BusName);
+    return (struct IIC_CB*)OBJ_SearchChild(&s_tIICBusType,BusName);
 }
 
 // =============================================================================
 // 功能：在IIC总线结点上增加器件，即总线上挂接的器件，该器件属于总线结点的子结点
 // 参数：BusName,新增子器件挂接的总线名称
 //       DevName,器件名称
-//       DevAddr,器件地址，低七个比特有效，未包含读写比特，如0x50
-//       BitOfMaddrInDaddr,存储地址在器件地址的比特位数
-//       BitOfMaddr,器件存储地址的位数，未包含在器件地址的比特位
+//       DevAddr,器件地址，低7位有效，未包含读写标志位，如0x50
+//       BitOfMaddrInDaddr,存储器地址在器件地址的比特位数
+//       BitOfMaddr,器件存储地址的总位数
 // 返回：控制块结点指针，添加失败时返回NULL
-// 举例：如器件存储地址寻址空间为17个比特，即0x1FFFF,BitOfMaddrInDaddr = 1,
-//       则BitOfMaddr = 16
 // =============================================================================
-struct tagIIC_Device *IIC_DevAdd(char *BusName , char *DevName, u8 DevAddr,
+struct IIC_Device *IIC_DevAdd(const char *BusName ,const char *DevName, u8 DevAddr,
                                 u8 BitOfMaddrInDaddr, u8 BitOfMaddr)
 {
-    struct tagIIC_CB      *IIC;
-    struct tagIIC_Device *NewDev;
+    struct IIC_CB      *IIC;
+    struct IIC_Device *NewDev;
 
     //查询是否该总线存在
     IIC = IIC_BusFind(BusName);
@@ -281,11 +279,11 @@ struct tagIIC_Device *IIC_DevAdd(char *BusName , char *DevName, u8 DevAddr,
         return NULL;
 
     //避免建立同名的IIC器件
-    if(NULL != Rsc_SearchSon(&IIC->IIC_BusNode,DevName))
+    if(NULL != OBJ_SearchChild(&IIC->IIC_BusNode,DevName))
         return NULL;
 
     //为新的器件结点动态分配内存
-    NewDev = (struct tagIIC_Device *)M_Malloc(sizeof(struct tagIIC_Device),0);
+    NewDev = (struct IIC_Device *)M_Malloc(sizeof(struct IIC_Device),0);
     if(NULL == NewDev)
         return NULL;
 
@@ -293,8 +291,8 @@ struct tagIIC_Device *IIC_DevAdd(char *BusName , char *DevName, u8 DevAddr,
     NewDev->DevAddr              = DevAddr;
     NewDev->BitOfMemAddrInDevAddr = BitOfMaddrInDaddr;
     NewDev->BitOfMemAddr          = BitOfMaddr;
-    Rsc_AddSon(&IIC->IIC_BusNode,&NewDev->DevNode,
-                sizeof(struct tagIIC_Device),RSC_IIC_DEVICE,DevName);
+    OBJ_AddChild(&IIC->IIC_BusNode,&NewDev->DevNode,
+                sizeof(struct IIC_Device),RSC_IIC_DEVICE,DevName);
     if(NULL == &NewDev->DevNode)
     {
         free(NewDev);
@@ -312,24 +310,28 @@ struct tagIIC_Device *IIC_DevAdd(char *BusName , char *DevName, u8 DevAddr,
 //       NewDev,新增器件指针
 // 返回：控制块结点指针，添加失败时返回NULL
 // =============================================================================
-struct tagIIC_Device *IIC_DevAdd_s(char *BusName, char *DevName,
-                                struct tagIIC_Device *NewDev)
+struct IIC_Device *IIC_DevAdd_s(struct IIC_Device *NewDev,const char *BusName,
+                                   const char *DevName, u8 DevAddr,
+                                   u8 BitOfMaddrInDaddr, u8 BitOfMaddr)
 {
-    struct tagIIC_CB *IIC;
+    struct IIC_CB *IIC;
     //查询是否该总线存在
     IIC = IIC_BusFind(BusName);
     if((NULL == IIC) || (NULL == NewDev))
         return NULL;
 
     //避免建立同名的IIC器件
-    if(NULL != Rsc_SearchSon(&IIC->IIC_BusNode,DevName))
+    if(NULL != OBJ_SearchChild(&IIC->IIC_BusNode,DevName))
         return NULL;
 
-    Rsc_AddSon(&IIC->IIC_BusNode,&NewDev->DevNode,
-                sizeof(struct tagIIC_Device),RSC_IIC_DEVICE,DevName);
+    NewDev->DevAddr              = DevAddr;
+    NewDev->BitOfMemAddrInDevAddr = BitOfMaddrInDaddr;
+    NewDev->BitOfMemAddr          = BitOfMaddr;
+    OBJ_AddChild(&IIC->IIC_BusNode,&NewDev->DevNode,
+                sizeof(struct IIC_Device),RSC_IIC_DEVICE,DevName);
 
     printk("IIC Device %s Added Succeeded!\r\n",DevName);
-    return (struct tagIIC_Device *)&NewDev->DevNode;
+    return (struct IIC_Device *)&NewDev->DevNode;
 }
 
 // =============================================================================
@@ -337,13 +339,13 @@ struct tagIIC_Device *IIC_DevAdd_s(char *BusName, char *DevName,
 // 参数：DelDev,删除的器件指针
 // 返回：true,删除成功;false,删除失败
 // =============================================================================
-bool_t IIC_DevDelete(struct tagIIC_Device *DelDev)
+bool_t IIC_DevDelete(struct IIC_Device *DelDev)
 {
     bool_t result;
     if(NULL == DelDev)
         return false;
 
-    if(NULL == Rsc_DelNode(&DelDev->DevNode))
+    if(NULL == OBJ_Del(&DelDev->DevNode))
     {
         result = false;
     }
@@ -360,13 +362,13 @@ bool_t IIC_DevDelete(struct tagIIC_Device *DelDev)
 // 参数：DelDev,删除的器件指针
 // 返回：true,删除成功;false,删除失败
 // =============================================================================
-bool_t IIC_DevDelete_s(struct tagIIC_Device *DelDev)
+bool_t IIC_DevDelete_s(struct IIC_Device *DelDev)
 {
     bool_t result;
     if(NULL == DelDev)
         return false;
 
-    if(NULL == Rsc_DelNode(&DelDev->DevNode))
+    if(NULL == OBJ_Del(&DelDev->DevNode))
     {
         result = false;
     }
@@ -382,10 +384,10 @@ bool_t IIC_DevDelete_s(struct tagIIC_Device *DelDev)
 // 参数：DevName,器件名称
 // 返回：结点附属结构体指针
 // =============================================================================
-struct tagIIC_Device *IIC_DevFind(char *DevName)
+struct IIC_Device *IIC_DevFind(const char *DevName)
 {
     //通过IIC类型结点，向下搜索后代结点
-    return (struct tagIIC_Device*)Rsc_SearchScion(&s_tIICBusType,DevName);
+    return (struct IIC_Device*)OBJ_SearchScion(&s_tIICBusType,DevName);
 }
 
 // =============================================================================
@@ -400,10 +402,10 @@ struct tagIIC_Device *IIC_DevFind(char *DevName)
 //       timeout,超时时间，us
 // 返回：发送的字节数
 // =============================================================================
-s32  IIC_Write(struct tagIIC_Device *Dev, u32 addr,u8 *buf,u32 len,
+s32  IIC_Write(struct IIC_Device *Dev, u32 addr,u8 *buf,u32 len,
                 bool_t block_option,u32 timeout)
 {
-    struct tagIIC_CB *IIC;
+    struct IIC_CB *IIC;
     u8 DevAddr,MemAddrLen;
     u32 written=0;
     s32 result = 0;
@@ -412,23 +414,24 @@ s32  IIC_Write(struct tagIIC_Device *Dev, u32 addr,u8 *buf,u32 len,
     if(NULL == Dev)
         return CN_IIC_EXIT_PARAM_ERR;
 
-    base_time = (u32)DjyGetTime();
+    base_time = (u32)DjyGetSysTime();
     //查找该器件属于哪条总线
-    IIC = (struct tagIIC_CB *)Rsc_GetParent(&Dev->DevNode);
+    IIC = (struct IIC_CB *)OBJ_Parent(&Dev->DevNode);
     if(NULL == IIC)
         return CN_IIC_EXIT_PARAM_ERR;
     //需要等待总线空闲
     if(false == Lock_SempPend(IIC->IIC_BusSemp,timeout))
         return CN_IIC_EXIT_TIMEOUT;
 
-    rel_timeout = timeout - ((u32)DjyGetTime() - base_time);
+    rel_timeout = timeout - ((u32)DjyGetSysTime() - base_time);
     DevAddr = Dev->DevAddr |
             ((u8)(addr >> (Dev->BitOfMemAddr - Dev->BitOfMemAddrInDevAddr))
             & ~(0xFF<<Dev->BitOfMemAddrInDevAddr));
     //计算发送地址字节数
-    MemAddrLen = (Dev->BitOfMemAddr)/8 +
-            ((Dev->BitOfMemAddr - Dev->BitOfMemAddrInDevAddr)%8 ? 1:0);
-
+    //change by lst
+//    MemAddrLen = (Dev->BitOfMemAddr)/8 +
+//            ((Dev->BitOfMemAddr - Dev->BitOfMemAddrInDevAddr)%8 ? 1:0);
+    MemAddrLen = (Dev->BitOfMemAddr - Dev->BitOfMemAddrInDevAddr +7)/8;
     IIC->Flag &= ~CN_IIC_FLAG_R;
     //判断是否用轮询方式
     if((Djy_QuerySch() == false) || (IIC->pGenerateWriteStart == NULL)
@@ -470,7 +473,7 @@ s32  IIC_Write(struct tagIIC_Device *Dev, u32 addr,u8 *buf,u32 len,
     if(true == IIC->pGenerateWriteStart(IIC->SpecificFlag,DevAddr,
                                         addr,MemAddrLen,len,IIC->IIC_BusSemp))
     {
-        rel_timeout = (u32)DjyGetTime();
+        rel_timeout = (u32)DjyGetSysTime();
         if(rel_timeout - base_time < timeout)
             rel_timeout = timeout - (rel_timeout - base_time);
         else
@@ -531,9 +534,9 @@ s32  IIC_Write(struct tagIIC_Device *Dev, u32 addr,u8 *buf,u32 len,
 //       timeout,超时时间，us
 // 返回：接收的字节数
 // =============================================================================
-s32  IIC_Read(struct tagIIC_Device *Dev,u32 addr,u8 *buf,u32 len,u32 timeout)
+s32  IIC_Read(struct IIC_Device *Dev,u32 addr,u8 *buf,u32 len,u32 timeout)
 {
-    struct tagIIC_CB *IIC;
+    struct IIC_CB *IIC;
     u8 DevAddr,MemAddrLen;
     s32 result = len;
     u32 base_time = 0,rel_timeout = timeout;
@@ -541,9 +544,9 @@ s32  IIC_Read(struct tagIIC_Device *Dev,u32 addr,u8 *buf,u32 len,u32 timeout)
     if(NULL == Dev)
         return CN_IIC_EXIT_PARAM_ERR;
 
-    base_time = (u32)DjyGetTime();
+    base_time = (u32)DjyGetSysTime();
     //查找该器件属于哪条总线
-    IIC = (struct tagIIC_CB *)Rsc_GetParent(&Dev->DevNode);
+    IIC = (struct IIC_CB *)OBJ_Parent(&Dev->DevNode);
     if(NULL == IIC)
         return CN_IIC_EXIT_PARAM_ERR;
 
@@ -552,13 +555,14 @@ s32  IIC_Read(struct tagIIC_Device *Dev,u32 addr,u8 *buf,u32 len,u32 timeout)
 
     Lock_SempPend(IIC->IIC_BufSemp,0);                          //相当于清二值信号量
 
-    rel_timeout = timeout - ((u32)DjyGetTime() - base_time);
+    rel_timeout = timeout - ((u32)DjyGetSysTime() - base_time);
     DevAddr = Dev->DevAddr |
             ((u8)(addr >> (Dev->BitOfMemAddr - Dev->BitOfMemAddrInDevAddr))
             & ~(0xFF<<Dev->BitOfMemAddrInDevAddr));
     //计算发送地址字节数
-    MemAddrLen = (Dev->BitOfMemAddr)/8 +
-            ((Dev->BitOfMemAddr - Dev->BitOfMemAddrInDevAddr)%8 ? 1:0);
+//    MemAddrLen = (Dev->BitOfMemAddr)/8 +
+//            ((Dev->BitOfMemAddr - Dev->BitOfMemAddrInDevAddr)%8 ? 1:0);
+    MemAddrLen = (Dev->BitOfMemAddr - Dev->BitOfMemAddrInDevAddr +7)/8;
 
     IIC->Flag |= CN_IIC_FLAG_R;
     //判断是否用轮询方式
@@ -588,7 +592,7 @@ s32  IIC_Read(struct tagIIC_Device *Dev,u32 addr,u8 *buf,u32 len,u32 timeout)
     if(IIC->pGenerateReadStart(IIC->SpecificFlag,DevAddr,addr,MemAddrLen,
                                 len,IIC->IIC_BufSemp))
     {
-        rel_timeout = (u32)DjyGetTime();
+        rel_timeout = (u32)DjyGetSysTime();
         if(rel_timeout - base_time < timeout)           //未超时
         {
             rel_timeout = timeout - (rel_timeout - base_time);
@@ -620,7 +624,7 @@ s32  IIC_Read(struct tagIIC_Device *Dev,u32 addr,u8 *buf,u32 len,u32 timeout)
 //       len,读数据长度，字节单位
 // 返回：字节数
 // =============================================================================
-s32 IIC_PortRead( struct tagIIC_CB *IIC,u8 *buf,u32 len)
+s32 IIC_PortRead( struct IIC_CB *IIC,u8 *buf,u32 len)
 {
     u32 Result = 0,RingLen,CpyLen;
     u8 *pbuf;
@@ -665,7 +669,7 @@ s32 IIC_PortRead( struct tagIIC_CB *IIC,u8 *buf,u32 len)
 //       len,数据长度，字节单位
 // 返回：字节数
 // =============================================================================
-s32 IIC_PortWrite(struct tagIIC_CB *IIC,u8 *buf,u32 len)
+s32 IIC_PortWrite(struct IIC_CB *IIC,u8 *buf,u32 len)
 {
     u32 cpylen = 0;
 
@@ -691,14 +695,14 @@ s32 IIC_PortWrite(struct tagIIC_CB *IIC,u8 *buf,u32 len)
 //       data1,data2,参数数据，根据具体命令定义不同
 // 返回：-1=参数检查出错,否则由cmd决定,若需要调用用户的pBusCtrl,则是该函数返回值
 // =============================================================================
-s32 IIC_BusCtrl(struct tagIIC_Device *Dev,u32 cmd,ptu32_t data1,ptu32_t data2)
+s32 IIC_BusCtrl(struct IIC_Device *Dev,u32 cmd,ptu32_t data1,ptu32_t data2)
 {
-    struct tagIIC_CB *IIC;
+    struct IIC_CB *IIC;
     s32 result = 1;
     if(NULL == Dev)
         return -1;
 
-    IIC = (struct tagIIC_CB *)Rsc_GetParent(&Dev->DevNode);
+    IIC = (struct IIC_CB *)OBJ_Parent(&Dev->DevNode);
     if(NULL == IIC)
         return -1;
 
@@ -716,7 +720,7 @@ s32 IIC_BusCtrl(struct tagIIC_Device *Dev,u32 cmd,ptu32_t data1,ptu32_t data2)
     case CN_IIC_SET_POLL:
         IIC->Flag |=  CN_IIC_FLAG_POLL;
         break;
-    case CN_IIC_SET_UNPOLL:
+    case CN_IIC_SET_INT:
         IIC->Flag &= ~CN_IIC_FLAG_POLL;
         break;
     default:
@@ -732,7 +736,7 @@ s32 IIC_BusCtrl(struct tagIIC_Device *Dev,u32 cmd,ptu32_t data1,ptu32_t data2)
 //       ErrNo,发生错误序号，如未收到ACK信号CN_IIC_NO_ACK_ERR
 // 返回：执行结果，CN_EXIT_NO_ERR为无错误
 // =============================================================================
-s32 IIC_ErrPop(struct tagIIC_CB *IIC, u32 ErrNo)
+s32 IIC_ErrPop(struct IIC_CB *IIC, u32 ErrNo)
 {
     if(NULL == IIC)
         return CN_IIC_EXIT_PARAM_ERR;

@@ -18,8 +18,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "multiplex.h"
 #include <windows.h>
+#include "multiplex.h"
 
 #define     cn_cmd_connect_recv_evtt    0
 #define     cn_cmd_disconnect_recv_evtt 1
@@ -28,7 +28,7 @@ u32 cmd_int(ufast_t uart_int_line);
 u32 WINAPI win32_scanf_pro( LPVOID lpParameter );
 ptu32_t ModuleInstall_Cmd(ptu32_t para);
 bool_t cmd_MultiplexAdd (ptu32_t PrivateTag,
-                         struct tagMultiplexSetsCB *MultiplexSets,
+                         struct MultiplexSetsCB *MultiplexSets,
                          u32 DevAlias,
                          u32 SensingBit);
 ptu32_t cmd_DriverWrite(ptu32_t PrivateTag,u8 *buf,

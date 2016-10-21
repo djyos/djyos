@@ -1,0 +1,46 @@
+////////////////////////////////////////////////////////////////////
+//   Memory configuration file for P1020RDB
+////////////////////////////////////////////////////////////////////
+//
+//	
+//   Memory Map
+//
+//	0x00000000  0x3FFFFFFF  DDR3	  			1G 
+//   0x80000000  0xBFFFFFFF  PEX1,PEX2   		1G
+//  0xE0000000  0xE00FFFFF  CCSR   				1M
+//  0xEFC00000  0xEFC3FFFF  PEX I/O     		256K
+//  0xEFA00000	0xEFA3FFFF  Board CPLD          256K
+//  0xEFF00000	0xEFF0FFFF  LocalBus NAND FLASH	64K
+//  0xFF000000	0xFFFFFFFF  LocalBus NOR FLASH	16M		
+//
+//
+////////////////////////////////////////////////////////////////////
+
+
+
+reservedchar 0x21	// display '!' for invalid reads
+
+
+// Mark as reserved the gaps between the above valid memory ranges
+
+reserved v:0x40000000 v:0x7FFFFFFF
+reserved p:0x40000000 p:0x7FFFFFFF
+reserved v:0xC0000000 v:0xDFFFFFFF
+reserved p:0xC0000000 p:0xDFFFFFFF
+reserved v:0xE0100000 v:0xEF9FFFFF
+reserved p:0xE0100000 p:0xEF9FFFFF
+reserved v:0xEFA40000 v:0xEFEFFFFF
+reserved p:0xEFA40000 p:0xEFEFFFFF
+reserved v:0xEFF40000 v:0xFEFFFFFF
+reserved p:0xEFF40000 p:0xFEFFFFFF
+
+range	v:0xE003E400 v:0xE003E41F 8 Write	// KEUKDn registers
+range	p:0xE003E400 p:0xE003E41F 8 Write	// KEUKDn registers
+
+// Below are some valid memory ranges defined in MMU.
+// However, because the default init file does not fully initializes the underlying PEX controllers,
+// we disallow the debugger accessing these ranges
+
+reserved v:0x80000000	v:0xBFFFFFFF
+reserved p:0x80000000	p:0xBFFFFFFF
+

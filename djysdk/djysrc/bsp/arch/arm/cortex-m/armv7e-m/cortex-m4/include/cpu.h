@@ -64,17 +64,17 @@
 extern "C" {
 #endif
 
-struct  tagThreadVm *__CreateThread(struct  tagEventType *evtt,u32 *stack_size);
-struct  tagThreadVm *__CreateStaticThread(struct  tagEventType *evtt,void *Stack,
+struct ThreadVm *__CreateThread(struct EventType *evtt,u32 *stack_size);
+struct ThreadVm *__CreateStaticThread(struct EventType *evtt,void *Stack,
                                     u32 StackSize);
 void *__asm_reset_thread(ptu32_t (*thread_routine)(void),
-                           struct  tagThreadVm  *vm);
+                           struct ThreadVm  *vm);
 void __asm_reset_switch(ptu32_t (*thread_routine)(void),
-                           struct  tagThreadVm *new_vm,struct  tagThreadVm *old_vm);
-void __asm_start_thread(struct  tagThreadVm  *new_vm);
-void __asm_turnto_context(struct  tagThreadVm  *new_vm);
-void __asm_switch_context(struct  tagThreadVm *new_vm,struct  tagThreadVm *old_vm);
-void __asm_switch_context_int(struct  tagThreadVm *new_vm,struct  tagThreadVm *old_vm);
+                           struct ThreadVm *new_vm,struct ThreadVm *old_vm);
+void __asm_start_thread(struct ThreadVm  *new_vm);
+void __asm_turnto_context(struct ThreadVm  *new_vm);
+void __asm_switch_context(struct ThreadVm *new_vm,struct ThreadVm *old_vm);
+void __asm_switch_context_int(struct ThreadVm *new_vm,struct ThreadVm *old_vm);
 
 #ifdef __cplusplus
 }

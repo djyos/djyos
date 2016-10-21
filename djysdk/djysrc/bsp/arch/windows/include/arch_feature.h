@@ -66,9 +66,6 @@ extern "C" {
 typedef bool_t atom_high_t;
 typedef bool_t atom_low_t;
 
-//线程上下文中，用来保存寄存器所需要的栈，windows版本不关心
-#define CN_REGISTER_STACK     0
-
 //定义一些与对齐相关的宏
 #define CN_MEM_ALIGN            1    //如果目标系统没有对齐要求，改为0
 #define CN_ALIGN_SIZE           8    //arm(含cm3)要求8字节对齐

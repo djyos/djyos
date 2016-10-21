@@ -71,7 +71,7 @@
 #define   DISMODE  1
 void start_menu(void)
 {
-    struct tagInputDeviceMsg input_msg;
+    struct InputDeviceMsg input_msg;
     s32 touch_x=0, touch_y=0;
     struct coordinate_point   mypoint={0,0};
     u8  keyvalue;
@@ -79,12 +79,12 @@ void start_menu(void)
   s32 height,width;
   struct menu_item      *tempmenuitem;
   bool_t   result;
-  struct tagGkWinRsc *desktop;
-  struct tagGkWinRsc testwin;
+  struct GkWinRsc *desktop;
+  struct GkWinRsc testwin;
   struct menu_item   *menutreenode;
   struct menu_displaypara  *operatingDispara;
   //设置鼠标焦点
-//  Stddev_SetFocusDefault(Djy_MyEvttId());     //todo:设置焦点的函数变了。
+//  HmiIn_SetFocusDefault(Djy_MyEvttId());     //todo:设置焦点的函数变了。
 
   //开始测试菜单项
   printf("begin to test the menuitem tree!\n");
@@ -129,22 +129,22 @@ void start_menu(void)
     for ( ; ; )
     {
         //printf("---in main --3\n");
-//        input_msg = (struct tagInputDeviceMsg *)Djy_GetEventPara(NULL,NULL);
-        if(Stddev_ReadDefaultMsg(&input_msg,20*mS))
+//        input_msg = (struct InputDeviceMsg *)Djy_GetEventPara(NULL,NULL);
+        if(HmiIn_ReadDefaultMsg(&input_msg,20*mS))
         {
             //查看是否单点触摸屏
-            if(input_msg->input_type == EN_STDIN_SINGLE_TOUCH)
+            if(input_msg->input_type == EN_HMIIN_SINGLE_TOUCH)
             {
                 //除以放大倍数
-                touch_x = input_msg->input_data.tagSingleTouchMsg.x/X_SCALE;
-                touch_y = input_msg->input_data.tagSingleTouchMsg.y/Y_SCALE;
+                touch_x = input_msg->input_data.SingleTouchMsg.x/CN_LCD_X_SCALE;
+                touch_y = input_msg->input_data.SingleTouchMsg.y/CN_LCD_Y_SCALE;
 
                 mypoint.x=touch_x;
                 mypoint.y=touch_y;
 
                 operatingDispara = menumousetouch_respond(operatingDispara,&mypoint);
             }
-            else if(input_msg->input_type == EN_STDIN_KEYBOARD)//查看是否键盘
+            else if(input_msg->input_type == EN_HMIIN_KEYBOARD)//查看是否键盘
             {
                 keyvalue= input_msg->input_data.key_board.key_value[0];
                 //按键松开才确认，因此先判断是否断码,不是断码，表示按键按下

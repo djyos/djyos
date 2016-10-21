@@ -44,32 +44,34 @@
 //-----------------------------------------------------------------------------
 #ifndef __SHELL_H__
 #define __SHELL_H__
-#include "rsc.h"
+#include "object.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define CN_SHELL_CMD_LIMIT 255 //shell 命令串长度限制
 
-struct tagShellCmdTab
+struct ShellCmdTab
 {
     char *cmd;              //命令串
-    bool_t (*shell_cmd_func)(char *param);  //执行函数
+    bool_t (*shell_cmd_func)(char *buf);  //执行函数
     char *help_hint;        //帮助提示
     char *help_detailed;    //详细帮助
 };
 
-struct tagShellCmdRsc
+struct ShellCmdRsc
 {
-    struct tagRscNode cmd_node;
-    bool_t (*shell_cmd_func)(char *param);
+    struct Object cmd_node;
+    bool_t (*shell_cmd_func)(char *buf);
     char *help_hint;        //帮助提示
     char *help_detailed;    //详细帮助
 };
-bool_t Sh_InstallCmd(struct tagShellCmdTab const *cmd_tab,
-                    struct tagShellCmdRsc *cmd_rsc,u32 cmd_num);
-char *Sh_GetItem(char *buf,char **next);
-char *Sh_GetWord(char *buf,char **next);
+bool_t Sh_InstallCmd(struct ShellCmdTab const *cmd_tab,
+                    struct ShellCmdRsc *cmd_rsc,u32 cmd_num);
+ptu32_t ModuleInstall_Sh(ptu32_t para);
+void Sh_PrintWorkPathSet(void);
+u32 sh_uninstall_cmd_bytab(struct ShellCmdTab const *cmd_tab,u32 cmd_num);
+bool_t Sh_UninstallCmdByName(char *param);
 
 extern void (*fng_pPrintWorkPath)(void);
 extern bool_t (*fng_pCD_PTT)(const char *PTT_Name);

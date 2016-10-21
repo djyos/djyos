@@ -58,11 +58,11 @@ extern "C" {
 #define CN_PALETTE_SIZE         32
 
 //以下是djyos风格的一些定义，这样可以直接使用djyos提供的初始化文件。
-#define LCD_XSIZE            CN_LCD_XSIZE
-#define LCD_YSIZE            CN_LCD_YSIZE
+#define CN_LCD_XSIZE            CN_LCD_XSIZE
+#define CN_LCD_YSIZE            CN_LCD_YSIZE
 #define cn_lcd_line_size        CN_LCD_LINE_SIZE
 #define cn_frame_buffer_size    CN_FRAME_BUFFER_SIZE
-#define cn_lcd_pf               CN_LCD_PF
+#define CN_LCD_PIXEL_FORMAT               CN_LCD_PF
 
 void Lcd_BL_On(void);
 void Lcd_BL_Off(void);

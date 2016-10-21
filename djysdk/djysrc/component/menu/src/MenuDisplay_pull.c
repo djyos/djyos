@@ -71,7 +71,7 @@ void drawstatecontent_pull_rightside(struct menu_displaypara  *dispara)
     u8  numTotal=0;
     s32 lengthT=0;
     s32 LengthE=0;
-    struct tagRectangle  state_area={0,0,0,0};
+    struct Rectangle  state_area={0,0,0,0};
     numOp=CalMenuitemNumber(dispara->OperatingMenuitem);
     numTotal=CalMenuitemNum(dispara->FVisualMenuitem);
     dispara=getmainmenudispara(dispara);
@@ -112,7 +112,7 @@ void drawstatecontent_pull_rightside(struct menu_displaypara  *dispara)
 //void DrawStateContentBottom(struct menu_displaypara  *dispara)
 //{
 //
-//       struct tagRectangle  state_area={0,0,0,0};
+//       struct Rectangle  state_area={0,0,0,0};
 //
 //
 //     u8  numOp=0;

@@ -117,5 +117,36 @@ const tagElbcCfg  tgP1020RDB_ElbcCfg[] =
 };
 const int gElbcCfgItem = ARRAY_SIZE(tgLawConfig);
 
+#define CN_CACHEL2_BASEADDR          (CN_CCSR_NEWADDR_V + 0x20000)
+#define CN_CACHEL2_L2CTL             (CN_CACHEL2_BASEADDR)
+#define CN_CACHEL2_L2CTL_L2E         (1<<31)
+#define CN_CACHEL2_L2CTL_L2I         (1<<30)
 
+/*
+@-------------------------------------------------------------------------------
+@function:initial the l2 cache
+@para:void
+@return:void
+@-------------------------------------------------------------------------------
+*/
+void Cache_InitL2(void)
+{
+	u32 value;
+	u32 *addr;
+	
+	addr = (u32 *)CN_CACHEL2_L2CTL;
+	value = *(u32 *)(addr);
+	
+	value = CN_CACHEL2_L2CTL_L2E;
+	*(u32 *)(addr)= value;
+	
+	value |= CN_CACHEL2_L2CTL_L2I;
+	*(u32 *)(addr)= value;
+
+	while(value & CN_CACHEL2_L2CTL_L2I)
+	{
+		value = *(u32 *)(addr);
+	}
+	return;
+}
 

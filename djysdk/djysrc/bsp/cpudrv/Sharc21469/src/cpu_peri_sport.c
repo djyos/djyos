@@ -426,7 +426,7 @@ bool_t InitSportDMA(u32 SportNum,u8* pData,u32 DataLen)
 //返回：成功返回true，失败返回false。
 // ------------------------------------------------------------------------
 
-u32 SPORT1_TX_IRQ(ufast_t ufl_line)
+u32 SPORT1_TX_IRQ(ptu32_t ufl_line)
 {
 
     SPORT1_Send_Flag=true;
@@ -441,7 +441,7 @@ u32 SPORT1_TX_IRQ(ufast_t ufl_line)
 //返回：成功返回true，失败返回false。
 // ------------------------------------------------------------------------
 
-u32 SPORT1_RX_IRQ(ufast_t ufl_line)
+u32 SPORT1_RX_IRQ(ptu32_t ufl_line)
 {
     SPORT1_Recv_Flag=true;
     //DisableSport(1);
@@ -454,7 +454,7 @@ u32 SPORT1_RX_IRQ(ufast_t ufl_line)
 //参数：中断号。
 //返回：成功返回true，失败返回false。
 // ------------------------------------------------------------------------
-u32 SPORT0_RX_IRQ(ufast_t ufl_line)
+u32 SPORT0_RX_IRQ(ptu32_t ufl_line)
 {
     SPORT0_Recv_Flag=true;
     //DisableSport(0);
@@ -468,7 +468,7 @@ u32 SPORT0_RX_IRQ(ufast_t ufl_line)
 //参数：中断号。
 //返回：成功返回true，失败返回false。
 // ------------------------------------------------------------------------
-u32 SPORT0_TX_IRQ(ufast_t ufl_line)
+u32 SPORT0_TX_IRQ(ptu32_t ufl_line)
 {
     SPORT0_Send_Flag=true;
     //DisableSport(0);
@@ -487,6 +487,7 @@ bool_t Sport_Interrupt_Init(u32 SportNum,u32 TransMode)
 {
      if(SportNum==0)
         {
+        Int_Register(cn_int_line_SP0I);
         if(TransMode==0)
             {
              Int_IsrConnect(cn_int_line_SP0I,SPORT0_TX_IRQ);
@@ -503,6 +504,7 @@ bool_t Sport_Interrupt_Init(u32 SportNum,u32 TransMode)
         }
      else if (SportNum==1)
         {
+        Int_Register(cn_int_line_SP1I);
         if(TransMode==0)
             {
              Int_IsrConnect(cn_int_line_SP1I,SPORT1_TX_IRQ);

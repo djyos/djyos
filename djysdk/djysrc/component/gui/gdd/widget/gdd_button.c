@@ -60,16 +60,23 @@
 //   修改说明: 原始版本
 //------------------------------------------------------
 #include    "gdd.h"
-#include    "../include/gdd_private.h"
+#include    <gui/gdd/gdd_private.h>
+#include    <widget.h>
+
 
 /*============================================================================*/
 
-static  int _get_button_type(HWND hwnd)
+static  s32 _get_button_type(HWND hwnd)
 {
     return hwnd->Style&BS_TYPE_MASK;
 }
 
-static  void button_paint(MSG *pMsg)
+//----按钮绘制函数-------------------------------------------------------------
+//功能：这是按钮控件的MSG_PAINT消息响应函数
+//参数：pMsg，消息指针
+//返回：固定true
+//-----------------------------------------------------------------------------
+static  bool_t ButtonPaint(struct WindowMsg *pMsg)
 {
     HWND hwnd;
     HDC hdc;
@@ -81,8 +88,12 @@ static  void button_paint(MSG *pMsg)
     {
         GetClientRect(hwnd,&rc);
 
-
-        if(hwnd->Style&BS_PUSHED)
+        if(hwnd->Style&WS_DISABLE)
+        {
+            FillRect(hdc,&rc);
+            OffsetRect(&rc,1,1);
+        }
+        else if(hwnd->Style&BS_PUSHED)
         {
             SetTextColor(hdc,RGB(255,255,255));
 
@@ -96,29 +107,29 @@ static  void button_paint(MSG *pMsg)
             switch(hwnd->Style&BS_SURFACE_MASK)
             {
                 case    BS_NICE:
-                        GradientFillRect(hdc,&rc,
-                                RGB(210,210,210),RGB(150,150,150),GFILL_U_D);
-                        break;
+                    GradientFillRect(hdc,&rc,
+                            RGB(210,210,210),RGB(150,150,150),CN_FILLRECT_MODE_UD);
+                    break;
 
                 case    BS_SIMPLE:
-                        SetDrawColor(hdc,RGB(220,220,220));
-                        DrawLine(hdc,0,0,0,RectH(&rc)-1); //L
-                        DrawLine(hdc,0,0,RectW(&rc)-1,0);   //U
+                    SetDrawColor(hdc,RGB(220,220,220));
+                    DrawLine(hdc,0,0,0,RectH(&rc)-1); //L
+                    DrawLine(hdc,0,0,RectW(&rc)-1,0);   //U
 
-                        SetDrawColor(hdc,RGB(80,80,80));
-                        DrawLine(hdc,RectW(&rc)-1,0,RectW(&rc)-1,RectH(&rc)-1); //R
-                        DrawLine(hdc,0,RectH(&rc)-1,RectW(&rc)-1,RectH(&rc)-1); //D
+                    SetDrawColor(hdc,RGB(80,80,80));
+                    DrawLine(hdc,RectW(&rc)-1,0,RectW(&rc)-1,RectH(&rc)-1); //R
+                    DrawLine(hdc,0,RectH(&rc)-1,RectW(&rc)-1,RectH(&rc)-1); //D
 
-                        InflateRect(&rc,-1,-1);
-                        SetFillColor(hdc,RGB(150,150,150));
-                        FillRect(hdc,&rc);
-                        break;
+                    InflateRect(&rc,-1,-1);
+                    SetFillColor(hdc,RGB(150,150,150));
+                    FillRect(hdc,&rc);
+                    break;
 
                 case    BS_FLAT:
                 default:
-                        SetFillColor(hdc,RGB(140,140,140));
-                        FillRect(hdc,&rc);
-                        break;
+                    SetFillColor(hdc,RGB(140,140,140));
+                    FillRect(hdc,&rc);
+                    break;
 
             }
 
@@ -128,105 +139,112 @@ static  void button_paint(MSG *pMsg)
         DrawText(hdc,hwnd->Text,-1,&rc,DT_VCENTER|DT_CENTER);
         EndPaint(hwnd,hdc);
     }
-
-
+    return true;
 }
 
-u32 button_proc(MSG *pMsg)
+//----左键按下响应函数---------------------------------------------------------
+//功能：略
+//参数：pMsg，消息指针
+//返回：固定true
+//-----------------------------------------------------------------------------
+static  bool_t ButtonL_Down(struct WindowMsg *pMsg)
 {
     HWND hwnd;
-    RECT rc;
 
     hwnd =pMsg->hwnd;
-    switch(pMsg->Code)
+    switch(_get_button_type(hwnd))
     {
-        case    MSG_CREATE:
-                GetWindowRect(hwnd,&rc);
-                printf("btn[%04XH]: MSG_CREATE.\r\n",hwnd->WinId);
-                return 1;
-                ////
-        case    MSG_LBUTTON_DOWN:
-                {
-//                    int x,y;
-//                    x =LO16(pMsg->Param2);
-//                    y =HI16(pMsg->Param2);
-                    switch(_get_button_type(hwnd))
-                    {
-                        case    BS_NORMAL:  //常规按钮
-                                hwnd->Style |= BS_PUSHED;
-                                SendMessage(GetParent(hwnd),MSG_NOTIFY,(BTN_DOWN<<16)|(hwnd->WinId),(ptu32_t)hwnd);
-                                break;
-                                ////
-                        case    BS_HOLD:    //自锁按钮
-                                hwnd->Style ^= BS_PUSHED;
-                                if(hwnd->Style&BS_PUSHED)
-                                {
-                                    SendMessage(GetParent(hwnd),MSG_NOTIFY,(BTN_DOWN<<16)|(hwnd->WinId),(ptu32_t)hwnd);
-                                }
-                                else
-                                {
-                                    SendMessage(GetParent(hwnd),MSG_NOTIFY,(BTN_UP<<16)|(hwnd->WinId),(ptu32_t)hwnd);
-                                }
-                                break;
-                                ////
-
-                    }
-
-                    InvalidateWindow(hwnd);
-                }
-                break;
-                ////
-        case    MSG_LBUTTON_UP:
-                {
-//                    int x,y;
-//                    x =LO16(pMsg->Param2);
-//                    y =HI16(pMsg->Param2);
-                    switch(_get_button_type(hwnd))
-                    {
-                        case    BS_NORMAL:
-                                hwnd->Style &= ~BS_PUSHED;
-                                SendMessage(GetParent(hwnd),MSG_NOTIFY,(BTN_UP<<16)|(hwnd->WinId),(ptu32_t)hwnd);
-                                break;
-                                ////
-                        case    BS_HOLD:
-                                break;
-                                ////
-
-                    }
-                    InvalidateWindow(hwnd);
-
-                }
-                break;
-                ////
-        case    MSG_MOUSE_MOVE:
-                {
-//                    int x,y;
-//                    x =LO16(pMsg->Param2);
-//                    y =HI16(pMsg->Param2);
-                    //printf("btn: MSG_MOUSE_MOVE: %d,%d\r\n",x,y);
-                }
-                break;
-                ////
-
-        case    MSG_PAINT:
-            //  printf("btn[%04XH]: MSG_PAINT.\r\n",hwnd->WinId);
-                button_paint(pMsg);
-                return 1;
-                ////
-
-        case    MSG_DESTROY:
-                printf("btn[%04XH]: MSG_DESTROY.\r\n",hwnd->WinId);
-                return 1;
-                ////
-
-        default:
-                return DefWindowProc(pMsg);
+        case    BS_NORMAL:  //常规按钮
+            hwnd->Style |= BS_PUSHED;
+//          InvalidateWindow(hwnd,FALSE);   //父窗口消息处理可能导致按钮被删除，
+//                                          //InvalidateWindow不能在SendMessage之后调用
+            SendMessage(Gdd_GetWindowParent(hwnd),MSG_NOTIFY,(BTN_DOWN<<16)|(hwnd->WinId),(ptu32_t)hwnd);
+            break;
+            ////
+        case    BS_HOLD:    //自锁按钮
+            hwnd->Style ^= BS_PUSHED;
+            if(hwnd->Style&BS_PUSHED)
+            {
+                PostMessage(Gdd_GetWindowParent(hwnd),MSG_NOTIFY,(BTN_DOWN<<16)|(hwnd->WinId),(ptu32_t)hwnd);
+            }
+            else
+            {
+                PostMessage(Gdd_GetWindowParent(hwnd),MSG_NOTIFY,(BTN_UP<<16)|(hwnd->WinId),(ptu32_t)hwnd);
+            }
+            break;
+            ////
 
     }
-    return 0;
+    InvalidateWindow(hwnd,FALSE);   //父窗口消息处理可能导致按钮被删除，
+                                    //InvalidateWindow不能在SendMessage之后调用
 
+
+    return true;
 }
-/*============================================================================*/
+
+//----左键弹起响应函数---------------------------------------------------------
+//功能：略
+//参数：pMsg，消息指针
+//返回：固定true
+//-----------------------------------------------------------------------------
+static  bool_t ButtonL_Up(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+
+
+    hwnd =pMsg->hwnd;
+    switch(_get_button_type(hwnd))
+    {
+        case    BS_NORMAL:
+            hwnd->Style &= ~BS_PUSHED;
+            InvalidateWindow(hwnd,TRUE);   //父窗口消息处理可能导致按钮被删除，
+                                            //InvalidateWindow不能在SendMessage之后调用
+            SendMessage(Gdd_GetWindowParent(hwnd),MSG_NOTIFY,(BTN_UP<<16)|(hwnd->WinId),(ptu32_t)hwnd);
+            break;
+            ////
+        case    BS_HOLD:
+            break;
+            ////
+
+    }
+
+    return true;
+}
+
+//默认按钮消息处理函数表，处理用户函数表中没有处理的消息。
+static struct MsgProcTable s_gButtonMsgProcTable[] =
+{
+    {MSG_LBUTTON_DOWN,ButtonL_Down},
+    {MSG_LBUTTON_UP,ButtonL_Up},
+    {MSG_PAINT,ButtonPaint}
+};
+
+static struct MsgTableLink  s_gButtonMsgLink;
+
+HWND CreateButton(  const char *Text,u32 Style,
+                    s32 x,s32 y,s32 w,s32 h,
+                    HWND hParent,u32 WinId,void *pdata,
+                    struct MsgTableLink *UserMsgTableLink)
+{
+    WINDOW *pGddWin=NULL;
+    struct MsgTableLink *Current;
+    if(UserMsgTableLink != NULL)
+    {
+        Current = UserMsgTableLink;
+        while(Current->LinkNext != NULL)
+            Current = Current->LinkNext;
+        Current->LinkNext = &s_gButtonMsgLink;
+        Current = UserMsgTableLink;
+    }
+    else
+        Current = &s_gButtonMsgLink;
+    s_gButtonMsgLink.LinkNext = NULL;
+    s_gButtonMsgLink.MsgNum = sizeof(s_gButtonMsgProcTable) / sizeof(struct MsgProcTable);
+    s_gButtonMsgLink.myTable = (struct MsgProcTable *)&s_gButtonMsgProcTable;
+    pGddWin=CreateWindow(Text,WS_CHILD|Style,x,y,w,h,hParent,WinId,CN_WINBUF_PARENT,pdata,Current);
+    return pGddWin;
+}
+
 
 
 

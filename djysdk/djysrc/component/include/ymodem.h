@@ -46,15 +46,81 @@
 
 #ifndef __YMODEM_H__
 #define __YMODEM_H__
-#include "stdint.h"
+#include <stdint.h>
+#include <stdio.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void ymodem_RegisterFn(
-                u32 (*pWriteTo)(uint32_t addr, uint8_t *buf, uint32_t len),
-                u32 (*pReadFrom)(uint32_t addr, uint8_t *buf, uint32_t len)
-                        );
+// YMODEM命令
+#define CN_YMODEM_SOH     1         //128字节起始符
+#define CN_YMODEM_STX     2         //1028字节起始符
+#define CN_YMODEM_EOT     4
+#define CN_YMODEM_ACK     6
+#define CN_YMODEM_NAK     0x15
+#define CN_YMODEM_C       0x43          //大写字母C
+#define CN_YMODEM_CAN     0x18
+
+// YMODEM数据包长度
+#define CN_YMODEM_SOH_SIZE  128        //SOH数据包大小为128字节
+#define CN_YMODEM_STX_SIZE  1024       //STX数据包大小为1024
+
+typedef enum
+{
+	 YMODEM_OK= 0,				//正常返回
+	 YMODEM_PARAM_ERR,			//参数错误
+	 YMODEM_FILE_ERR,			//文件操作错误
+	 YMODEM_TIMEOUT,			//超时返回
+	 YMODEM_MEM_ERR,			//内存不够
+	 YMODEM_CAN_TRANS,			//取消传输
+	 YMODEM_MEDIA_ERR,			//硬件错误
+	 YMODEM_UNKNOW_ERR
+}YMRESULT;
+
+typedef enum
+{
+	ENUM_YMODEM_STA_INFO = 0x80,		//YMODEM信息包
+	ENUM_YMODEM_STA_SOH,				//128字节的数据包
+	ENUM_YMODEM_STA_STX,				//1024字节的数据包
+	ENUM_YMODEM_STA_EOT,				//结束符
+	ENUM_YMODEM_STA_ZERO,				//全ZERO包
+}YMSTATUS;
+
+typedef enum
+{
+	YMODEM_FILE_NOOPS= 0xF0,			//无文件操作
+	YMODEM_FILE_OPEN ,					//打开文件标记
+	YMODEM_FILE_WRITE,					//写文件标记
+	YMODEM_FILE_READ,					//读文件标记
+	YMODEM_FILE_STAT,
+	YMODEM_FILE_CLOSE,					//关闭文件标记
+}YMFILEOPS;
+
+
+typedef struct __Ymodem
+{
+	FILE 	*File;						//file ptr for file op
+	const char    *Path;				//文件所在的路径（未含文件名）
+	char 	*FileName;				    //文件名称
+	struct MutexLCB *pYmodemMutex;		//互斥访问
+	YMFILEOPS FileOps;					//文件操作
+	u32 	FileSize;					//当前传输文件大小
+	u32 	FileCnt;					//写入文件大小计数
+	u32 	PkgNo;						//包号
+	u32 	PkgSize;					//当前包长度
+	s64 	StartTime;					//start time
+	u32 	TimeOut;					//time out
+	YMSTATUS Status;					//ymodem status
+	u8 		*FileBuf;					//file buf
+	u32 	FileBufCnt;					//文件缓冲区大小计数
+	u8 		*PkgBuf;
+	u32 	PkgBufCnt;					//PKG大小计数
+}tagYmodem;
+
+ptu32_t ModuleInstall_Ymodem(struct DjyDevice *para);
+bool_t Ymodem_UploadFile(char *Param);
+bool_t Ymodem_DownloadFile(char *Param);
+bool_t Ymodem_PathSet(const char *Path);
 
 #ifdef __cplusplus
 }

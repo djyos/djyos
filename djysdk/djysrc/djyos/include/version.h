@@ -62,7 +62,7 @@ extern "C" {
 #endif
 
 // DJYOS°æ±¾ºÅ
-#define djyos_kernel_version    "djyosV1.1.0.20150213 (2004-2015)"
+#define djyos_kernel_version    "djyosV1.2.0-"__DATE__"-" __TIME__
 
 #ifdef __cplusplus
 }

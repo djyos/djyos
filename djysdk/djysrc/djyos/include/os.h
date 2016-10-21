@@ -55,7 +55,10 @@
 #ifndef OS_H_
 #define OS_H_
 
-#include "core-cfg.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "align.h"
 #include "critical.h"
 #include "djyos.h"
@@ -65,11 +68,14 @@
 #include "msg.h"
 #include "msgqueue.h"
 #include "pool.h"
-#include "rsc.h"
+#include "object.h"
 #include "sys_init.h"
 #include "systime.h"
-#include "time.h"
 #include "version.h"
 #include "atomic.h"
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* OS_H_ */

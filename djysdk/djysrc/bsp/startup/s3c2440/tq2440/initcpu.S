@@ -70,6 +70,7 @@
 #define R1_nF   (1<<30)
 #define R1_iA   (1<<31)
 
+#define WTCON   0x53000000
 
 .cpu	arm920t
 .fpu	softvfp
@@ -93,36 +94,6 @@ _start:        /* 复位向量地址 */
     ldr		r0,=R1_I|R1_C|R1_V
     mcr     p15, 0, r0, c1, c0, 0
 	
-
-/* 初始化栈指针 */
-    mrs     r0, cpsr
-    bic     r0, r0, #SF_MODEMASK
-
-    orr		r0, r0, #SF_IRQ_BIT|SF_FIQ_BIT
-
-    orr     r1, r0, #SF_UNDEFMODE
-    msr     cpsr_cxsf, r1
-    ldr     sp, =undef_top
-
-    orr     r1, r0, #SF_ABORTMODE
-    msr     cpsr_cxsf, r1
-    ldr     sp, =abort_top
-
-    orr     r1, r0, #SF_IRQMODE
-    msr     cpsr_cxsf, r1
-    ldr     sp, =irq_top
-
-    orr     r1, r0, #SF_FIQMODE
-    msr     cpsr_cxsf, r1
-    ldr     sp, =fiq_top
-
-    orr     r1, r0, #SF_SVCMODE
-    msr     cpsr_cxsf, r1
-    ldr     sp, =svc_top
-
-    orr     r1, r0, #SF_SYSMODE
-    msr     cpsr_cxsf, r1
-      
     ldr		sp,=0x40000400 /*SDRAM还不能使用，临时使用内部SRAM作为Stack.*/
 	
     bl		Init_CpuClk
@@ -151,6 +122,38 @@ copy_isr:
 	bcc		copy_isr
 	nop
 	nop
+    //// 初始化栈指针
+    mov     r1,#SF_UNDEFMODE|SF_IRQ_BIT|SF_FIQ_BIT
+    msr     cpsr_cxsf,r1        //UndefMode
+    ldr     sp,=undef_top
+    bic     sp,sp,#0x07
+
+    mov     r1,#SF_ABORTMODE|SF_IRQ_BIT|SF_FIQ_BIT
+    msr     cpsr_cxsf,r1        //AbortMode
+    ldr     sp,=abort_top
+    bic     sp,sp,#0x07
+
+    mov     r1,#SF_IRQMODE|SF_IRQ_BIT|SF_FIQ_BIT
+    msr     cpsr_cxsf,r1        //IRQMode
+    ldr     sp,=irq_top
+    bic     sp,sp,#0x07
+
+    mov     r1,#SF_FIQMODE|SF_IRQ_BIT|SF_FIQ_BIT
+    msr     cpsr_cxsf,r1        //FIQMode
+    ldr     sp,=fiq_top
+    bic     sp,sp,#0x07
+
+    mov     r1,#SF_SVCMODE|SF_IRQ_BIT|SF_FIQ_BIT
+    msr     cpsr_cxsf,r1        //SVCMode
+    ldr     sp,=svc_top
+    bic     sp,sp,#0x07
+
+    mov     r1,#SF_SYSMODE|SF_IRQ_BIT|SF_FIQ_BIT
+    msr     cpsr_cxsf,r1        //SYSMode
+    ldr     sp,=usr_top
+    bic     sp,sp,#0x07
+    nop
+    nop
     bl      Load_Preload
 
 

@@ -68,42 +68,44 @@ extern "C" {
 #define CN_MULTIPLEX_INVALID   1   //对象不支持Multiplex功能
 #define CN_MULTIPLEX_ERROR     2   //对象虽然支持Multiplex，但拒绝了本次调用
 
-//struct tagMultiplexSetsCB中Type成员的定义:
-#define CN_MULTIPLEX_OBJECT_AND      0     //全部Multiplex对象都被触发才触发
-#define CN_MULTIPLEX_OBJECT_OR   (1<<0)    //有一个Multiplex对象被触发就触发
+//struct MultiplexSetsCB中Type成员的定义:
+//#define CN_MULTIPLEX_OBJECT_AND      0     //全部Multiplex对象都被触发才触发
+//#define CN_MULTIPLEX_OBJECT_OR   (1<<0)    //有一个Multiplex对象被触发就触发
 //#define CN_MULTIPLEX_POLL            0     //查询型，即等待应用程序查询
 //#define CN_MULTIPLEX_ASYN        (1<<1)    //异步触发型，即Sets触发时立即唤醒
 
-//struct tagMultiplexObjectCB中SensingBit成员的定义:
+//struct MultiplexObjectCB中SensingBit成员的定义:
 #define CN_MULTIPLEX_SENSINGBIT_READ      (1<<0)  //对象可读
 #define CN_MULTIPLEX_SENSINGBIT_WRITE     (1<<1)  //对象可写
 #define CN_MULTIPLEX_SENSINGBIT_ERROR     (1<<2)  //对象出错
+                                                  //
+#define CN_MULTIPLEX_SENSINGBIT_MODE      (1<<31) //模式位的位偏移
 #define CN_MULTIPLEX_SENSINGBIT_AND        0      //SensingBit中全部置位才触发
 #define CN_MULTIPLEX_SENSINGBIT_OR        (1<<31) //SensingBit中有一个置位就触发
 
-struct tagMultiplexSetsCB;
-struct tagMultiplexObjectCB;
+struct MultiplexSetsCB;
+struct MultiplexObjectCB;
 
-struct tagMultiplexSetsCB
+struct MultiplexSetsCB
 {
-    struct tagMultiplexObjectCB *ObjectQ;   // 指向未触发的对象链表
-    struct tagMultiplexObjectCB *ActiveQ;   // 指向已触发的对象链表
+    struct MultiplexObjectCB *ObjectQ;   // 指向未触发的对象链表
+    struct MultiplexObjectCB *ActiveQ;   // 指向已触发的对象链表
     u32 ObjectSum;          // 对象集中包含的对象数。
     u32 ActiveLevel;        // 触发水平，被触发对象数量达到ActiveLevel，将触发
                             // 对象集，大于ObjectSum 表示全触发
     u32 Actived;            // 已经触发的对象数
     bool_t SetsActived;     // 对象集是否已经触发。
-    struct tagSemaphoreLCB Lock;        // Type定义了异步触发模式:同步用的锁。
+    struct SemaphoreLCB Lock;        // Type定义了异步触发模式:同步用的锁。
 };
 
-struct tagMultiplexObjectCB
+struct MultiplexObjectCB
 {
-    struct tagMultiplexObjectCB *NextObject;//纵向双向链表，用于连接一个MultiplexSets
+    struct MultiplexObjectCB *NextObject;//纵向双向链表，用于连接一个MultiplexSets
                                          //包含的多个object
-    struct tagMultiplexObjectCB *PreObject;
-    struct tagMultiplexObjectCB *NextSets;  //横向单向链表，用于一个object被多个
+    struct MultiplexObjectCB *PreObject;
+    struct MultiplexObjectCB *NextSets;  //横向单向链表，用于一个object被多个
                                          //MultiplexSets包含的情况
-    struct tagMultiplexSetsCB *MySets;   //指向主控制块
+    struct MultiplexSetsCB *MySets;      //指向主控制块
     ptu32_t ObjectID;                    //被MultiplexSets等待的对象
     u32 PendingBit;                      //对象中已经触发的bit
     u32 SensingBit;                      //敏感位标志，共31bit
@@ -113,14 +115,14 @@ struct tagMultiplexObjectCB
 };
 
 ptu32_t ModuleInstall_Multiplex(ptu32_t para);
-struct tagMultiplexSetsCB *Multiplex_Creat(u32 ActiveLevel);
-bool_t Multiplex_AddObject(struct tagMultiplexSetsCB  *Sets,
-                    struct tagMultiplexObjectCB **ObjectHead,
+struct MultiplexSetsCB *Multiplex_Creat(u32 ActiveLevel);
+bool_t Multiplex_AddObject(struct MultiplexSetsCB  *Sets,
+                    struct MultiplexObjectCB **ObjectHead,
                     u32 ObjectStatus,ptu32_t ObjectID, u32 SensingBit);
-bool_t Multiplex_DelObject(struct tagMultiplexSetsCB  *Sets,
-               struct tagMultiplexObjectCB **ObjectHead);
-bool_t Multiplex_Set(struct tagMultiplexObjectCB *ObjectHead,u32 Status);
-ptu32_t Multiplex_Wait( struct tagMultiplexSetsCB *Sets,u32 *Status,u32 Timeout);
+bool_t Multiplex_DelObject(struct MultiplexSetsCB  *Sets,
+               struct MultiplexObjectCB **ObjectHead);
+bool_t Multiplex_Set(struct MultiplexObjectCB *ObjectHead,u32 Status);
+ptu32_t Multiplex_Wait( struct MultiplexSetsCB *Sets,u32 *Status,u32 Timeout);
 
 #ifdef __cplusplus
 }

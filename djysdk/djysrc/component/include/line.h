@@ -61,7 +61,7 @@
 extern "C" {
 #endif
 
-struct tagLineBuf
+struct LineBuf
 {
     ucpu_t    current;      //缓冲区中的字节数/当前指针
     ucpu_t    limit;        //缓冲区最大长度,元素个数.
@@ -69,18 +69,18 @@ struct tagLineBuf
                             //参数一致,djyos不做检查.
 };
 
-void Line_Init(struct tagLineBuf *line, u8 *buf, u32 len);
-u32 Line_Capacity(struct tagLineBuf *line);
-u32 Line_SkipTail(struct tagLineBuf *line,u32 len);
-u32 Line_Write(struct tagLineBuf *line,u8 *buffer,u32 len);
-u32 Line_Read(struct tagLineBuf *line,u8 *buffer);
-u8 *Line_GetBuf(struct tagLineBuf *line);
-u32    Line_Check(struct tagLineBuf *line);
-bool_t   Line_IsEmpty(struct tagLineBuf *line);
-bool_t   Line_IsFull(struct tagLineBuf *line);
-void    Line_Flush(struct tagLineBuf *line);
-u32 Line_SearchCh(struct tagLineBuf *line, char c);
-u32 Line_SearchStr(struct tagLineBuf *line, char *string,u32 str_len);
+void Line_Init(struct LineBuf *line, u8 *buf, u32 len);
+u32 Line_Capacity(struct LineBuf *line);
+u32 Line_SkipTail(struct LineBuf *line,u32 len);
+u32 Line_Write(struct LineBuf *line,u8 *buffer,u32 len);
+u32 Line_Read(struct LineBuf *line,u8 *buffer);
+u8 *Line_GetBuf(struct LineBuf *line);
+u32    Line_Check(struct LineBuf *line);
+bool_t   Line_IsEmpty(struct LineBuf *line);
+bool_t   Line_IsFull(struct LineBuf *line);
+void    Line_Flush(struct LineBuf *line);
+u32 Line_SearchCh(struct LineBuf *line, char c);
+u32 Line_SearchStr(struct LineBuf *line, char *string,u32 str_len);
 
 #ifdef __cplusplus
 }

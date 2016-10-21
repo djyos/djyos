@@ -54,7 +54,7 @@
 #include "timer_hard.h"
 #include <cdef21469.h>
 #include <def21489.h>
-#include "config-prj.h"
+#include "misc_config.h"
 #include "board_config.h"
 #include "int.h"
 #include "cpu.h"
@@ -68,7 +68,7 @@
 
 
 //各个定时器芯片的定时器应该有自己的句柄
-struct tagGPTimerHandle
+struct GPTimerHandle
 {
     u32     timerno;          //定时器号
     u32     irqline;          //中断号
@@ -77,7 +77,7 @@ struct tagGPTimerHandle
 };
 
 
-static struct tagGPTimerHandle  s_tGPTimerHandle[2];
+static struct GPTimerHandle  s_tGPTimerHandle[2];
 
 static u32 sgHaltimerIrq[2]={cn_int_line_GPTMR0I,cn_int_line_GPTMR1I};
 
@@ -147,7 +147,7 @@ bool_t __GPTimer_Counter2Time(u32 counter,u32 *time)
 // 说明    :
 // =============================================================================
 
-bool_t __GPTimer_PauseCount(struct tagGPTimerHandle  *timer)
+bool_t __GPTimer_PauseCount(struct GPTimerHandle  *timer)
 {
     u8 timerno;
     u32 temp;
@@ -187,7 +187,7 @@ bool_t __GPTimer_PauseCount(struct tagGPTimerHandle  *timer)
 // 返回值  :true成功 fasle失败
 // 说明    :
 // =============================================================================
-bool_t __GPTimer_StartCount(struct tagGPTimerHandle  *timer)
+bool_t __GPTimer_StartCount(struct GPTimerHandle  *timer)
 {
     u8 timerno;
     if(timer->timerstate & CN_TIMER_ENUSE)
@@ -231,7 +231,7 @@ bool_t __GPTimer_StartCount(struct tagGPTimerHandle  *timer)
 // 返回值  :true成功 fasle失败
 // 说明    :如果设置周期太大（超过最大定时器能力），则设置为定时器的最大周期
 // =============================================================================
-bool_t  __GPTimer_SetCycle(struct tagGPTimerHandle  *timer, u32 cycle)
+bool_t  __GPTimer_SetCycle(struct GPTimerHandle  *timer, u32 cycle)
 {
     u8 timerno;
     u32 temp;
@@ -274,7 +274,7 @@ bool_t  __GPTimer_SetCycle(struct tagGPTimerHandle  *timer, u32 cycle)
 // 说明：SHARC21469 GP_Timer0/GP_Timer1默认为reload，要想改变周期，需要先disable，然后再重新设置周期。
 // =============================================================================
 
-bool_t  __GPTimer_SetAutoReload(struct tagGPTimerHandle  *timer, bool_t autoreload)
+bool_t  __GPTimer_SetAutoReload(struct GPTimerHandle  *timer, bool_t autoreload)
 {
 
     if(timer->timerstate&CN_TIMER_ENUSE)
@@ -299,18 +299,17 @@ bool_t  __GPTimer_SetAutoReload(struct tagGPTimerHandle  *timer, bool_t autorelo
 // =============================================================================
 // 函数功能:__GPTimer_Alloc
 //          分配定时器
-// 输入参数:cycle，定时器周期
-//          timerisr,定时器的中断处理函数
+// 输入参数:timerisr,定时器的中断处理函数
 // 输出参数:
 // 返回值  :分配的定时器句柄，NULL则分配不成功
 // 说明    :
 // =============================================================================
-ptu32_t __GPTimer_Alloc(u32 cycle,fnTimerIsr timerisr)
+ptu32_t __GPTimer_Alloc(fntTimerIsr timerisr)
 {
     u8 timerno;
     u8 i=0;
     u8 irqline;
-    struct tagGPTimerHandle  *timer;
+    struct GPTimerHandle  *timer;
     ptu32_t timerhandle;
     //原子操作，防止资源竞争
     atom_low_t  timeratom;
@@ -339,15 +338,16 @@ ptu32_t __GPTimer_Alloc(u32 cycle,fnTimerIsr timerisr)
 
     irqline = sgHaltimerIrq[timerno];
     timer = &s_tGPTimerHandle[timerno];
-    timer->cycle = cycle;
+    timer->cycle = 0;
     timer->timerno = timerno;
     timer->irqline = irqline;
     timer->timerstate = CN_TIMER_ENUSE;
     //好了，中断号和定时器号码都有了，该干嘛就干嘛了。
     //先设置好定时器周期
     //__P1020PicTimer_PauseCount(timer);
-    __GPTimer_SetCycle(timer,cycle);
+//    __GPTimer_SetCycle(timer,cycle);
     //设置定时器中断,先结束掉该中断所有的关联相关内容
+    Int_Register(irqline);
     Int_CutLine(irqline);
     Int_IsrDisConnect(irqline);
     Int_EvttDisConnect(irqline);
@@ -372,8 +372,8 @@ bool_t  __GPTimer_Free(ptu32_t timerhandle)
     u8 timerno;
     u8 irqline;
     atom_low_t  timeratom;  //保护公用资源
-    struct tagGPTimerHandle  *timer;
-    timer = (struct tagGPTimerHandle  *)timerhandle;
+    struct GPTimerHandle  *timer;
+    timer = (struct GPTimerHandle  *)timerhandle;
 
     if(timer->timerstate & CN_TIMER_ENUSE)
     {
@@ -413,7 +413,7 @@ bool_t  __GPTimer_Free(ptu32_t timerhandle)
 // 返回值  :分配的定时器，NULL则分配不成功
 // 说明    :
 // =============================================================================
-bool_t  __GPTimer_SetIntPro(struct tagGPTimerHandle  *timer, bool_t real_prior)
+bool_t  __GPTimer_SetIntPro(struct GPTimerHandle  *timer, bool_t real_prior)
 {
     if(timer->timerstate & CN_TIMER_ENUSE)
     {
@@ -442,7 +442,7 @@ bool_t  __GPTimer_SetIntPro(struct tagGPTimerHandle  *timer, bool_t real_prior)
 // 返回值  :true成功false失败
 // 说明    :
 // =============================================================================
-bool_t  __GPTimer_EnInt(struct tagGPTimerHandle  *timer)
+bool_t  __GPTimer_EnInt(struct GPTimerHandle  *timer)
 {
     if(timer->timerstate & CN_TIMER_ENUSE)
     {
@@ -462,7 +462,7 @@ bool_t  __GPTimer_EnInt(struct tagGPTimerHandle  *timer)
 // 返回值  :true成功false失败
 // 说明    :
 // =============================================================================
-bool_t  __GPTimer_DisInt(struct tagGPTimerHandle  *timer)
+bool_t  __GPTimer_DisInt(struct GPTimerHandle  *timer)
 {
     if(timer->timerstate & CN_TIMER_ENUSE)
     {
@@ -482,7 +482,7 @@ bool_t  __GPTimer_DisInt(struct tagGPTimerHandle  *timer)
 // 返回值  :true成功false失败
 // 说明    :从设定的周期算起，即cycle-剩余时间,表示已经走掉的时间
 // =============================================================================
-bool_t __GPTimer_GetTime(struct tagGPTimerHandle  *timer, u32 *time)
+bool_t __GPTimer_GetTime(struct GPTimerHandle  *timer, u32 *time)
 {
     u8 timerno;
     u32 temp;
@@ -526,7 +526,7 @@ bool_t __GPTimer_GetTime(struct tagGPTimerHandle  *timer, u32 *time)
 // 返回值  :true成功 false失败
 // 说明    :
 // =============================================================================
-bool_t __GPTimer_CheckTimeout(struct tagGPTimerHandle  *timer, bool_t *timeout)
+bool_t __GPTimer_CheckTimeout(struct GPTimerHandle  *timer, bool_t *timeout)
 {
     bool_t result;
     u8 timerno;
@@ -572,7 +572,7 @@ bool_t __GPTimer_CheckTimeout(struct tagGPTimerHandle  *timer, bool_t *timeout)
 // 返回值  ：true 成功 false失败
 // 说明    : 本层实现
 // =============================================================================
-bool_t __GPTimer_GetID(struct tagGPTimerHandle   *timer,u32 *timerId)
+bool_t __GPTimer_GetID(struct GPTimerHandle   *timer,u32 *timerId)
 {
     u16 irqno;
     u16 timerno;
@@ -597,7 +597,7 @@ bool_t __GPTimer_GetID(struct tagGPTimerHandle   *timer,u32 *timerId)
 // 输出参数：cycle，定时器周期(微秒)
 // 返回值  ：true 成功 false失败
 // =============================================================================
-bool_t __GPTimer_GetCycle(struct tagGPTimerHandle   *timer, u32 *cycle)
+bool_t __GPTimer_GetCycle(struct GPTimerHandle   *timer, u32 *cycle)
 {
     if(NULL == timer)
     {
@@ -617,7 +617,7 @@ bool_t __GPTimer_GetCycle(struct tagGPTimerHandle   *timer, u32 *cycle)
 // 返回值  ：true 成功 false失败
 // 说明    : 本层实现
 // =============================================================================
-bool_t __GPTimer_GetState(struct tagGPTimerHandle   *timer, u32 *timerflag)
+bool_t __GPTimer_GetState(struct GPTimerHandle   *timer, u32 *timerflag)
 {
 
     if(NULL == timer)
@@ -640,12 +640,12 @@ bool_t __GPTimer_GetState(struct tagGPTimerHandle   *timer, u32 *timerflag)
 // 说明    :
 // =============================================================================
 bool_t __GPTimer_Ctrl(ptu32_t timerhandle, \
-                         enum _ENUM_TIMER_CTRL_TYPE_ ctrlcmd, \
+                         enum TimerCmdCode ctrlcmd, \
                          ptu32_t inoutpara)
 {
     bool_t result;
-    struct tagGPTimerHandle  *timer;
-    timer = (struct tagGPTimerHandle  *)timerhandle;
+    struct GPTimerHandle  *timer;
+    timer = (struct GPTimerHandle  *)timerhandle;
     if(NULL == timer)
     {
         result = false;
@@ -703,7 +703,7 @@ bool_t __GPTimer_Ctrl(ptu32_t timerhandle, \
 // 返回值  :无
 // 说明    :
 // =============================================================================
-void __GPTimer0_ISR(ufast_t GPTMR0I_int_line)
+void __GPTimer0_ISR(ptu32_t GPTMR0I_int_line)
 {
     //MUST clear timer0 interrupt status first
     *pTMSTAT = TIM0IRQ;
@@ -724,7 +724,7 @@ void __GPTimer0_ISR(ufast_t GPTMR0I_int_line)
 // 返回值  :无
 // 说明    :
 // =============================================================================
-void __GPTimer1_ISR(ufast_t GPTMR1I_int_line)
+void __GPTimer1_ISR(ptu32_t GPTMR1I_int_line)
 {
     //MUST clear timer1 interrupt status first
     *pTMSTAT = TIM1IRQ;
@@ -746,13 +746,15 @@ void __GPTimer1_ISR(ufast_t GPTMR1I_int_line)
 // =============================================================================
 void GPTimer_ModuleInit(void)
 {
-    struct tagTimerChip  Sharc21469GPtimer;
+    struct TimerChip  Sharc21469GPtimer;
 
+    Int_Register(cn_int_line_GPTMR0I);
     Int_IsrConnect(cn_int_line_GPTMR0I,__GPTimer0_ISR);
     Int_SettoAsynSignal(cn_int_line_GPTMR0I);
     Int_ClearLine(cn_int_line_GPTMR0I);     //清掉初始化产生的发送fifo空的中断
     Int_RestoreAsynLine(cn_int_line_GPTMR0I);
 
+    Int_Register(cn_int_line_GPTMR1I);
     Int_IsrConnect(cn_int_line_GPTMR1I,__GPTimer1_ISR);
     Int_SettoAsynSignal(cn_int_line_GPTMR1I);
     Int_ClearLine(cn_int_line_GPTMR1I);     //清掉初始化产生的发送fifo空的中断
@@ -767,15 +769,15 @@ void GPTimer_ModuleInit(void)
 
 
     Sharc21469GPtimer.chipname = "SHARC21469GPTimer";
-    Sharc21469GPtimer.timerhardalloc = __GPTimer_Alloc;
-    Sharc21469GPtimer.timerhardfree = __GPTimer_Free;
-    Sharc21469GPtimer.timerhardctrl = __GPTimer_Ctrl;
+    Sharc21469GPtimer.TimerHardAlloc = __GPTimer_Alloc;
+    Sharc21469GPtimer.TimerHardFree = __GPTimer_Free;
+    Sharc21469GPtimer.TimerHardCtrl = __GPTimer_Ctrl;
     TimerHard_RegisterChip(&Sharc21469GPtimer);
 
 
     // =============下面代码仅做测试使用===================================
 /*
-struct tagGPTimerHandle *testTimer;
+struct GPTimerHandle *testTimer;
 //step1:分配一个定时器
   testTimer=__GPTimer_Alloc(30000000, __GPTimer0_ISR);
     //step2:设置定时周期

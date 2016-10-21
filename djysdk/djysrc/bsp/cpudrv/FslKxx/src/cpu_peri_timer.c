@@ -54,7 +54,7 @@
 // =============================================================================
 // 备注：由于提供给timer_core.c使用，所以不再做参数检查之类的
 
-#include "config-prj.h"
+#include "cfg/misc_config.h"
 
 #include "timer_hard.h"
 #include "cpu_peri.h"
@@ -72,7 +72,7 @@ enum ENUM_FREESCALE_PIT
 };
 
 //各个定时器芯片的定时器应该有自己的句柄
-struct tagFslPitHandle
+struct FslPitHandle
 {
     u32     timerno;          //定时器号
     u32     irqline;          //中断号
@@ -82,7 +82,7 @@ struct tagFslPitHandle
 #define CN_FSLPIT_NUM   (EN_FREESCALE_PIT3 +1)
 
 #define s_FslPitReg ((PIT_Type *)PIT_BASE)
-static struct tagFslPitHandle  stgFslPitHandle[CN_FSLPIT_NUM];
+static struct FslPitHandle  stgFslPitHandle[CN_FSLPIT_NUM];
 #define CN_PIT_MAX_COUNTER     0xFFFFFFFF
 #define CN_PIT_MAX_TIME_US     (0xFFFFFFFF/50) //PIT最大定时为85秒
 
@@ -168,7 +168,7 @@ bool_t __FslPit_Counter2Time(u32 counter,u32 *time)
 // 返回值  :true成功 fasle失败
 // 说明    :
 // =============================================================================
-bool_t __FslPit_PauseCount(struct tagFslPitHandle  *timer)
+bool_t __FslPit_PauseCount(struct FslPitHandle  *timer)
 {
     u8 timerno;
     if(timer->timerstate & CN_TIMER_ENUSE)
@@ -199,7 +199,7 @@ bool_t __FslPit_PauseCount(struct tagFslPitHandle  *timer)
 // 返回值  :true成功 fasle失败
 // 说明    :
 // =============================================================================
-bool_t __FslPit_StartCount(struct tagFslPitHandle  *timer)
+bool_t __FslPit_StartCount(struct FslPitHandle  *timer)
 {
     u8 timerno;
     if(timer->timerstate & CN_TIMER_ENUSE)
@@ -229,12 +229,12 @@ bool_t __FslPit_StartCount(struct tagFslPitHandle  *timer)
 // 函数功能:__FslPit_SetCycle
 //          设定周期
 // 输入参数:timer，PIC定时器
-//          cycle,周期（微秒），
+//          cycle,周期(单位：定时器主频时钟个数)，
 // 输出参数:
 // 返回值  :true成功 fasle失败
 // 说明    :如果设置周期太大（超过最大定时器能力），则设置为定时器的最大周期
 // =============================================================================
-bool_t  __FslPit_SetCycle(struct tagFslPitHandle  *timer, u32 cycle)
+bool_t  __FslPit_SetCycle(struct FslPitHandle  *timer, u32 cycle)
 {
     u8 timerno;
     u32 counter;
@@ -247,9 +247,10 @@ bool_t  __FslPit_SetCycle(struct tagFslPitHandle  *timer, u32 cycle)
         }
         else
         {
-            __FslPit_Time2Counter(cycle,&counter);
+//            __FslPit_Time2Counter(cycle,&counter);
+            counter = cycle;
             s_FslPitReg->CHANNEL[timerno].LDVAL = counter - 1;
-            cycle = counter * 20 /1000;//turn to us
+//            cycle = counter * 20 /1000;//turn to us
 
             timer->cycle = cycle;
             return true;
@@ -268,7 +269,7 @@ bool_t  __FslPit_SetCycle(struct tagFslPitHandle  *timer, u32 cycle)
 // 输出参数:
 // 返回值  :true成功 fasle失败
 // =============================================================================
-bool_t  __FslPit_SetAutoReload(struct tagFslPitHandle  *timer, bool_t autoreload)
+bool_t  __FslPit_SetAutoReload(struct FslPitHandle  *timer, bool_t autoreload)
 {
     bool_t result;
     u8 timerno;
@@ -300,17 +301,16 @@ bool_t  __FslPit_SetAutoReload(struct tagFslPitHandle  *timer, bool_t autoreload
 // =============================================================================
 // 函数功能:__FslPit_Alloc
 //          分配定时器
-// 输入参数:cycle，定时器周期
-//          timerisr,定时器的中断处理函数
+// 输入参数:timerisr,定时器的中断处理函数
 // 输出参数:
 // 返回值  :分配的定时器句柄，NULL则分配不成功
 // 说明    :
 // =============================================================================
-ptu32_t __FslPit_Alloc(u32 cycle,fnTimerIsr timerisr)
+ptu32_t __FslPit_Alloc(fntTimerIsr timerisr)
 {
     u8 timerno;
     u8 irqline;
-    struct tagFslPitHandle  *timer;
+    struct FslPitHandle  *timer;
     ptu32_t timerhandle;
     //原子操作，防止资源竞争
     atom_low_t  timeratom;
@@ -330,19 +330,23 @@ ptu32_t __FslPit_Alloc(u32 cycle,fnTimerIsr timerisr)
     }
     irqline = sgHaltimerIrq[timerno];
     timer = &stgFslPitHandle[timerno];
-    timer->cycle = cycle;
+    timer->cycle = 0;
     timer->timerno = timerno;
     timer->irqline = irqline;
     timer->timerstate = CN_TIMER_ENUSE;
     //好了，中断号和定时器号码都有了，该干嘛就干嘛了。
     //先设置好定时器周期
     __FslPit_PauseCount(timer);
-    __FslPit_SetCycle(timer,cycle);
+//    __FslPit_SetCycle(timer,cycle);
     //设置定时器中断,先结束掉该中断所有的关联相关内容
-    Int_CutLine(irqline);
-    Int_IsrDisConnect(irqline);
-    Int_EvttDisConnect(irqline);
-    Int_SettoAsynSignal(irqline);
+    if(true == Int_Register(irqline))
+    {
+		Int_CutLine(irqline);
+		Int_IsrDisConnect(irqline);
+		Int_EvttDisConnect(irqline);
+		Int_SettoAsynSignal(irqline);
+    }
+
     Int_IsrConnect(irqline, timerisr);
     timerhandle = (ptu32_t)timer;
 
@@ -363,8 +367,8 @@ bool_t  __FslPit_Free(ptu32_t timerhandle)
     u8 timerno;
     u8 irqline;
     atom_low_t  timeratom;  //保护公用资源
-    struct tagFslPitHandle  *timer;
-    timer = (struct tagFslPitHandle  *)timerhandle;
+    struct FslPitHandle  *timer;
+    timer = (struct FslPitHandle  *)timerhandle;
 
     if(timer->timerstate & CN_TIMER_ENUSE)
     {
@@ -379,6 +383,7 @@ bool_t  __FslPit_Free(ptu32_t timerhandle)
             Int_CutLine(irqline);
             Int_IsrDisConnect(irqline);
             Int_EvttDisConnect(irqline);
+	        Int_UnRegister(irqline);
 
             Int_LowAtomEnd(timeratom);  //原子操作完毕
 
@@ -406,7 +411,7 @@ bool_t  __FslPit_Free(ptu32_t timerhandle)
 // 返回值  :分配的定时器，NULL则分配不成功
 // 说明    :
 // =============================================================================
-bool_t  __FslPit_SetIntPro(struct tagFslPitHandle  *timer, bool_t real_prior)
+bool_t  __FslPit_SetIntPro(struct FslPitHandle  *timer, bool_t real_prior)
 {
     if(timer->timerstate & CN_TIMER_ENUSE)
     {
@@ -436,7 +441,7 @@ bool_t  __FslPit_SetIntPro(struct tagFslPitHandle  *timer, bool_t real_prior)
 // 返回值  :true成功false失败
 // 说明    :
 // =============================================================================
-bool_t  __FslPit_EnInt(struct tagFslPitHandle  *timer)
+bool_t  __FslPit_EnInt(struct FslPitHandle  *timer)
 {
     if(timer->timerstate & CN_TIMER_ENUSE)
     {
@@ -459,7 +464,7 @@ bool_t  __FslPit_EnInt(struct tagFslPitHandle  *timer)
 // 返回值  :true成功false失败
 // 说明    :
 // =============================================================================
-bool_t  __FslPit_DisInt(struct tagFslPitHandle  *timer)
+bool_t  __FslPit_DisInt(struct FslPitHandle  *timer)
 {
     if(timer->timerstate & CN_TIMER_ENUSE)
     {
@@ -480,9 +485,9 @@ bool_t  __FslPit_DisInt(struct tagFslPitHandle  *timer)
 // 输入参数:timer，待操作的定时器
 // 输出参数:time，走时（微秒）
 // 返回值  :true成功false失败
-// 说明    :从设定的周期算起，即cycle-剩余时间,表示已经走掉的时间
+// 说明    :从设定的周期算起，即cycle-剩余时间,表示已经走掉的时间(单位：定时器主频时钟个数)
 // =============================================================================
-bool_t __FslPit_GetTime(struct tagFslPitHandle  *timer, u32 *time)
+bool_t __FslPit_GetTime(struct FslPitHandle  *timer, u32 *time)
 {
     u8 timerno;
     u32 counter;
@@ -500,7 +505,8 @@ bool_t __FslPit_GetTime(struct tagFslPitHandle  *timer, u32 *time)
             counter = s_FslPitReg->CHANNEL[timerno].CVAL;
 
             counter = basecounter - counter;
-            *time = counter * 20/1000;
+//            *time = counter * 20/1000;
+            *time = counter;
             return true;
         }
     }
@@ -517,7 +523,7 @@ bool_t __FslPit_GetTime(struct tagFslPitHandle  *timer, u32 *time)
 // 返回值  :true成功 false失败
 // 说明    :
 // =============================================================================
-bool_t __FslPit_CheckTimeout(struct tagFslPitHandle  *timer, bool_t *timeout)
+bool_t __FslPit_CheckTimeout(struct FslPitHandle  *timer, bool_t *timeout)
 {
     bool_t result;
     u8 timerno;
@@ -559,7 +565,7 @@ bool_t __FslPit_CheckTimeout(struct tagFslPitHandle  *timer, bool_t *timeout)
 // 返回值  ：true 成功 false失败
 // 说明    : 本层实现
 // =============================================================================
-bool_t __FslPit_GetID(struct tagFslPitHandle   *timer,u32 *timerId)
+bool_t __FslPit_GetID(struct FslPitHandle   *timer,u32 *timerId)
 {
     u16 irqno;
     u16 timerno;
@@ -581,10 +587,10 @@ bool_t __FslPit_GetID(struct tagFslPitHandle   *timer,u32 *timerId)
 // 函数功能：__FslPit_GetCycle
 //          获取定时器周期
 // 输入参数：timer，待操作定时器，
-// 输出参数：cycle，定时器周期(微秒)
+// 输出参数：cycle，定时器周期(单位：定时器主频时钟个数)
 // 返回值  ：true 成功 false失败
 // =============================================================================
-bool_t __FslPit_GetCycle(struct tagFslPitHandle   *timer, u32 *cycle)
+bool_t __FslPit_GetCycle(struct FslPitHandle   *timer, u32 *cycle)
 {
     if(NULL == timer)
     {
@@ -604,7 +610,7 @@ bool_t __FslPit_GetCycle(struct tagFslPitHandle   *timer, u32 *cycle)
 // 返回值  ：true 成功 false失败
 // 说明    : 本层实现
 // =============================================================================
-bool_t __FslPit_GetState(struct tagFslPitHandle   *timer, u32 *timerflag)
+bool_t __FslPit_GetState(struct FslPitHandle   *timer, u32 *timerflag)
 {
 
     if(NULL == timer)
@@ -627,12 +633,12 @@ bool_t __FslPit_GetState(struct tagFslPitHandle   *timer, u32 *timerflag)
 // 说明    :
 // =============================================================================
 bool_t __FslPit_Ctrl(ptu32_t timerhandle, \
-                         enum _ENUM_TIMER_CTRL_TYPE_ ctrlcmd, \
+                         enum TimerCmdCode ctrlcmd, \
                          ptu32_t inoutpara)
 {
     bool_t result;
-    struct tagFslPitHandle  *timer;
-    timer = (struct tagFslPitHandle  *)timerhandle;
+    struct FslPitHandle  *timer;
+    timer = (struct FslPitHandle  *)timerhandle;
     if(NULL == timer)
     {
         result = false;
@@ -683,6 +689,20 @@ bool_t __FslPit_Ctrl(ptu32_t timerhandle, \
 }
 
 // =============================================================================
+// 函数功能:__FslPit_GetFreq
+//       获取定时器主频
+// 输入参数:timerhandle 待操作的定时器句柄
+// 输出参数:
+// 返回值  :定时器主频
+// 说明    :单位（HZ）
+// =============================================================================
+u32  __FslPit_GetFreq(ptu32_t timerhandle)
+{
+    //PIT时钟是50M的定时频率
+    return 50000000;
+}
+
+// =============================================================================
 // 函数功能:module_init_timer
 //          P1020的PICtimer初始化
 // 输入参数:
@@ -692,7 +712,7 @@ bool_t __FslPit_Ctrl(ptu32_t timerhandle, \
 // =============================================================================
 void TimerHard_ModuleInit(void)
 {
-    struct tagTimerChip  FslPittimer;
+    struct TimerChip  FslPittimer;
     u8 loop;
     //做基本的初始化
     //1.PIT初始化
@@ -704,9 +724,10 @@ void TimerHard_ModuleInit(void)
     }
 
     FslPittimer.chipname = "FslPit";
-    FslPittimer.timerhardalloc = __FslPit_Alloc;
-    FslPittimer.timerhardfree = __FslPit_Free;
-    FslPittimer.timerhardctrl = __FslPit_Ctrl;
+    FslPittimer.TimerHardAlloc = __FslPit_Alloc;
+    FslPittimer.TimerHardFree = __FslPit_Free;
+    FslPittimer.TimerHardCtrl = __FslPit_Ctrl;
+    FslPittimer.TimerHardGetFreq = __FslPit_GetFreq;
     TimerHard_RegisterChip(&FslPittimer);
 
     return ;

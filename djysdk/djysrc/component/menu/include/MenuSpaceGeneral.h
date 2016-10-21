@@ -57,7 +57,7 @@
 #include  "MenuDisplay.h"
 
 
-struct tagRectangle  zero_strect(void);
+struct Rectangle  zero_strect(void);
 
 struct menu_displaypara* mallocdisplaypara(void);
 void deldisplaypara(struct menu_displaypara *menudispara);
@@ -67,7 +67,7 @@ struct menu_item_space cal_textarea(const char *text, u32 count );
 struct menu_item_space cal_menuitemarea(struct menu_item *menuitem);
 //struct menu_displaypara *SearchLatestPageNode(struct menu_displaypara *cur);
 struct menu_displaypara*  getmainmenudispara(struct menu_displaypara *cur);
-bool_t create_menudisparawin(struct menu_displaypara  *menudispara,struct tagRectangle win_rec,const char *win_name);
+bool_t create_menudisparawin(struct menu_displaypara  *menudispara,struct Rectangle win_rec,const char *win_name);
 
 
 #endif

@@ -63,19 +63,15 @@
 extern "C" {
 #endif
 
-extern struct tagSystickReg volatile * const pg_systick_reg;
-extern struct scb_reg volatile * const pg_scb_reg;
-extern struct nvic_reg volatile * const pg_nvic_reg;
-
-struct  tagThreadVm *__CreateThread(struct  tagEventType *evtt,u32 *stack_size);
+struct ThreadVm *__CreateThread(struct EventType *evtt,u32 *stack_size);
 void *__asm_reset_thread(ptu32_t (*thread_routine)(void),
-                           struct  tagThreadVm  *vm);
+                           struct ThreadVm  *vm);
 void __asm_reset_switch(ptu32_t (*thread_routine)(void),
-                           struct  tagThreadVm *new_vm,struct  tagThreadVm *old_vm);
-void __asm_start_thread(struct  tagThreadVm  *new_vm);
-void __asm_turnto_context(struct  tagThreadVm  *new_vm);
-void __asm_switch_context(struct  tagThreadVm *new_vm,struct  tagThreadVm *old_vm);
-void __asm_switch_context_int(struct  tagThreadVm *new_vm,struct  tagThreadVm *old_vm);
+                           struct ThreadVm *new_vm,struct ThreadVm *old_vm);
+void __asm_start_thread(struct ThreadVm  *new_vm);
+void __asm_turnto_context(struct ThreadVm  *new_vm);
+void __asm_switch_context(struct ThreadVm *new_vm,struct ThreadVm *old_vm);
+void __asm_switch_context_int(struct ThreadVm *new_vm,struct ThreadVm *old_vm);
 
 #ifdef __cplusplus
 }

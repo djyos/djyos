@@ -55,13 +55,13 @@
 
 #define                            cn_limit_menuitem        1000 //max menuitem num
 static struct menu_item             sMenuitemRsc[cn_limit_menuitem];  // todo:
-static struct tagRscNode             *pg_menuitem_root;  // the menuitem tree
-struct tagMemCellPool               *pg_menuitem_pool;// the menuitem pool
+static struct Object             *pg_menuitem_root;  // the menuitem tree
+struct MemCellPool               *pg_menuitem_pool;// the menuitem pool
 //static struct menu_item             *pg_operating_menuitem;// the current operating menuitem ,for the visible
 
 #define                            CN_MENU_ROOT_NUM           10    //the maxi node son of pg_menuitem_rsc_tree
 static  u8                         menuitem_tree_count=0;     //the current node son of pg_menuitem_rsc_tree
-//struct tagSemaphoreLCB              *pg_menuitem_semp;//use to limit the menuitem rsc tree operation limit
+//struct SemaphoreLCB              *pg_menuitem_semp;//use to limit the menuitem rsc tree operation limit
 
 // =========================================================================
 // 函数功能:菜单模块初始化函数，初始化相应资源，添加根节点
@@ -72,11 +72,11 @@ static  u8                         menuitem_tree_count=0;     //the current node
 // =========================================================================
 ptu32_t module_init_menu(ptu32_t para)
 {
-   static struct tagRscNode sMenuitemRoot;
+   static struct Object sMenuitemRoot;
    bool_t  result=false;
 
    //init the menuitem tree
-   pg_menuitem_root= Rsc_AddTree(&sMenuitemRoot, sizeof(struct tagRscNode),RSC_RSCNODE,"MenuItem_root");
+   pg_menuitem_root= OBJ_AddTree(&sMenuitemRoot, sizeof(struct Object),RSC_RSCNODE,"MenuItem_root");
    if(NULL==pg_menuitem_root)
    {
       printf("create the pg_menuitem_root failed!\n");
@@ -188,10 +188,10 @@ struct menu_item *CreateMenuitemTreeNode(char * pTreeName)
      strcpy(result->name,pTreeName);
    }
 
-   Rsc_CleanNode((struct tagRscNode *) result);
-   Rsc_AddHeadSon((struct tagRscNode *)(pg_menuitem_root),\
-       (struct tagRscNode *) result, sizeof(struct menu_item),\
-        RSCTYPE_USER,result->name);
+   OBJ_Clean((struct Object *) result);
+   OBJ_AddChildHead((struct Object *)(pg_menuitem_root),\
+       (struct Object *) result, sizeof(struct menu_item),\
+        RSCTYPE_USER,(const char*)(result->name));
    menuitem_tree_count++;
    printf("menuitem_tree_node:%s\n",result->node.name);
 
@@ -225,7 +225,7 @@ struct menu_item *CreateMenuitem(const char *name,const char *byTip,u32 byAttrib
       return result;
     }
     //初始化链表头
-    Rsc_CleanNode(&result->node);
+    OBJ_Clean(&result->node);
     //具体化成员变量
     //拷贝名字
     charLen=strnlen(name,namesize);
@@ -271,7 +271,7 @@ struct menu_item* SearchSubMenuitemByName(struct menu_item * pParent, const char
 {
    struct menu_item *result=NULL;
 
-   result=(struct menu_item*)Rsc_SearchSon((struct tagRscNode * )pParent, name);//已经做了参数的检查
+   result=(struct menu_item*)OBJ_SearchChild((struct Object * )pParent, name);//已经做了参数的检查
    return result;
 }
 
@@ -287,7 +287,7 @@ struct menu_item * SearchBroMenuitemByName(struct menu_item * pBrother, const ch
 
     struct menu_item * result=NULL;
 
-    result=(struct menu_item *)Rsc_SearchSibling((struct tagRscNode *)pBrother,  name);
+    result=(struct menu_item *)OBJ_SearchSibling((struct Object *)pBrother,  name);
 
     return result;
 }
@@ -304,7 +304,7 @@ struct menu_item * SearchBroMenuitemByName(struct menu_item * pBrother, const ch
 bool_t AddSubMenuitem(struct menu_item * pParent, struct menu_item *pNewmenuitem, bool_t head)
 {
     bool_t  result=false;
-    struct tagRscNode  *temp_node;
+    struct Object  *temp_node;
 
     //check if any sub menuitem named this
     if(NULL!=SearchSubMenuitemByName(pParent,pNewmenuitem->name))
@@ -314,13 +314,13 @@ bool_t AddSubMenuitem(struct menu_item * pParent, struct menu_item *pNewmenuitem
     }
     if (head)
     {
-        temp_node= Rsc_AddHeadSon((struct tagRscNode *)pParent, (struct tagRscNode *)pNewmenuitem, \
-            sizeof(struct menu_item),RSCTYPE_USER,pNewmenuitem->name);
+        temp_node= OBJ_AddChildHead((struct Object *)pParent, (struct Object *)pNewmenuitem, \
+            sizeof(struct menu_item),RSCTYPE_USER,(const char*)(pNewmenuitem->name));
     }
     else
     {
-        temp_node= Rsc_AddSon((struct tagRscNode *)pParent, (struct tagRscNode *)pNewmenuitem, \
-            sizeof(struct menu_item),RSCTYPE_USER,pNewmenuitem->name);
+        temp_node= OBJ_AddChild((struct Object *)pParent, (struct Object *)pNewmenuitem, \
+            sizeof(struct menu_item),RSCTYPE_USER,(const char*)(pNewmenuitem->name));
     }
 
     if(temp_node!=NULL)
@@ -339,7 +339,7 @@ bool_t AddSubMenuitem(struct menu_item * pParent, struct menu_item *pNewmenuitem
 bool_t AddBroMenuitem(struct menu_item * pBrother, struct menu_item *pNewmenuitem, bool_t insert)
 {
     bool_t result=false;
-    struct tagRscNode *temp_node;
+    struct Object *temp_node;
 
     //check any brother menuitem named this
     if(NULL!=SearchBroMenuitemByName(pBrother, pNewmenuitem->name))
@@ -349,13 +349,13 @@ bool_t AddBroMenuitem(struct menu_item * pBrother, struct menu_item *pNewmenuite
     }
     if(insert)
     {
-         temp_node=Rsc_AddToPrevious((struct tagRscNode *)pBrother, (struct tagRscNode *)pNewmenuitem,\
-            sizeof(struct menu_item), RSCTYPE_USER,pNewmenuitem->name);
+         temp_node=OBJ_AddToPrevious((struct Object *)pBrother, (struct Object *)pNewmenuitem,\
+            sizeof(struct menu_item), RSCTYPE_USER,(const char*)(pNewmenuitem->name));
     }
     else
     {
-         temp_node=Rsc_AddToNext(&(pBrother->node), &(pNewmenuitem->node),\
-                    sizeof(struct menu_item),RSCTYPE_USER, pNewmenuitem->name);
+         temp_node=OBJ_AddToNext(&(pBrother->node), &(pNewmenuitem->node),\
+                    sizeof(struct menu_item),RSCTYPE_USER,(const char*)(pNewmenuitem->name));
     }
     if(NULL!=temp_node)
         result=true;
@@ -374,7 +374,7 @@ struct menu_item* SearchSubTernalMenuitem(struct menu_item * pMenuitem)
 {
 
    struct menu_item* result=NULL;
-   result=(struct menu_item *)Rsc_GetTwig((struct  tagRscNode *)pMenuitem);
+   result=(struct menu_item *)OBJ_GetTwig((struct  Object *)pMenuitem);
    return result;
 }
 
@@ -391,7 +391,7 @@ bool_t DelMenuBranchCompletely(struct menu_item * pMenuitem)
    bool_t             result=false;
    struct menu_item    *temp_menuitem=pMenuitem;
 
-  if((struct tagRscNode *)pMenuitem==pg_menuitem_root)//this is an menuitem root node
+  if((struct Object *)pMenuitem==pg_menuitem_root)//this is an menuitem root node
   {
      printf("Invalid para---DelMenuBranchCompletely\n");
     return result;
@@ -399,15 +399,15 @@ bool_t DelMenuBranchCompletely(struct menu_item * pMenuitem)
   while((temp_menuitem=SearchSubTernalMenuitem(pMenuitem))!=NULL)
   {
     printf("begin to delete the menuitem=%s\n",temp_menuitem->node.name);
-    Rsc_DelNode((struct tagRscNode *)temp_menuitem);
+    OBJ_Del((struct Object *)temp_menuitem);
     Mb_Free(pg_menuitem_pool, temp_menuitem);
   }
-  if(Rsc_GetParent((struct tagRscNode *)pMenuitem)==pg_menuitem_root)
+  if(OBJ_Parent((struct Object *)pMenuitem)==pg_menuitem_root)
   {
      menuitem_tree_count--;
   }
   printf("begin to delete the menuitem=%s\n",pMenuitem->node.name);
-  Rsc_DelNode((struct tagRscNode *)(&(pMenuitem->node)));
+  OBJ_Del((struct Object *)(&(pMenuitem->node)));
   Mb_Free(pg_menuitem_pool, pMenuitem);
   result=true;
 
@@ -427,7 +427,7 @@ bool_t DelMenuBranch(struct menu_item * pMenuitem)
    bool_t             result=false;
    struct menu_item    *temp_menuitem=pMenuitem;
 
-  if((struct tagRscNode *)pMenuitem==pg_menuitem_root)//this is an menuitem root node
+  if((struct Object *)pMenuitem==pg_menuitem_root)//this is an menuitem root node
   {
      printf("Invalid para---DelMenuBranchCompletely\n");
     return result;
@@ -435,7 +435,7 @@ bool_t DelMenuBranch(struct menu_item * pMenuitem)
   while((temp_menuitem=SearchSubTernalMenuitem(pMenuitem))!=NULL)
   {
     printf("begin to delete the menuitem=%s\n",temp_menuitem->node.name);
-    Rsc_DelNode((struct tagRscNode *)temp_menuitem);
+    OBJ_Del((struct Object *)temp_menuitem);
     Mb_Free(pg_menuitem_pool, temp_menuitem);
   }
   result=true;
@@ -455,7 +455,7 @@ struct menu_item *GetNextMenuitem(struct menu_item * pMenuitem)
 {
     struct menu_item * result=NULL;
 
-    result=(struct menu_item *)Rsc_GetNext((struct tagRscNode *)pMenuitem);
+    result=(struct menu_item *)OBJ_Next((struct Object *)pMenuitem);
 
     return result;
 
@@ -473,7 +473,7 @@ struct menu_item *GetPreMenuitem(struct menu_item * pMenuitem)
 {
     struct menu_item * result=NULL;
 
-    result=(struct menu_item *)Rsc_GetPrevious((struct tagRscNode *)pMenuitem);
+    result=(struct menu_item *)OBJ_Previous((struct Object *)pMenuitem);
 
     return result;
 
@@ -490,7 +490,7 @@ struct menu_item *GetPreMenuitem(struct menu_item * pMenuitem)
 struct menu_item *GetSonMenuitem(struct menu_item * pMenuitem)
 {
     struct menu_item * result=NULL;
-    result=(struct menu_item *)Rsc_GetSon((struct tagRscNode *)pMenuitem);
+    result=(struct menu_item *)OBJ_Child((struct Object *)pMenuitem);
     return result;
 }
 // =========================================================================
@@ -505,7 +505,7 @@ struct menu_item *GetParMenuitem(struct menu_item * pMenuitem)
 {
     struct menu_item * result=NULL;
 
-    result=(struct menu_item *)Rsc_GetParent((struct tagRscNode *)pMenuitem);
+    result=(struct menu_item *)OBJ_Parent((struct Object *)pMenuitem);
 
     return result;
 }
@@ -538,7 +538,7 @@ struct menu_item * GetBBmenuitem(struct menu_item  *menuitem)
 {
     struct menu_item   *result=NULL;
 
-    result=(struct menu_item *)Rsc_GetHead((struct tagRscNode *)menuitem);
+    result=(struct menu_item *)OBJ_GetHead((struct Object *)menuitem);
     return  result;
 }
 // =========================================================================

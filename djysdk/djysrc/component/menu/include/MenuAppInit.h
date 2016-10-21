@@ -58,15 +58,15 @@
 #include "MenuDisplay.h"
 
 struct menu_displaypara* module_menu_init_9cell(struct menu_item *menuitem,\
-		                                        struct tagGkWinRsc *win);
+                                                struct GkWinRsc *win);
 struct menu_displaypara* module_menu_init_pull(struct menu_item *menuitem,\
-		                                       struct tagGkWinRsc *win);
+                                               struct GkWinRsc *win);
 
 void menu_display(struct menu_displaypara *dispara);
 
 struct menu_displaypara*  menuperipheral_respond(\
-		struct menu_displaypara *operatingDispara, void* para );
+        struct menu_displaypara *operatingDispara, void* para );
 struct menu_displaypara*  menupeiripheralrespondgeneral(\
-		struct menu_displaypara *operatingDispara, void* para );
+        struct menu_displaypara *operatingDispara, void* para );
 
 #endif /* MENUMODULEINIT_H_ */

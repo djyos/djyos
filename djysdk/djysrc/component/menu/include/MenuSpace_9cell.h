@@ -56,7 +56,7 @@
 #include "MenuSpaceGeneral.h"
 
 struct menu_displaypara *createmenudisparabypre_9cell(struct menu_displaypara *pre,struct menu_item *menuitem,\
-                                                      struct tagGkWinRsc  *Appwin);//创建九宫格显示参数
+                                                      struct GkWinRsc  *Appwin);//创建九宫格显示参数
 
 void adjustvisualmenuitem_9cell(struct menu_displaypara  *dispara);//调整九宫格的可视菜单项
 

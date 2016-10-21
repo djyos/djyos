@@ -56,6 +56,11 @@
 //------------------------------------------------------
 #include "stdint.h"
 #include "copy_table.h"
+#include "cpu-optional.h"
+
+#if CN_CPU_OPTIONAL_CACHE == 1
+#include "set-cache.h"
+#endif
 
 void Pre_Start(void);
 
@@ -91,9 +96,11 @@ void Load_Preload(void)
         }
     }
 
-  //   Cache_CleanData();
-  //  Cache_InvalidInst();
-
+#if CN_CPU_OPTIONAL_CACHE == 1
+    Cache_CleanData();
+    Cache_InvalidInst();
+    Cache_config();
+#endif
 
     pl_1st();   //用指针做远程调用
 }

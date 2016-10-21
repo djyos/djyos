@@ -33,11 +33,11 @@
 // =============================================================================
 // Buffer sizes in bytes (must be divisible by 16)
 #define RX_BUFFER_SIZE                                         256//ETH_MAX_FRM
-//#define TX_BUFFER_SIZE                                         1520//ETH_MAX_FRM
+#define TX_BUFFER_SIZE                                         1520//ETH_MAX_FRM
 
 // Number of Receive and Transmit Buffers and Buffer Descriptors
 #define NUM_RXBDS 20
-#define NUM_TXBDS 10
+#define NUM_TXBDS 4
 
 
 typedef struct
@@ -249,6 +249,7 @@ typedef enum
 /* FEC Configuration Parameters */
 typedef struct
 {
+  const char *      name;			 /* enet name */
   ENET_INTERFACE      interface;     /* Transceiver mode  */
   ENET_AUTONEG        neg;           /* FEC autoneg */
   ENET_SPEED          speed;         /* Ethernet Speed           */

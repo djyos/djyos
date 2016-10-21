@@ -65,55 +65,79 @@
 #include "ascii.h"
 #include "charset.h"
 #include "gkernel.h"
-s32 Charset_AsciiModuleInitMbToUcs4(u32* pwc, const char* s, s32 n);
-s32 Charset_AsciiModuleInitMbsToUcs4s(u32* pwcs, const char* mbs, s32 n);
-s32 Charset_AsciiModuleInitUcs4ToMb(char* s, s32 wc);
-s32 Charset_AsciiModuleInitUcs4sToMbs(char* mbs, const u32* pwcs, s32 n);
+s32 AsciiMbToUcs4(u32* pwc, const char* s, s32 n);
+s32 AsciiMbsToUcs4s(u32* pwcs, const char* mbs, s32 n);
+s32 AsciiUcs4ToMb(char* s, s32 wc);
+s32 AsciiUcs4sToMbs(char* mbs, const u32* pwcs, s32 n);
 
-// ◊¢ Õ≤Œ’’ encoding.h-> tagCharset -> mb_to_ucs4
-s32 Charset_AsciiModuleInitMbToUcs4(u32* pwc, const char* mbs, s32 n)
+// ◊¢ Õ≤Œ’’ charset.h-> struct Charset -> GetOneMb
+s32 AsciiGetOneMb(const char* mbs,s32 n)
 {
-    u8 c = *mbs;
-
-    n = n;
-
-    if(c < 0x80){
-
-        *pwc = (u32)c;
-        return 1;
+    if (mbs == NULL)
+    {
+        return 0;
     }
-
-    return -1;
+    else if(*mbs >= 0x80)       //¥ÆΩ· ¯∑˚“≤ «∫œ∑®◊÷∑˚
+        return -1;
+    else
+        return 1;
 }
 
-// ◊¢ Õ≤Œ’’ encoding.h-> tagCharset -> mbs_to_uc4s
-s32 Charset_AsciiModuleInitMbsToUcs4s(u32* pwcs, const char* mbs, s32 n)
+// ◊¢ Õ≤Œ’’ charset.h-> struct Charset -> MbToUcs4
+s32 AsciiMbToUcs4(u32* pwc, const char* mbs,s32 n)
 {
-    s32 wcn;
+    u8 c;
+    s32 result;
+    if (mbs == NULL)
+    {
+        return 0;
+    }
+    c = *mbs;
+
+    if(c == 0)
+    {
+        result = 0;
+    }else if(c < 0x80)
+    {
+        result = 1;
+    }
+    else
+        result = -1;
+    if(pwc != NULL)
+        *pwc = c;
+    return result;
+}
+
+// ◊¢ Õ≤Œ’’ charset.h-> struct Charset -> MbsToUcs4s
+//todo£∫¿©’πascii¬Î‘ı√¥À„?
+s32 AsciiMbsToUcs4s(u32* pwcs, const char* mbs, s32 n)
+{
+    s32 wcn,len;
     if(mbs == NULL)
         return 0;
-    for(wcn = 0; wcn < n; wcn++)
+    if(n != -1)
+        len = n;
+    else
+        len = CN_LIMIT_SINT32;
+    for(wcn = 0; wcn < len; wcn++)
     {
-        if(mbs[wcn] == 0)
+        if( (mbs[wcn] == 0) || (mbs[wcn] >= 0x80) )
         {
             if(pwcs != NULL)
                 pwcs[wcn] = (u32)0;
             return wcn;
         }
-        else if(mbs[wcn] < 0x80)
+        else
         {
             if(pwcs != NULL)
                 pwcs[wcn] = (u32)mbs[wcn];
-        }else
-        {
-            return -1;
         }
     }
     return wcn;
 }
 
-// ◊¢ Õ≤Œ’’ encoding.h-> tagCharset -> ucs4_to_mb
-s32 Charset_AsciiModuleInitUcs4ToMb(char* mbs, s32 wc)
+// ◊¢ Õ≤Œ’’ charset.h-> struct Charset -> Ucs4ToMb
+s32 AsciiUcs4ToMb(char* mbs, s32 wc)
 {
 
     if(wc < 0x80){
@@ -125,28 +149,28 @@ s32 Charset_AsciiModuleInitUcs4ToMb(char* mbs, s32 wc)
     return -1;
 }
 
-// ◊¢ Õ≤Œ’’ encoding.h-> tagCharset -> ucs4s_to_mbs
-s32 Charset_AsciiModuleInitUcs4sToMbs(char* mbs, const u32* pwcs, s32 n)
+// ◊¢ Õ≤Œ’’ charset.h-> struct Charset -> Ucs4sToMbs
+s32 AsciiUcs4sToMbs(char* mbs, const u32* pwcs, s32 n)
 {
-    s32 asciin;
+    s32 asciin,len;
     if(pwcs == NULL)
         return 0;
-    for(asciin = 0; asciin < n; asciin++)
+    if(n != -1)
+        len = n;
+    else
+        len = CN_LIMIT_SINT32;
+    for(asciin = 0; asciin < len; asciin++)
     {
-        if(pwcs[asciin] == 0)
+        if( (pwcs[asciin] == 0) || (pwcs[asciin] >= 0x80) )
         {
             if(mbs != NULL)
                 mbs[asciin] = '\0';
-            return asciin+1;
+            break;
         }
-        else if(mbs[asciin] < 0x80)
+        else
         {
             if(mbs != NULL)
                 mbs[asciin] = (u8)pwcs[asciin];
-        }else
-        {
-            asciin = -1;
-            break;
         }
     }
     return asciin;
@@ -162,13 +186,15 @@ s32 Charset_AsciiModuleInitUcs4sToMbs(char* mbs, const u32* pwcs, s32 n)
 //-----------------------------------------------------------------------------
 ptu32_t ModuleInstall_CharsetAscii(ptu32_t para)
 {
-    static struct tagCharset encoding;
+    static struct Charset encoding;
 
     encoding.max_len = 1;
-    encoding.mb_to_ucs4 = Charset_AsciiModuleInitMbToUcs4;
-    encoding.ucs4_to_mb = Charset_AsciiModuleInitUcs4ToMb;
-    encoding.mbs_to_ucs4s = Charset_AsciiModuleInitMbsToUcs4s;
-    encoding.ucs4s_to_mbs = Charset_AsciiModuleInitUcs4sToMbs;
+    encoding.EOC_Size = 1;
+    encoding.GetOneMb = AsciiGetOneMb;
+    encoding.MbToUcs4 = AsciiMbToUcs4;
+    encoding.Ucs4ToMb = AsciiUcs4ToMb;
+    encoding.MbsToUcs4s = AsciiMbsToUcs4s;
+    encoding.Ucs4sToMbs = AsciiUcs4sToMbs;
     if( Charset_NlsInstallCharset(&encoding, CN_NLS_CHARSET_ASCII))
     {
         printf("ASCII encoding install sucess\r\n");

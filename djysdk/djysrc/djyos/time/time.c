@@ -59,11 +59,12 @@
 //------------------------------------------------------
 #include "stdint.h"
 #include "string.h"
-#include "config-prj.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
-#include "time.h"
+#include <sys/time.h>
+
+extern const u32 gc_u32CfgTimeZone;
 
 extern s64 __Rtc_Time(s64 *rtctime);
 extern s64 __Rtc_TimeUs(s64 *rtctime);
@@ -119,7 +120,7 @@ s64 Tm_MkTimeUs(struct tm *dt)
 //      result，用来返回结果的指针，必须非空
 //返回: 分解时间
 //----------------------------------------------------------------------------
-struct tm *Tm_GmTime_r(s64 *time,struct tm *result)
+struct tm *Tm_GmTime_r(const s64 *time,struct tm *result)
 {
     s64 temp_time;
     if(result == NULL)
@@ -142,7 +143,7 @@ struct tm *Tm_GmTime_r(s64 *time,struct tm *result)
 //参数: time,1970年来的秒数,给空指针则直接使用日历时间
 //返回: 分解时间
 //----------------------------------------------------------------------------
-struct tm *Tm_GmTime(s64 *time)
+struct tm *Tm_GmTime(const s64 *time)
 {
     static struct tm datetime;
     s64 temp_time;
@@ -164,7 +165,7 @@ struct tm *Tm_GmTime(s64 *time)
 //      result，用来返回结果的指针，必须非空
 //返回: 分解时间
 //----------------------------------------------------------------------------
-struct tm *Tm_GmTimeUs_r(s64 *time,struct tm *result)
+struct tm *Tm_GmTimeUs_r(const s64 *time,struct tm *result)
 {
     s64 temp_time;
     if(result == NULL)
@@ -187,7 +188,7 @@ struct tm *Tm_GmTimeUs_r(s64 *time,struct tm *result)
 //参数: time,1970年来的微秒数,给空指针则直接使用日历时间
 //返回: 分解时间
 //----------------------------------------------------------------------------
-struct tm *Tm_GmTimeUs(s64 *time)
+struct tm *Tm_GmTimeUs(const s64 *time)
 {
     static struct tm datetime;
     s64 temp_time;
@@ -209,7 +210,7 @@ struct tm *Tm_GmTimeUs(s64 *time)
 //      result，用来返回结果的指针，必须非空
 //返回: 分解时间
 //-----------------------------------------------------------------------------
-struct tm *Tm_LocalTime_r(s64 *time,struct tm *result)
+struct tm *Tm_LocalTime_r(const s64 *time,struct tm *result)
 {
     u32 second, minute, hour;
     u32 day, month, year;
@@ -298,7 +299,7 @@ struct tm *Tm_LocalTime_r(s64 *time,struct tm *result)
 //参数: time,1970年来的秒数,给空指针则直接使用日历时间
 //返回: 分解时间
 //-----------------------------------------------------------------------------
-struct tm *Tm_LocalTime(s64 *time)
+struct tm *Tm_LocalTime(const s64 *time)
 {
     static struct tm datetime;
 
@@ -311,22 +312,25 @@ struct tm *Tm_LocalTime(s64 *time)
 //      result，用来返回结果的指针，必须非空
 //返回: 分解时间
 //-----------------------------------------------------------------------------
-struct tm *Tm_LocalTimeUs_r(s64 *time_us,struct tm *result)
+struct tm *Tm_LocalTimeUs_r(const s64 *time_us,struct tm *result)
 {
     s64 temp_time;
+    s64 temp_us;
     if(result == NULL)
         return NULL;
     if(time_us == NULL)
     {
         temp_time = __Rtc_TimeUs(NULL);
+        temp_us = temp_time%1000000;
         temp_time /=1000000;
     }
     else
     {
+        temp_us = *time_us%1000000;
         temp_time = *time_us/1000000;
     }
     Tm_LocalTime_r(&temp_time,result);
-    result->tm_us = temp_time%1000000;
+    result->tm_us = temp_us;
     return result;
 }
 
@@ -338,67 +342,73 @@ struct tm *Tm_LocalTimeUs_r(s64 *time_us,struct tm *result)
 struct tm *Tm_LocalTimeUs(s64 *time_us)
 {
     static struct tm datetime;
+    s64 temp_us;
     s64 temp_time;
     if(time_us == NULL)
     {
         temp_time = __Rtc_TimeUs(NULL);
+        temp_us = temp_time%1000000;
         temp_time /=1000000;
     }
     else
     {
+        temp_us = *time_us%1000000;
         temp_time = *time_us/1000000;
     }
 
     Tm_LocalTime_r(&temp_time,&datetime);
-    datetime.tm_us = temp_time%1000000;
+    datetime.tm_us = temp_us;
     return &datetime;
 }
 
 //----更新日历时间-------------------------------------------------------------
-//功能: 用格式为"2011/10/28,22:37:50"的字符串表示的时间设置日历时间，手工矫正时
-//      间后，可调用本函数设置系统日历时间
+//功能: 用格式为"2011/10/28,22:37:50:000"的字符串表示的时间设置日历时间，可调用
+//      本函数设置系统日历时间，最后一段是uS数，可以不给
 //参数: buf，输入时间值
 //返回: 1=成功，其他值:对应的错误代码
 //-----------------------------------------------------------------------------
+//2011/10/28,22:37:50:
 s32 Tm_SetDateTimeStr(char *buf)
 {
     s64 nowtime;
     struct tm ptDateTime;
-    char *sepstr;
-    char sepch[] = "/";
-    u32 res;
+    int params;
 
-    sepch[0] = '/';
-    sepstr = strsep(&buf, sepch);
-    res = strtol(sepstr, (char **)NULL, 0);
-    if ((1970>res) || (res>2100))
+    memset(&ptDateTime,0,sizeof(ptDateTime));
+    params = sscanf(buf,"%d/%d/%d,%d:%d:%d:%d",\
+            &ptDateTime.tm_year,&ptDateTime.tm_mon,&ptDateTime.tm_mday,\
+            &ptDateTime.tm_hour,&ptDateTime.tm_min,&ptDateTime.tm_sec,\
+            &ptDateTime.tm_us);
+
+    //parameters enough
+    if(params < 6)
+    {
+        return EN_CLOCK_FMT_ERROR;
+    }
+    //year check
+    if ((1970>ptDateTime.tm_year) || (ptDateTime.tm_year>2100))
     {
         return EN_CLOCK_YEAR_ERROR;
     }
-    ptDateTime.tm_year = res;
 
-    sepstr = strsep(&buf, sepch);
-    res = strtol(sepstr, (char **)NULL, 0);
-    if ((1>res) || (res>12))
+    //moth check
+    if ((1>ptDateTime.tm_mon) || (ptDateTime.tm_mon>12))
     {
         return EN_CLOCK_MON_ERROR;
     }
-    ptDateTime.tm_mon = res;
 
-    sepch[0] = ',';
-    sepstr = strsep(&buf, sepch);
-    res = strtol(sepstr, (char **)NULL, 0);
-    if ((1>res) || (res>31))
+    //day check
+    if ((1>ptDateTime.tm_mday) || (ptDateTime.tm_mday>31))
     {
         return EN_CLOCK_DAY_ERROR;
     }
-    if (res > g_u32MonthDays[ptDateTime.tm_mon-1])
+    if (ptDateTime.tm_mday > g_u32MonthDays[ptDateTime.tm_mon-1])
     {
         return EN_CLOCK_DAY_ERROR;
     }
     if (ptDateTime.tm_mon == 2)
     {
-        if (res > 29)
+        if (ptDateTime.tm_mday > 29)
         {
             return EN_CLOCK_DAY_ERROR;
         }
@@ -409,51 +419,41 @@ s32 Tm_SetDateTimeStr(char *buf)
             {
                 if (ptDateTime.tm_year%400)
                 {
-                    if (res > 28)
+                    if (ptDateTime.tm_mday > 28)
                         return EN_CLOCK_DAY_ERROR;
                 }
             }
         }
         else
         {
-            if (res > 28)
+            if (ptDateTime.tm_mday > 28)
                 return EN_CLOCK_DAY_ERROR;
         }
     }
-    ptDateTime.tm_mday = res;
 
-    sepch[0] = ':';
-    sepstr = strsep(&buf, sepch);
-    res = strtol(sepstr, (char **)NULL, 0);
-    if (res>23)
+    //hour check
+    if (ptDateTime.tm_hour>23)
     {
         return EN_CLOCK_HOUR_ERROR;
     }
-    ptDateTime.tm_hour = res;
 
-    sepstr = strsep(&buf, sepch);
-    res = strtol(sepstr, (char **)NULL, 0);
-    if (res>59)
+    //min check
+    if (ptDateTime.tm_min>59)
     {
         return EN_CLOCK_MIN_ERROR;
     }
-    ptDateTime.tm_min = res;
 
-    sepstr = strsep(&buf, sepch);
-    res = strtol(sepstr, (char **)NULL, 0);
-    if (res>59)
+    //sec check
+    if (ptDateTime.tm_sec >59)
     {
         return EN_CLOCK_SEC_ERROR;
     }
-    ptDateTime.tm_sec = res;
-    ptDateTime.tm_us = 0;
 
     nowtime = Tm_MkTimeUs(&ptDateTime);
     //use the rtc module to set
     __Rtc_SetTime(nowtime);
     return 1;
 }
-
 //----更新日历时间-------------------------------------------------------------
 //功能: 用分解时间更新日历时间，有rtc硬件的系统中，如果硬件直接输出分解时间的，
 //      硬件驱动调用本函数。
@@ -531,7 +531,7 @@ void Tm_AscTimeMs(struct tm *tm, char buf[])
 {
     Tm_AscTime(tm,buf);
     buf[19] = ':';
-    itoa(tm->tm_us/1000, &buf[20], 3);
+    itoa(tm->tm_us/1000, &buf[20], 10);
     buf[23] = '\0';
     return ;
 }
@@ -546,7 +546,7 @@ void Tm_AscTimeUs(struct tm *tm, char buf[])
 {
     Tm_AscTime(tm,buf);
     buf[19] = ':';
-    itoa(tm->tm_us, &buf[20], 6);
+    itoa(tm->tm_us, &buf[20], 10);
     buf[26] = '\0';
     return ;
 }
@@ -565,7 +565,7 @@ ptu32_t ModuleInstall_TM(ptu32_t para)
 //参数: ret,非空则返回日历时间。
 //返回: 日历时间
 //-----------------------------------------------------------------------------
-s64 TM_Time(s64 *ret)
+s64 Tm_Time(s64 *ret)
 {
     return __Rtc_Time(ret);
 }
@@ -574,8 +574,158 @@ s64 TM_Time(s64 *ret)
 //参数: ret,非空则返回日历时间。
 //返回: 日历时间
 //-----------------------------------------------------------------------------
-s64 TM_TimeUs(s64 *ret)
+s64 Tm_TimeUs(s64 *ret)
 {
     return __Rtc_TimeUs(ret);
 }
+//modified by zqf--make the libc time interface
+#define CN_WEEKDAY_MAX  7
+static const char *pWeekDay[CN_WEEKDAY_MAX]={
+        "Sun",
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat"
+};
+
+#define CN_MONTH_MAX 13
+static const char *pMonth[CN_MONTH_MAX] ={
+        NULL,
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec"
+};
+
+
+struct tm *localtime_r(const time_t *timep, struct tm *result)
+{
+    return Tm_LocalTime_r(timep,result);
+}
+struct tm *localtime(const time_t *timep)
+{
+    static struct  tm result;
+
+    return localtime_r(timep,&result);
+}
+struct tm *gmtime_r(const time_t *timep, struct tm *result)
+{
+    return Tm_GmTime_r(timep,result);
+}
+struct tm *gmtime(const time_t *timep)
+{
+    static struct  tm result;
+
+    return gmtime_r(timep,&result);
+}
+
+time_t mktime(struct tm *tm)
+{
+    return Tm_MkTime(tm);
+}
+//put the break-down time to the char string
+char *asctime_r(const struct tm *tm,char *buf)
+{
+    char *result = NULL;
+
+    if((NULL != tm)&&(NULL != buf)&&(tm->tm_wday <CN_WEEKDAY_MAX)&&\
+        (tm->tm_mon<CN_MONTH_MAX))
+    {
+        //do the transfer
+        sprintf(buf,"%s %s %d %d:%d:%d %d",pWeekDay[tm->tm_wday],pMonth[tm->tm_mon],\
+                tm->tm_mday,tm->tm_hour,tm->tm_min,tm->tm_sec,tm->tm_year);
+        result = buf;
+    }
+    return result;
+}
+
+char *asctime(const struct tm *tm)
+{
+    static char  buf[32];
+
+    return asctime_r(tm,buf);
+}
+
+
+char *ctime_r(const time_t *timep, char *buf)
+{
+    struct tm var,*tmp;
+
+    tmp = localtime_r(timep,&var);
+
+    return asctime_r(tmp,buf);
+
+}
+
+char *ctime(const time_t *timep)
+{
+
+    static char  buf[32];
+
+    return ctime_r(timep,buf);
+}
+
+
+time_t time(time_t *t)
+{
+    return Tm_Time(t);
+}
+
+int gettimeofday(struct timeval *tv, struct timezone *tz)
+{
+    int result = -1;
+
+    if(NULL != tv)
+    {
+        tv->tv_sec = time(NULL);
+        result = 0;
+    }
+
+    return result;
+}
+
+int settimeofday(const struct timeval *tv, const struct timezone *tz)
+{
+    int result = -1;
+    time_t timetmp;
+    struct tm  time_tm,*time_p;
+
+    if(NULL != tv)
+    {
+        timetmp = tv->tv_sec;
+        time_p = localtime_r(&timetmp,&time_tm);
+        if(NULL != time_p)
+        {
+            Tm_SetDateTime(time_p);
+            result = 0;
+        }
+
+    }
+
+    return result;
+}
+
+int gettimezone(int *result)
+{
+    if(NULL != result)
+    {
+        *result = gc_u32CfgTimeZone;
+    }
+    return 0;
+}
+int settimezone(int timezone)
+{
+    return -1;
+}
+
 

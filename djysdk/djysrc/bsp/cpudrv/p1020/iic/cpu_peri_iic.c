@@ -63,21 +63,21 @@
 #define I2C_SR_SRW                  (1<<2)//I2C中断标志位
 #define I2C_SR_MIF                  (1<<1)//I2C仲裁丢失
 #define I2C_SR_RXAK                 (1<<0)//I2C接收到ACK信号
-static struct tagIIC_CB s_IIC0_CB;
-static struct tagIIC_CB s_IIC1_CB;
+static struct IIC_CB s_IIC0_CB;
+static struct IIC_CB s_IIC1_CB;
 
 #define IIC0_BUF_LEN  128
 #define IIC1_BUF_LEN  128
 
-struct tagIIC_IntParamSet
+struct IIC_IntParamSet
 {
-    struct tagSemaphoreLCB *pDrvPostSemp;   //信号量
+    struct SemaphoreLCB *pDrvPostSemp;   //信号量
     u32 TransCount;                     //传输数据量计数器
     u32 TransTotalLen;
 };
 
-static struct tagIIC_IntParamSet IntParamset0;
-static struct tagIIC_IntParamSet IntParamset1;
+static struct IIC_IntParamSet IntParamset0;
+static struct IIC_IntParamSet IntParamset1;
 
 // =============================================================================
 // 函数：读写数据等待
@@ -272,9 +272,10 @@ static void __IIC_HardDefaultSet(ptu32_t RegBaseAddr)
 //       isr,中断服务函数指针
 // 返回: 无
 // =============================================================================
-static void __IIC_IntConfig(u32 IntLine,u32 (*isr)(ufast_t))
+static void __IIC_IntConfig(u32 IntLine,u32 (*isr)(ptu32_t))
 {
     //中断线的初始化
+    Int_Register(IntLine);
     Int_IsrConnect(IntLine,isr);
     Int_SettoAsynSignal(IntLine);
     //set the iic active high
@@ -315,7 +316,7 @@ static bool_t __IIC_GenerateWriteStart(ptu32_t  specific_flag,
                                        u32 mem_addr,
                                        u8 maddr_len,
                                        u32 length,
-                                       struct tagSemaphoreLCB *iic_semp)
+                                       struct SemaphoreLCB *iic_semp)
 {
     volatile tagI2CReg *reg;
     u8 mem_addr_buf[4];
@@ -380,7 +381,7 @@ static bool_t __IIC_GenerateReadStart( ptu32_t  specific_flag,
                                        u32 mem_addr,
                                        u8 maddr_len,
                                        u32 length,
-                                       struct tagSemaphoreLCB *iic_semp)
+                                       struct SemaphoreLCB *iic_semp)
 {
     volatile tagI2CReg *reg;
     u8 mem_addr_buf[4];
@@ -490,8 +491,8 @@ static s32 __IIC_BusCtrl(ptu32_t spceific_flag,u32 cmd,u32 data1,u32 data2)
 // =============================================================================
 static u32 __IIC_ISR(ufast_t i2c_int_line)
 {
-    static struct tagIIC_CB *ICB;
-    static struct tagIIC_IntParamSet *IntParam;
+    static struct IIC_CB *ICB;
+    static struct IIC_IntParamSet *IntParam;
     tagI2CReg *reg;
     u8 ch;
     u32 IicErrorNo;
@@ -593,7 +594,7 @@ static u32 __IIC_ISR(ufast_t i2c_int_line)
 bool_t IIC0_Init(void)
 {
     static u8 s_IIC0Buf[IIC0_BUF_LEN];
-    struct tagIIC_Param IIC0_Config;
+    struct IIC_Param IIC0_Config;
 
     IIC0_Config.BusName             = "IIC0";
     IIC0_Config.IICBuf              = (u8*)&s_IIC0Buf;
@@ -624,7 +625,7 @@ bool_t IIC0_Init(void)
 bool_t IIC1_Init(void)
 {
     static u8 s_IIC1Buf[IIC1_BUF_LEN];
-    struct tagIIC_Param IIC1_Config;
+    struct IIC_Param IIC1_Config;
 
     IIC1_Config.BusName             = "IIC1";
     IIC1_Config.IICBuf              = (u8*)&s_IIC1Buf;

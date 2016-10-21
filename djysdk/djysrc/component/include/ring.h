@@ -61,7 +61,7 @@
 extern "C" {
 #endif
 
- struct tagRingBuf
+struct RingBuf
 {
     u32    len;            //缓冲区中的字节数
     u32    offset_read;    //缓冲区读指针,指向下一次读的位置
@@ -71,20 +71,21 @@ extern "C" {
                               //参数一致,djyos不做检查.
 };
 
-void Ring_Init(struct tagRingBuf *ring, u8 *buf, u32 len);
-u32 Ring_Capacity(struct tagRingBuf *ring);
-u8 *Ring_GetBuf(struct tagRingBuf *ring);
-u32    Ring_Write(struct tagRingBuf *ring,u8 *buffer,u32 len);
-u32    Ring_Read(struct tagRingBuf *ring,u8 *buffer,u32 len);
-u32    Ring_Check(struct tagRingBuf *ring);
-bool_t   Ring_IsEmpty(struct tagRingBuf *ring);
-bool_t   Ring_IsFull(struct tagRingBuf *ring);
-void    Ring_Flush(struct tagRingBuf *ring);
-u32 Ring_DumbRead(struct tagRingBuf *ring,u32 len);
-u32 Ring_RecedeRead(struct tagRingBuf *ring,u32 len);
-u32 Ring_SkipTail(struct tagRingBuf *ring,u32 size);
-u32 Ring_SearchCh(struct tagRingBuf *ring, char c);
-u32 Ring_SearchStr(struct tagRingBuf *ring, char *string,u32 str_len);
+void Ring_Init(struct RingBuf *ring, u8 *buf, u32 len);
+u32 Ring_Capacity(struct RingBuf *ring);
+u8 *Ring_GetBuf(struct RingBuf *ring);
+u32    Ring_Write(struct RingBuf *ring,u8 *buffer,u32 len);
+u32    Ring_Read(struct RingBuf *ring,u8 *buffer,u32 len);
+u32    Ring_Check(struct RingBuf *ring);
+bool_t   Ring_IsEmpty(struct RingBuf *ring);
+bool_t   Ring_IsFull(struct RingBuf *ring);
+void    Ring_Flush(struct RingBuf *ring);
+u32 Ring_PseudoRead(struct RingBuf *ring,u32 len);
+u32 Ring_RecedeRead(struct RingBuf *ring,u32 len,u8 *buf);
+u32 Ring_SkipTail(struct RingBuf *ring,u32 size);
+void Ring_Clean(struct RingBuf *ring);
+u32 Ring_SearchCh(struct RingBuf *ring, char c);
+u32 Ring_SearchStr(struct RingBuf *ring, char *string,u32 str_len);
 
 #ifdef __cplusplus
 }

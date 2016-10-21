@@ -72,7 +72,7 @@ extern "C" {
 #include "cpu_peri_gpio.h"
 #include "cpu_peri_wdt.h"
 #include "cpu_peri_int_line.h"
-extern struct tagGPIO_StReg volatile * const pg_gpio_reg [4];
+extern struct GPIO_StReg volatile * const pg_gpio_reg [4];
 extern struct st_sysctrl_reg volatile * const pg_sysctrl_reg;
 extern struct st_nxp_uart_reg volatile * const pg_uart_reg0;
 extern struct st_nxp_uart_reg volatile * const pg_uart_reg1;

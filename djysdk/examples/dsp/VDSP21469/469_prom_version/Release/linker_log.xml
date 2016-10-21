@@ -1,9 +1,0 @@
-<?xml version="1.0" standalone="no"?>
-<?xml-stylesheet type="text/xsl" href="file:///D:/Analog Devices/VisualDSP 5.0/System/linker_log.xsl"?>
-<DOCUMENT gen_time='Mon Dec 02 19:21:26 2013
-'>
-<MSG id='00C92D48' mid='li1021' type='Error' >
-<TEXT><![CDATA[The following symbols referenced in processor 'P0' could not be resolved:
-        'app_offset_parallel [_app_offset_parallel]' referenced from '.\Release\469_prom_version.doj']]></TEXT>
-</MSG>
-</DOCUMENT>

@@ -62,7 +62,7 @@
 #include "stdlib.h"
 #include "os.h"
 
-#include "Socket.h"
+#include <tcpip/comport/sys/socket.h>
 #include "endian.h"
 
 #define CN_UDP_SERVERPORT        2048
@@ -71,19 +71,17 @@
 
 bool_t UdpServer_Snd(void)
 {
-	int sockfd;
-	int clientfd;
+	int server;
 	int addrlen;
 	struct sockaddr_in serveraddr;
 	struct sockaddr_in clientaddr;
 	
 	char *rcvbuf;
-	int  rcvlen;
+	int   rcvlen;
 	int sndopt;
-
-
-	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-	if(-1 == sockfd)
+	
+	server = socket(AF_INET, SOCK_DGRAM, 0);
+	if(-1 == server)
 	{
 		printk("socket failed!\n\r");
 		return false;
@@ -93,10 +91,11 @@ bool_t UdpServer_Snd(void)
 		printk("socket success!\n\r");
 	}
 
+	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_port = htons(CN_UDP_SERVERPORT);
 	serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-	if(-1==bind(sockfd, &serveraddr, sizeof(serveraddr)))
+	if(-1==bind(server, &serveraddr, sizeof(serveraddr)))
 	{
 		printk("bind failed!\n\r");
 		return false;
@@ -105,69 +104,26 @@ bool_t UdpServer_Snd(void)
 	{
 		printk("bind success!\n\r");
 	}
-
-	if(-1 == listen(sockfd, 100))
+	//设置发送缓冲区
+	sndopt = CN_SOCKBUF_LEN;
+	if(0 == setsockopt(server,SOL_SOCKET ,SO_SNDBUF,&sndopt,4))
 	{
-		printk("listen failed!\n\r");
-		return false;
+		printk("Client:set client sndbuf success!\n\r");
 	}
 	else
 	{
-		printk("listen success!\n\r");
+		printk("Client:set client sndbuf failed!\n\r");
 	}
-
-	while(1)
+	//设置发送缓冲区触发水平
+	rcvbuf = malloc(CN_BUF_LEN);
+	if(NULL != rcvbuf)
 	{
-    	clientfd = accept(sockfd, &clientaddr, &addrlen);
-    	if(clientfd != -1)
-    	{
-    		printk("Got an client:ip = %08x  port = %04x\n\r",\
-    				     ntohl(clientaddr.sin_addr.s_addr),ntohs(clientaddr.sin_port));
-    		//关闭NAGLE
-    		sndopt = 1;
-    		if(0 == setsockopt(clientfd, IPPROTO_TCP,TCP_NODELAY,&sndopt,4))
-    		{
-    			printk("Client:close nagle success!\n\r");
-    		}
-    		else
-    		{
-    			printk("Client:close nagle  failed!\n\r");
-    		}
-    		//设置发送缓冲区
-    		sndopt = CN_SOCKBUF_LEN;
-    		if(0 == setsockopt(clientfd,SOL_SOCKET ,SO_SNDBUF,&sndopt,4))
-    		{
-    			printk("Client:set client sndbuf success!\n\r");
-    		}
-    		else
-    		{
-    			printk("Client:set client sndbuf failed!\n\r");
-    		}
-    		//设置发送缓冲区触发水平
-    		rcvbuf = M_Malloc(CN_BUF_LEN,CN_TIMEOUT_FOREVER);
-    		while(1)
-    		{
-				rcvlen = recv(clientfd,rcvbuf,CN_BUF_LEN,0);
-				if(rcvlen > 0)
-				{
-					rcvbuf[rcvlen] = '\0';
-					printk("RcvMsg: %s\n\r",rcvbuf);
-				}
-				else
-				{
-					printk("TcpServerSnd:snd failed!\n\r");
-					closesocket(clientfd);
-					break;
-				}
-				Djy_EventDelay(1000*mS);
-    		}
-    	}
-    	else
-    	{
-    		printk("Bad Accept!\n\r");
-    	}
+		while(1)
+		{
+			Djy_EventDelay(1000*mS);
+		}
 	}
-	closesocket(sockfd);
+	closesocket(server);
 	return true;
 }
 

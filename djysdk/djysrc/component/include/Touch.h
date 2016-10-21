@@ -56,27 +56,27 @@
 #ifndef __TOUCH_H__
 #define __TOUCH_H__
 
-#include "stddev.h"
+#include "hmi-input.h"
 #include "systime.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct tagST_TouchAdjust
+struct ST_TouchAdjust
 {
     s32 ratio_x,ratio_y;        //定点小数，低16位是小数位。
     s32 offset_x,offset_y;       //定点小数，低16位是小数位。
 };
 
-struct tagSingleTouchPrivate
+struct SingleTouchPrivate
 {
-    ufast_t (*read_touch)(struct tagSingleTouchMsg *touch_data);
-    struct tagSingleTouchMsg touch_loc;
+    ufast_t (*read_touch)(struct SingleTouchMsg *touch_data);
+    struct SingleTouchMsg touch_loc;
     bool_t status;
 };
 
-s32 Touch_InstallDevice(char *touch_name,struct tagSingleTouchPrivate *touch_pr);
+s32 Touch_InstallDevice(char *touch_name,struct SingleTouchPrivate *touch_pr);
 
 ptu32_t Touch_Scan(void);
 ptu32_t ModuleInstall_Touch(ptu32_t para);

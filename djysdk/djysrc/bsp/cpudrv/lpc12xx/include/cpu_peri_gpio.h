@@ -166,7 +166,7 @@ struct st_iocon_reg
 
 
 /* Includes ------------------------------------------------------------------- */
-struct tagGPIO_StReg
+struct GPIO_StReg
 {
     vu32 MASK;       /*!< Offset: 0x000 Pin value mask register (R/W) */
     vu32 PIN;
@@ -215,16 +215,16 @@ extern "C"
                                      (  TYPE == GPIO_INTERRUPT_LOW)       || \
                                      (  TYPE == GPIO_INTERRUPT_HIGH))
 
-	void GPIO_CfgPinFunc(u32 port,u32 pinnum,u32 func_no);
-	void gpio_cfg_pin_mode(u32 port,u32 pinnum,u32 mode);
-	void gpio_setto_in(u32 port,u32 msk);
-	void gpio_setto_out(u32 port,u32 msk);
-	u32 GPIO_GetData(u32 port);
-	void GPIO_OutData(u32 port,u32 data);
-	void GPIO_SettoHigh(u32 port,u32 msk);
-	void GPIO_SettoLow(u32 port,u32 msk);
-	void GPIO_PowerOn(u32 port);
-	void GPIO_PowerOff(u32 port);
+    void GPIO_CfgPinFunc(u32 port,u32 pinnum,u32 func_no);
+    void gpio_cfg_pin_mode(u32 port,u32 pinnum,u32 mode);
+    void gpio_setto_in(u32 port,u32 msk);
+    void gpio_setto_out(u32 port,u32 msk);
+    u32 GPIO_GetData(u32 port);
+    void GPIO_OutData(u32 port,u32 data);
+    void GPIO_SettoHigh(u32 port,u32 msk);
+    void GPIO_SettoLow(u32 port,u32 msk);
+    void GPIO_PowerOn(u32 port);
+    void GPIO_PowerOff(u32 port);
 
 #ifdef __cplusplus
 }

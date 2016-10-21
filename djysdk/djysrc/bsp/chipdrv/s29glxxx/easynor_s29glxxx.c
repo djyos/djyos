@@ -64,7 +64,7 @@
 #include "SysSpace.h"
 #include "easynorflash.h"
 
-static struct tagEasynorFlashChip norflash_chip;
+static struct EasynorFlashChip norflash_chip;
 static u8 *chip_sector_buf;
 
 #define cn_flash_size                   0x2000000    //32M

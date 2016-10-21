@@ -57,34 +57,36 @@
 //   新版本号: V1.0.0
 //   修改说明: 原始版本
 //------------------------------------------------------
-#include "config-prj.h"
+
+#include <windows.h>
+#include <tchar.h>
+//#include <process.h>
 #include "align.h"
 #include "stdint.h"
-#include "core-cfg.h"
 #include "stdlib.h"
+#include <stdio.h>
 #include "int.h"
-#include "exception.h"
+#include "hard-exp.h"
 #include "string.h"
 #include "arch_feature.h"
 #include "cpu.h"
 #include "djyos.h"
-#include <windows.h>
-#include <mmsystem.h>
-#include <tchar.h>
-#include <process.h>
-#include <stdio.h>
 //#pragma comment(lib,"Winmm.lib")
 //#pragma comment (lib,"ntdll_32.lib")       // Copy From DDK  64位系统改为ntdll_64.lib
 
+// Windows上仿真堆,其定义与嵌入式环境不太一样,嵌入式环境中的定义,请参考官方发布
+// 的代码任意一个*.lds文件.
 struct WinHeap
 {
-    u32 CessionNum;
-    u32 HeapAlign;
-    u32 HeapBottom;
-    u32 HeapTop;
-    u32 PageSize;
-    u8  name[5];
+    u32 CessionNum;                //该堆由两段内存组成
+    u32 HeapAlign;                 //该堆上分配的内存的对齐尺寸，0表示使用系统对齐
+    u32 property;                  //0=专用堆,1=专用堆,如果系统只有唯一一个堆,则只能是通用堆
+    u32 HeapBottom;                //段基址，须符合对齐要求
+    u32 HeapTop;                   //段地址上限（不含），须符合对齐要求
+    u32 PageSize;                  //页尺寸=32bytes
+    char  name[5];                   //堆的名字,须是“sys”
 };
+
 struct WinHeap pHeapList;
 
 //struct WinHeap *pHeapList;             //在脚本中定义
@@ -94,8 +96,8 @@ extern ufast_t ufg_int_number;
 extern u32  g_s64OsTicks;             //操作系统运行ticks数
 u32 g_u32CycleSpeed = 100; //for(i=j;i>0;i--);每循环纳秒数*1.024
 s64 s64g_freq;
-extern struct  tagEventECB  *g_ptEventReady;      //就绪队列头
-extern struct  tagEventECB  *g_ptEventRunning;    //当前正在执行的事件
+extern struct EventECB  *g_ptEventReady;      //就绪队列头
+extern struct EventECB  *g_ptEventRunning;    //当前正在执行的事件
 u8 DjyosHeap[0x1000000];   //16M内存
 u32 WINAPI win_engine( LPVOID lpParameter );
 
@@ -107,13 +109,16 @@ extern HANDLE win32_int_event;
 extern HANDLE win32_int_engine;
 HANDLE old_id,new_id;
 
-u32 switch_context(ufast_t line)
+u32 switch_context(ptu32_t line)
 {
     SuspendThread(old_id);
     ResumeThread(new_id);
     Int_ContactAsynSignal();
     return 0;
 }
+
+ptu32_t Heap_StaticModuleInit(ptu32_t para);
+void Sys_Start(void);
 
 void main(int argc, char *argv[])
 {
@@ -125,7 +130,8 @@ void main(int argc, char *argv[])
 
     pHeapList.CessionNum = 1;
     pHeapList.HeapAlign = 0;
-    pHeapList.HeapBottom = DjyosHeap;
+    pHeapList.property = 0;
+    pHeapList.HeapBottom = (u32)DjyosHeap;
     pHeapList.HeapTop = pHeapList.HeapBottom + sizeof(DjyosHeap);
     pHeapList.PageSize = 128;
     strcpy(pHeapList.name,"sys");
@@ -136,6 +142,7 @@ void main(int argc, char *argv[])
     Int_Init();
     QueryPerformanceFrequency(&litmp);
     s64g_freq = litmp.QuadPart;
+    Int_Register(cn_int_line_switch_context);
     Int_IsrConnect(cn_int_line_switch_context,switch_context);
     Int_SettoAsynSignal(cn_int_line_switch_context); //tick中断被设为异步信号
     Int_RestoreAsynLine(cn_int_line_switch_context);
@@ -179,20 +186,20 @@ ATOM RegisterWinClass(HINSTANCE hInstance,WNDPROC *func,TCHAR *title)
 //返回：新创建的线程的虚拟机指针
 //注: 移植敏感函数
 //-----------------------------------------------------------------------------
-struct  tagThreadVm *__CreateThread(struct  tagEventType *evtt,u32 *stack_size)
+struct ThreadVm *__CreateThread(struct EventType *evtt,u32 *stack_size)
 {
-    struct  tagThreadVm  *result;
+    struct ThreadVm  *result;
     //stack_size和cn_kernel_stack在windows版本中并没有用到，windows的线程栈是自己维护
     //的，这样写比较接近实际cpu平台。
-    *stack_size = evtt->stack_size+sizeof(struct  tagThreadVm);
-    result=(struct  tagThreadVm  *)__MallocStack(*stack_size);
+    *stack_size = evtt->stack_size+sizeof(struct ThreadVm);
+    result=(struct ThreadVm  *)__MallocStack(*stack_size);
     if(NULL == result)
     {
         return result;
     }
     else
     {
-        memset(result,0,sizeof(struct tagThreadVm));
+        memset(result,0,sizeof(struct ThreadVm));
     }
     result->stack_top = CreateThread( NULL, 0, win_engine, evtt->thread_routine,
                                         CREATE_SUSPENDED, NULL );
@@ -213,17 +220,14 @@ struct  tagThreadVm *__CreateThread(struct  tagEventType *evtt,u32 *stack_size)
 //返回：新创建的线程指针
 //注: 移植敏感函数
 //-----------------------------------------------------------------------------
-struct  tagThreadVm *__CreateStaticThread(struct  tagEventType *evtt,void *Stack,
+struct ThreadVm *__CreateStaticThread(struct EventType *evtt,void *Stack,
                                     u32 StackSize)
 {
-    struct  tagThreadVm  *result;
-    ptu32_t  len;
+    struct ThreadVm  *result;
 
-    result = (struct  tagThreadVm  *)align_up_sys(Stack);
+    result = (struct ThreadVm  *)align_up_sys(Stack);
 
-#if CN_CFG_STACK_FILL != 0
-    memset(Stack,CN_CFG_STACK_FILL,StackSize);
-#endif
+    memset(Stack, 'd', StackSize-((ptu32_t)result - (ptu32_t)Stack));
 
     //看实际分配了多少内存，djyos内存分配使用块相联策略，如果分配的内存量大于
     //申请量，可以保证其实际尺寸是对齐的。之所以注释掉，是因为当len大于申请量时，
@@ -248,9 +252,9 @@ struct  tagThreadVm *__CreateStaticThread(struct  tagEventType *evtt,void *Stack
 //      vm，线程虚拟机指针
 //返回:  初始化结束后的当前栈指针
 //函数原型:void * __asm_reset_thread(void (*thread_routine)(void),
-//                                   struct  tagThreadVm  *vm);
+//                                   struct ThreadVm  *vm);
 //-----------------------------------------------------------------------------
-void * __asm_reset_thread(ptu32_t (*thread_routine)(void),struct  tagThreadVm  *vm)
+void * __asm_reset_thread(ptu32_t (*thread_routine)(void),struct ThreadVm  *vm)
 {
     return NULL;
 }
@@ -266,10 +270,10 @@ void * __asm_reset_thread(ptu32_t (*thread_routine)(void),struct  tagThreadVm  *
 //      old_vm，被复位线程
 //返回:  无
 //函数原型:void __asm_reset_switch(void (*thread_routine)(void),
-//                           struct  tagThreadVm *new_vm,struct  tagThreadVm *old_vm);
+//                           struct ThreadVm *new_vm,struct ThreadVm *old_vm);
 //-----------------------------------------------------------------------------
 void __asm_reset_switch(ptu32_t (*thread_routine)(void),
-                           struct  tagThreadVm *new_vm,struct  tagThreadVm *old_vm)
+                           struct ThreadVm *new_vm,struct ThreadVm *old_vm)
 {
     Int_HalfEnableAsynSignal();
     old_vm->stack_top = CreateThread( NULL, 0, win_engine, thread_routine,
@@ -285,7 +289,7 @@ void __asm_reset_switch(ptu32_t (*thread_routine)(void),
 }
 
 
-void __asm_start_thread(struct  tagThreadVm  *new_vm)
+void __asm_start_thread(struct ThreadVm  *new_vm)
 {
     ResumeThread(win32_int_engine);
     __asm_turnto_context(new_vm);
@@ -295,10 +299,10 @@ void __asm_start_thread(struct  tagThreadVm  *new_vm)
 //功能:  不保存原上下文，直接切入新的上下文执行
 //参数:  new_sp，新上下文的栈指针
 //返回:  无
-//函数原型: void __asm_turnto_context(struct  tagThreadVm  *new_vm);
+//函数原型: void __asm_turnto_context(struct ThreadVm  *new_vm);
 //说明:  当事件完成,就没有必要保存旧事件的上下文,直接切换到新事件即可.
 //-----------------------------------------------------------------------------
-void __asm_turnto_context(struct  tagThreadVm  *new_vm)
+void __asm_turnto_context(struct ThreadVm  *new_vm)
 {
     Int_HalfEnableAsynSignal();
     ResumeThread((HANDLE )new_vm->stack_top);
@@ -311,9 +315,9 @@ void __asm_turnto_context(struct  tagThreadVm  *new_vm)
 //参数:  old_sp，旧上下文的栈指针的指针，即&vm->stack。无需提供旧上下文栈指针，
 //               sp寄存器的当前值就是
 //返回:  无
-//函数原型: void __asm_switch_context(struct  tagThreadVm *new_vm,struct  tagThreadVm *old_vm);
+//函数原型: void __asm_switch_context(struct ThreadVm *new_vm,struct ThreadVm *old_vm);
 //-----------------------------------------------------------------------------
-void __asm_switch_context(struct  tagThreadVm *new_vm,struct  tagThreadVm *old_vm)
+void __asm_switch_context(struct ThreadVm *new_vm,struct ThreadVm *old_vm)
 {
     old_id = (HANDLE )old_vm->stack_top;
     new_id = (HANDLE )new_vm->stack_top;
@@ -329,13 +333,15 @@ void __asm_switch_context(struct  tagThreadVm *new_vm,struct  tagThreadVm *old_v
 //参数:  new_sp，切换目标虚拟机
 //参数:  old_sp，被中断线程虚拟机
 //返回:  无
-//函数原型: void __asm_switch_context_int(struct tagThreadVm *new_vm,struct tagThreadVm *old_vm);
+//函数原型: void __asm_switch_context_int(struct ThreadVm *new_vm,struct ThreadVm *old_vm);
 //-----------------------------------------------------------------------------
-void __asm_switch_context_int(struct tagThreadVm *new_vm,struct tagThreadVm *old_vm)
+void __asm_switch_context_int(struct ThreadVm *new_vm,struct ThreadVm *old_vm)
 {
     SuspendThread((HANDLE )old_vm->stack_top);
     ResumeThread((HANDLE )new_vm->stack_top);
 }
+
+void __Djy_VmEngine(ptu32_t (*thread_routine)(void));
 
 u32 WINAPI win_engine( LPVOID lpParameter )
 {
@@ -381,7 +387,7 @@ void CALLBACK TimerCallBack(UINT uTimerID, UINT uMsg, DWORD dwUser,
     Int_TapLine(cn_int_line_timer_event);
 }
 
-u32 __DjyIsrTick(ufast_t line)
+u32 __DjyIsrTick(ptu32_t line)
 {
     Djy_IsrTick(1);
     return 0;
@@ -395,6 +401,7 @@ u32 __DjyIsrTick(ufast_t line)
 //-----------------------------------------------------------------------------
 void __DjyInitTick(void)
 {
+    Int_Register(cn_int_line_timer_event);
     Int_IsrConnect(cn_int_line_timer_event,__DjyIsrTick);
     Int_SettoAsynSignal(cn_int_line_timer_event); //tick中断被设为异步信号
     Int_RestoreAsynLine(cn_int_line_timer_event);
@@ -407,9 +414,9 @@ void __DjyInitTick(void)
 //      周期,需要使用原子操作。
 //参数：无
 //返回：当前时钟
-//说明: 这是一个桩函数,被rtc.c文件的 DjyGetTime 函数调用
+//说明: 这是一个桩函数,被rtc.c文件的 DjyGetSysTime 函数调用
 //-----------------------------------------------------------------------------
-s64 __DjyGetTime(void)
+s64 __DjyGetSysTime(void)
 {
     LARGE_INTEGER litmp;
     s64 cnt;

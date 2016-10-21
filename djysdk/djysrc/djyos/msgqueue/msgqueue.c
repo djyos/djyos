@@ -65,8 +65,8 @@
 #include "int.h"
 #include "lock.h"
 #include "msgqueue.h"
-static struct tagRscNode s_tMsgQ_Node;
-static struct tagMutexLCB s_tMsgQ_Mutex;
+static struct Object s_tMsgQ_Node;
+static struct MutexLCB s_tMsgQ_Mutex;
 
 //----初始化-------------------------------------------------------------------
 //功能: 初始化消息队列组件，添加消息队列根资源结点，初始化互斥量
@@ -75,7 +75,7 @@ static struct tagMutexLCB s_tMsgQ_Mutex;
 //-----------------------------------------------------------------------------
 ptu32_t ModuleInstall_MsgQ (ptu32_t para)
 {
-    Rsc_AddTree(&s_tMsgQ_Node,sizeof(struct tagRscNode),RSC_RSCNODE,"消息队列");
+    OBJ_AddTree(&s_tMsgQ_Node,sizeof(struct Object),RSC_RSCNODE,"消息队列");
     Lock_MutexCreate_s(&s_tMsgQ_Mutex,"消息队列");
     return 0;
 }
@@ -89,14 +89,14 @@ ptu32_t ModuleInstall_MsgQ (ptu32_t para)
 //          件被阻塞时的排队方式。
 //返回: 新创建的消息队列指针，失败则返回NULL.
 //-----------------------------------------------------------------------------
-struct tagMsgQueue *MsgQ_Create( u32 MaxMsgs,u32  MsgLength,u32 Options)
+struct MsgQueue *MsgQ_Create( u32 MaxMsgs,u32  MsgLength,u32 Options)
 {
-    struct tagMsgQueue *MQ;
+    struct MsgQueue *MQ;
     //分配内存，同时分配消息队列控制块和存储消息的内存。
-    MQ = M_Malloc(sizeof(struct tagMsgQueue)+MsgLength*MaxMsgs,0);
+    MQ = M_Malloc(sizeof(struct MsgQueue)+MsgLength*MaxMsgs,0);
     if(MQ != NULL)
     {
-        Rsc_AddSon(&s_tMsgQ_Node,&MQ->MsgNode,sizeof(struct tagMsgQueue),
+        OBJ_AddChild(&s_tMsgQ_Node,&MQ->MsgNode,sizeof(struct MsgQueue),
                                               RSC_MSGQ,"消息队列");
         if( (Options & CN_MSGQ_TYPE_MASK) == CN_MSGQ_TYPE_PRIO)
         {
@@ -132,12 +132,12 @@ struct tagMsgQueue *MsgQ_Create( u32 MaxMsgs,u32  MsgLength,u32 Options)
 //      buf，保存消息的内存块指针。
 //返回: 新创建的消息队列指针，失败则返回NULL.
 //-----------------------------------------------------------------------------
-struct tagMsgQueue *MsgQ_Create_s(struct tagMsgQueue *pMsgQ, u32 MaxMsgs,
-                                  u32  MsgLength,u32 Options,void *buf)
+struct MsgQueue *MsgQ_Create_s(struct MsgQueue *pMsgQ, u32 MaxMsgs,
+                               u32  MsgLength,u32 Options,void *buf)
 {
     if((pMsgQ != NULL) && (buf != NULL))
     {
-        Rsc_AddSon(&s_tMsgQ_Node,&pMsgQ->MsgNode,sizeof(struct tagMsgQueue),
+        OBJ_AddChild(&s_tMsgQ_Node,&pMsgQ->MsgNode,sizeof(struct MsgQueue),
                                                  RSC_MSGQ,"消息队列");
         if( (Options & CN_MSGQ_TYPE_MASK) == CN_MSGQ_TYPE_PRIO)
         {
@@ -170,12 +170,12 @@ struct tagMsgQueue *MsgQ_Create_s(struct tagMsgQueue *pMsgQ, u32 MaxMsgs,
 //参数: pMsgQ，被删除的消息队列。
 //返回: true=成功删除，false=失败
 //-----------------------------------------------------------------------------
-bool_t MsgQ_Delete(struct tagMsgQueue *pMsgQ)
+bool_t MsgQ_Delete(struct MsgQueue *pMsgQ)
 {
     bool_t result;
+    Lock_MutexPend(&s_tMsgQ_Mutex,CN_TIMEOUT_FOREVER);
     if(pMsgQ != NULL)
     {
-        Lock_MutexPend(&s_tMsgQ_Mutex,CN_TIMEOUT_FOREVER);
         if(Lock_SempCheckBlock(&(pMsgQ->MsgSendSemp))
                 || Lock_SempCheckBlock(&(pMsgQ->MsgRecvSemp)) )
         {
@@ -183,18 +183,18 @@ bool_t MsgQ_Delete(struct tagMsgQueue *pMsgQ)
         }
         else
         {
-            Rsc_DelNode(&pMsgQ->MsgNode);          //删除信号量结点
+            OBJ_Del(&pMsgQ->MsgNode);          //删除信号量结点
             Lock_SempDelete_s(&(pMsgQ->MsgSendSemp));
             Lock_SempDelete_s(&(pMsgQ->MsgRecvSemp));
             free(pMsgQ);
             result = true;
         }
-        Lock_MutexPost(&s_tMsgQ_Mutex);
     }
     else
     {
         result = false;
     }
+    Lock_MutexPost(&s_tMsgQ_Mutex);
     return result;
 }
 
@@ -203,22 +203,22 @@ bool_t MsgQ_Delete(struct tagMsgQueue *pMsgQ)
 //参数: pMsgQ，被删除的消息队列。
 //返回: true=成功删除，false=失败
 //-----------------------------------------------------------------------------
-bool_t MsgQ_Delete_s(struct tagMsgQueue *pMsgQ)
+bool_t MsgQ_Delete_s(struct MsgQueue *pMsgQ)
 {
     bool_t result=false;
+    Lock_MutexPend(&s_tMsgQ_Mutex,CN_TIMEOUT_FOREVER);
     if(pMsgQ != NULL)
     {
-        Lock_MutexPend(&s_tMsgQ_Mutex,CN_TIMEOUT_FOREVER);
         if( !(Lock_SempCheckBlock(&(pMsgQ->MsgSendSemp))
                 || Lock_SempCheckBlock(&(pMsgQ->MsgRecvSemp)) ) )
         {
-            Rsc_DelNode(&pMsgQ->MsgNode);          //删除信号量结点
+            OBJ_Del(&pMsgQ->MsgNode);          //删除信号量结点
             Lock_SempDelete_s(&(pMsgQ->MsgSendSemp));
             Lock_SempDelete_s(&(pMsgQ->MsgRecvSemp));
             result = true;
         }
-        Lock_MutexPost(&s_tMsgQ_Mutex);
     }
+    Lock_MutexPost(&s_tMsgQ_Mutex);
     return result;
 }
 
@@ -232,7 +232,7 @@ bool_t MsgQ_Delete_s(struct tagMsgQueue *pMsgQ)
 //          决定新消息排在队列头还是尾部
 //返回: true=成功发送，false=失败
 //-----------------------------------------------------------------------------
-bool_t MsgQ_Send(struct tagMsgQueue *pMsgQ,u8 *buffer,u32 nBytes,u32 Timeout,
+bool_t MsgQ_Send(struct MsgQueue *pMsgQ,u8 *buffer,u32 nBytes,u32 Timeout,
                  bool_t priority)
 {
     u32 WriteOffset,sum,used;
@@ -241,7 +241,15 @@ bool_t MsgQ_Send(struct tagMsgQueue *pMsgQ,u8 *buffer,u32 nBytes,u32 Timeout,
         return false;
     if(nBytes > pMsgQ->MsgSize)
         return false;
-    // todo 加锁互斥，防消息队列被删除。
+    // 是否存在被操作的队列被别人删除的问题呢? 理论上是有的,分以下几种情况:
+    // 1.别人误操作,但别人得不到你的MsgQ指针,根本操作不到你.
+    // 2.恶意破坏操作,你根本防不住.
+    // 3.自己误操作
+    //
+    // 如果消息队列被删除,本地指针非空,但指向的消息队列却已经释放,此时访问这个指
+    // 针,确实很危险,一般是用信号量或者互斥量来保护,但同样存在用来保护的信号量被
+    // 删除的可能,是个无解过程.如果使用原子操作保护,保护一个会被阻塞的过程,要付出
+    // 很大的代价,且还只能保护自己的小模块内的误操作,是不值得的.
     if( Lock_SempPend(&(pMsgQ->MsgSendSemp),Timeout) )  //看消息队列还有空位没
     {
         //取当前队列中的消息容量
@@ -281,7 +289,7 @@ bool_t MsgQ_Send(struct tagMsgQueue *pMsgQ,u8 *buffer,u32 nBytes,u32 Timeout,
 //      Timeout，超时时间，us，如果消息队列空，将阻塞，直到超时
 //返回: true=成功发送，false=失败
 //-----------------------------------------------------------------------------
-bool_t MsgQ_Receive(struct tagMsgQueue *pMsgQ,u8 *buffer,u32 nBytes,u32 Timeout)
+bool_t MsgQ_Receive(struct MsgQueue *pMsgQ,u8 *buffer,u32 nBytes,u32 Timeout)
 {
     u32 sum;
     atom_low_t atom_low;
@@ -312,7 +320,7 @@ bool_t MsgQ_Receive(struct tagMsgQueue *pMsgQ,u8 *buffer,u32 nBytes,u32 Timeout)
 //参数: pMsgQ，目标消息队列
 //返回: 消息数。
 //-----------------------------------------------------------------------------
-u32 MsgQ_NumMsgs(struct tagMsgQueue *pMsgQ)
+u32 MsgQ_NumMsgs(struct MsgQueue *pMsgQ)
 {
     if(pMsgQ == NULL)
         return 0;

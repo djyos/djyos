@@ -51,15 +51,15 @@
 // <版本号> <修改日期>, <修改人员>: <修改功能概述>
 // =============================================================================
 // 备注:主要处理钩子的注册和调用
-#include "config-prj.h"
+
 
 #include "stdint.h"
 #include "stddef.h"
-#include "exp_api.h"
+#include "exp.h"
 #include "exp_hook.h"
 
-static fnExp_HookDealermodule   s_fnExpHookDealer = NULL;
-static fnExp_HookInfoDecodermodule  s_fnExpHookInfoDecoder = NULL;
+static fntExp_Hook   s_fnExpHookDealer = NULL;
+static fntExp_HookParse  s_fnExpHookInfoDecoder = NULL;
 
 // =============================================================================
 // 函数功能:Exp_HookDealer
@@ -67,23 +67,23 @@ static fnExp_HookInfoDecodermodule  s_fnExpHookInfoDecoder = NULL;
 // 输入参数:throwpara,异常抛出者抛出的异常参数
 // 输出参数:infoaddr, 存储异常信息的地址
 //          infolen,存储搜集信息长度
-//          dealresult,存储处理结构，当没有HOOK时，该值无效
+//          ExpAction,保存处理结果，当没有HOOK时，该值无效
 // 返回值  :true成功  false 失败（没有注册等因素，钩子结果不用采纳）
 // =============================================================================
-bool_t Exp_HookDealer(struct tagExpThrowPara *throwpara,\
-                          ptu32_t *infoaddr,u32 *infolen,u32 *dealresult)
+bool_t Exp_HookDealer(struct ExpThrowPara *throwpara,\
+                          ptu32_t *infoaddr,u32 *infolen,enum EN_ExpAction *ExpAction)
 {
     if(NULL != s_fnExpHookDealer)
     {
-        *dealresult = s_fnExpHookDealer(throwpara,infoaddr,infolen);
+        *ExpAction = s_fnExpHookDealer(throwpara,infoaddr,infolen);
         return true;
     }
     else
     {
         *infoaddr = (ptu32_t)NULL;
         *infolen = 0;
-        *dealresult = EN_EXP_DEAL_DEFAULT;
-        return false;
+        *ExpAction = EN_EXP_DEAL_DEFAULT;
+        return true;
     }
 }
 // =============================================================================
@@ -96,7 +96,7 @@ bool_t Exp_HookDealer(struct tagExpThrowPara *throwpara,\
 // 输出参数:无
 // 返回值  :true成功  false 失败（没有注册等因素）
 // =============================================================================
-bool_t Exp_HookInfoDecoder(struct tagExpThrowPara *throwpara,\
+bool_t Exp_HookInfoDecoder(struct ExpThrowPara *throwpara,\
                            ptu32_t infoaddr, u32 infolen,u32 endian)
 {
     if(NULL != s_fnExpHookInfoDecoder)
@@ -109,19 +109,22 @@ bool_t Exp_HookInfoDecoder(struct tagExpThrowPara *throwpara,\
     }
 }
 
+
 // =============================================================================
-// 函数功能:Exp_RegisterHook
-//          注册APP提供的异常处理HOOK
-// 输入参数:fnappdealer提供的异常处理器
-//          fnappdecoder提供的异常信息解析器
+// 函数功能：注册APP提供的异常处理HOOK，当异常发生后，将调用fnHookFunc函数，
+//           详见 fntExp_Hook类型定义的注释。fnHookFunc函数可以通过infoaddr指针
+//           返回一些信息，这些信息如果不是字符串，可以进一步提供fnHookParse，
+//           用于把信息解析成可读信息。
+// 输入参数:fnHookFunc，异常处理器
+//          fnHookParse，异常信息解析器
 // 输出参数:无
 // 返回值  ：true成功  false失败
 // =============================================================================
-bool_t Exp_RegisterHook(fnExp_HookDealermodule  fnapphookdealer,\
-                            fnExp_HookInfoDecodermodule fnapphookdecoder)
+bool_t Exp_RegisterHook(fntExp_Hook  fnHookFunc,
+                        fntExp_HookParse fnHookParse)
 {
-    s_fnExpHookDealer = fnapphookdealer;
-    s_fnExpHookInfoDecoder = fnapphookdecoder;
+    s_fnExpHookDealer = fnHookFunc;
+    s_fnExpHookInfoDecoder = fnHookParse;
     return true;
 }
 

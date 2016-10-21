@@ -70,14 +70,12 @@ extern "C" {
 #include "arch_stdint.h"
 #include "..\..\..\cortex-m.h"
 #include "..\..\..\armv7m.h"
-typedef ucpu_t atom_high_t;
-typedef ucpu_t atom_low_t;
 
 //cpu°æ±¾ºÅ
-#define cn_revision_r0p0   0x410fc230
-#define cn_revision_r1p0   0x410fc231
-#define cn_revision_r1p1   0x411fc231
-#define cn_revision_r2p0   0x412fc320
+#define CN_M3_REVISION_R0P0   0x410fc230
+#define CN_M3_REVISION_R1P0   0x410fc231
+#define CN_M3_REVISION_R1P1   0x411fc231
+#define CN_M3_REVISION_R2P0   0x412fc320
 
 #ifdef __cplusplus
 }

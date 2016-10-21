@@ -67,7 +67,7 @@ uint8_t Hard_BoardNo_Read( void )
 //参数：tgfpgaver：版本信息的结构体
 //返回：无
 // -----------------------------------------------------------------------
-void Cpld_GetInfo(struct tagCpldVer *tgfpgaver)
+void Cpld_GetInfo(struct CpldVer *tgfpgaver)
 {
     tgfpgaver->dwCpldYearHi    = *(uint8_t *)(cn_cpld_info_addr + 0x00);    //年高
     tgfpgaver->dwCpldYearLo    = *(uint8_t *)(cn_cpld_info_addr + 0x01);  //年低

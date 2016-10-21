@@ -73,11 +73,11 @@ extern "C" {
 //   满足，故阻塞将持续下去。
 //2、整体模式下，请求的数据量超过(管道长度-最后一次整体写入数据量)，将出现和1一
 //   样的效果。
- struct tagPipePCB
+ struct PipePCB
 {
-    struct tagRingBuf pipe_buf;               //环形发送缓冲区.
-    struct tagSemaphoreLCB *pipe_write_semp;  //写缓冲区锁
-    struct tagSemaphoreLCB *pipe_read_semp;   //读缓冲区锁
+    struct RingBuf pipe_buf;               //环形发送缓冲区.
+    struct SemaphoreLCB *pipe_write_semp;  //写缓冲区锁
+    struct SemaphoreLCB *pipe_read_semp;   //读缓冲区锁
     u32    write_level;                     //写触发水平
     u32    read_level;                      //读触发水平
     bool_t whole_mode;          //整体模式，true=确保每次写入完整记录，比如要写
@@ -95,17 +95,17 @@ extern "C" {
 #define pipe_read(pipe,buf,len,timeout)     Driver_DevReadRight(pipe,buf,len,timeout)
 
 ptu32_t Pipe_ModuleInit(ptu32_t para);
-tagDevHandle Pipe_Create(u8* buf,u32 size,bool_t whole,
+struct DjyDevice * Pipe_Create(u8* buf,u32 size,bool_t whole,
                              u32 write_level,u32 read_level,char *name);
-ptu32_t Pipe_DevRead(tagDevHandle pipe_dev,ptu32_t res,
+ptu32_t Pipe_DevRead(struct DjyDevice * pipe_dev,ptu32_t res,
                                         ptu32_t dst_buf,ptu32_t len);
-ptu32_t Pipe_DevWrite(tagDevHandle pipe_dev,ptu32_t src_buf,
+ptu32_t Pipe_DevWrite(struct DjyDevice * pipe_dev,ptu32_t src_buf,
                             ptu32_t res,ptu32_t len);
-ptu32_t Pipe_DevCtrl(tagDevHandle pipe_dev,u32 cmd,
+ptu32_t Pipe_DevCtrl(struct DjyDevice * pipe_dev,u32 cmd,
                         u32 data1,u32 data2);
-bool_t Pipe_Delete(tagDevHandle pipe_dev);
-u32 Pipe_Capacity(tagDevHandle pipe_dev);
-u32 Pipe_Check(tagDevHandle pipe_dev);
+bool_t Pipe_Delete(struct DjyDevice * pipe_dev);
+u32 Pipe_Capacity(struct DjyDevice * pipe_dev);
+u32 Pipe_Check(struct DjyDevice * pipe_dev);
 
 #ifdef __cplusplus
 }

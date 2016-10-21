@@ -57,7 +57,9 @@
 #ifndef _BOARD_CONFIG_H
 #define _BOARD_CONFIG_H
 
-
+//内核相关配置
+#define CN_CFG_DYNAMIC_MEM 1  //是否支持动态内存分配，即使不支持，也允许使用malloc-free分配内存，
+                              //但使用有差别，详见《……用户手册》内存分配章节
 //CPU架构相关配置,可选才在这里配置,例如大小端,是可选的,在这里配置,
 //而CPU字长固定,故字长在BSP的arch.h文件中定义
 //存储器大小端的配置
@@ -69,7 +71,7 @@
 #define CN_CFG_TICK_US 1000  //操作系统内核时钟脉冲长度，以us为单位。*
 #define CN_CFG_TICK_HZ 1000  //内核时钟频率，单位为hz。
 #define Mhz 1000000
-#define CN_CFG_MCLK      (800*Mhz)  //主频
+#define CN_CFG_MCLK      (800*Mhz)  //主频，内核要用，必须定义
 #define cfg_core_ccb_clk (400*Mhz)
 #define cfg_core_tb_clk  (cfg_core_ccb_clk/8)  //tbclk
 #define cfg_core_tb_clk_time   20              //ns
@@ -79,12 +81,12 @@
 #define CN_CFG_EASYNOR_START_SECTOR       0   //定义简易文件系统起始块
 #define CN_CFG_EASYNOR_LENGTH_SECTOR      50  //定义文件系统占用sector个数
 //flash芯片宏定义
-#define cn_norflash_bus_width		   16 	//定义flash总线宽度
-#define cn_norflash_buf_size           64	//定义norflash缓冲区大小
+#define cn_norflash_bus_width          16   //定义flash总线宽度
+#define cn_norflash_buf_size           64   //定义norflash缓冲区大小
 //RTC_DS1390
-#define CFG_RTC_SPI_BUS			g_ptSpi_Reg //RTC使用的SPI
-#define CFG_RTC_SPI_CS			0			//CS0
-#define CFG_RTC_SPI_SPEED		600000      //RTC传递的SPI速度 600kHz
+#define CFG_RTC_SPI_BUS         g_ptSpi_Reg //RTC使用的SPI
+#define CFG_RTC_SPI_CS          0           //CS0
+#define CFG_RTC_SPI_SPEED       600000      //RTC传递的SPI速度 600kHz
 
 /*____外设配置____*/
 #define CN_CFG_UART0_USED 1

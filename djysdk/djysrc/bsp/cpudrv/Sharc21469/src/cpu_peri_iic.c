@@ -82,7 +82,7 @@
 #define I2C_WRITE_BIT 0
 
 
-static struct tagIIC_CB s_IIC0_CB;
+static struct IIC_CB s_IIC0_CB;
 
 //缓存区大小限制：2-254.
 //SHARC21469作为主机发送时，理论上不对发送数据长度做限制；
@@ -94,14 +94,14 @@ static struct tagIIC_CB s_IIC0_CB;
 #define TWI_ADDR_GET(n)         ((n>>1)& TWI_ADDR_MASK)
 
 
-struct tagIIC_IntParamSet
+struct IIC_IntParamSet
 {
-    struct tagSemaphoreLCB *pDrvPostSemp;   //信号量
+    struct SemaphoreLCB *pDrvPostSemp;   //信号量
     u32 TransCount;                     //传输数据量计数器
     u32 TransTotalLen;
 };
 
-static struct tagIIC_IntParamSet IntParamset0;
+static struct IIC_IntParamSet IntParamset0;
 
 
 //函数声明
@@ -126,13 +126,13 @@ static struct tagIIC_IntParamSet IntParamset0;
                                        u32 mem_addr,
                                        u8 maddr_len,
                                        u32 length,
-                                       struct tagSemaphoreLCB *iic_semp);
+                                       struct SemaphoreLCB *iic_semp);
  static bool_t __IIC_GenerateReadStart(ptu32_t  specific_flag,
                                        u8 dev_addr,
                                        u32 mem_addr,
                                        u8 maddr_len,
                                        u32 length,
-                                       struct tagSemaphoreLCB *iic_semp);
+                                       struct SemaphoreLCB *iic_semp);
 
 
 
@@ -349,7 +349,7 @@ static bool_t __IIC_GenerateWriteStart(ptu32_t  specific_flag,
                                        u32 mem_addr,
                                        u8 maddr_len,
                                        u32 length,
-                                       struct tagSemaphoreLCB *iic_semp)
+                                       struct SemaphoreLCB *iic_semp)
 {
    volatile tagI2CReg *reg;
     u8 mem_addr_buf[4];
@@ -418,7 +418,7 @@ static bool_t __IIC_GenerateReadStart(ptu32_t  specific_flag,
                                        u32 mem_addr,
                                        u8 maddr_len,
                                        u32 length,
-                                       struct tagSemaphoreLCB *iic_semp)
+                                       struct SemaphoreLCB *iic_semp)
 {
      volatile tagI2CReg *reg;
       u8 mem_addr_buf[4];
@@ -541,8 +541,8 @@ static void __IIC_GenerateEnd(ptu32_t specific_flag)
 static u32 __IIC_ISR(ufast_t i2c_int_line)
 {
 
-    static struct tagIIC_IntParamSet *IntParam;
-    static struct tagIIC_CB *ICB;
+    static struct IIC_IntParamSet *IntParam;
+    static struct IIC_CB *ICB;
     tagI2CReg *reg;
     u8 ch;
     u32 IicErrorNo;
@@ -692,9 +692,10 @@ static void __IIC_HardDefaultSet(ptu32_t RegBaseAddr)
 //       isr,中断服务函数指针
 // 返回: 无
 // =============================================================================
-static void __IIC_IntConfig(u32 IntLine,u32 (*isr)(ufast_t))
+static void __IIC_IntConfig(u32 IntLine,u32 (*isr)(ptu32_t))
 {
-     Int_IsrConnect(cn_int_line_TWII,__IIC_ISR);
+    Int_Register(cn_int_line_TWII);
+    Int_IsrConnect(cn_int_line_TWII,__IIC_ISR);
     Int_SettoAsynSignal(cn_int_line_TWII);
     Int_ClearLine(cn_int_line_TWII);     //清掉初始化产生的发送fifo空的中断
     Int_RestoreAsynLine(cn_int_line_TWII);
@@ -742,7 +743,7 @@ static void __IIC_BusCtrl(ptu32_t spceific_flag,u32 cmd,u32 data1,u32 data2)
 bool_t IIC0_Init(void)
 {
     static u8 s_IIC0Buf[IIC0_BUF_LEN];
-    struct tagIIC_Param IIC0_Config;
+    struct IIC_Param IIC0_Config;
     IIC0_Config.BusName="IIC0";
     IIC0_Config.SimpleBuf=(u8 *)&s_IIC0Buf;
     IIC0_Config.SimpleBufLen=IIC0_BUF_LEN;

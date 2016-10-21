@@ -62,7 +62,7 @@
 //                 3, 不允许没有名字
 //                 4，第一项的class一般的为0
 // =============================================================================
-bool_t  CheckTagMenuitemModelTab(const struct _tagMenuitemModel *tab,u32 tab_size)
+bool_t  CheckTagMenuitemModelTab(const struct MenuitemModel *tab,u32 tab_size)
 {
    bool_t    result=false;
    s8        temp_class=0;
@@ -106,7 +106,7 @@ bool_t  CheckTagMenuitemModelTab(const struct _tagMenuitemModel *tab,u32 tab_siz
 // 返回值  :tablist所包含的菜单项意愿的个数
 // 说明    :当tab_list的名字为空的时候表示结束。
 // =========================================================================
-u32  CalTagMenuitemModuleTabSize(const struct _tagMenuitemModel * tab_list)
+u32  CalTagMenuitemModuleTabSize(const struct MenuitemModel * tab_list)
 {
     u32  num=0;
     bool_t flag=true;
@@ -133,7 +133,7 @@ u32  CalTagMenuitemModuleTabSize(const struct _tagMenuitemModel * tab_list)
 // 说明:首先检查tab_list的合法性，然后按照相对位置进行添加,tablist的第一个必须是
 //          是主菜单项（处于最高菜单层次，class最小）
 // ===================================================================================
-struct menu_item*  append_menu_branch(struct menu_item * menuitem_tree, const struct _tagMenuitemModel * tab_list)
+struct menu_item*  append_menu_branch(struct menu_item * menuitem_tree, const struct MenuitemModel * tab_list)
 {
      bool_t    result=false;
      u8        current_class=0;
@@ -255,7 +255,7 @@ struct menu_item*  append_menu_branch(struct menu_item * menuitem_tree, const st
 //        成功的时候等情况下返回NULL；
 // 说明    :首先检查tab_list的合法性，然后按照相对位置进行添加
 // =========================================================================
-struct menu_item  *create_menu_tree(const char *treename,const struct _tagMenuitemModel * tab_list)
+struct menu_item  *create_menu_tree(const char *treename,const struct MenuitemModel * tab_list)
 {
 
      struct menu_item    *result;//used to store the result

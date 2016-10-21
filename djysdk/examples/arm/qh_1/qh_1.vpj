@@ -219,19 +219,35 @@
             Filters=""></Folder>
     </CustomFolders>
     <Files AutoFolders="DirectoryView">
-        <Folder Name="config">
+        <Folder
+            Name="config"
+            GUID="{2AF93261-26EB-4741-6C6B-EB26C150B7AF}">
             <F N="config/Debug.lds"/>
             <F N="config/Release.lds"/>
         </Folder>
-        <Folder Name="src">
-            <Folder Name="OS_prjcfg">
-                <Folder Name="include">
-                    <F N="src/OS_prjcfg/include/board-cfg.h"/>
+        <Folder
+            Name="src"
+            GUID="{8B40D5F2-0062-4914-AA2C-3D2FF4A48C84}">
+            <Folder
+                Name="OS_prjcfg"
+                GUID="{3C835095-BFE2-4483-44B1-3EC9A64D939B}">
+                <Folder
+                    Name="config"
+                    GUID="{53B342CA-FCF8-4EFD-B556-8DB7C68562B2}">
+                    <F N="src/OS_prjcfg/config/int-config.c"/>
+                </Folder>
+                <Folder
+                    Name="include"
+                    GUID="{D8AD0D34-40C5-461D-E45C-7D2007B0068D}">
                     <F N="src/OS_prjcfg/include/config-prj.h"/>
                 </Folder>
             </Folder>
-            <Folder Name="user">
-                <Folder Name="critical">
+            <Folder
+                Name="user"
+                GUID="{E7D4F994-A667-4FD6-1C1B-95C95CE319A4}">
+                <Folder
+                    Name="critical"
+                    GUID="{4AF19747-5833-42EB-8FA0-9785B6434FAF}">
                     <F N="src/user/critical/critical.c"/>
                 </Folder>
                 <F N="src/user/main.c"/>

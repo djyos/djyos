@@ -52,10 +52,13 @@
 // =============================================================================
 
 #include "cpu_peri.h"
-#include "uart.h"
+#include "stdio.h"
+#include <driver/include/uart.h>
 #include "string.h"
 
-extern const char *gc_pCfgStddevName;  //标准终端名字
+extern const char *gc_pCfgStdinName;    //标准输入设备
+extern const char *gc_pCfgStdoutName;   //标准输出设备
+extern const char *gc_pCfgStderrName;   //标准错误输出设备
 // =============================================================================
 #define tagUartReg     UART_Type
 
@@ -65,6 +68,12 @@ static tagUartReg volatile * const tg_UART_Reg[] = {(tagUartReg *)CN_UART0_BASE,
                                                     (tagUartReg *)CN_UART3_BASE,
                                                     (tagUartReg *)CN_UART4_BASE,
                                                     (tagUartReg *)CN_UART5_BASE};
+
+static u32 TxByteTime;                    //正常发送一个字节所需要的时间
+static tagUartReg *PutStrDirectReg;     //用于printk发送的串口寄存器
+static tagUartReg *GetCharDirectReg;     //用于直接接收的串口寄存器
+static u32 TxDirectPort;                  //用于printk发送的串口号
+static u32 RxDirectPort;                  //用于直接接收的串口号
 // =============================================================================
 
 #define UART0_SendBufLen            32
@@ -84,13 +93,13 @@ static tagUartReg volatile * const tg_UART_Reg[] = {(tagUartReg *)CN_UART0_BASE,
 
 #define UART5_SendBufLen            32
 #define UART5_RecvBufLen            32
-static struct tagUartCB *pUartCB[CN_UART_NUM];
+static struct UartCB *pUartCB[CN_UART_NUM];
 
 //用于标识串口是否初始化标记，第0位表示UART0，第一位表UART1....
 //依此类推，1表示初始化，0表示未初始化
 static u8 sUartInited = 0;
 // =============================================================================
-static ptu32_t UART_ISR(ufast_t IniLine);
+static ptu32_t UART_ISR(ptu32_t IniLine);
 
 // ----使能接收中断-------------------------------------------------------------
 // 功能: 使能UART的接收中断
@@ -143,6 +152,16 @@ static bool_t __UART_TxTranEmpty(tagUartReg volatile *reg)
 }
 
 // =============================================================================
+// 功能: 检查接收寄存器的状态，有数据就返回true，否则返回false
+// 参数：reg,被操作的寄存器组指针
+// 返回: true = 有数据，false = 无数据
+// =============================================================================
+static bool_t __UART_RxHadChar(tagUartReg volatile *reg)
+{
+    return reg->RCFIFO; //接收数据量，如果有数据返回true,否则false
+}
+
+// =============================================================================
 // 功能: 设置串口串口的波特率，FreescaleKxx的UART0和UART1时钟源为CORE，其他的时钟源
 //       为BUS时钟
 // 参数: Reg,被操作的寄存器组指针
@@ -171,6 +190,11 @@ static void __UART_BaudSet(tagUartReg volatile *Reg,u32 baud)
     //用于校正
     temp = Reg->C4 & ~(UART_C4_BRFA(0x1F));
     Reg->C4 = temp |  UART_C4_BRFA(Brfa);
+
+    if(tg_UART_Reg[TxDirectPort] == Reg)
+    {
+        TxByteTime = 11000000/baud;     //1个字节传输时间，按10bit，+10%计算
+    }
 }
 
 // =============================================================================
@@ -226,10 +250,10 @@ static void __UART_GpioConfig(u8 SerialNo)
 // =============================================================================
 static void __UART_ComConfig(tagUartReg volatile *Reg,ptu32_t data)
 {
-    struct tagCOMParam *COM;
+    struct COMParam *COM;
     if((data == 0) || (Reg == NULL))
         return;
-    COM = (struct tagCOMParam *)data;
+    COM = (struct COMParam *)data;
     __UART_BaudSet(Reg,COM->BaudRate);
 
     switch(COM->DataBits)               // data bits
@@ -275,11 +299,15 @@ static void __UART_IntInit(u32 SerialNo)
         IntLine = CN_INT_LINE_UART5_RX_TX;
     else
         return;
-    Int_SetClearType(IntLine,CN_INT_CLEAR_PRE);
-    Int_IsrConnect(IntLine,UART_ISR);
-    Int_SettoAsynSignal(IntLine);
-    Int_ClearLine(IntLine);
-    Int_RestoreAsynLine(IntLine);
+
+    if(true == Int_Register(IntLine))
+    {
+		Int_IsrConnect(IntLine,UART_ISR);
+		Int_SetClearType(IntLine,CN_INT_CLEAR_AUTO);
+		Int_SettoAsynSignal(IntLine);
+		Int_ClearLine(IntLine);
+		Int_RestoreAsynLine(IntLine);
+    }
 }
 
 // =============================================================================
@@ -290,27 +318,12 @@ static void __UART_IntInit(u32 SerialNo)
 // =============================================================================
 static void __UART_HardInit(u8 SerialNo)
 {
-    u32 UartClk;
-    u16 Sbr,Brfa;
     if(SerialNo > CN_UART5)
         return;
 
-    //UART0和UART1的时钟来源于CORE时钟，而其他的来源于BUS时钟
-    if(SerialNo < CN_UART2)
-        UartClk = CN_CFG_MCLK;
-    else
-        UartClk = CN_CFG_MCLK/2;
     //GPIO的配置
     __UART_GpioConfig(SerialNo);
-
-    Sbr = (u16)(UartClk/(115200 * 16));
-    Brfa = (((UartClk*32)/(115200 * 16)) - (Sbr * 32));
-
-    tg_UART_Reg[SerialNo]->C2 &= ~(UART_C2_TE_MASK | UART_C2_RE_MASK ); //关收发
-    tg_UART_Reg[SerialNo]->C1  = 0;     // 8 bits, no Parity, 1 Stop bit
-    tg_UART_Reg[SerialNo]->BDH = UART_BDH_SBR(((Sbr & 0x1F00) >> 8));   // 115200
-    tg_UART_Reg[SerialNo]->BDL = (u8)(Sbr & UART_BDL_SBR_MASK);
-    tg_UART_Reg[SerialNo]->C4  = UART_C4_BRFA(Brfa);
+    __UART_BaudSet(tg_UART_Reg[SerialNo],115200);
 
     tg_UART_Reg[SerialNo]->C2 |= UART_C2_TIE_MASK;      //使能TIE中断
     tg_UART_Reg[SerialNo]->C2 |= UART_C2_RIE_MASK;      //使能RIE中断
@@ -328,27 +341,27 @@ static void __UART_HardInit(u8 SerialNo)
 //       timeout,超时时间，us
 // 返回: 发送字节数
 // =============================================================================
-static u32 __UART_SendDirectly(tagUartReg *Reg,u8 *send_buf,u32 len,u32 timeout)
-{
-    u32  result;
-
-    if(NULL == Reg)     return 0;
-    __UART_TxIntDisable(Reg);
-    for(result=0; result < len; result ++)
-    {
-        // 超时或者发送缓冲为空时退出
-        while((false == __UART_TxTranEmpty(Reg))&& (timeout > 0))
-        {
-            timeout--;
-            Djy_DelayUs(1);
-        }
-        if(timeout == 0)
-            break;
-        Reg->D = send_buf[result];
-    }
-    __UART_TxIntEnable(Reg);
-    return result;
-}
+//static u32 __UART_SendDirectly(tagUartReg *Reg,u8 *send_buf,u32 len,u32 timeout)
+//{
+//    u32  result;
+//
+//    if(NULL == Reg)     return 0;
+//    __UART_TxIntDisable(Reg);
+//    for(result=0; result < len; result ++)
+//    {
+//        // 超时或者发送缓冲为空时退出
+//        while((false == __UART_TxTranEmpty(Reg))&& (timeout > 0))
+//        {
+//            timeout--;
+//            Djy_DelayUs(1);
+//        }
+//        if(timeout == 0)
+//            break;
+//        Reg->D = send_buf[result];
+//    }
+//    __UART_TxIntEnable(Reg);
+//    return result;
+//}
 
 // =============================================================================
 // 功能: 启动串口发送，其目的是触发中断，用中断方式发送数据。
@@ -433,9 +446,9 @@ static ptu32_t __UART_Ctrl(tagUartReg *Reg,u32 cmd, u32 data1,u32 data2)
 // 参数: 中断线号.
 // 返回: 0.
 // =============================================================================
-static u32 UART_ISR(ufast_t IntLine)
+static u32 UART_ISR(ptu32_t IntLine)
 {
-    struct tagUartCB *UCB;
+    struct UartCB *UCB;
     volatile tagUartReg *Reg;
     u32 i,fifodep=1,num=0;
     u8 ch[16];
@@ -444,30 +457,30 @@ static u32 UART_ISR(ufast_t IntLine)
     {
     case CN_INT_LINE_UART0_RX_TX:
     case CN_INT_LINE_UART0_ERR:
-    	UCB = pUartCB[CN_UART0];
-    	Reg = tg_UART_Reg[CN_UART0];
+        UCB = pUartCB[CN_UART0];
+        Reg = tg_UART_Reg[CN_UART0];
         fifodep = 8;
         break;
     case CN_INT_LINE_UART1_RX_TX:
     case CN_INT_LINE_UART1_ERR:
-    	UCB = pUartCB[CN_UART1];
-    	Reg = tg_UART_Reg[CN_UART1];
+        UCB = pUartCB[CN_UART1];
+        Reg = tg_UART_Reg[CN_UART1];
         fifodep = 8;
         break;
     case CN_INT_LINE_UART2_RX_TX:
     case CN_INT_LINE_UART2_ERR:
-    	UCB = pUartCB[CN_UART2];
-    	Reg = tg_UART_Reg[CN_UART2];
+        UCB = pUartCB[CN_UART2];
+        Reg = tg_UART_Reg[CN_UART2];
         break;
     case CN_INT_LINE_UART3_RX_TX:
     case CN_INT_LINE_UART3_ERR:
-    	UCB = pUartCB[CN_UART3];
-    	Reg = tg_UART_Reg[CN_UART3];
+        UCB = pUartCB[CN_UART3];
+        Reg = tg_UART_Reg[CN_UART3];
         break;
     case CN_INT_LINE_UART4_RX_TX:
     case CN_INT_LINE_UART4_ERR:
-    	UCB = pUartCB[CN_UART4];
-    	Reg = tg_UART_Reg[CN_UART4];
+        UCB = pUartCB[CN_UART4];
+        Reg = tg_UART_Reg[CN_UART4];
         break;
     case CN_INT_LINE_UART5_RX_TX:
     case CN_INT_LINE_UART5_ERR:
@@ -494,8 +507,8 @@ static u32 UART_ISR(ufast_t IntLine)
         num = UART_PortRead(UCB,ch,fifodep,0);
         if(num>0)
         {
-			for(i = 0; i < num; i++)
-				Reg->D = ch[i++];
+            for(i = 0; i < num; i++)
+                Reg->D = ch[i++];
         }
         else
         {
@@ -522,7 +535,7 @@ static u32 UART_ISR(ufast_t IntLine)
 // =============================================================================
 ptu32_t ModuleInstall_UART(u32 serial_no)
 {
-    struct tagUartParam UART_Param;
+    struct UartParam UART_Param;
 
     switch(serial_no)
     {
@@ -533,7 +546,6 @@ ptu32_t ModuleInstall_UART(u32 serial_no)
         UART_Param.TxRingBufLen = UART0_SendBufLen;
         UART_Param.RxRingBufLen = UART0_RecvBufLen;
         UART_Param.StartSend    = (UartStartSend)__UART_SendStart;
-        UART_Param.DirectlySend = (UartDirectSend)__UART_SendDirectly;
         UART_Param.UartCtrl     = (UartControl)__UART_Ctrl;
         break;
     case CN_UART1://串口1
@@ -543,7 +555,6 @@ ptu32_t ModuleInstall_UART(u32 serial_no)
         UART_Param.TxRingBufLen = UART1_SendBufLen;
         UART_Param.RxRingBufLen = UART1_RecvBufLen;
         UART_Param.StartSend    = (UartStartSend)__UART_SendStart;
-        UART_Param.DirectlySend = (UartDirectSend)__UART_SendDirectly;
         UART_Param.UartCtrl     = (UartControl)__UART_Ctrl;
         break;
     case CN_UART2://串口2
@@ -553,7 +564,6 @@ ptu32_t ModuleInstall_UART(u32 serial_no)
         UART_Param.TxRingBufLen = UART2_SendBufLen;
         UART_Param.RxRingBufLen = UART2_RecvBufLen;
         UART_Param.StartSend    = (UartStartSend)__UART_SendStart;
-        UART_Param.DirectlySend = (UartDirectSend)__UART_SendDirectly;
         UART_Param.UartCtrl     = (UartControl)__UART_Ctrl;
         break;
     case CN_UART3://串口3
@@ -563,7 +573,6 @@ ptu32_t ModuleInstall_UART(u32 serial_no)
         UART_Param.TxRingBufLen = UART3_SendBufLen;
         UART_Param.RxRingBufLen = UART3_RecvBufLen;
         UART_Param.StartSend    = (UartStartSend)__UART_SendStart;
-        UART_Param.DirectlySend = (UartDirectSend)__UART_SendDirectly;
         UART_Param.UartCtrl     = (UartControl)__UART_Ctrl;
         break;
     case CN_UART4://串口4
@@ -573,7 +582,6 @@ ptu32_t ModuleInstall_UART(u32 serial_no)
         UART_Param.TxRingBufLen = UART4_SendBufLen;
         UART_Param.RxRingBufLen = UART4_RecvBufLen;
         UART_Param.StartSend    = (UartStartSend)__UART_SendStart;
-        UART_Param.DirectlySend = (UartDirectSend)__UART_SendDirectly;
         UART_Param.UartCtrl     = (UartControl)__UART_Ctrl;
         break;
     case CN_UART5://串口5
@@ -583,7 +591,6 @@ ptu32_t ModuleInstall_UART(u32 serial_no)
         UART_Param.TxRingBufLen = UART5_SendBufLen;
         UART_Param.RxRingBufLen = UART5_RecvBufLen;
         UART_Param.StartSend    = (UartStartSend)__UART_SendStart;
-        UART_Param.DirectlySend = (UartDirectSend)__UART_SendDirectly;
         UART_Param.UartCtrl     = (UartControl)__UART_Ctrl;
         break;
     default:
@@ -594,55 +601,151 @@ ptu32_t ModuleInstall_UART(u32 serial_no)
     __UART_HardInit(serial_no);
     __UART_IntInit(serial_no);
 
-	sUartInited |= (0x01 << serial_no);
-	pUartCB[serial_no] = UART_InstallPort(&UART_Param);
-	if( pUartCB[serial_no] == NULL)
-		return 0;
-	else
-		return 1;
+    sUartInited |= (0x01 << serial_no);
+    pUartCB[serial_no] = UART_InstallPort(&UART_Param);
+    if( pUartCB[serial_no] == NULL)
+        return 0;
+    else
+        return 1;
 }
 
 // =============================================================================
-// 功能：字符终端直接发送函数，采用轮询方式，直接写寄存器，多用于djy_printk等调试环境
-// 参数：发送字符串指针
+// 功能：字符终端直接发送函数，采用轮询方式，直接写寄存器，用于printk，或者stdout
+//       没有初始化
+// 参数：str，发送字符串指针
+//      len，发送的字节数
 // 返回：0，发生错误；result,发送数据长度，字节单位
 // =============================================================================
-u32 Uart_SendServiceDirectly(char *str)
+s32 Uart_PutStrDirect(const char *str,u32 len)
 {
-    u32  result=0,len,timeout=100*mS;
-	tagUartReg *Reg;
-	u32 BaseAddr;
+    u32 result = 0,timeout = TxByteTime * len;
+    u16 CR_Bak;
 
-	if(!strcmp(gc_pCfgStddevName,"UART0") && (sUartInited & (0x01 << CN_UART0)))
-		BaseAddr = CN_UART0_BASE;
-	else if(!strcmp(gc_pCfgStddevName,"UART1")&& (sUartInited & (0x01 << CN_UART1)))
-		BaseAddr = CN_UART1_BASE;
-	else if(!strcmp(gc_pCfgStddevName,"UART2")&& (sUartInited & (0x01 << CN_UART2)))
-		BaseAddr = CN_UART2_BASE;
-	else if(!strcmp(gc_pCfgStddevName,"UART3")&& (sUartInited & (0x01 << CN_UART3)))
-		BaseAddr = CN_UART3_BASE;
-	else if(!strcmp(gc_pCfgStddevName,"UART4")&& (sUartInited & (0x01 << CN_UART4)))
-		BaseAddr = CN_UART4_BASE;
-	else if(!strcmp(gc_pCfgStddevName,"UART5")&& (sUartInited & (0x01 << CN_UART5)))
-		BaseAddr = CN_UART5_BASE;
-	else
-		return 0;
-
-    len = strlen(str);
-    Reg = (tagUartReg *)BaseAddr;
-    __UART_TxIntDisable(Reg);
-    for(result=0; result < len; result ++)
+    CR_Bak = GetCharDirectReg->C2;                          //Save INT
+    __UART_TxIntDisable(GetCharDirectReg);                  //disable send INT
+    for(result=0; result < len+1; result ++)
     {
         // 超时或者发送缓冲为空时退出
-        while((false == __UART_TxTranEmpty(Reg))&& (timeout > 0))
+        while((false == __UART_TxTranEmpty(PutStrDirectReg))&& (timeout > 10))
         {
-            timeout--;
-            Djy_DelayUs(1);
+            timeout -=10;
+            Djy_DelayUs(10);
         }
-        if(timeout == 0)
+        if( (timeout <= 10) || (result == len))
             break;
-        Reg->D = str[result];
+        PutStrDirectReg->D = str[result];
     }
-    __UART_TxIntEnable(Reg);
+    PutStrDirectReg->C2 = CR_Bak;                         //restore send INT
     return result;
+}
+
+// =============================================================================
+// 功能：字符终端直接接收函数，采用轮询方式，直接读寄存器，用于stdin初始化前
+// 参数：str，发送字符串指针
+//      len，发送的字节数
+// 返回：0，发生错误；result,发送数据长度，字节单位
+// =============================================================================
+char Uart_GetCharDirect(void)
+{
+    u16 CR_Bak;
+    char result;
+
+    CR_Bak = GetCharDirectReg->C2;                          //Save INT
+    __UART_TxIntDisable(GetCharDirectReg);                  //disable send INT
+    while(__UART_RxHadChar(GetCharDirectReg) == false) ;
+    result = GetCharDirectReg->D;
+    PutStrDirectReg->C2 = CR_Bak;                         //restore send INT
+    return result;
+}
+
+//----初始化内核级IO-----------------------------------------------------------
+//功能：初始化内核级输入和输出所需的runtime函数指针。
+//参数：无
+//返回：无
+//-----------------------------------------------------------------------------
+void Stdio_KnlInOutInit(u32 para)
+{
+    if(!strcmp(gc_pCfgStdoutName,"/dev/UART0"))
+    {
+        PutStrDirectReg = (tagUartReg*)CN_UART0_BASE;
+        TxDirectPort = CN_UART0;
+    }
+    else if(!strcmp(gc_pCfgStdoutName,"/dev/UART1"))
+    {
+        PutStrDirectReg = (tagUartReg*)CN_UART1_BASE;
+        TxDirectPort = CN_UART1;
+    }
+    else if(!strcmp(gc_pCfgStdoutName,"/dev/UART2"))
+    {
+        PutStrDirectReg = (tagUartReg*)CN_UART2_BASE;
+        TxDirectPort = CN_UART2;
+    }
+    else if(!strcmp(gc_pCfgStdoutName,"/dev/UART3"))
+    {
+        PutStrDirectReg = (tagUartReg*)CN_UART3_BASE;
+        TxDirectPort = CN_UART3;
+    }
+    else if(!strcmp(gc_pCfgStdoutName,"/dev/UART4"))
+    {
+        PutStrDirectReg = (tagUartReg*)CN_UART4_BASE;
+        TxDirectPort = CN_UART4;
+    }
+    else if(!strcmp(gc_pCfgStdoutName,"/dev/UART5"))
+    {
+        PutStrDirectReg = (tagUartReg*)CN_UART5_BASE;
+        TxDirectPort = CN_UART5;
+    }
+    else
+    {
+        PutStrDirectReg = NULL ;
+    }
+
+    if(PutStrDirectReg != NULL)
+    {
+        __UART_HardInit(TxDirectPort);
+        TxByteTime = 95;      //初始化默认115200，发送一个byte是87uS,+10%容限
+        PutStrDirect = Uart_PutStrDirect;
+    }
+
+    if(!strcmp(gc_pCfgStdoutName,"/dev/UART0"))
+    {
+        GetCharDirectReg = (tagUartReg*)CN_UART0_BASE;
+        RxDirectPort = CN_UART0;
+    }
+    else if(!strcmp(gc_pCfgStdoutName,"/dev/UART1"))
+    {
+        GetCharDirectReg = (tagUartReg*)CN_UART1_BASE;
+        RxDirectPort = CN_UART1;
+    }
+    else if(!strcmp(gc_pCfgStdinName,"/dev/UART2"))
+    {
+        GetCharDirectReg = (tagUartReg*)CN_UART2_BASE;
+        RxDirectPort = CN_UART2;
+    }
+    else if(!strcmp(gc_pCfgStdinName,"/dev/UART3"))
+    {
+        GetCharDirectReg = (tagUartReg*)CN_UART3_BASE;
+        RxDirectPort = CN_UART3;
+    }
+    else if(!strcmp(gc_pCfgStdinName,"/dev/UART4"))
+    {
+        GetCharDirectReg = (tagUartReg*)CN_UART4_BASE;
+        RxDirectPort = CN_UART4;
+    }
+    else if(!strcmp(gc_pCfgStdinName,"/dev/UART5"))
+    {
+        GetCharDirectReg = (tagUartReg*)CN_UART5_BASE;
+        RxDirectPort = CN_UART5;
+    }
+    else
+    {
+        GetCharDirectReg = NULL ;
+    }
+    if(GetCharDirectReg != NULL)
+    {
+        if(TxDirectPort != RxDirectPort)
+            __UART_HardInit(RxDirectPort);
+        GetCharDirect = Uart_GetCharDirect;
+    }
+    return;
 }

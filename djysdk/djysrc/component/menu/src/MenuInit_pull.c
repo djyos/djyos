@@ -66,7 +66,7 @@
 // 返回值  :下拉模式的初始显示参数
 // =========================================================================
 
-struct menu_displaypara  *module_menu_init_pull(struct menu_item *menuitem, struct tagGkWinRsc *win)
+struct menu_displaypara  *module_menu_init_pull(struct menu_item *menuitem, struct GkWinRsc *win)
 {
   struct menu_displaypara  *dispara=NULL;
   if((NULL==menuitem)||(NULL==win))

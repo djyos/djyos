@@ -56,21 +56,21 @@
 #include "cpu_peri.h"
 
 //寄存器定义（部分）
-#define F_STATUS		0x00
-#define OUT_X_MSB		0x01
-#define OUT_X_LSB		0x02
-#define OUT_Y_MSB		0x03
-#define OUT_Y_LSB		0x04
-#define OUT_Z_MSB		0x05
-#define OUT_Z_LSB		0x06
-#define WHO_AM_I      	0x0D
+#define F_STATUS        0x00
+#define OUT_X_MSB       0x01
+#define OUT_X_LSB       0x02
+#define OUT_Y_MSB       0x03
+#define OUT_Y_LSB       0x04
+#define OUT_Z_MSB       0x05
+#define OUT_Z_LSB       0x06
+#define WHO_AM_I        0x0D
 
 //定义IICBUS架构下的IIC设备结构
-static struct tagIIC_Device *ps_MMA_Dev = NULL;
+static struct IIC_Device *ps_MMA_Dev = NULL;
 static u32 s_MMA_Timeout = CN_TIMEOUT_FOREVER;
 
-#define MMA_ADDRESS			0x50			//设备地址
-#define MMA_CLK_FRE			(100*1000)		//总线速度，单位Hz
+#define MMA_ADDRESS         0x50            //设备地址
+#define MMA_CLK_FRE         (100*1000)      //总线速度，单位Hz
 
 // =============================================================================
 // 功能：读加速度器的寄存器（内部调用）
@@ -81,10 +81,10 @@ static u32 s_MMA_Timeout = CN_TIMEOUT_FOREVER;
 // =============================================================================
 bool_t __MMA8541Q_ReadReg(u8 RegAddr, u8 *pbyBuf, u16 wBytesNum)
 {
-	if(wBytesNum == IIC_Read(ps_MMA_Dev,RegAddr,pbyBuf,wBytesNum,s_MMA_Timeout))
-		return true;
-	else
-		return false;
+    if(wBytesNum == IIC_Read(ps_MMA_Dev,RegAddr,pbyBuf,wBytesNum,s_MMA_Timeout))
+        return true;
+    else
+        return false;
 }
 
 // =============================================================================
@@ -94,16 +94,16 @@ bool_t __MMA8541Q_ReadReg(u8 RegAddr, u8 *pbyBuf, u16 wBytesNum)
 // =============================================================================
 u8 MMA8541Q_ID_Read(void)
 {
-	u8 pbyBuf,RegAddr,wBytesNum;
+    u8 pbyBuf,RegAddr,wBytesNum;
 
-	pbyBuf = 0;
-	RegAddr = WHO_AM_I;
-	wBytesNum = 1;
+    pbyBuf = 0;
+    RegAddr = WHO_AM_I;
+    wBytesNum = 1;
 
-	if(true == __MMA8541Q_ReadReg(RegAddr,&pbyBuf,wBytesNum))
-		return pbyBuf;
-	else
-		return 0;
+    if(true == __MMA8541Q_ReadReg(RegAddr,&pbyBuf,wBytesNum))
+        return pbyBuf;
+    else
+        return 0;
 }
 
 // =============================================================================
@@ -113,16 +113,16 @@ u8 MMA8541Q_ID_Read(void)
 // =============================================================================
 u8 MMA8541Q_StatusRead(void)
 {
-	u8 pbyBuf,RegAddr,wBytesNum;
+    u8 pbyBuf,RegAddr,wBytesNum;
 
-	pbyBuf = 0;
-	RegAddr = F_STATUS;
-	wBytesNum = 1;
+    pbyBuf = 0;
+    RegAddr = F_STATUS;
+    wBytesNum = 1;
 
-	if(true == __MMA8541Q_ReadReg(RegAddr,&pbyBuf,wBytesNum))
-		return pbyBuf;
-	else
-		return 0;
+    if(true == __MMA8541Q_ReadReg(RegAddr,&pbyBuf,wBytesNum))
+        return pbyBuf;
+    else
+        return 0;
 }
 
 // =============================================================================
@@ -132,17 +132,17 @@ u8 MMA8541Q_StatusRead(void)
 // =============================================================================
 u16 MMA8541Q_X_Read(void)
 {
-	u8 pbyBuf[2],RegAddr,wBytesNum;
+    u8 pbyBuf[2],RegAddr,wBytesNum;
 
-	pbyBuf[0] = 0;
-	pbyBuf[1] = 0;
-	RegAddr = OUT_X_MSB;
-	wBytesNum = 2;
+    pbyBuf[0] = 0;
+    pbyBuf[1] = 0;
+    RegAddr = OUT_X_MSB;
+    wBytesNum = 2;
 
-	if(true == __MMA8541Q_ReadReg(RegAddr,pbyBuf,wBytesNum))
-		return (u16)(pbyBuf[1]<<8 + pbyBuf[0]);
-	else
-		return 0;
+    if(true == __MMA8541Q_ReadReg(RegAddr,pbyBuf,wBytesNum))
+        return (u16)(pbyBuf[1]<<8 + pbyBuf[0]);
+    else
+        return 0;
 }
 
 // =============================================================================
@@ -152,17 +152,17 @@ u16 MMA8541Q_X_Read(void)
 // =============================================================================
 u16 MMA8541Q_Y_Read(void)
 {
-	u8 pbyBuf[2],RegAddr,wBytesNum;
+    u8 pbyBuf[2],RegAddr,wBytesNum;
 
-	pbyBuf[0] = 0;
-	pbyBuf[1] = 0;
-	RegAddr = OUT_Y_MSB;
-	wBytesNum = 2;
+    pbyBuf[0] = 0;
+    pbyBuf[1] = 0;
+    RegAddr = OUT_Y_MSB;
+    wBytesNum = 2;
 
-	if(true == __MMA8541Q_ReadReg(RegAddr,pbyBuf,wBytesNum))
-		return (u16)(pbyBuf[1]<<8 + pbyBuf[0]);
-	else
-		return 0;
+    if(true == __MMA8541Q_ReadReg(RegAddr,pbyBuf,wBytesNum))
+        return (u16)(pbyBuf[1]<<8 + pbyBuf[0]);
+    else
+        return 0;
 }
 // =============================================================================
 // 功能：读加速度器的Z轴方向值
@@ -171,17 +171,17 @@ u16 MMA8541Q_Y_Read(void)
 // =============================================================================
 u16 MMA8541Q_Z_Read(void)
 {
-	u8 pbyBuf[2],RegAddr,wBytesNum;
+    u8 pbyBuf[2],RegAddr,wBytesNum;
 
-	pbyBuf[0] = 0;
-	pbyBuf[1] = 0;
-	RegAddr = OUT_Z_MSB;
-	wBytesNum = 2;
+    pbyBuf[0] = 0;
+    pbyBuf[1] = 0;
+    RegAddr = OUT_Z_MSB;
+    wBytesNum = 2;
 
-	if(true == __MMA8541Q_ReadReg(RegAddr,pbyBuf,wBytesNum))
-		return (u16)(pbyBuf[1]<<8 + pbyBuf[0]);
-	else
-		return 0;
+    if(true == __MMA8541Q_ReadReg(RegAddr,pbyBuf,wBytesNum))
+        return (u16)(pbyBuf[1]<<8 + pbyBuf[0]);
+    else
+        return 0;
 }
 // =============================================================================
 // 功能：MMA芯片初始化，包括WP写保护功能引脚初始化和加载设备到对应的IIC总线
@@ -191,24 +191,24 @@ u16 MMA8541Q_Z_Read(void)
 
 ptu32_t MMA8541Q_ModuleInit(ptu32_t para)
 {
-	bool_t result = false;
-	static struct tagIIC_Device s_MMA_Dev;
-	//GPIO初始化，SDA、SCL已经在IIC中初始化了，此处只需初始化WP即可
-//	__MMA_GpioInit();
+    bool_t result = false;
+    static struct IIC_Device s_MMA_Dev;
+    //GPIO初始化，SDA、SCL已经在IIC中初始化了，此处只需初始化WP即可
+//  __MMA_GpioInit();
 
-	//初始化IIC设备结构体
-	s_MMA_Dev.DevAddr 					= MMA_ADDRESS;
-	s_MMA_Dev.BitOfMemAddr 				= 8;
-	s_MMA_Dev.BitOfMemAddrInDevAddr 	= 0;
+    //初始化IIC设备结构体
+    s_MMA_Dev.DevAddr                   = MMA_ADDRESS;
+    s_MMA_Dev.BitOfMemAddr              = 8;
+    s_MMA_Dev.BitOfMemAddrInDevAddr     = 0;
 
-	//添加MMA8451到IIC0总线
-	if(NULL != IIC_DevAdd_r("IIC0","IIC_Dev_MMA8451Q",&s_MMA_Dev))
-	{
-		ps_MMA_Dev = &s_MMA_Dev;
-		IIC_BusCtrl(ps_MMA_Dev,CN_IIC_SET_CLK,MMA_CLK_FRE,0);
-		result = true;
-	}
+    //添加MMA8451到IIC0总线
+    if(NULL != IIC_DevAdd_r("IIC0","IIC_Dev_MMA8451Q",&s_MMA_Dev))
+    {
+        ps_MMA_Dev = &s_MMA_Dev;
+        IIC_BusCtrl(ps_MMA_Dev,CN_IIC_SET_CLK,MMA_CLK_FRE,0);
+        result = true;
+    }
 
-	return result;
+    return result;
 }
 

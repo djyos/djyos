@@ -30,9 +30,7 @@ DDR_FAILED:
     ori  sp, sp, usr_top@l
     subi sp, sp, 0x10
     //before we cpy the code, we must unlock the l1 cache, else any cpy will be invalid
-    bl __AsmEnableL1Cache   
-    bl Cache_InitL2
- 
+    bl   __AsmEnableL1Cache   
     bl   LoadLoader2Mem
     lis  r3, __AsmRamStart@h
     ori  r3, r3, __AsmRamStart@l

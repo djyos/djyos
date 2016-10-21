@@ -64,23 +64,23 @@
 #define CN_TIMER_ENUSE       ((u32)(1<<10))//正在使用
 
 //TIMER的操作码
-enum _ENUM_TIMER_CTRL_TYPE_
+enum TimerCmdCode
 {
-	EN_TIMER_STARTCOUNT = 0,     //使能计数
-	EN_TIMER_PAUSECOUNT,         //停止计数
-	EN_TIMER_SETCYCLE,           //设置周期
-	EN_TIMER_SETRELOAD,          //设置定时器为单次触发，还是自动触发
-	EN_TIMER_ENINT,              //中断使能
-	EN_TIMER_DISINT,             //中断禁止
-	EN_TIMER_SETINTPRO,          //中断属性设置
-	EN_TIMER_GETTIME,            //获取计时时间
-	EN_TIMER_GETCYCLE,           //获取定时周期
-	EN_TIMER_GETID,              //获取定时器ID，高16位为intID，低16为timerID
-	EN_TIMER_GETSTATE,           //获取定时器状态
-	EN_TIMER_LASTOPCODE,
+    EN_TIMER_STARTCOUNT,    //使能计数，inoutpara无意义
+    EN_TIMER_PAUSECOUNT,    //停止计数，inoutpara无意义
+    EN_TIMER_SETCYCLE,      //设置周期，inoutpara为u32,待设置的周期（计数值）
+    EN_TIMER_SETRELOAD,     //reload模式or not！，inoutpara为bool_t,true代表reload
+    EN_TIMER_ENINT,         //中断使能，inoutpara无意义
+    EN_TIMER_DISINT,        //中断禁止，inoutpara无意义
+    EN_TIMER_SETINTPRO,     //中断属性设置，inoutpara为bool_t,true代表实时信号
+    EN_TIMER_GETTIME,       //获取上一次溢出到现在的计数值，inoutpara为u32 *
+    EN_TIMER_GETCYCLE,      //获取定时周期，inoutpara为u32 *,单位为周期数
+    EN_TIMER_GETID,         //获取定时器ID，inoutpara为u32 *，高16位为intID，低16为timerID
+    EN_TIMER_GETSTATE,      //获取定时器状态，inoutpara为u32 *
+    EN_TIMER_LASTOPCODE,
 };
 
-typedef u32 (*fnTimerIsr)(ufast_t irq_no);
+typedef u32 (*fntTimerIsr)(ptu32_t TimerHandle);
 
 //当注册定时器时，需要使用下述函数原型
 // =============================================================================
@@ -95,16 +95,22 @@ typedef u32 (*fnTimerIsr)(ufast_t irq_no);
 //           刚开始分配的定时器应该是各种属性都关闭的，因此属性必须自己重新设置
 //           默认：停止计数，异步中断，reload,中断禁止
 // =============================================================================
-typedef ptu32_t (*fnTimerHardAlloc)(u32 cycle,fnTimerIsr timerisr);
+typedef ptu32_t (*fntTimerHardAlloc)(fntTimerIsr timerisr);
 // =============================================================================
 // 函数功能：fnTimerHardFree
 //           定时器释放
 // 输入参数：timerhandle，待释放定时器
 // 输出参数：无
 // 返回值  ：true 成功 false失败 
-// 说明    : 依赖芯片驱动实现
 // =============================================================================
-typedef bool_t  (*fnTimerHardFree)(ptu32_t timerhandle);
+typedef bool_t  (*fntTimerHardFree)(ptu32_t timerhandle);
+// =============================================================================
+// 函数功能：检查定时器计数频率
+// 输入参数：timerhandle，被检查的定时器
+// 输出参数：无
+// 返回值  ：频率，Hz为单位 
+// =============================================================================
+typedef u32  (*fntTimerHardGetFreq)(ptu32_t timerhandle);
 // =============================================================================
 // 函数功能：fnTimerHardCtrl
 //           操作定时器
@@ -112,37 +118,28 @@ typedef bool_t  (*fnTimerHardFree)(ptu32_t timerhandle);
 //           ctrlcmd, 操作命令
 // 输出参数：inoutpara，输入输出参数，根据不同的情况而定
 // 返回值  ：true 操作成功 false操作失败 
-// 说明：ctrlcmd对应的inoutpara的属性定义说明
-//	EN_TIMER_STARTCOUNT  //使能计数，inoutpara无意义
-//	EN_TIMER_PAUSECOUNT, //停止计数，inoutpara无意义
-//	EN_TIMER_SETCYCLE,     //设置周期，inoutpara为u32,待设置的周期（微秒）
-//	EN_TIMER_SETRELOAD,      //reload模式or not！，inoutpara为bool_t,true代表reload
-//	EN_TIMER_ENINT,        //中断使能，inoutpara无意义
-//	EN_TIMER_DISINT,       //中断禁止，inoutpara无意义
-//	EN_TIMER_SETINTPRO,       //中断属性设置，inoutpara为bool_t,true代表实时信号
-//	EN_TIMER_GETTIME,      //获取计时时间，inoutpara为u32 *,单位为微秒
-//	EN_TIMER_GETCYCLE,     //获取定时周期，inoutpara为u32 *,单位为微秒
-//	EN_TIMER_GETID,        //获取定时器ID，inoutpara为u32 *，高16位为intID，低16为timerID
-//	EN_TIMER_GETSTATE,     //获取定时器状态，inoutpara为u32 *
+// 说明：ctrlcmd对应的inoutpara的属性定义说明参看enum TimerCmdCode定义
 // =============================================================================
-typedef bool_t  (*fnTimerHardCtrl)(ptu32_t timerhandle,\
-                                   enum _ENUM_TIMER_CTRL_TYPE_ ctrlcmd, \
+typedef bool_t  (*fntTimerHardCtrl)(ptu32_t timerhandle,\
+                                   enum TimerCmdCode ctrlcmd, \
                                    ptu32_t inoutpara);
 
-struct tagTimerChip
+struct TimerChip
 {
-	char                        *chipname;        //chip名字，必须为静态型
-	fnTimerHardAlloc            timerhardalloc;   //分配定时器
-	fnTimerHardFree             timerhardfree;    //释放定时器
-	fnTimerHardCtrl             timerhardctrl ;   //看定时器定时时间是否到
+    char               *chipname;        //chip名字，必须为静态定义
+    fntTimerHardAlloc  TimerHardAlloc;   //分配定时器
+    fntTimerHardFree   TimerHardFree;    //释放定时器
+    fntTimerHardGetFreq TimerHardGetFreq; //获取定时器计数频率
+    fntTimerHardCtrl   TimerHardCtrl;    //控制定时器
 };
 
-bool_t  TimerHard_RegisterChip(struct tagTimerChip *timerchip);
+bool_t  TimerHard_RegisterChip(struct TimerChip *timerchip);
 bool_t  TimerHard_UnRegisterChip(void);
-ptu32_t TimerHard_Alloc(u32 timerhardcycle,fnTimerIsr timerhardisr);
+ptu32_t TimerHard_Alloc(fntTimerIsr timerhardisr);
 bool_t  TimerHard_Free(ptu32_t timerhandle);
+u32  TimerHard_GetFreq(ptu32_t timerhandle);
 bool_t  TimerHard_Ctrl(ptu32_t timerhandle, \
-                       enum _ENUM_TIMER_CTRL_TYPE_ ctrlcmd, \
+                       enum TimerCmdCode ctrlcmd, \
                        ptu32_t inoutpara);
 
 #endif /* TIMER_HARD_H_ */

@@ -10,7 +10,7 @@
 
 #include "stdint.h"
 #include "stdio.h"
-#include "rsc.h"
+#include "object.h"
 #include "lock.h"
 #include "stdlib.h"
 #include "driver.h"
@@ -19,18 +19,18 @@
 #include "spibus.h"
 #include "systime.h"
 #include "djyos.h"
-static struct tagRscNode s_SPIBusType;
+static struct Object s_SPIBusType;
 
-#define CN_SPI_FLAG_POLL        (1<<0)			//轮询中断方式标记
+#define CN_SPI_FLAG_POLL        (1<<0)          //轮询中断方式标记
 // =============================================================================
 // 功能：将SPI总线类型结点挂接到DjyBus根结点
 // 参数：Para,无实际意义
 // 返回：返回建立的资源结点指针，失败时返回NULL
 // =============================================================================
-struct tagRscNode *ModuleInstall_SPIBus(ptu32_t Para)
+struct Object *ModuleInstall_SPIBus(ptu32_t Para)
 {
-    struct tagRscNode *BusTypeSPI = NULL;
-    BusTypeSPI = DjyBus_BusTypeAdd_s("BusTypeSPI",&s_SPIBusType);
+    struct Object *BusTypeSPI = NULL;
+    BusTypeSPI = DjyBus_BusTypeAdd_s(&s_SPIBusType,"BusTypeSPI");
     if(NULL != BusTypeSPI)
         printk("BUS Type SPI Added Succeeded!\r\n");
     return BusTypeSPI;
@@ -41,23 +41,23 @@ struct tagRscNode *ModuleInstall_SPIBus(ptu32_t Para)
 // 参数：NewSPIParam,新增总线参数，参数说明详细请参照tagSPI_Param结构体
 // 返回：返回建立的资源结点指针，失败时返回NULL
 // =============================================================================
-struct tagSPI_CB *SPI_BusAdd(struct tagSPI_Param *NewSPIParam)
+struct SPI_CB *SPI_BusAdd(struct SPI_Param *NewSPIParam)
 {
-    struct tagSPI_CB *NewSPI;
+    struct SPI_CB *NewSPI;
     if(NULL == NewSPIParam)
         goto exit_from_param;
 
     //避免重复建立同名的SPI总线
-    if(NULL != Rsc_SearchSon(&s_SPIBusType,NewSPIParam->BusName))
+    if(NULL != OBJ_SearchChild(&s_SPIBusType,(const char*)(NewSPIParam->BusName)))
         goto exit_from_readd;
 
-    NewSPI = (struct tagSPI_CB *)M_Malloc(sizeof(struct tagSPI_CB),0);
+    NewSPI = (struct SPI_CB *)M_Malloc(sizeof(struct SPI_CB),0);
     if(NewSPI == NULL)
         goto exit_from_malloc;
 
     //将总线结点挂接到总线类型结点的子结点
-    Rsc_AddSon(&s_SPIBusType,&NewSPI->SPI_BusNode,
-                sizeof(struct tagSPI_CB),RSC_SPIBUS,NewSPIParam->BusName);
+    OBJ_AddChild(&s_SPIBusType,&NewSPI->SPI_BusNode,
+                sizeof(struct SPI_CB),RSC_SPIBUS,(const char*)(NewSPIParam->BusName));
     if(&NewSPI->SPI_BusNode == NULL)
         goto exit_from_add_node;
 
@@ -88,7 +88,7 @@ struct tagSPI_CB *SPI_BusAdd(struct tagSPI_Param *NewSPIParam)
 exit_from_spi_buf_semp:
     Lock_SempDelete(NewSPI->SPI_BusSemp);
 exit_from_spi_bus_semp:
-    Rsc_DelNode(&NewSPI->SPI_BusNode);
+    OBJ_Del(&NewSPI->SPI_BusNode);
 exit_from_add_node:
     free(NewSPI);
 exit_from_malloc:
@@ -104,18 +104,18 @@ exit_from_param:
 //       NewSPI,新增SPI控制块指针
 // 返回：返回建立的资源结点指针，失败时返回NULL
 // =============================================================================
-struct tagSPI_CB *SPI_BusAdd_s(struct tagSPI_Param *NewSPIParam,struct tagSPI_CB *NewSPI)
+struct SPI_CB *SPI_BusAdd_s(struct SPI_CB *NewSPI,struct SPI_Param *NewSPIParam)
 {
     if((NULL == NewSPI) || (NULL == NewSPIParam))
         goto exit_from_param;
 
     //避免重复建立同名的SPI总线
-    if(NULL != Rsc_SearchSon(&s_SPIBusType,NewSPIParam->BusName))
+    if(NULL != OBJ_SearchChild(&s_SPIBusType,(const char*)(NewSPIParam->BusName)))
         goto exit_from_readd;
 
     //将总线结点挂接到总线类型结点的子结点
-    Rsc_AddSon(&s_SPIBusType,&NewSPI->SPI_BusNode,
-                sizeof(struct tagSPI_CB),RSC_SPIBUS,NewSPIParam->BusName);
+    OBJ_AddChild(&s_SPIBusType,&NewSPI->SPI_BusNode,
+                sizeof(struct SPI_CB),RSC_SPIBUS,(const char*)(NewSPIParam->BusName));
     if(&NewSPI->SPI_BusNode == NULL)
         goto exit_from_add_node;
 
@@ -147,7 +147,7 @@ struct tagSPI_CB *SPI_BusAdd_s(struct tagSPI_Param *NewSPIParam,struct tagSPI_CB
 exit_from_spi_buf_semp:
     Lock_SempDelete(NewSPI->SPI_BusSemp);
 exit_from_spi_bus_semp:
-    Rsc_DelNode(&NewSPI->SPI_BusNode);
+    OBJ_Del(&NewSPI->SPI_BusNode);
 exit_from_add_node:
 exit_from_readd:
 exit_from_param:
@@ -160,12 +160,12 @@ exit_from_param:
 // 参数：DelSPI,删除SPI控制块指针
 // 返回：true,删除成功;false,删除失败
 // =============================================================================
-bool_t SPI_BusDelete(struct tagSPI_CB *DelSPI)
+bool_t SPI_BusDelete(struct SPI_CB *DelSPI)
 {
     bool_t result;
     if(NULL == DelSPI)
         return false;
-    if(NULL == Rsc_DelNode(&DelSPI->SPI_BusNode))
+    if(NULL == OBJ_Del(&DelSPI->SPI_BusNode))
     {
         result = false;
     }
@@ -182,12 +182,12 @@ bool_t SPI_BusDelete(struct tagSPI_CB *DelSPI)
 // 参数：DelSPI,删除SPI控制块指针
 // 返回：true,删除成功;false,删除失败
 // =============================================================================
-bool_t SPI_BusDelete_s(struct tagSPI_CB *DelSPI)
+bool_t SPI_BusDelete_s(struct SPI_CB *DelSPI)
 {
     bool_t result;
     if(NULL == DelSPI)
         return false;
-    if(NULL == Rsc_DelNode(&DelSPI->SPI_BusNode))
+    if(NULL == OBJ_Del(&DelSPI->SPI_BusNode))
     {
         result = false;
     }
@@ -203,9 +203,9 @@ bool_t SPI_BusDelete_s(struct tagSPI_CB *DelSPI)
 // 参数：BusName,查找的总线名称
 // 返回：查找的控制块结点指针，未找到时返回NULL
 // =============================================================================
-struct tagSPI_CB *SPI_BusFind(char *BusName)
+struct SPI_CB *SPI_BusFind(const char *BusName)
 {
-    return (struct tagSPI_CB*)Rsc_SearchSon(&s_SPIBusType,BusName);
+    return (struct SPI_CB*)OBJ_SearchChild(&s_SPIBusType,BusName);
 }
 
 // =============================================================================
@@ -220,11 +220,11 @@ struct tagSPI_CB *SPI_BusFind(char *BusName)
 //       autocs,新增加设备是否自动片选
 // 返回：控制块结点指针，添加失败时返回NULL
 // =============================================================================
-struct tagSPI_Device *SPI_DevAdd(char *BusName ,char *DevName,u8 cs,u8 charlen,
+struct SPI_Device *SPI_DevAdd(const char *BusName ,const char *DevName,u8 cs,u8 charlen,
                                 u8 mode,u8 shiftdir,u32 freq,u8 autocs)
 {
-    struct tagSPI_CB      *SPI;
-    struct tagSPI_Device *NewDev;
+    struct SPI_CB      *SPI;
+    struct SPI_Device *NewDev;
     tagSpiConfig spicfg;
 
     //查询是否该总线存在
@@ -233,18 +233,18 @@ struct tagSPI_Device *SPI_DevAdd(char *BusName ,char *DevName,u8 cs,u8 charlen,
         return NULL;
 
     //避免建立同名的SPI器件
-    if(NULL != Rsc_SearchSon(&SPI->SPI_BusNode,DevName))
+    if(NULL != OBJ_SearchChild(&SPI->SPI_BusNode,DevName))
         return NULL;
 
     //为新的器件结点动态分配内存
-    NewDev = (struct tagSPI_Device *)M_Malloc(sizeof(struct tagSPI_Device),0);
+    NewDev = (struct SPI_Device *)M_Malloc(sizeof(struct SPI_Device),0);
     if(NULL == NewDev)
         return NULL;
 
     //为新结点初始化
     NewDev->Cs  = cs;
-    Rsc_AddSon(&SPI->SPI_BusNode,&NewDev->DevNode,
-                sizeof(struct tagSPI_Device),RSC_SPI_DEVICE,DevName);
+    OBJ_AddChild(&SPI->SPI_BusNode,&NewDev->DevNode,
+                sizeof(struct SPI_Device),RSC_SPI_DEVICE,DevName);
     if(NULL == &NewDev->DevNode)
     {
         free(NewDev);
@@ -266,7 +266,7 @@ struct tagSPI_Device *SPI_DevAdd(char *BusName ,char *DevName,u8 cs,u8 charlen,
     //如果SPI控制器有多套CS寄存器，则配置它，否则不作配置
     if(true == SPI->MultiCsReg)
     {
-        SPI_BusCtrl(NewDev,CN_SPI_CS_CONFIG,(ptu32_t)cs,(ptu32_t)&spicfg);
+        SPI_BusCtrl(NewDev,CN_SPI_CS_CONFIG,(ptu32_t)&spicfg,(ptu32_t)cs);
     }
 
     printk("SPI Device %s Added Succeeded!\r\n",DevName);
@@ -286,10 +286,10 @@ struct tagSPI_Device *SPI_DevAdd(char *BusName ,char *DevName,u8 cs,u8 charlen,
 //       autocs,新增加设备是否自动片选
 // 返回：控制块结点指针，添加失败时返回NULL
 // =============================================================================
-struct tagSPI_Device *SPI_DevAdd_s(char *BusName, char *DevName,
-                                struct tagSPI_Device *NewDev)
+struct SPI_Device *SPI_DevAdd_s(struct SPI_Device *NewDev,const char *BusName,
+                                   const char *DevName)
 {
-    struct tagSPI_CB *SPI;
+    struct SPI_CB *SPI;
     tagSpiConfig spicfg;
     //查询是否该总线存在
     SPI = SPI_BusFind(BusName);
@@ -297,24 +297,24 @@ struct tagSPI_Device *SPI_DevAdd_s(char *BusName, char *DevName,
         return NULL;
 
     //避免建立同名的SPI器件
-    if(NULL != Rsc_SearchSon(&SPI->SPI_BusNode,DevName))
+    if(NULL != OBJ_SearchChild(&SPI->SPI_BusNode,DevName))
         return NULL;
 
-    Rsc_AddSon(&SPI->SPI_BusNode,&NewDev->DevNode,
-                sizeof(struct tagSPI_Device),RSC_SPI_DEVICE,DevName);
+    OBJ_AddChild(&SPI->SPI_BusNode,&NewDev->DevNode,
+                sizeof(struct SPI_Device),RSC_SPI_DEVICE,DevName);
 
     spicfg.CharLen = NewDev->CharLen;
     spicfg.Mode    = NewDev->Mode;
     spicfg.Freq    = NewDev->Freq;
     spicfg.ShiftDir= NewDev->ShiftDir;
 
-    if(true == SPI->MultiCsReg)
+//    if(true == SPI->MultiCsReg)
     {
-        SPI_BusCtrl(NewDev,CN_SPI_CS_CONFIG,(ptu32_t)NewDev->Cs,(ptu32_t)&spicfg);
+        SPI_BusCtrl(NewDev,CN_SPI_CS_CONFIG,(ptu32_t)&spicfg,(ptu32_t)NewDev->Cs);
     }
 
     printk("SPI Device %s Added Succeeded!\r\n",DevName);
-    return (struct tagSPI_Device *)&NewDev->DevNode;
+    return (struct SPI_Device *)&NewDev->DevNode;
 }
 
 // =============================================================================
@@ -322,13 +322,13 @@ struct tagSPI_Device *SPI_DevAdd_s(char *BusName, char *DevName,
 // 参数：DelDev,删除的器件指针
 // 返回：true,删除成功;false,删除失败
 // =============================================================================
-bool_t SPI_DevDelete(struct tagSPI_Device *DelDev)
+bool_t SPI_DevDelete(struct SPI_Device *DelDev)
 {
     bool_t result;
     if(NULL == DelDev)
         return false;
 
-    if(NULL == Rsc_DelNode(&DelDev->DevNode))
+    if(NULL == OBJ_Del(&DelDev->DevNode))
     {
         result = false;
     }
@@ -345,13 +345,13 @@ bool_t SPI_DevDelete(struct tagSPI_Device *DelDev)
 // 参数：DelDev,删除的器件指针
 // 返回：true,删除成功;false,删除失败
 // =============================================================================
-bool_t SPI_DevDelete_s(struct tagSPI_Device *DelDev)
+bool_t SPI_DevDelete_s(struct SPI_Device *DelDev)
 {
     bool_t result;
     if(NULL == DelDev)
         return false;
 
-    if(NULL == Rsc_DelNode(&DelDev->DevNode))
+    if(NULL == OBJ_Del(&DelDev->DevNode))
     {
         result = false;
     }
@@ -367,10 +367,10 @@ bool_t SPI_DevDelete_s(struct tagSPI_Device *DelDev)
 // 参数：DevName,器件名称
 // 返回：结点附属结构体指针
 // =============================================================================
-struct tagSPI_Device *SPI_DevFind(char *DevName)
+struct SPI_Device *SPI_DevFind(const char *DevName)
 {
     //通过SPI类型结点，向下搜索后代结点
-    return (struct tagSPI_Device*)Rsc_SearchScion(&s_SPIBusType,DevName);
+    return (struct SPI_Device*)OBJ_SearchScion(&s_SPIBusType,DevName);
 }
 
 // =============================================================================
@@ -381,14 +381,14 @@ struct tagSPI_Device *SPI_DevFind(char *DevName)
 //       timeout,请求总线信号量超时时间，us
 // 返回：true,成功;false,失败
 // =============================================================================
-bool_t SPI_CsActive(struct tagSPI_Device *Dev,u32 timeout)
+bool_t SPI_CsActive(struct SPI_Device *Dev,u32 timeout)
 {
-    struct tagSPI_CB *SPI;
+    struct SPI_CB *SPI;
     tagSpiConfig spicfg;
     if(NULL == Dev)
         return false;
 
-    SPI = (struct tagSPI_CB *)Rsc_GetParent(&Dev->DevNode);
+    SPI = (struct SPI_CB *)OBJ_Parent(&Dev->DevNode);
     if(NULL == SPI)
         return false;
 
@@ -405,7 +405,7 @@ bool_t SPI_CsActive(struct tagSPI_Device *Dev,u32 timeout)
             spicfg.Mode    = Dev->Mode;
             spicfg.Freq    = Dev->Freq;
             SPI->pBusCtrl(SPI->SpecificFlag,CN_SPI_CS_CONFIG,
-                            (ptu32_t)Dev->Cs,(ptu32_t)&spicfg);
+                            (ptu32_t)&spicfg,(ptu32_t)Dev->Cs);
         }
         //如果每个CS都有独立的配置寄存器，则无需每次调用都配置，用户可通过调用pBusCtrl
         //控制CS相关的寄存器配置
@@ -415,7 +415,7 @@ bool_t SPI_CsActive(struct tagSPI_Device *Dev,u32 timeout)
     return true;
 }
 
-bool_t __SPI_AutoCsActive(struct tagSPI_CB *SPI,struct tagSPI_Device *Dev)
+bool_t __SPI_AutoCsActive(struct SPI_CB *SPI,struct SPI_Device *Dev)
 {
     tagSpiConfig spicfg;
 
@@ -427,7 +427,7 @@ bool_t __SPI_AutoCsActive(struct tagSPI_CB *SPI,struct tagSPI_Device *Dev)
         spicfg.Mode    = Dev->Mode;
         spicfg.Freq    = Dev->Freq;
         SPI->pBusCtrl(SPI->SpecificFlag,CN_SPI_CS_CONFIG,
-                        (ptu32_t)Dev->Cs,(ptu32_t)&spicfg);
+                        (ptu32_t)&spicfg,(ptu32_t)Dev->Cs);
     }
     //如果每个CS都有独立的配置寄存器，则无需每次调用都配置，用户可通过调用pBusCtrl
     //控制CS相关的寄存器配置
@@ -443,20 +443,20 @@ bool_t __SPI_AutoCsActive(struct tagSPI_CB *SPI,struct tagSPI_Device *Dev)
 //       block_option,阻塞选项，为true时，表明最后一次传输为阻塞方式，否则为非阻塞
 // 返回：true,成功;false,失败
 // =============================================================================
-bool_t SPI_CsInactive(struct tagSPI_Device *Dev)
+bool_t SPI_CsInactive(struct SPI_Device *Dev)
 {
-    struct tagSPI_CB *SPI;
+    struct SPI_CB *SPI;
     if(NULL == Dev)
         return false;
 
-    SPI = (struct tagSPI_CB *)Rsc_GetParent(&Dev->DevNode);
+    SPI = (struct SPI_CB *)OBJ_Parent(&Dev->DevNode);
     if(NULL == SPI)
         return false;
 
     if(Dev->AutoCs == false)                        //自动片选时，手动调用无效
     {
-        Lock_SempPost(SPI->SPI_BusSemp);
         SPI->pCsInActive(SPI->SpecificFlag,Dev->Cs);
+        Lock_SempPost(SPI->SPI_BusSemp);
     }
     else
     {
@@ -466,10 +466,10 @@ bool_t SPI_CsInactive(struct tagSPI_Device *Dev)
     return true;
 }
 
-bool_t __SPI_AutoCsInactive(struct tagSPI_CB *SPI,u8 CS)
+bool_t __SPI_AutoCsInactive(struct SPI_CB *SPI,u8 CS)
 {
-    Lock_SempPost(SPI->SPI_BusSemp);
     SPI->pCsInActive(SPI->SpecificFlag,CS);
+    Lock_SempPost(SPI->SPI_BusSemp);
     return true;
 }
 
@@ -487,10 +487,10 @@ bool_t __SPI_AutoCsInactive(struct tagSPI_CB *SPI,u8 CS)
 //       timeout,超时参数，us
 // 返回：返回发送状态，超时或错误或无错误
 // =============================================================================
-s32 SPI_Transfer(struct tagSPI_Device *Dev,struct tagSPI_DataFrame *spidata,
+s32 SPI_Transfer(struct SPI_Device *Dev,struct SPI_DataFrame *spidata,
                 u8 block_option,u32 timeout)
 {
-    struct tagSPI_CB *SPI;
+    struct SPI_CB *SPI;
 //  struct semaphore_LCB *spi_semp;
     s32 result ;
     u32 written=0;
@@ -499,11 +499,11 @@ s32 SPI_Transfer(struct tagSPI_Device *Dev,struct tagSPI_DataFrame *spidata,
     if(NULL == Dev)
         return CN_SPI_EXIT_PARAM_ERR;
 
-    SPI = (struct tagSPI_CB *)Rsc_GetParent(&Dev->DevNode);//查找该器件属于哪条总线
+    SPI = (struct SPI_CB *)OBJ_Parent(&Dev->DevNode);//查找该器件属于哪条总线
     if(NULL == SPI)
         return CN_SPI_EXIT_PARAM_ERR;
 
-    base_time = (u32)DjyGetTime();
+    base_time = (u32)DjyGetSysTime();
     //若配置需自动片选，则本函数内部需拉低片选
     if(Dev->AutoCs == true)
     {
@@ -524,7 +524,7 @@ s32 SPI_Transfer(struct tagSPI_Device *Dev,struct tagSPI_DataFrame *spidata,
         if(SPI->pTransferPoll != NULL)
         {
             SPI->pTransferPoll(SPI->SpecificFlag,spidata->SendBuf,spidata->SendLen,
-                spidata->RecvBuf,spidata->RecvLen,spidata->RecvOff);
+                spidata->RecvBuf,spidata->RecvLen,spidata->RecvOff,Dev->Cs);
 
             if(Dev->AutoCs == true)
                 __SPI_AutoCsInactive(SPI,Dev->Cs);
@@ -533,6 +533,7 @@ s32 SPI_Transfer(struct tagSPI_Device *Dev,struct tagSPI_DataFrame *spidata,
         goto exit_from_no_err;
     }
 
+    //以下是中断方式收发
     if(spidata->RecvLen)
         block_option = true;                            //接收数据自动转为阻塞
     SPI->SPI_Buf.Offset = 0;                            //发送前先清空缓冲区
@@ -554,7 +555,7 @@ s32 SPI_Transfer(struct tagSPI_Device *Dev,struct tagSPI_DataFrame *spidata,
                                 spidata->RecvOff
                                 ))
     {
-        rel_timeout = (u32)DjyGetTime();
+        rel_timeout = (u32)DjyGetSysTime();
         if(rel_timeout - base_time < timeout)
             rel_timeout = timeout - (rel_timeout - base_time);
         else
@@ -601,7 +602,7 @@ exit_from_no_err:
 //       len,读数据长度，字节单位
 // 返回：字节数
 // =============================================================================
-s32 SPI_PortRead( struct tagSPI_CB *SPI,u8 *buf,u32 len)
+s32 SPI_PortRead( struct SPI_CB *SPI,u8 *buf,u32 len)
 {
     u32 Result = 0,RingLen,CpyLen = 0;
     u8 *pbuf;
@@ -668,7 +669,7 @@ s32 SPI_PortRead( struct tagSPI_CB *SPI,u8 *buf,u32 len)
 //       len,数据长度，字节单位
 // 返回：字节数
 // =============================================================================
-s32 SPI_PortWrite(struct tagSPI_CB *SPI,u8 *buf,u32 len)
+s32 SPI_PortWrite(struct SPI_CB *SPI,u8 *buf,u32 len)
 {
     u32 cpylen;
     if((len > 0) && (SPI->Frame.RecvLen > 0))
@@ -703,16 +704,16 @@ s32 SPI_PortWrite(struct tagSPI_CB *SPI,u8 *buf,u32 len)
 //       data1,data2,参数数据，根据具体命令定义不同
 // 返回：-1=参数检查出错,否则由cmd决定,若需要调用用户的pBusCtrl,则是该函数返回值
 // =============================================================================
-s32 SPI_BusCtrl(struct tagSPI_Device *Dev,u32 cmd,ptu32_t data1,ptu32_t data2)
+s32 SPI_BusCtrl(struct SPI_Device *Dev,u32 cmd,ptu32_t data1,ptu32_t data2)
 {
-    struct tagSPI_CB *SPI;
+    struct SPI_CB *SPI;
     tagSpiConfig *spicfg;
     s32 result = -1;
 
     if(NULL == Dev)
         return -1;
 
-    SPI = (struct tagSPI_CB *)Rsc_GetParent(&Dev->DevNode);
+    SPI = (struct SPI_CB *)OBJ_Parent(&Dev->DevNode);
     if(NULL == SPI)
         return -1;
 
@@ -722,7 +723,7 @@ s32 SPI_BusCtrl(struct tagSPI_Device *Dev,u32 cmd,ptu32_t data1,ptu32_t data2)
         result = SPI->pBusCtrl(SPI->SpecificFlag,cmd,data1,Dev->Cs);
         break;
     case CN_SPI_CS_CONFIG:
-        spicfg = (tagSpiConfig *)data2;
+        spicfg = (tagSpiConfig *)data1;
         Dev->CharLen = spicfg->CharLen;
         Dev->Freq    = spicfg->Freq;
         Dev->Mode    = spicfg->Mode;
@@ -759,7 +760,7 @@ s32 SPI_BusCtrl(struct tagSPI_Device *Dev,u32 cmd,ptu32_t data1,ptu32_t data2)
 //       ErrNo,发生错误序号，如未收到ACK信号CN_SPI_NO_ACK_ERR
 // 返回：执行结果，-1参数错误，0无错误
 // =============================================================================
-s32 SPI_ErrPop(struct tagSPI_CB *SPI, u32 ErrNo)
+s32 SPI_ErrPop(struct SPI_CB *SPI, u32 ErrNo)
 {
     if(NULL == SPI)
         return -1;

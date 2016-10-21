@@ -63,7 +63,7 @@
 #define __CHARSET_H__
 
 #include "stdint.h"
-#include "rsc.h"
+#include "object.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,27 +71,42 @@ extern "C" {
 
 #define CN_CHAR_ENCODING_RSC_TREE       "charset encoding"
 
-/* 多字节字符编码资源 */
-struct tagCharset
-{
-    struct tagRscNode node;
+#define CN_NLS_CHARSET_ASCII            "ascii"
+#define CN_NLS_CHARSET_GB2312           "gb2312"
+#define CN_NLS_CHARSET_UTF8             "utf8"
+#define CN_NLS_CHARSET_CYRIL            "cyril"     //西里尔字符集
 
-    /* 单个字符的最大字节数 */
-    u32 max_len;
+#define CN_NLS_CHARSET_DEFAULT          CN_NLS_CHARSET_GB2312
+
+/* 多字节字符编码资源 */
+struct Charset
+{
+    struct Object node;
+
+    u16 max_len;        // 单个字符的最大字节数
+    u16 EOC_Size;       // 字符串结束符的字节数
+
+//----取多字节字符-------------------------------------------------------------
+//功能: 从多字节字符集中取一个多字节字符，不转换为ucs4字符。
+//参数: mbs, 指向待转换的多字节字符字节序列的指针(由调用函数判断s的合法性)
+//      n，最大检测长度，-1表示检测全串。
+//返回: 0: mbs是NULL指针。
+//      -1:mbs指向的不是合法多字节字符。
+//      其他：被转换的字符长度（字节数）,注意，串结束符也是合法字符
+//说明：返回的多字节字符，即mbs指向的字符。
+    s32 (*GetOneMb)(const char* mbs, s32 n);
 
 //----多字节字符转为ucs4字符---------------------------------------------------
 //功能: 把一个多字节字符转换为ucs4字符。
-//参数: pwc，保存转换结果的指针，调用方确保不为NULL,不判断，gui将确保本函数不
-//      会被其他模块调用。
+//参数: pwc，保存转换结果的指针，若为NULL,则不返回转换结果
 //      mbs, 指向待转换的多字节字符字节序列的指针(由调用函数判断s的合法性)
-//      n，最大检测长度，
-//返回: 0: pwc,mbs是NULL指针或者mbs指向空串。
-//      -1:mbs指向的不是合法多字节字符，或者长度n内未能检测到完整多字节字符
-//      其他:mbs缓冲区内第一个完整多字节字符的长度。
+//      n，最大检测长度，-1表示检测全串。
+//返回: 0: mbs是NULL指针或者mbs指向空串。
+//      -1:mbs指向的不是合法多字节字符。
+//      其他：被转换的字符长度（字节数）
 //说明：
 //      此函数是C Run-time库的mblen及mbtowc服务函数。
-//      传入的s指针必须非NULL
-    s32 (*mb_to_ucs4)(u32* pwc, const char* mbs, s32 n);
+    s32 (*MbToUcs4)(u32* pwc, const char* mbs, s32 n);
 
 //----ucs4字符转为多字节字符---------------------------------------------------
 //功能: 把一个ucs4字符转换为多字节字符。
@@ -101,40 +116,39 @@ struct tagCharset
 //      字节数，返回对应的多字节字符的字节数。
 //说明：
 //      此函数是C Run-time库的wctomb服务函数。
-    s32 (*ucs4_to_mb)(char* mb, s32 wc);
+    s32 (*Ucs4ToMb)(char* mb, u32 wc);
 
 //----多字节字符串转为ucs4串---------------------------------------------------
 //功能: 把一个多字节字符串转换为ucs4字符串
 //参数: pwcs，保存转换结果的指针，缓冲区由调用方提供，若空，则本函数转变为只计算
 //          保存转换结果所需的字节数
 //      mbs，保存多字节字符的缓冲区指针
-//      n，最大检测长度，
+//      n，最大检测长度，-1表示检测全串。
 //返回: 0: mbs是NULL指针
 //      -1:结束条件到达前，有不能转换的字符
 //      其他:得到的字符数，=n表示源串是不包含串结束符'\0'。
 //-----------------------------------------------------------------------------
-    s32 (*mbs_to_ucs4s)(u32* pwcs, const char* mbs, s32 n);
+    s32 (*MbsToUcs4s)(u32* pwcs, const char* mbs, s32 n);
 
 //----ucs4字符串转为多字节字符串-----------------------------------------------
 //功能: 把一个ucs4字符串转换为多字节字符串。
 //参数: mbs，保存转换结果的指针，缓冲区由调用方提供，若空，则本函数转变为只计算
 //          保存转换结果所需的字节数
 //      pwcs，待转换的字符
-//      n，最大检测长度，遇串结束符或长度达到n结束转换，注意ucs4的结束符是连续
-//          4个0x00.
+//      n，最大检测长度，-1表示检测全串。注意ucs4的结束符是连续4个0x00.
 //返回: 0: pwcs是NULL指针
 //      -1:结束条件到达前，有不能转换的字符
 //      其他:写入mbs缓冲区的字节数，含串结束符'\0'
 //-----------------------------------------------------------------------------
-    s32 (*ucs4s_to_mbs)(char* mbs, const u32* pwcs, s32 n);
+    s32 (*Ucs4sToMbs)(char* mbs, const u32* pwcs, s32 n);
 };
 
 
 ptu32_t ModuleInstall_Charset(ptu32_t para);
-bool_t  Charset_NlsInstallCharset(struct tagCharset *encoding, char* name);
-struct tagCharset* Charset_NlsGetCurCharset(void);
-struct tagCharset* Charset_NlsSetCurCharset(struct tagCharset* encoding);
-struct tagCharset* Charset_NlsSearchCharset(const char* name);
+bool_t  Charset_NlsInstallCharset(struct Charset *encoding,const char* name);
+struct Charset* Charset_NlsGetCurCharset(void);
+struct Charset* Charset_NlsSetCurCharset(struct Charset* encoding);
+struct Charset* Charset_NlsSearchCharset(const char* name);
 
 #ifdef __cplusplus
 }

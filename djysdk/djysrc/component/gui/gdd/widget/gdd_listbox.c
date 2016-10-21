@@ -61,562 +61,674 @@
 //------------------------------------------------------
 
 #include    "gdd.h"
-#include    "../include/gdd_private.h"
+#include    <gui/gdd/gdd_private.h>
+#include    <widget.h>
+
 /*============================================================================*/
 
 typedef struct{
 
-	list_t node;
-	u32 Flag;
-	u32 Data;
-	char szText[4];
-
+    list_t node;
+    u32 Flag;
+    u32 Data;
+    char szText[4];
 }LISTBOX_ITEM;
 
 typedef struct{
-	list_t list;
-	s32 ItemNum;
-	s32 TopIndex;
-	s32 CurSel;
-	s32 ItemHeight;
-	s32	xpos,ypos;
-
+    list_t list;
+    s32 ItemNum;
+    s32 TopIndex;
+    s32 CurSel;
+    s32 ItemHeight;
+    s32 xpos,ypos;
 }LISTBOX_DATA;
-
-
-static	LISTBOX_ITEM*	listbox_get_item(LISTBOX_DATA *pLB,u32 idx)
+//---------------创建列表-------------------------------------------------------
+//功能：略
+//参数：pMsg，消息指针
+//返回：固定true
+//-----------------------------------------------------------------------------
+static bool_t ListBox_Create(struct WindowMsg *pMsg)
 {
-	LISTBOX_ITEM *item=NULL;
-	list_t *n;
-	int i;
-
-	if(idx<pLB->ItemNum)
-	{
-		i=0;
-		n =pLB->list.next;
-		while(1)
-		{
-			if(n==&pLB->list)
-			{
-				break;
-			}
-			if(i==idx)
-			{
-				item =(LISTBOX_ITEM*)list_entry(n,LISTBOX_ITEM,node);
-				break;
-			}
-
-			i++;
-			n =n->next;
-
-		}
-
-	}
-	return item;
+     HWND hwnd;
+     LISTBOX_DATA *pLB;
+     hwnd =pMsg->hwnd;
+     if(pMsg->Param1==0)
+     {
+         pLB =(LISTBOX_DATA*)malloc(sizeof(LISTBOX_DATA));
+         if(pLB==NULL)
+              return false;
+         pMsg->Param1=(ptu32_t*)pLB;
+         dListInit(&pLB->list);
+         pLB->ItemNum =0;
+         pLB->TopIndex =0;//表头是链表第几项
+         pLB->CurSel =-1;
+         pLB->ItemHeight =20;//行高
+     }
+     SetWindowPrivateData(hwnd,pMsg->Param1);
+     return true;
 }
 
-static	s32  listbox_add_string(LISTBOX_DATA *pLB,s32 idx,const char *text)
+//-----------------------------------------------------------------------
+//功能：获取列表项
+//参数：pMsg，消息指针
+//返回：列表项
+//-----------------------------------------------------------------------------
+
+static  LISTBOX_ITEM*   ListBox_GetItem(LISTBOX_DATA *pLB,u32 idx)
 {
-	s32 i;
-	list_t *n;
-	LISTBOX_ITEM *item;
+    LISTBOX_ITEM *item=NULL;
+    list_t *n;
+    s32 i;
 
-	if(pLB->ItemNum >= (s32)0x7FFFFFFE)
-	{
-		return (s32)-1;
-	}
+    if(idx<pLB->ItemNum)
+    {
+        i=0;
+        n =pLB->list.next;
+        while(1)
+        {
+            if(n==&pLB->list)
+            {
+                break;
+            }
+            if(i==idx)
+            {
+                item =(LISTBOX_ITEM*)dListEntry(n,LISTBOX_ITEM,node);
+                break;
+            }
 
-	i=strlen(text)+1;
-	item =(LISTBOX_ITEM*)malloc(sizeof(LISTBOX_ITEM)+i);
-	if(item == NULL)
-	{
-		return (s32)-1;
-	}
-	strcpy(item->szText,text);
-	item->Flag =0;
-	item->Data =0;
+            i++;
+            n =n->next;
 
-	i=0;
-	n=pLB->list.next;
-	while(1)
-	{
-		if(n == &pLB->list)
-		{
-			break;
-		}
-		n =n->next;
+        }
 
-		if(i == idx)
-		{
-			break;
-		}
-		i++;
-	}
-
-	list_insert_before(n,&item->node);
-
-	pLB->ItemNum++;
-
-	if(pLB->CurSel<0)
-	{
-		pLB->CurSel=0;
-	}
-
-	if(pLB->TopIndex<0)
-	{
-		pLB->TopIndex=0;
-	}
-
-	return i;
+    }
+    return item;
 }
-
-static	void listbox_del_string(LISTBOX_DATA *pLB,s32 idx)
-{
-	LISTBOX_ITEM *item;
-	if(pLB->ItemNum>0)
-	{
-		if(idx>=pLB->ItemNum)
-		{
-			idx=pLB->ItemNum-1;
-		}
-
-		item =listbox_get_item(pLB,idx);
-		if(item!=NULL)
-		{
-			list_remove(&item->node);
-			free(item);
-		}
-
-		pLB->ItemNum--;
-
-		if(pLB->CurSel>=pLB->ItemNum)
-		{
-			pLB->CurSel=pLB->ItemNum-1;
-		}
-
-		if(pLB->TopIndex>=pLB->ItemNum)
-		{
-			pLB->TopIndex=pLB->ItemNum-1;
-		}
-
-	}
-}
-
-static	void listbox_reset_content(LISTBOX_DATA *pLB)
-{
-	list_t *n,*next;
-	LISTBOX_ITEM *item;
-
-	n=pLB->list.next;
-	while(1)
-	{
-		if(n==&pLB->list)
-		{
-			break;
-		}
-		next =n->next;
-
-		item =(LISTBOX_ITEM*)list_entry(n,LISTBOX_ITEM,node);
-		free(item);
-
-		n=next;
-
-	}
-
-	pLB->ItemNum =0;
-	pLB->TopIndex =0;
-	pLB->CurSel =-1;
-}
-
-static	u32 listbox_set_cur_sel(HWND hwnd,LISTBOX_DATA *pLB,s32 idx)
-{
-
-	if(pLB->ItemNum>0)
-	{
-		if(idx<0)
-		{
-			idx=pLB->ItemNum-1;
-		}
-
-		if(idx>=pLB->ItemNum)
-		{
-			idx=pLB->ItemNum-1;
-		}
-
-		if(pLB->CurSel!=idx)
-		{
-			pLB->CurSel=idx;
-			SendMessage(GetParent(hwnd),MSG_NOTIFY,(LBN_SELCHANGE<<16)|((u16)hwnd->WinId),(ptu32_t)hwnd);
-		}
-	}
-	return pLB->CurSel;
-}
-
-static	u32 listbox_set_top_index(LISTBOX_DATA *pLB,s32 idx)
-{
-	if(idx<0)
-	{
-		idx =pLB->ItemNum-1;
-	}
-
-	if(idx<pLB->ItemNum)
-	{
-		pLB->TopIndex=idx;
-	}
-	return pLB->TopIndex;
-}
-
-static	BOOL listbox_set_item_data(LISTBOX_DATA *pLB,s32 idx,u32 data)
-{
-	LISTBOX_ITEM *item;
-
-	item =listbox_get_item(pLB,idx);
-	if(item!=NULL)
-	{
-		item->Data =data;
-		return TRUE;
-	}
-	return FALSE;
-}
-
-static	u32 listbox_get_item_data(LISTBOX_DATA *pLB,s32 idx)
-{
-	LISTBOX_ITEM *item;
-
-	item=listbox_get_item(pLB,idx);
-	if(item!=NULL)
-	{
-		return item->Data;
-	}
-	return 0;
-}
-
-static  void listbox_paint(HWND hwnd,LISTBOX_DATA *pLB)
-{
-	HDC hdc;
-	RECT rc,rc0;
-	list_t *n;
-	LISTBOX_ITEM *item;
-	s32 i;
-
-	hdc =BeginPaint(hwnd);
-
-	GetClientRect(hwnd,&rc0);
-	if(GetWindowStyle(hwnd)&LBS_FLAT)
-	{
-		SetFillColor(hdc,RGB(200,200,200));
-		FillRect(hdc,&rc0);
-	}
-	else
-	{
-		GradientFillRect(hdc,&rc0,
-    					RGB(240,240,240),
-						RGB(100,100,100),
-						GFILL_U_D);
-	}
-
-	i=0;
-	n=pLB->list.next;
-	while(1)
-	{
-		if(n==&pLB->list)
-		{	//已经是最后一个表项.
-			break;
-		}
-
-		if(i==pLB->TopIndex)
-		{	//丛TopIndex开始绘制.
-			break;
-		}
-
-		i++;
-		n=n->next;
-	}
-
-	if(n!=&pLB->list)
-	{
-		SetRect(&rc,0,0,RectW(&rc0),pLB->ItemHeight);
-		while(1)
-		{	//循环绘制表项.
-			if(n == &pLB->list)
-			{	//已经是最后一个表项.
-				break;
-			}
-
-			if(rc.top >= rc0.bottom)
-			{	//已经不在窗口范围内.
-				break;
-			}
-
-			item =(LISTBOX_ITEM*)list_entry(n,LISTBOX_ITEM,node);
-			if(i == pLB->CurSel)
-			{	//为当前选中项目.
-				SetDrawColor(hdc,RGB(255,100,255));
-				SetFillColor(hdc,RGB(128,0,160));
-				SetTextColor(hdc,RGB(0,255,0));
-				DrawText(hdc,item->szText,-1,&rc,DT_LEFT|DT_VCENTER|DT_BORDER|DT_BKGND);
-			}
-			else
-			{
-				SetTextColor(hdc,RGB(1,1,1));
-				DrawText(hdc,item->szText,-1,&rc,DT_LEFT|DT_VCENTER);
-			}
-
-			OffsetRect(&rc,0,RectH(&rc));
-			i++;
-			n =n->next;
-
-		}
-	}
-
-	EndPaint(hwnd,hdc);
-}
-
-static	void	listbox_lbutton_down(HWND hwnd,LISTBOX_DATA *pLB,int x,int y)
-{
-	RECT rc,rc0;
-	LISTBOX_ITEM *item;
-	int i;
-	POINT pt;
-
-	pt.x =x;
-	pt.y =y;
-
-	pLB->xpos =x;
-	pLB->ypos =y;
-
-	GetClientRect(hwnd,&rc0);
-	SetRect(&rc,0,0,RectW(&rc0),pLB->ItemHeight);
-
-	item =listbox_get_item(pLB,pLB->TopIndex);
-	if(item!=NULL)
-	{
-		i=pLB->TopIndex;
-		while(i<pLB->ItemNum)
-		{
-			if(rc.top>rc0.right)
-			{
-				break;
-			}
-
-			if(PtInRect(&rc,&pt))
-			{
-				listbox_set_cur_sel(hwnd,pLB,i);
-				break;
-			}
-
-			OffsetRect(&rc,0,RectH(&rc));
-			i++;
-		}
-	}
-
-}
-
-static	BOOL	listbox_mouse_move(LISTBOX_DATA *pLB,s32 x,s32 y)
-{
-	int i;
-
-	if((y-pLB->ypos)>pLB->ItemHeight)
-	{
-		pLB->xpos =x;
-		pLB->ypos =y;
-
-		i=pLB->TopIndex;
-		if(i>0)
-		{
-			i--;
-		}
-		listbox_set_top_index(pLB,i);
-		return TRUE;
-	}
-
-	if((y-pLB->ypos)<(-(s32)pLB->ItemHeight))
-	{
-		pLB->xpos =x;
-		pLB->ypos =y;
-
-		i=pLB->TopIndex;
-		if(i<pLB->ItemNum)
-		{
-			i++;
-		}
-		listbox_set_top_index(pLB,i);
-		return TRUE;
-	}
-
-	return FALSE;
-
-}
-
-static	u32	listbox_get_text_len(LISTBOX_DATA *pLB,s32 idx)
-{
-	LISTBOX_ITEM *item;
-
-	item =listbox_get_item(pLB,idx);
-	return strlen(item->szText)+1;
-
-}
-static	BOOL	listbox_get_text(LISTBOX_DATA *pLB,s32 idx,char *buf)
-{
-	LISTBOX_ITEM *item;
-
-	if(buf!=NULL)
-	{
-		item =listbox_get_item(pLB,idx);
-		if(item!=NULL)
-		{
-			strcpy(buf,item->szText);
-			return TRUE;
-		}
-		buf[0]='\0';
-	}
-	return FALSE;
-}
-
-u32 listbox_proc(MSG *pMsg)
+//添加字符串
+static  bool_t  ListBox_AddString(struct WindowMsg *pMsg)
 {
     HWND hwnd;
     LISTBOX_DATA *pLB;
-    u32 res;
-
+    s32 i;
+    char *text;
+    list_t *n;
+    LISTBOX_ITEM *item;
+    u32 idx;
     hwnd =pMsg->hwnd;
-    switch(pMsg->Code)
+    idx=pMsg->Param1;
+    text=(char*)pMsg->Param2;
+    pLB=(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
+    if(pLB->ItemNum >= (s32)0x7FFFFFFE)
     {
-        case    MSG_CREATE:
-        		pLB =(LISTBOX_DATA*)malloc(sizeof(LISTBOX_DATA));
-        		if(pLB!=NULL)
-        		{
-        			list_init(&pLB->list);
-        			pLB->ItemNum =0;
-        			pLB->TopIndex =0;
-        			pLB->CurSel =-1;
-        			pLB->ItemHeight =20;
-        			SetWindowPrivateData(hwnd,(void*)pLB);
-					return TRUE;
-        		}
-        		return FALSE;
-                ////
-
-        case	MSG_LBUTTON_DOWN:
-        		pLB =(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
-        		listbox_lbutton_down(hwnd,pLB,(s16)LO16(pMsg->Param2),(s16)HI16(pMsg->Param2));
-        		InvalidateWindow(hwnd);
-        		return TRUE;
-        		////
-
-        case	MSG_MOUSE_MOVE:
-        		pLB =(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
-        		if(listbox_mouse_move(pLB,(s16)LO16(pMsg->Param2),(s16)HI16(pMsg->Param2)))
-        		{
-        			InvalidateWindow(hwnd);
-        		}
-        		return TRUE;
-        		////
-
-        case	LBM_ADDSTRING:
-        		pLB =(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
-        		res =listbox_add_string(pLB,pMsg->Param1,(const char*)pMsg->Param2);
-        		InvalidateWindow(hwnd);
-        		return res;
-        		////
-
-        case	LBM_DELSTRING:
-				pLB =(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
-				listbox_del_string(pLB,pMsg->Param1);
-				InvalidateWindow(hwnd);
-				return TRUE;
-				////
-        case	LBM_RESETCONTENT:
-				pLB =(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
-				listbox_reset_content(pLB);
-				InvalidateWindow(hwnd);
-				return TRUE;
-				////
-
-        case	LBM_GETCOUNT:
-        		pLB =(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
-        		return pLB->ItemNum;
-         		////
-
-        case	LBM_SETCURSEL:
-       			pLB =(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
-       			res	=listbox_set_cur_sel(hwnd,pLB,pMsg->Param1);
-       			InvalidateWindow(hwnd);
-       			return res;
-       			////
-
-        case	LBM_GETCURSEL:
-        		pLB =(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
-        		return pLB->CurSel;
-         		////
-
-        case	LBM_SETTOPINDEX:
-       			pLB =(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
-       			res =listbox_set_top_index(pLB,pMsg->Param1);
-       			InvalidateWindow(hwnd);
-       			return res;
-       			////
-
-        case	LBM_GETTOPINDEX:
-         		pLB =(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
-        		return pLB->TopIndex;
-         		////
-
-        case	LBM_SETITEMHEIGHT:
-        		pLB =(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
-        		pLB->ItemHeight =pMsg->Param1;
-        		InvalidateWindow(hwnd);
-        		return TRUE;
-         		////
-
-        case	LBM_GETITEMHEIGHT:
-        		pLB =(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
-        		return pLB->ItemHeight;
-         		////
-
-        case	LBM_SETITEMDATA:
-        		pLB =(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
-        		return listbox_set_item_data(pLB,pMsg->Param1,pMsg->Param2);
-        		////
-
-        case	LBM_GETITEMDATA:
-    			pLB =(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
-    			return listbox_get_item_data(pLB,pMsg->Param1);
-    			////
-
-        case	LBM_GETTEXTLEN:
-   				pLB =(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
-   				return	listbox_get_text_len(pLB,pMsg->Param1);
-   				////
-
-        case	LBM_GETTEXT:
-   				pLB =(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
-   				listbox_get_text(pLB,pMsg->Param1,(char*)pMsg->Param2);
-   				return TRUE;
-   				////
-
-        case    MSG_PAINT:
-        		pLB =(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
-        		listbox_paint(pMsg->hwnd,pLB);
-                return TRUE;
-                ////
-
-        case    MSG_DESTROY:
-        		pLB =(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
-        		if(pLB!=NULL)
-        		{
-        			SetWindowPrivateData(hwnd,NULL);
-        			listbox_reset_content(pLB);
-        			free(pLB);
-        		}
-                return TRUE;
-                ////
-
-        default:
-                return DefWindowProc(pMsg);
-
+        return (s32)-1;
     }
-    return FALSE;
+
+    i=strlen(text)+1;
+    item =(LISTBOX_ITEM*)malloc(sizeof(LISTBOX_ITEM)+i);
+    if(item == NULL)
+    {
+        return (s32)-1;
+    }
+    strcpy(item->szText,text);
+    item->Flag =0;
+    item->Data =0;
+
+    i=0;
+    n=pLB->list.next;
+    while(1)
+    {
+        if(n == &pLB->list)
+        {
+            break;
+        }
+        n =n->next;
+
+        if(i == idx)
+        {
+            break;
+        }
+        i++;
+    }
+
+    dListInsertBefore(n,&item->node);
+
+    pLB->ItemNum++;
+
+    if(pLB->CurSel<0)
+    {
+        pLB->CurSel=0;
+    }
+
+    if(pLB->TopIndex<0)
+    {
+        pLB->TopIndex=0;
+    }
+    InvalidateWindow(hwnd,false);
+    return true;
+}
+
+
+//删除字符串
+static  bool_t ListBox_DelString(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    LISTBOX_DATA *pLB;
+    LISTBOX_ITEM *item;
+    hwnd =pMsg->hwnd;
+    s32 idx;
+    pLB=(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
+    idx=pMsg->Param1;
+
+    if(pLB->ItemNum>0)
+    {
+        if(idx>=pLB->ItemNum)
+        {
+            idx=pLB->ItemNum-1;
+        }
+
+        item =ListBox_GetItem(pLB,idx);
+        if(item!=NULL)
+        {
+            dListRemove(&item->node);
+            free(item);
+        }
+
+        pLB->ItemNum--;
+
+        if(pLB->CurSel>=pLB->ItemNum)
+        {
+            pLB->CurSel=pLB->ItemNum-1;
+        }
+
+        if(pLB->TopIndex>=pLB->ItemNum)
+        {
+            pLB->TopIndex=pLB->ItemNum-1;
+        }
+
+        InvalidateWindow(hwnd,false);
+        return true;
+    }
+    return false;
+}
+
+
+//重置内容
+static  bool_t ListBox_ResetContent(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    LISTBOX_DATA *pLB;
+    list_t *n,*next;
+    LISTBOX_ITEM *item;
+    hwnd =pMsg->hwnd;
+    pLB=(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
+
+    n=pLB->list.next;
+    while(1)
+    {
+        if(n==&pLB->list)
+        {
+            break;
+        }
+        next =n->next;
+
+        item =(LISTBOX_ITEM*)dListEntry(n,LISTBOX_ITEM,node);
+        free(item);
+        n=next;
+    }
+
+    pLB->ItemNum =0;
+    pLB->TopIndex =0;
+    pLB->CurSel =-1;
+    InvalidateWindow(hwnd,false);
+    return true;
+}
+
+//设置当前选中项
+static  u32 ListBox_SetCurSel(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    LISTBOX_DATA *pLB;
+    hwnd =pMsg->hwnd;
+    pLB=(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
+    u32 idx;
+    idx=pMsg->Param1;
+
+    if(pLB->ItemNum>0)
+    {
+        if(idx<0)
+        {
+            idx=pLB->ItemNum-1;
+        }
+
+        if(idx>=pLB->ItemNum)
+        {
+            idx=pLB->ItemNum-1;
+        }
+
+        if(pLB->CurSel!=idx)
+        {
+            pLB->CurSel=idx;
+//          InvalidateWindow(hwnd,false);   //父窗口消息处理可能导致按钮被删除，
+//                                          //InvalidateWindow不能在SendMessage之后调用
+            PostMessage(Gdd_GetWindowParent(hwnd),MSG_NOTIFY,(LBN_SELCHANGE<<16)|((u16)hwnd->WinId),(ptu32_t)hwnd);
+        }
+    }
+    InvalidateWindow(hwnd,false);   //父窗口消息处理可能导致按钮被删除，
+                                    //InvalidateWindow不能在SendMessage之后调用
+    return pLB->CurSel;
+}
+//
+static u32 __ListBox_SetCurSel(HWND hwnd,LISTBOX_DATA *pLB,u32 idx)
+{
+    if(pLB->ItemNum>0)
+    {
+        if(idx<0)
+        {
+            idx=pLB->ItemNum-1;
+        }
+
+        if(idx>=pLB->ItemNum)
+        {
+            idx=pLB->ItemNum-1;
+        }
+
+        if(pLB->CurSel!=idx)
+        {
+            pLB->CurSel=idx;
+            PostMessage(Gdd_GetWindowParent(hwnd),MSG_NOTIFY,(LBN_SELCHANGE<<16)|((u16)hwnd->WinId),(ptu32_t)hwnd);
+        }
+    }
+    return pLB->CurSel;
+}
+
+//获取当前选项
+static u32 ListBox_GetCurSel(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    LISTBOX_DATA *pLB;
+    hwnd =pMsg->hwnd;
+    pLB=(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
+    return pLB->CurSel;
+}
+
+
+//获取列表数
+static s32 ListBox_GetCount(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    LISTBOX_DATA *pLB;
+    hwnd =pMsg->hwnd;
+    pLB=(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
+    return pLB->ItemNum;
+}
+
+//设置表头指针
+static  u32 ListBox_SetTopIndex(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    LISTBOX_DATA *pLB;
+    s32 idx;
+    hwnd =pMsg->hwnd;
+    pLB=(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
+    idx=pMsg->Param1;
+    if(idx<0)
+    {
+        idx =pLB->ItemNum-1;
+    }
+
+    if(idx<pLB->ItemNum)
+    {
+        pLB->TopIndex=idx;
+    }
+    InvalidateWindow(hwnd,false);
+    return pLB->TopIndex;
+}
+
+//设置头指针
+static u32 __ListBox_SetTopIndex(LISTBOX_DATA *pLB,u32 idx)
+{
+    if(idx<0)
+    {
+        idx =pLB->ItemNum-1;
+    }
+
+    if(idx<pLB->ItemNum)
+    {
+        pLB->TopIndex=idx;
+    }
+    return pLB->TopIndex;
+}
+//设置头指针
+static u32 ListBox_GetTopIndex(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    LISTBOX_DATA *pLB;
+    hwnd =pMsg->hwnd;
+    pLB=(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
+    return pLB->TopIndex;
+}
+
+//设置项的行高
+static  bool_t ListBox_SetItemHeight(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    LISTBOX_DATA *pLB;
+    hwnd =pMsg->hwnd;
+    pLB=(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
+    pLB->ItemHeight=pMsg->Param1;
+    InvalidateWindow(hwnd,false);
+    return true;
+}
+//取的项的行高
+static u32 ListBox_GetItemHeight(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    LISTBOX_DATA *pLB;
+    hwnd =pMsg->hwnd;
+    pLB=(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
+    return pLB->ItemHeight;
+}
+
+//设置项的数据
+static  bool_t ListBox_SetItemData(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    LISTBOX_DATA *pLB;
+    s32 idx;
+    u32 data;
+    LISTBOX_ITEM *item;
+    hwnd =pMsg->hwnd;
+    pLB=(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
+    idx=pMsg->Param1;
+    data=pMsg->Param2;
+    item =ListBox_GetItem(pLB,idx);
+    if(item!=NULL)
+    {
+        item->Data =data;
+        return true;
+    }
+    return false;
+}
+//获取项的数据
+static  u32 ListBox_GetItemData(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    LISTBOX_DATA *pLB;
+    s32 idx;
+    LISTBOX_ITEM *item;
+    hwnd =pMsg->hwnd;
+    pLB=(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
+    idx=pMsg->Param1;
+    item=ListBox_GetItem(pLB,idx);
+    if(item!=NULL)
+    {
+        return item->Data;
+    }
+    return 0;
+}
+//窗口客户区绘制
+static  bool_t ListBox_Paint(struct WindowMsg *pMsg)
+{
+    HDC hdc;
+    HWND hwnd;
+    LISTBOX_DATA *pLB;
+    RECT rc,rc0;
+    list_t *n;
+    LISTBOX_ITEM *item;
+    s32 i;
+    hwnd =pMsg->hwnd;
+    pLB=(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
+
+    hdc =BeginPaint(hwnd);
+    GetClientRect(hwnd,&rc0);
+    if(GetWindowStyle(hwnd)&LBS_FLAT)
+    {
+        SetFillColor(hdc,RGB(200,200,200));
+        FillRect(hdc,&rc0);
+    }
+    else
+    {
+        GradientFillRect(hdc,&rc0,
+                        RGB(240,240,240),
+                        RGB(100,100,100),
+                        CN_FILLRECT_MODE_UD);
+    }
+
+    i=0;
+    n=pLB->list.next;
+    while(1)
+    {
+        if(n==&pLB->list)
+        {   //已经是最后一个表项.
+            break;
+        }
+
+        if(i==pLB->TopIndex)
+        {   //丛TopIndex开始绘制.
+            break;
+        }
+
+        i++;
+        n=n->next;
+    }
+
+    if(n!=&pLB->list)
+    {
+        SetRect(&rc,0,0,RectW(&rc0),pLB->ItemHeight);
+        while(1)
+        {   //循环绘制表项.
+            if(n == &pLB->list)
+            {   //已经是最后一个表项.
+                break;
+            }
+
+            if(rc.top >= rc0.bottom)
+            {   //已经不在窗口范围内.
+                break;
+            }
+
+            item =(LISTBOX_ITEM*)dListEntry(n,LISTBOX_ITEM,node);
+            if(i == pLB->CurSel)
+            {   //为当前选中项目.
+                SetDrawColor(hdc,RGB(255,100,255));
+                SetFillColor(hdc,RGB(128,0,160));
+                SetTextColor(hdc,RGB(0,255,0));
+                DrawText(hdc,item->szText,-1,&rc,DT_LEFT|DT_VCENTER|DT_BORDER|DT_BKGND);
+            }
+            else
+            {
+                SetTextColor(hdc,RGB(1,1,1));
+                DrawText(hdc,item->szText,-1,&rc,DT_LEFT|DT_VCENTER);
+            }
+
+            OffsetRect(&rc,0,RectH(&rc));
+            i++;
+            n =n->next;
+
+        }
+    }
+
+    EndPaint(hwnd,hdc);
+    return true;
+}
+
+//列表框左键按下
+static  bool_t    ListBox_LbuttonDown(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    LISTBOX_DATA *pLB;
+    hwnd =pMsg->hwnd;
+    s32 x,y,i;
+    RECT rc,rc0;
+    LISTBOX_ITEM *item;
+    POINT pt;
+    pLB=(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
+    x=(s16)LO16(pMsg->Param2);
+    y=(s16)HI16(pMsg->Param2);
+    pt.x =x;
+    pt.y =y;
+    ScreenToClient(hwnd,&pt,1);
+    pLB->xpos =x;
+    pLB->ypos =y;
+    GetClientRect(hwnd,&rc0);
+    SetRect(&rc,0,0,RectW(&rc0),pLB->ItemHeight);
+    item =ListBox_GetItem(pLB,pLB->TopIndex);
+    if(item!=NULL)
+    {
+        i=pLB->TopIndex;
+        while(i<pLB->ItemNum)
+        {
+            if(rc.top>rc0.bottom)
+            {
+                break;
+            }
+
+            if(PtInRect(&rc,&pt))
+            {
+                __ListBox_SetCurSel(hwnd,pLB,i);
+                break;
+            }
+
+            OffsetRect(&rc,0,RectH(&rc));
+            i++;
+        }
+    }
+    InvalidateWindow(hwnd,false);
+    return true;
+}
+//列表框移动
+static  bool_t    ListBox_MouseMove(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    LISTBOX_DATA *pLB;
+    hwnd =pMsg->hwnd;
+    pLB=(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
+    s32 x,y,i;
+    x=(s16)LO16(pMsg->Param2);
+    y=(s16)HI16(pMsg->Param2);
+
+    if((y-pLB->ypos)>pLB->ItemHeight)
+    {
+        pLB->xpos =x;
+        pLB->ypos =y;
+
+        i=pLB->TopIndex;
+        if(i>0)
+        {
+            i--;
+        }
+
+        __ListBox_SetTopIndex(pLB,i);
+        return true;
+    }
+
+    if((y-pLB->ypos)<(-(s32)pLB->ItemHeight))
+    {
+        pLB->xpos =x;
+        pLB->ypos =y;
+
+        i=pLB->TopIndex;
+        if(i<pLB->ItemNum)
+        {
+            i++;
+        }
+        __ListBox_SetTopIndex(pLB,i);
+        InvalidateWindow(hwnd,false);
+        return true;
+    }
+
+    return false;
 
 }
+
+//获取文本长度
+static  u32 ListBox_GetTextLen(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    LISTBOX_DATA *pLB;
+    LISTBOX_ITEM *item;
+    u32 idx;
+    hwnd =pMsg->hwnd;
+    pLB=(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
+    idx=pMsg->Param1;
+    item =ListBox_GetItem(pLB,idx);
+    return strlen(item->szText)+1;
+
+}
+
+//获取文本
+static  bool_t    ListBox_GetText(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    LISTBOX_DATA *pLB;
+    LISTBOX_ITEM *item;
+    char *buf;
+    u32 idx;
+    hwnd =pMsg->hwnd;
+    pLB=(LISTBOX_DATA*)GetWindowPrivateData(hwnd);
+    idx=pMsg->Param1;
+    buf=(char*)pMsg->Param2;
+    if(buf!=NULL)
+    {
+        item =ListBox_GetItem(pLB,idx);
+        if(item!=NULL)
+        {
+            strcpy(buf,item->szText);
+            return true;
+        }
+        buf[0]='\0';
+    }
+    return false;
+}
+
+//默认进度条消息处理函数表，处理用户函数表中没有处理的消息。
+static struct MsgProcTable s_gListBoxMsgProcTable[] =
+{
+    {MSG_LBUTTON_DOWN,ListBox_LbuttonDown},
+    {MSG_MOUSE_MOVE,ListBox_MouseMove},
+    {MSG_ListBox_ADDSTRING,ListBox_AddString},
+    {MSG_ListBox_DELSTRING,ListBox_DelString},
+    {MSG_ListBox_RESETCONTENT,ListBox_ResetContent},
+    {MSG_ListBox_GETCOUNT,ListBox_GetCount},
+    {MSG_ListBox_SETCURSEL,ListBox_SetCurSel},
+    {MSG_ListBox_GETCURSEL,ListBox_GetCurSel},
+    {MSG_ListBox_SETTOPINDEX,ListBox_SetTopIndex},
+    {MSG_ListBox_GETTOPINDEX,ListBox_GetTopIndex},
+    {MSG_ListBox_SETITEMHEIGHT,ListBox_SetItemHeight},
+    {MSG_ListBox_GETITEMHEIGHT,ListBox_GetItemHeight},
+    {MSG_ListBox_SETITEMDATA,ListBox_SetItemData},
+    {MSG_ListBox_GETITEMDATA,ListBox_GetItemData},
+    {MSG_ListBox_GETTEXTLEN,ListBox_GetTextLen},
+    {MSG_ListBox_GETTEXT,ListBox_GetText},
+    {MSG_CREATE,ListBox_Create},
+    {MSG_PAINT,ListBox_Paint}
+};
+
+
+static struct MsgTableLink  s_gListBoxMsgLink;
+
+HWND CreateListBox(  const char *Text,u32 Style,
+                    s32 x,s32 y,s32 w,s32 h,
+                    HWND hParent,u32 WinId,void *pdata,
+                    struct MsgTableLink *UserMsgTableLink)
+{
+    WINDOW *pGddWin=NULL;
+    struct MsgTableLink *Current;
+    if(UserMsgTableLink != NULL)
+    {
+        Current = UserMsgTableLink;
+        while(Current->LinkNext != NULL)
+            Current = Current->LinkNext;
+        Current->LinkNext = &s_gListBoxMsgLink;
+        Current = UserMsgTableLink;
+    }
+    else
+        Current = &s_gListBoxMsgLink;
+    s_gListBoxMsgLink.LinkNext = NULL;
+    s_gListBoxMsgLink.MsgNum = sizeof(s_gListBoxMsgProcTable) / sizeof(struct MsgProcTable);
+    s_gListBoxMsgLink.myTable = (struct MsgProcTable *)&s_gListBoxMsgProcTable;
+    pGddWin=CreateWindow(Text,WS_CHILD|Style,x,y,w,h,hParent,WinId, CN_WINBUF_PARENT,pdata,Current);
+    return pGddWin;
+}
+
 /*============================================================================*/

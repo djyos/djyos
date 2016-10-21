@@ -65,16 +65,15 @@
 */
 
 .macro  vector_align
-    .align  8
+    .align  4
     .endm
 
 /* 异常向量表 */
-.align  8
+.align    16
 .global   exception_tab
 exception_tab:
 .long 0x12345678
-.align  8
-
+	vector_align
 .global IVOR0_OFFSET
 IVOR0_OFFSET:
     b     .
@@ -420,37 +419,25 @@ __AsmSetExpVecTab:
     lwz r3, 8(sp)
     blr    
 
-.align 16
+.align 4
 .section    .stack.usr, "aw", %nobits
-.align  16
-    .space  0x10000
+.align 4
+    .space  0x1000
 .section    .stack.irq, "aw", %nobits
-.align  16
-    .space  0x10000
-
-.section    .stack.prg_exp, "aw", %nobits
-.align  16
-    .space  0x10000
-
-.section    .stack.dbg_exp, "aw", %nobits
-.align  16
-    .space  0x10000
+.align 4
+    .space  0x1000
 
 .section    .stack.cint_exp, "aw", %nobits
-.align  16
-    .space  0x10000
+.align 4
+    .space  0x1000
 
 .section    .stack.mc_exp, "aw", %nobits
-.align  16
-    .space  0x10000
+.align 4
+    .space  0x1000
 
 .section    .stack.sys_exp, "aw", %nobits
-.align  16
-    .space  0x10000
-    
-.section    .stack.core1_stack, "aw", %nobits
-.align  16
-    .space  0x10000
+.align 4
+    .space  0x1000
 
 .end
 

@@ -59,7 +59,7 @@
 extern "C" {
 #endif
 
-#include "config-prj.h"
+
 #include "djyos.h"
 #include "systime.h"
 #include "int.h"

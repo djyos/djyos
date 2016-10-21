@@ -66,7 +66,6 @@
 extern "C" {
 #endif
 
-#define CN_NLS_CHARSET_ASCII            "ascii"
 
 ptu32_t ModuleInstall_CharsetAscii(ptu32_t para);
 

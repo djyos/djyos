@@ -131,6 +131,7 @@ __asm_reset_switch:
     mov     sp,r5
 @    bl      Int_HalfEnableAsynSignal @对应done函数开头的 __Int_ResetAsynSignal 调用
     svc     0                   @切入新上下文
+    bx      lr
 @ end of __asm_reset_switch
 
 @----启动多事件调度-----------------------------------------------------------
@@ -153,6 +154,7 @@ __asm_start_thread:
     mov     sp,r1
 @    bl      Int_HalfEnableAsynSignal @线程启动后，调度应该是允许的
     svc     0                   @切入新上下文
+    bx      lr
 
 @----切入上下文---------------------------------------------------------------
 @功能:  不保存原上下文，直接切入新的上下文执行
@@ -171,6 +173,7 @@ __asm_turnto_context:
     mov     sp,r1
 @    bl      Int_HalfEnableAsynSignal @对应done函数开头的 Int_SaveAsynSignal 调用
     svc     0                   @切入新上下文
+    bx      lr
 @ end of __asm_turnto_context
 
 @----上下文切换---------------------------------------------------------------
@@ -211,6 +214,7 @@ __asm_switch_context:
     mov     sp,r2
 @    bl      Int_HalfEnableAsynSignal
     svc     0                   @切入新上下文
+    bx      lr
 @ end of __asm_switch_context
 
 @----中断中的上下文切换-------------------------------------------------------

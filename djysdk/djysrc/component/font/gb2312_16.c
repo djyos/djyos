@@ -62,11 +62,12 @@
 #include "stdint.h"
 #include "stdio.h"
 #include "stdlib.h"
-
 #include "gkernel.h"
+#include "charset.h"
 #include "font.h"
 
 #include "gb2312_16.h"
+    static struct Charset* s_ptGb2312Set;
 //横向左高位取模,包含GB2312-80标准汉字库
 static const u8 cs_GB2312Song8x16 [] =
 {
@@ -16802,7 +16803,7 @@ extern const u8 cs_ascii_8x16[];
 bool_t __Gb2312_816_1616LoadFromFile(void *zk_addr);
 void __Gb2312_816_1616UnLoadFromFile(void);
 bool_t __Font_Gb2312_816_1616GetCharBitMap(u32 charcode, u32 size,u32 resv,
-                                    struct tagRectBitmap *bitmap);
+                                    struct RectBitmap *bitmap);
 
 u8 *pg_GB2312Song16x16;
 u8 *pg_Ascii8x16;
@@ -16811,7 +16812,7 @@ u8 *pg_Ascii8x16;
 #define FONT_HZ16_W             16              // Width
 #define FONT_HZ16_H             16              // Height
 #define FONT_HZ16_GLYPH_BYTES   32              // 字符字模的字节数
-s32 __Charset_Gb2312Ucs4ToMb (u8* mb, u32 wc);
+s32 Gb2312Ucs4ToMb (u8* mb, u32 wc);
 
 
 bool_t __Gb2312_816_1616LoadFromFile(void* FileName)
@@ -16853,16 +16854,14 @@ void __Gb2312_816_1616UnLoadFromFile(void)
 //      默认字符的点阵
 //-----------------------------------------------------------------------------
 bool_t __Font_Gb2312_816_1616GetCharBitMap(u32 charcode, u32 size,u32 resv,
-                                    struct tagRectBitmap *bitmap)
+                                    struct RectBitmap *bitmap)
 {
     u8 i;
     u8 gbcode[2];  // GB2312内码
     u32 offset;
     bool_t result = true;
-
-
     // 得到字符字模在数组中的偏移量
-    if(__Charset_Gb2312Ucs4ToMb(gbcode, charcode) == -1)
+    if (s_ptGb2312Set->Ucs4ToMb((char*)gbcode, charcode) == -1)
     {
         gbcode[0] = FONT_HZ16_DEF_CHAR &0xff;
         gbcode[1] = (FONT_HZ16_DEF_CHAR>>8) &0xff;
@@ -16951,7 +16950,14 @@ s32 __Font_Gb2312_816_1616GetCharHeight(u32 CharCode)
 //-----------------------------------------------------------------------------
 ptu32_t ModuleInstall_FontGb2312_816_1616_Array(ptu32_t para)
 {
-    static struct tagFontRsc font_gb2312_8x16_1616;
+    static struct FontRsc font_gb2312_8x16_1616;
+
+    s_ptGb2312Set = Charset_NlsSearchCharset(CN_NLS_CHARSET_GB2312);
+    if (s_ptGb2312Set == NULL)
+    {
+        printf("gb2312 charset no install\n\r");
+        return 0;
+    }
 
     pg_Ascii8x16 = (u8*)cs_ascii_8x16;
     pg_GB2312Song16x16 = (u8*)cs_GB2312Song8x16;
@@ -16984,7 +16990,7 @@ ptu32_t ModuleInstall_FontGb2312_816_1616_Array(ptu32_t para)
 //-----------------------------------------------------------------------------
 ptu32_t ModuleInstall_FontGb2312_816_1616_File(ptu32_t para)
 {
-    static struct tagFontRsc font_gb2312_8x16_1616;
+    static struct FontRsc font_gb2312_8x16_1616;
 
     pg_Ascii8x16 = (u8*)cs_ascii_8x16;
     __Gb2312_816_1616LoadFromFile((void*)para);  //加载字库

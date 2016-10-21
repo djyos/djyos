@@ -50,28 +50,32 @@
 // 程序修改记录(最新的放在最前面):
 // <版本号> <修改日期>, <修改人员>: <修改功能概述>
 // =============================================================================
-#include "stdint.h"
-#include "string.h"
-#include "stdio.h"
-#include "systime.h"
+
+#include <stdint.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <endian.h>
+#include <string.h>
+#include <sys/time.h>
+
+#include <os.h>
+
 #include "exp_osstate.h"
-#include "endian.h"
-#include "time.h"
-#include "djyos.h"
+
 #define CN_EXP_OSSTATEINFO_MAGICNUMBER  ((u32)0x11111111)
 //跑出异常时搜集的系统信息
-struct tagExpOsState
+struct ExpOsState
 {
-    u32   magicnumber;                               //系统信息有效标志
+    u32   magicnumber;                             //系统信息有效标志
     u16   eventrunning_id;                         //正在运行的事件ID
     u16   evttrunning_id;                          //其事件类型Id
-    char  evttrunningname[CN_EXP_NAMELEN_LIMIT];//事件类型名字
+    char  evttrunningname[CN_EXP_NAMELEN_LIMIT];   //事件类型名字
     s64   exptime;                                 //异常时刻
 };
-static struct tagExpOsState s_tExpOsstateInfo;
+static struct ExpOsState s_tExpOsstateInfo;
 
 // =============================================================================
-// 函数功能:Exp_OsStateInfoGather
+// 函数功能:__Exp_OsStateInfoGather
 //         异常时刻系统的运行状态
 // 输入参数:throwpara,异常抛出者抛出的异常信息
 //          传递过来是为了更好的搜集异常信息
@@ -82,30 +86,23 @@ static struct tagExpOsState s_tExpOsstateInfo;
 //          异常模块内部使用，不对外开放
 //          目前未针对异常具体抛出者搜集特别信息，做通用处理
 // =============================================================================
-bool_t  Exp_OsStateInfoGather(struct tagExpThrowPara *throwpara,\
-                              ptu32_t *infoaddr,u32 *infolen)
+void  __Exp_OsStateInfoGather(ptu32_t *infoaddr,u32 *infolen)
 {
-    bool_t  result;
-
-    if(NULL != throwpara)
-    {
-        s_tExpOsstateInfo.exptime = DjyGetTime();
-        s_tExpOsstateInfo.eventrunning_id = Djy_MyEventId();
-        s_tExpOsstateInfo.evttrunning_id  = Djy_MyEvttId();
-        Djy_GetEvttName(s_tExpOsstateInfo.evttrunning_id,\
-                &s_tExpOsstateInfo.evttrunningname[0],CN_EXP_NAMELEN_LIMIT);
-        s_tExpOsstateInfo.magicnumber = CN_EXP_OSSTATEINFO_MAGICNUMBER;
-        *infoaddr = (ptu32_t)(&s_tExpOsstateInfo);
-        *infolen = sizeof(s_tExpOsstateInfo);
-        result = true;
-    }
-    else
-    {
-        *infoaddr = 0;
-        *infolen = 0;
-        result = false;
-    }
-    return result;
+    s_tExpOsstateInfo.exptime = DjyGetSysTime();
+    s_tExpOsstateInfo.eventrunning_id = Djy_MyEventId();
+    s_tExpOsstateInfo.evttrunning_id  = Djy_MyEvttId();
+    Djy_GetEvttName(s_tExpOsstateInfo.evttrunning_id,\
+            &s_tExpOsstateInfo.evttrunningname[0],CN_EXP_NAMELEN_LIMIT);
+    s_tExpOsstateInfo.magicnumber = CN_EXP_OSSTATEINFO_MAGICNUMBER;
+    *infoaddr = (ptu32_t)(&s_tExpOsstateInfo);
+    *infolen = sizeof(s_tExpOsstateInfo);
+    printk("异常时系统运行状态\n\r");
+    printk("事件号  所属类型  异常时间  类型名\n\r");
+    printk("%5hd   %5hd    %lld %s\n\r",s_tExpOsstateInfo.eventrunning_id,
+                                  s_tExpOsstateInfo.evttrunning_id&(~CN_EVTT_ID_MASK),
+                                  s_tExpOsstateInfo.exptime,
+                                  s_tExpOsstateInfo.evttrunningname);
+    return;
 }
 
 // =============================================================================
@@ -116,14 +113,14 @@ bool_t  Exp_OsStateInfoGather(struct tagExpThrowPara *throwpara,\
 // 返回值  :无
 // 说明    :内部调用
 // =============================================================================
-void __Exp_OsstateinfoSwapByEndian(struct tagExpOsState *osstate)
+void __Exp_OsstateinfoSwapByEndian(struct ExpOsState *osstate)
 {
     osstate->magicnumber = swapl(osstate->magicnumber);
     osstate->eventrunning_id = swaps(osstate->eventrunning_id);
     osstate->evttrunning_id = swaps(osstate->evttrunning_id);
 }
 // =============================================================================
-// 函数功能:Exp_OsStateInfoDecoder
+// 函数功能:__Exp_OsStateInfoDecoder
 //          软件通用异常信息解析
 // 输入参数:throwpara,抛出者的参数
 //          infoaddr,异常信息存储地址
@@ -132,16 +129,13 @@ void __Exp_OsstateinfoSwapByEndian(struct tagExpOsState *osstate)
 // 返回值  :true,成功设置;false,设置失败，主要是因为参数错误
 // 说明    :内部调用
 // =============================================================================
-bool_t  Exp_OsStateInfoDecoder(struct tagExpThrowPara *throwpara,\
-                               ptu32_t infoaddr,u32 infolen,u32 endian)
+bool_t  __Exp_OsStateInfoDecoder(ptu32_t infoaddr,u32 infolen,u32 endian)
 {
     bool_t  result;
-    char buf[100];//作为日历时间年月日已经足够了
-	struct tm  exptime;
-    struct tagExpOsState osstate;
-    if((NULL == throwpara)||(infoaddr == 0)||(infolen != (sizeof(s_tExpOsstateInfo))))
+    struct ExpOsState osstate;
+    if((infoaddr == 0)||(infolen != (sizeof(s_tExpOsstateInfo))))
     {
-        printk("osstate:Invalid para or incomplete info!\n\r");
+        printf("osstate:Invalid para or incomplete info!\n\r");
         result = false;
     }
     else
@@ -153,21 +147,18 @@ bool_t  Exp_OsStateInfoDecoder(struct tagExpThrowPara *throwpara,\
         }
         if(CN_EXP_OSSTATEINFO_MAGICNUMBER == osstate.magicnumber)
         {
-            printk("osstate:EventRunningId = 0x%04x\n\r",\
+            printf("osstate:EventIdRunning     :0x%04x\n\r",\
                                    osstate.eventrunning_id);
-            printk("osstate:EvttRunningId  = 0x%04x\n\r",\
+            printf("osstate:EvttIdRunning      :0x%04x\n\r",\
                                       (osstate.eventrunning_id)&(~CN_EVTT_ID_MASK));
-            printk("osstate:EvttRunningName= %s\n\r",\
+            printf("osstate:EvttNameRunning    :%s\n\r",\
                                        osstate.evttrunningname);
-
-            Tm_LocalTimeUs_r((s64 *)&osstate.exptime,&exptime);
-            Tm_AscTime(&exptime,buf);
-            printk("osstate:OsTime         = %s(DEC) \n\r",buf);
+            printf("osstate:OsTime             :%s(DEC) \n\r",ctime((s64 *)&osstate.exptime));
             result = true;
         }
         else
         {
-            printk("osstate:DESTROYED PACKAGE \n\r");
+            printf("osstate:DESTROYED PACKAGE \n\r");
             result = false;
         }
     }

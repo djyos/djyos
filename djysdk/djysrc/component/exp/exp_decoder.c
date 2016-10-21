@@ -57,78 +57,37 @@
 #include "stdio.h"
 #include "int.h"
 #include "string.h"
-
+#include "list.h"
 #include "exp_decoder.h"
 
-static fnExp_ThrowinfoDecoderModule s_fnExpThrowinfoDecoderTab[CN_EXP_DECODERNUM_LIMIT] ={NULL};
-//解析器名字,所有的异常，都使用异常名字来搜索decoder，
-//如果觉得很多异常处理方法比较类似，可以注册一个NAME,然后在异常信息内部自己做
-//异常号的区分,如所有的硬件异常可以注册为CPU_HARD，然后自己根据MAJOR和MINOR自己区分
-static const char *s_pcExpThrowinfoDecoderNameTab[CN_EXP_DECODERNUM_LIMIT]= {NULL};
-
+struct dListNode ExpDecoderListHead;
 // =============================================================================
-// 函数功能:__Exp_CheckDecoderName
-//           看该异常名字是否已经被注册
-// 输入参数:name,解析器名字
+// 函数功能: 看该异常名字是否已经被注册,返回解析器结构,未被注册则返回NULL
+// 输入参数: name,解析器名字
 // 输出参数:
-// 返回值  :可以被注册的异常号
-// 说明    :如果该decoder的名字已经被注册，则返回无效的解析器号
+// 返回值  :解析器结构指针,没找到就返回NULL
 // =============================================================================
-u32  __Exp_CheckDecoderName(const char *name)
+struct ExpInfoDecoder *  __Exp_FindDecoderNoByName(const char *name)
 {
-    u32 i = 0;
-    u32 result = 0;
+    struct ExpInfoDecoder *result = NULL;
+    struct ExpInfoDecoder *Decoder;
+    struct dListNode *Pos;
     int cmpresult;
-    while(i < CN_EXP_DECODERNUM_LIMIT)
+    dListForEach(Pos,&ExpDecoderListHead)
     {
-        if(NULL == s_pcExpThrowinfoDecoderNameTab[i])//可用的
+        Decoder = dListEntry(Pos,struct ExpInfoDecoder,DecoderList);
+        cmpresult = strcmp(Decoder->DecoderName,name);
+        if(0 == cmpresult)
         {
-            result = i;
+            result = Decoder;
+            break;
         }
-        else
-        {
-            cmpresult = strcmp(s_pcExpThrowinfoDecoderNameTab[i],name);
-            if(0 == cmpresult)
-            {
-                break;
-            }
-        }
-        i++;
-    }
-    if(i < CN_EXP_DECODERNUM_LIMIT)//有重名的
-    {
-        result = CN_EXP_DECODERNUM_LIMIT;
     }
     return result;
 }
+
 // =============================================================================
-// 函数功能：__Exp_FindDecoderNoByName
-//          用名字查找异常解析器号
-// 输入参数:name,注册的异常名字
-// 输出参数：
-// 返回值  :对应名字的异常号，否则无效异常号
-// 说明    ：
-// =============================================================================
-u32  __Exp_FindDecoderNoByName(char *name)
-{
-    u32 i = 0;
-    int cmpresult;
-    while(i < CN_EXP_DECODERNUM_LIMIT)
-    {
-        if(NULL != s_pcExpThrowinfoDecoderNameTab[i])//可用的
-        {
-            cmpresult = strcmp(s_pcExpThrowinfoDecoderNameTab[i],name);
-            if(0 == cmpresult)
-            {
-                break;
-            }
-        }
-        i++;
-    }
-    return i;
-}
-// =============================================================================
-// 函数功能:Exp_Throwinfodecoder
+// 函数功能:Exp_ThrowInfodecode
 //          抛出异常信息解析
 // 输入参数:parahead,抛出异常时参数
 //          endian, 信息的大小端
@@ -136,53 +95,69 @@ u32  __Exp_FindDecoderNoByName(char *name)
 // 返回值  :true,成功设置;false,设置失败，主要是因为参数错误
 // 说明    :内部调用
 // =============================================================================
-bool_t  Exp_Throwinfodecoder(struct tagExpThrowPara *parahead,u32 endian)
+bool_t  Exp_ThrowInfodecode(struct ExpThrowPara *parahead,u32 endian)
 {
     bool_t result;
-    u32 decoder_num;
+    u32 n;
+    struct ExpInfoDecoder *Decoder;
 
-    decoder_num = __Exp_FindDecoderNoByName(parahead->name);
-    if(decoder_num != CN_EXP_DECODERNUM_LIMIT)//注册有，那么就解析吧
+    if((parahead->DecoderName == NULL) || (strlen(parahead->DecoderName) == 0))
     {
-        result = s_fnExpThrowinfoDecoderTab[decoder_num](parahead,endian);
+        printf("%s",parahead->ExpInfo);
+        printf("\n\r");
+        result = true;
     }
     else
     {
-        result = false;
+        Decoder = __Exp_FindDecoderNoByName(parahead->DecoderName);
+        if(Decoder != NULL) //注册有，那么就解析吧
+        {
+            result = Decoder->MyDecoder(parahead,endian);
+        }
+        else                //DecoderName非空，但却找不到解析器
+        {
+            printf("异常信息解析器未找到,显示16进制信息");
+            for(n = 0; n < parahead->ExpInfoLen; n++)
+            {
+                printf("%x ",parahead->ExpInfo[n]);
+                if((n & 0xf) == 0)
+                    printf("\n\r");
+            }
+            result = false;
+        }
     }
     return result;
 }
 // =============================================================================
-// 函数功能：Exp_RegisterThrowinfoDecoder
-//          注册软件异常信息解析器
-// 输入参数：decoder,异常解析器
-//          name,异常解析器名字,至少保证是全局的且不会变的
-// 输出参数：
-// 返回值  ：true,成功注册;false,注册失败，
-// 说明    ：
-//          1,当对应的异常号已经被注册了的时候，会查找未被注册的异常号进行注册
-//          2,无名或者已经存在对应命名的异常会导致注册失败澹(只是‘\0’也是无效的)
-//          3,有注册失败的可能，因此注意检查返回结果
-//          4,为了保证该函数的通用性，将会采用原子操作而非同步量
+//功能：注册异常信息解析器,如果异常发生时收集的信息比较多而且复杂,可注册一个
+//      解析器,用于把该信息解析成可读信息以供分析。如果异常信息本身就是一个字符串,
+//      则无须注册解析器.
+//      若存储的异常有名字,但却未注册,则按照16进制显示.
+//参数：decoder,异常解析器函数指针
+//输出：无
+//返回：true,成功注册;false,注册失败，
+//说明：为什么使用名字而不用函数指针, 原因如下:
+//      1.异常是在设备正常运行时记录的,分析和查找问题时,往往加载一个专门的诊断
+//        程序,此时用于解析异常的函数,其一般跟记录异常时的地址不一致.
+//      2.异常记录有可能被copy到其他计算机上分析,解析器函数地址坑定不一致了.
 // =============================================================================
-bool_t Exp_RegisterThrowinfoDecoder(fnExp_ThrowinfoDecoderModule decoder,const char *name)
+bool_t Exp_RegisterThrowInfoDecoder(struct ExpInfoDecoder *Decoder)
 {
     bool_t  result;
-    u32 num_search;
+    struct ExpInfoDecoder *dcd;
     atom_low_t  atom2operate;
 
-    if((NULL == name)||(NULL == decoder) ||('\0')== *name)
+    if(Decoder == NULL)
     {
-        printk("Exp_RegisterThrowinfoDecoder:Invalid parameter!\n\r");
+        printk("Exp_RegisterThrowInfoDecoder:Invalid parameter!\n\r");
         return false;
     }
     atom2operate = Int_LowAtomStart();
 
-    num_search = __Exp_CheckDecoderName(name);
-    if(num_search != CN_EXP_DECODERNUM_LIMIT)//名字有效
+    dcd = __Exp_FindDecoderNoByName(Decoder->DecoderName);
+    if(dcd == NULL)//名字尚未被注册
     {
-        s_fnExpThrowinfoDecoderTab[num_search] = decoder;
-        s_pcExpThrowinfoDecoderNameTab[num_search] = name;
+        dListInsertAfter(&ExpDecoderListHead,&(Decoder->DecoderList));
         result = true;
     }
     else
@@ -191,45 +166,6 @@ bool_t Exp_RegisterThrowinfoDecoder(fnExp_ThrowinfoDecoderModule decoder,const c
     }
     Int_LowAtomEnd(atom2operate);
 
-    return result;
-}
-
-// =============================================================================
-// 函数功能:Exp_UnRegisterThrowinfoDecoder
-//          注销软件异常信息解析器
-// 输入参数:name,已经被注册的异常名字
-// 输出参数：
-// 返回值  :true,成功注销;false,注销失败，
-// 说明    ：
-// =============================================================================
-bool_t Exp_UnRegisterThrowinfoDecoder(char *name)
-{
-    bool_t  result;
-    u32 num_search;
-    atom_low_t  atom2operate;
-
-    if(NULL == name)
-    {
-        printk("Exp_UnRegisterThrowinfoDecoder:Invalid parameter!\n\r");
-        result = false;
-    }
-    else
-    {
-        atom2operate = Int_LowAtomStart();
-
-        num_search = __Exp_FindDecoderNoByName(name);
-        if(num_search != CN_EXP_DECODERNUM_LIMIT)//名字有效
-        {
-            s_fnExpThrowinfoDecoderTab[num_search] = NULL;
-            s_pcExpThrowinfoDecoderNameTab[num_search] = NULL;
-            result = true;
-        }
-        else
-        {
-            result = false;
-        }
-        Int_LowAtomEnd(atom2operate);
-    }
     return result;
 }
 

@@ -1,8 +1,6 @@
 
-#include    "os_inc.h"
-
-#include    "GDD_Private.h"
-#include    "GDD.h"
+#include    "djyos.h"
+#include    "gdd.h"
 #include    <wchar.h>
 
 #include    "lauxlib.h"

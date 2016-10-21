@@ -60,26 +60,26 @@
 //       修改说明:初始版本
 //------------------------------------------------------
 #include "stdint.h"
-#include "rsc.h"
+#include "object.h"
 #include "stdio.h"
 
 #include "charset.h"
 
-static struct tagCharset *s_ptCurCharEncoding;    // 编码资源
+static struct Charset *s_ptCurCharEncoding;    // 编码资源
 //----安装字符编码-------------------------------------------------------------
 //功能: 把新字符编码安装到系统资源队列中
 //参数: encoding，新增的字符编码资源指针
 //      name，新增字符编码名
 //返回: true
 //-----------------------------------------------------------------------------
-bool_t  Charset_NlsInstallCharset(struct tagCharset *encoding, char* name)
+bool_t  Charset_NlsInstallCharset(struct Charset *encoding,const char* name)
 {
-    struct tagRscNode *rsc;
-    rsc = Rsc_SearchTree(CN_CHAR_ENCODING_RSC_TREE);
+    struct Object *rsc;
+    rsc = OBJ_SearchTree(CN_CHAR_ENCODING_RSC_TREE);
     if(rsc == NULL)
         return false;       //字符资源根结点未创建
 
-    Rsc_AddSon(rsc,&encoding->node,sizeof(struct tagCharset),RSC_CHARSET,name);
+    OBJ_AddChild(rsc,&encoding->node,sizeof(struct Charset),RSC_CHARSET,name);
 
     return true;
 }
@@ -89,12 +89,12 @@ bool_t  Charset_NlsInstallCharset(struct tagCharset *encoding, char* name)
 //-----------------------------------------------------------------------------
 ptu32_t ModuleInstall_Charset(ptu32_t para)
 {
-    static struct tagRscNode encoding_root_rsc;    // 编码资源
+    static struct Object encoding_root_rsc;    // 编码资源
 
     s_ptCurCharEncoding = NULL;
     // 添加字符编码资源根节点
-    if(Rsc_AddTree(&encoding_root_rsc,
-                            sizeof(struct tagRscNode),RSC_RSCNODE,
+    if(OBJ_AddTree(&encoding_root_rsc,
+                            sizeof(struct Object),RSC_RSCNODE,
                             CN_CHAR_ENCODING_RSC_TREE))
     {
         return 1;
@@ -109,7 +109,7 @@ ptu32_t ModuleInstall_Charset(ptu32_t para)
 //功能: 获取当前使用的字符编码
 //返回: 当前字符编码
 //-----------------------------------------------------------------------------
-struct tagCharset* Charset_NlsGetCurCharset(void)
+struct Charset* Charset_NlsGetCurCharset(void)
 {
     return s_ptCurCharEncoding;
 }
@@ -121,19 +121,20 @@ struct tagCharset* Charset_NlsGetCurCharset(void)
 //返回: NULL，设定失败
 //      设定之前的字符编码
 //-----------------------------------------------------------------------------
-struct tagCharset* Charset_NlsSetCurCharset(
-                                struct tagCharset* encoding)
+struct Charset* Charset_NlsSetCurCharset(struct Charset* encoding)
 {
-    struct tagRscNode *rsc;
+    struct Object *rsc;
+    char *Name;
     if(encoding == NULL)
         return NULL;
-    rsc = Rsc_SearchTree(CN_CHAR_ENCODING_RSC_TREE);
+    rsc = OBJ_SearchTree(CN_CHAR_ENCODING_RSC_TREE);
     if(rsc == NULL)
         return NULL;       //字符资源树未创建
-    rsc = Rsc_SearchSon(rsc,encoding->node.name);
+    Name = OBJ_Name(&encoding->node);
+    rsc = OBJ_SearchChild(rsc,(const char*)(Name));
     if(rsc != NULL)
     {
-        s_ptCurCharEncoding = (struct tagCharset*)rsc;
+        s_ptCurCharEncoding = (struct Charset*)rsc;
     }
     return s_ptCurCharEncoding;
 }
@@ -144,14 +145,14 @@ struct tagCharset* Charset_NlsSetCurCharset(
 //返回: NULL，无此编码资源
 //      要找的字符编码资源
 //-----------------------------------------------------------------------------
-struct tagCharset* Charset_NlsSearchCharset(const char* name)
+struct Charset* Charset_NlsSearchCharset(const char* name)
 {
-    struct tagRscNode *rsc;
+    struct Object *rsc;
 
-    rsc = Rsc_SearchTree(CN_CHAR_ENCODING_RSC_TREE);
+    rsc = OBJ_SearchTree(CN_CHAR_ENCODING_RSC_TREE);
     if(rsc == NULL)
         return NULL;       //字符资源树未创建
 
-    return (struct tagCharset*)Rsc_SearchSon(rsc, (char *)name);
+    return (struct Charset*)OBJ_SearchChild(rsc,name);
 }
 

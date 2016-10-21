@@ -50,8 +50,8 @@
  * 创建时间: 2011.06.01                                          *
  * Copyright(c) 2011-2011  深圳鹏瑞软件有限公司             *
  *========================================================*
- * 程序修改记录(最新的放在最前面):							     *
- *  <版本号> <修改日期>, <修改人员>: <修改功能概述>				 *
+ * 程序修改记录(最新的放在最前面):                               *
+ *  <版本号> <修改日期>, <修改人员>: <修改功能概述>              *
  *========================================================*
 * 例如：
 *  V1.02 2004-07-14, 张三: 接收函数增加对报文长度有效性校核
@@ -107,13 +107,13 @@ typedef struct         //offset
 #define uart2_buf_len  512
 
 //串口状态控制结构
-typedef struct tagUartUCB
+typedef struct UartUCB
 {
-    struct tagRingBuf send_ring_buf;           //环形发送缓冲区.
-    struct tagRingBuf recv_ring_buf;           //环形接收缓冲区.
+    struct RingBuf send_ring_buf;           //环形发送缓冲区.
+    struct RingBuf recv_ring_buf;           //环形接收缓冲区.
 
-    struct tagSemaphoreLCB *send_buf_semp;     //发送缓冲区锁
-    struct tagSemaphoreLCB *recv_buf_semp;     //接收缓冲区锁
+    struct SemaphoreLCB *send_buf_semp;     //发送缓冲区锁
+    struct SemaphoreLCB *recv_buf_semp;     //接收缓冲区锁
 
     u16 evtt_right_write;      //设备右手被写后弹出的事件类型
     u16 evtt_left_write;       //设备左手被写后弹出的事件类型

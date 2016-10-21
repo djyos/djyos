@@ -1,0 +1,16 @@
+*~
+*.o
+*o.cmd
+*.ko
+*.pyc
+DEADJOE
+*.mod.c
+*.order
+
+/Module.symvers
+/.tmp_versions
+
+#
+# cscope files
+#
+cscope.*

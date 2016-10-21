@@ -58,7 +58,7 @@
 #define __DRIVER_H__
 
 #include "errno.h"
-#include "rsc.h"
+#include "object.h"
 #include "multiplex.h"
 
 #ifdef __cplusplus
@@ -66,13 +66,12 @@ extern "C" {
 #endif
 
 #define CN_DEV_NAME_LIMIT   255     //设备名长度不能超过255字符
-typedef struct tagDjyDevice * tagDevHandle;
-struct  tagDjyDevice;
-struct  tagRscNode;
+struct DjyDevice;
+struct  Object;
 
-#define O_RDONLY    1   //只读模式
-#define O_WRONLY    2   //只写模式
-#define O_RDWR      3   //读写模式
+#define D_RDONLY    1   //只读模式
+#define D_WRONLY    2   //只写模式
+#define D_RDWR      3   //读写模式
 
 //泛设备模块出错代码，本enum常量从enum_drv_no_error开始依序增1.
 enum _DRV_ERROR_CODE_
@@ -104,18 +103,18 @@ enum _DRV_ERROR_CODE_
 //返回值:成功写入的字节数，如果设备有缓冲区，则写到缓冲区就算。例如一个串口设备，
 //返回值表示函数返回时成功写入到设备缓冲区的数据量，并不确定是否已经从物理串口
 //传输出去了。
-typedef u32 (*devWriteFunc)(ptu32_t PrivateTag,u8 *buf,
+typedef u32 (*fntDevWrite)(ptu32_t PrivateTag,u8 *buf,
                          u32 len,u32 offset,bool_t BlockOption,u32 timeout);
 //返回值:成功读取的字节数
-typedef u32 (*devReadFunc) (ptu32_t PrivateTag,u8 *buf,
+typedef u32 (*fntDevRead) (ptu32_t PrivateTag,u8 *buf,
                                      u32 len,u32 offset,u32 timeout);
 //返回值:收到不支持的命令，返回-1，0表示成功执行，其他返回值的含义自定
-typedef u32 (*devCtrlFunc) (ptu32_t PrivateTag,u32 cmd,
+typedef u32 (*fntDevCtrl) (ptu32_t PrivateTag,u32 cmd,
                                      ptu32_t data1,ptu32_t data2);
 //返回值:true=成功执行，false=失败。
 //SendsingBit设为0表示从MultiplexSets中删除该设备
-typedef bool_t (*devMultiplexAddFunc) (ptu32_t PrivateTag,
-                                       struct tagMultiplexSetsCB *MultiplexSets,
+typedef bool_t (*fntDevMultiplexAdd) (ptu32_t PrivateTag,
+                                       struct MultiplexSetsCB *MultiplexSets,
                                        u32 DevAlias,
                                        u32 SensingBit);
 #define DEV_READ_MUTEX_SYS      1       //bit0,1=读设备的互斥量是系统分配的。
@@ -123,49 +122,49 @@ typedef bool_t (*devMultiplexAddFunc) (ptu32_t PrivateTag,
 //注意，不提供dev_open、dev_close两个函数，如果有些设备需要在open时调用dev_open
 //完成一些设置工作的，可用dev_Ctrl函数的CN_DRV_CTRL_START命令。同理，也不提供
 //dev_close接口
-struct tagDjyDevice
+struct DjyDevice
 {
-    struct  tagRscNode Node;
-    devWriteFunc  dWrite;
-    devReadFunc   dRead;
-    devCtrlFunc   dCtrl;
-    devMultiplexAddFunc dMultiplexAdd;  //若设备driver不支持多路复用，请置空。
-    struct tagMutexLCB *dReadMutex;     //互斥量,控制设备独占式读访问
-    struct tagMutexLCB *dWriteMutex;    //互斥量,控制设备独占式写访问
+    struct  Object Node;
+    fntDevWrite  dWrite;
+    fntDevRead   dRead;
+    fntDevCtrl   dCtrl;
+    fntDevMultiplexAdd dMultiplexAdd;  //若设备driver不支持多路复用，请置空。
+    struct MutexLCB *dReadMutex;     //互斥量,控制设备独占式读访问
+    struct MutexLCB *dWriteMutex;    //互斥量,控制设备独占式写访问
     u32    MutexFlag;                   //标志互斥量是用户提供的,还是系统分配的。
+                                        //见DEV_READ_MUTEX_SYS的定义
     u32 delete_lock;                    //删除锁，大于 0 表示该设备不能删除
     ptu32_t PrivateTag;                 //本设备特有的数据
 };
 
 ptu32_t ModuleInstall_Driver(ptu32_t para);
-tagDevHandle Driver_DeviceCreate(  tagDevHandle         ParentDevice,
-                                char                    *name,
-                                struct tagMutexLCB      *dReadMutex,
-                                struct tagMutexLCB      *dWriteMutex,
-                                devWriteFunc            WriteFunc ,
-                                devReadFunc             ReadFunc,
-                                devCtrlFunc             Ctrl ,
-                                devMultiplexAddFunc     MultiplexAdd,
+struct DjyDevice * Driver_DeviceCreate(  struct DjyDevice *         ParentDevice,
+                                const char              *name,
+                                struct MutexLCB      *dReadMutex,
+                                struct MutexLCB      *dWriteMutex,
+                                fntDevWrite            WriteFunc ,
+                                fntDevRead             ReadFunc,
+                                fntDevCtrl             Ctrl ,
+                                fntDevMultiplexAdd     MultiplexAdd,
                                 ptu32_t                 tag);
 bool_t Driver_LockDevice(u32 DevAlias);
 bool_t Driver_UnLockDevice(u32 DevAlias);
-bool_t Driver_DeleteDevice(tagDevHandle handle);
-u32 Driver_FindDevice(char * name);
-u32 Driver_FindScionDevice(tagDevHandle ancestor,
-                                    char * scion_name);
-tagDevHandle Driver_OpenDevice(char *name,u32 flags,u32 timeout);
-tagDevHandle Driver_OpenScionDevice(tagDevHandle ancestor,
-                                 char *scion_name,u32 flags, u32 timeout);
-tagDevHandle Driver_OpenDeviceAlias(u32 DevAlias,u32 flags,u32 timeout);
-bool_t Driver_CloseDevice(tagDevHandle handle);
-u32 Driver_ReadDevice(tagDevHandle handle,u8 *buf,u32 len,u32 offset,u32 timeout);
-u32 Driver_WriteDevice(tagDevHandle handle,u8 *buf,
+bool_t Driver_DeleteDevice(struct DjyDevice * handle);
+u32 Driver_FindDevice(const char * name);
+u32 Driver_FindScionDevice(struct DjyDevice * ancestor,const char * scion_name);
+struct DjyDevice * Driver_OpenDevice(const char *name,u32 flags,u32 timeout);
+struct DjyDevice * Driver_OpenScionDevice(struct DjyDevice * ancestor,
+                                const char *scion_name,u32 flags, u32 timeout);
+struct DjyDevice * Driver_OpenDeviceAlias(u32 DevAlias,u32 flags,u32 timeout);
+bool_t Driver_CloseDevice(struct DjyDevice * handle);
+u32 Driver_ReadDevice(struct DjyDevice * handle,u8 *buf,u32 len,u32 offset,u32 timeout);
+u32 Driver_WriteDevice(struct DjyDevice * handle,u8 *buf,
                   u32 len,u32 offset,bool_t BlockOption,u32 timeout);
-u32 Driver_CtrlDevice(tagDevHandle handle,u32 cmd,ptu32_t data1,ptu32_t data2);
+u32 Driver_CtrlDevice(struct DjyDevice * handle,u32 cmd,ptu32_t data1,ptu32_t data2);
 u32 Driver_MultiplexCtrl(u32 DevAlias,u32 *ReadLevel,u32 *WriteLevel);
-u32 Driver_MultiplexAdd(struct tagMultiplexSetsCB *MultiplexSets,
+u32 Driver_MultiplexAdd(struct MultiplexSetsCB *MultiplexSets,
                         u32 *DevAliases,u32 num,u32 SensingBit);
-void Driver_MultiplexDel(struct tagMultiplexSetsCB *MultiplexSets,
+void Driver_MultiplexDel(struct MultiplexSetsCB *MultiplexSets,
                          u32 *DevAliases,u32 num);
 
 #ifdef __cplusplus

@@ -62,12 +62,12 @@
 extern "C" {
 #endif
 
-struct tagMemCellPool
+struct MemCellPool
 {
-    struct tagRscNode memb_node;    //资源结点,整个内存池将作为一个资源结点
+    struct Object memb_node;    //资源结点,整个内存池将作为一个资源结点
     void  *continue_pool;    //连续内存池首地址，使用它可以增加实时性。
-    struct tagMemCellFree  *free_list;        //未分配块链表,单向,NULL结尾
-    struct tagSemaphoreLCB memb_semp;
+    struct MemCellFree  *free_list;        //未分配块链表,单向,NULL结尾
+    struct SemaphoreLCB memb_semp;
     ptu32_t pool_offset;    //连续池中的偏移量(当前地址)
     u32 cell_size;          //块大小,初始化时将按系统要求调整尺寸。
     u32 cell_increment;     //当内存池耗尽时，将自动从堆中增加内存池尺寸，单位为
@@ -75,7 +75,7 @@ struct tagMemCellPool
                             //增不减的，即一旦从堆中申请了内存，是不释放的。
     u32 cell_limit;         //如果increment !=0，本成员限定该内存池的最大尺寸，
                             //单位为内存块数。
-    struct  tagEventECB *cell_sync;   //同步队列。
+    struct EventECB *cell_sync;   //同步队列。
     void * next_inc_pool;   //增量地址，用于记录本内存池运行过程中的增量，利于在
                             //删除内存池时释放之。
 };
@@ -88,25 +88,25 @@ struct tagMemCellPool
 //作，单向链表虽然可以用遍历的方法判断是否在free_list，但执行时间不确定，不符合
 //实时系统的要求。
 //用双向链表的后果是，单块内存至少两个指针长度，通常为8字节。
-struct tagMemCellFree
+struct MemCellFree
 {
-    struct tagMemCellFree *previous;
-    struct tagMemCellFree *next;
+    struct MemCellFree *previous;
+    struct MemCellFree *next;
 };
 ptu32_t Mb_ModuleInit(ptu32_t para);
-struct tagMemCellPool *Mb_CreatePool(void *pool_original,u32 capacital,
+struct MemCellPool *Mb_CreatePool(void *pool_original,u32 capacital,
                                 u32 cell_size,u32 increment,
-                                u32 limit,char *name);
-struct tagMemCellPool *Mb_CreatePool_s(struct tagMemCellPool *pool,
+                                u32 limit,const char *name);
+struct MemCellPool *Mb_CreatePool_s(struct MemCellPool *pool,
                                 void *pool_original,u32 capacital,
                                 u32 cell_size,u32 increment,
-                                u32 limit,char *name);
-bool_t Mb_DeletePool(struct tagMemCellPool *pool);
-bool_t Mb_DeletePool_s(struct tagMemCellPool *pool);
-void *Mb_Malloc(struct tagMemCellPool *pool,u32 timeout);
-void Mb_Free(struct tagMemCellPool *pool,void *block);
-u32 Mb_QueryFree(struct tagMemCellPool *pool);
-u32 Mb_QueryCapacital(struct tagMemCellPool *pool);
+                                u32 limit,const char *name);
+bool_t Mb_DeletePool(struct MemCellPool *pool);
+bool_t Mb_DeletePool_s(struct MemCellPool *pool);
+void *Mb_Malloc(struct MemCellPool *pool,u32 timeout);
+void Mb_Free(struct MemCellPool *pool,void *block);
+u32 Mb_QueryFree(struct MemCellPool *pool);
+u32 Mb_QueryCapacital(struct MemCellPool *pool);
 
 #ifdef __cplusplus
 }

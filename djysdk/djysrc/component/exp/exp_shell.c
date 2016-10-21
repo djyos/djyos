@@ -51,16 +51,18 @@
 // <版本号> <修改日期>, <修改人员>: <修改功能概述>
 // =============================================================================
 // 备注:该文件主要是为了实现SHELL的一些接口功能
-#include "config-prj.h"
+
 
 #include "stdint.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "exp.h"
 #include "exp_record.h"
-#include "exp_api.h"
 #include "shell.h"
 #include "systime.h"
+bool_t  Exp_InfoDecoder(struct ExpRecordPara *recordpara);
+
+extern char *Sh_GetWord(char *buf,char **next);
 // =============================================================================
 // 函数功能：Exp_ShellBrowseAssignedRecord
 //           shell查看指定条目的异常信息
@@ -76,7 +78,7 @@ bool_t Exp_ShellBrowseAssignedRecord(char *param)
     u32  item_num;
     u32  item_len;
     u8   *infomem;
-    struct tagExpRecordPara recordpara;
+    struct ExpRecordPara recordpara;
 
     if(NULL == param)
     {
@@ -90,25 +92,25 @@ bool_t Exp_ShellBrowseAssignedRecord(char *param)
     result = Exp_RecordCheckLen(item_num, &item_len);
     if(false == result)
     {
-        goto browse_end;
+        printf("请指定正确的条目号\n\r");
+        return true;
     }
 
     infomem = M_MallocLc(item_len, CN_TIMEOUT_FOREVER);
     if(NULL == infomem)
     {
-        result = false;
-        goto browse_end;
+        printf("请指定正确的条目号\n\r");
+        return true;
     }
 
     result = Exp_RecordGet(item_num,item_len,infomem, &recordpara);
     if(false == result)
-    {
-        free(infomem);
-        goto browse_end;
-    }
-    result = Exp_InfoDecoder(&recordpara);
+        printf("读取异常信息失败\n\r");
+    else
+        Exp_InfoDecoder(&recordpara);
 
     free(infomem);
+    return true;
 
 browse_end:
     return result;
@@ -131,16 +133,18 @@ bool_t Exp_ShellBrowseRecordNum(char *param)
     result = Exp_RecordCheckNum(&expnum);
     if(true == result)
     {
-        printk("ShellSysExp:There has been 0x%08x Exp record!\n\r",expnum);
+        printf("ShellSysExp:There has been 0x%08x Exp record!\n\r",expnum);
         if(expnum > 0)
         {
-            printk("ShellSysExp:VALID NO.(1-%d)\n\r",expnum);
+            printf("ShellSysExp:VALID NO.(1-%d)\n\r",expnum);
         }
         else
         {
-            printk("There has been no exception record yet!\n\r");
+            printf("There has been no exception record yet!\n\r");
         }
     }
+    else
+        printf("Get Exception Number Failed\n\r");
     return result;
 }
 
@@ -160,38 +164,38 @@ bool_t Exp_ShellRecordClear(char *param)
 
     if(true == result)
     {
-        printk("ShellSysExp:Clear SysExp info success!\n\r");
+        printf("\n\rShellSysExp:Clear SysExp info success!");
     }
     else
     {
-        printk("ShellSysExp:Clear SysExp info failed!\n\r");
+        printf("\n\rShellSysExp:Clear SysExp info failed!");
     }
 
     return result;
 }
-struct tagShellCmdTab  gtExpShellCmdTab[] =
+struct ShellCmdTab  gtExpShellCmdTab[] =
 {
     {
         "expi",
         Exp_ShellBrowseAssignedRecord,
-        "查看指定异常条目",
-        NULL
+        "browse the specified exception item",
+        "expi item\n\r"
     },
     {
         "expn",
         Exp_ShellBrowseRecordNum,
-        "查看异常条目数量",
-        NULL
+        "browse the exception number",
+        "expn"
     },
     {
         "expc",
         Exp_ShellRecordClear,
-        "清除所有异常条目",
-        NULL
+        "clear all the exception item",
+        "expc"
     }
 };
-#define CN_EXPSHELL_NUM  ((sizeof(gtExpShellCmdTab))/(sizeof(struct tagShellCmdTab)))
-static struct tagShellCmdRsc sgExpShellRsc[CN_EXPSHELL_NUM];
+#define CN_EXPSHELL_NUM  ((sizeof(gtExpShellCmdTab))/(sizeof(struct ShellCmdTab)))
+static struct ShellCmdRsc sgExpShellRsc[CN_EXPSHELL_NUM];
 // =============================================================================
 // 函数功能：Exp_ShellInit
 //          expshell模块初始化
@@ -205,12 +209,12 @@ bool_t Exp_ShellInit()
     bool_t result;
     if(Sh_InstallCmd(gtExpShellCmdTab,sgExpShellRsc,CN_EXPSHELL_NUM))
     {
-        printk("成功添加异常组件的shell命令\n\r");
+        printf("Install Exception Module Success\n\r");
         result = true;
     }
     else
     {
-        printk("添加异常组件的shell命令失败!S\n\r");
+        printf("Install Exception Module Failed\n\r");
         result = false;
     }
     return result;

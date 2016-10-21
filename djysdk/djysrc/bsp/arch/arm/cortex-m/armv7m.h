@@ -24,13 +24,13 @@
 //-----------------------------------------------------------------------------
 // Copyright (c) 2014 著作权由深圳鹏瑞软件有限公司所有。著作权人保留一切权利。
 //
-// 这份授权条款，在使用者符合以下二条件的情形下，授予使用者使用及再散播本
+// 这份授权条款，在使用者符合下列条件的情形下，授予使用者使用及再散播本
 // 软件包装原始码及二进位可执行形式的权利，无论此包装是否经改作皆然：
 //
-// 1. 对于本软件源代码的再散播，必须保留上述的版权宣告、此三条件表列，以
+// 1. 对于本软件源代码的再散播，必须保留上述的版权宣告、本条件列表，以
 //    及下述的免责声明。
 // 2. 对于本套件二进位可执行形式的再散播，必须连带以文件以及／或者其他附
-//    于散播包装中的媒介方式，重制上述之版权宣告、此三条件表列，以及下述
+//    于散播包装中的媒介方式，重制上述之版权宣告、本条件列表，以及下述
 //    的免责声明。
 
 // 免责声明：本软件是本软件版权持有人以及贡献者以现状（"as is"）提供，
@@ -63,18 +63,18 @@
 extern "C" {
 #endif
 
-#define STIR_reg_addr   0xe000ef00
-extern struct scb_reg volatile * const pg_scb_reg;
+extern struct ScbReg volatile * const pg_scb_reg;
+extern struct SystickReg volatile * const pg_systick_reg;
 
 
-//定义scb_reg.ICSR 中断控制及状态寄存器?0xE000_ED04 ,bm_为位掩码?bo_为位偏移
+//定义scb_reg.ICSR 中断控制及状态寄存器,0xE000_ED04 ,bm_为位掩码,bo_为位偏移
 #define bm_scb_icsr_nmipendset  (1<<31)     //rw 写1挂起nmi
-#define bm_scb_icsr_pendsvset   (1<<28)     //rw 写1挂起pendsv?读返回挂起状态
+#define bm_scb_icsr_pendsvset   (1<<28)     //rw 写1挂起pendsv,读返回挂起状态
 #define bm_scb_icsr_pendsvclr   (1<<27)     //w 写1清除pendsv挂起状态
-#define bm_scb_icsr_pendstset   (1<<26)     //rw 写1挂起systick?读返回挂起状态
+#define bm_scb_icsr_pendstset   (1<<26)     //rw 写1挂起systick,读返回挂起状态
 #define bm_scb_icsr_pendstclr   (1<<25)     //w 写1清除systick挂起状态
 #define bm_scb_icsr_isrpreempt  (1<<23)     //r 调试用
-#define bm_scb_icsr_isrpending  (1<<22)     //r 有中断挂起?不含nmi?
+#define bm_scb_icsr_isrpending  (1<<22)     //r 有中断挂起,不含nmi,
 #define bm_scb_icsr_vectpending (0x3ff<<12) //r 挂起的中断中优先级最高的中断号
 #define bm_scb_icsr_rettobase   (1<<11)     //r 1=执行异常服务程序且没有嵌套。
                                             //  0=主程序中或嵌套异常服务中
@@ -90,30 +90,30 @@ extern struct scb_reg volatile * const pg_scb_reg;
 #define bo_scb_icsr_rettobase   11
 #define bo_scb_icsr_vectactive  0
 
-//AIRCR 应用程序中断及复位控制寄存器?0xE000_ED0c ,bm_为位掩码?bo_为位偏移
+//AIRCR 应用程序中断及复位控制寄存器,0xE000_ED0c ,bm_为位掩码,bo_为位偏移
 #define bm_scb_aircr_vectkey        (0xffff<<16)
 #define bm_scb_aircr_endianess      (1<<15)
 #define bm_scb_aircr_prigroup       (7<<8)
 #define bm_scb_aircr_sysresetreq    (1<<2)
 #define bm_scb_aircr_vectclractive  (1<<1)
 #define bm_scb_aircr_vectreset      (1<<0)
-#define bo_scb_aircr_vectkey        16  //rw 写本寄存器?必须同时对此域写0x05fa
-#define bo_scb_aircr_endianess      15  //r 1=大端?0=小端
+#define bo_scb_aircr_vectkey        16  //rw 写本寄存器,必须同时对此域写0x05fa
+#define bo_scb_aircr_endianess      15  //r 1=大端,0=小端
 #define bo_scb_aircr_prigroup       8   //rw 本域+1=子优先级占用位数
 #define bo_scb_aircr_sysresetreq    2   //w 写1逻辑复位芯片
 #define bo_scb_aircr_vectclractive  1   //w 写1清除所有异常活动状态信息。
-#define bo_scb_aircr_vectreset      0   //w 写1复位cm3内核?不影响内核以外电路
+#define bo_scb_aircr_vectreset      0   //w 写1复位cm3内核,不影响内核以外电路
 
-//定义scb_reg.SCR 系统控制寄存器,0xE000_ED10 ,bm_为位掩码?bo_为位偏移
+//定义scb_reg.SCR 系统控制寄存器,0xE000_ED10 ,bm_为位掩码,bo_为位偏移
 #define bm_scb_scr_sevonpend    (1<<4)
 #define bm_scb_scr_sleepdeep    (1<<2)
 #define bm_scb_scr_sleeponexit  (1<<1)
 #define bo_scb_scr_sevonpend    4      //rw 1=任何中断和事件都可以唤醒处理器
                                        //   0=只有使能的中断和事件可以唤醒处理器
-#define bo_scb_scr_sleepdeep    2      //rw 0=普通睡眠?1=深度睡眠
+#define bo_scb_scr_sleepdeep    2      //rw 0=普通睡眠,1=深度睡眠
 #define bo_scb_scr_sleeponexit  1      //rw 1=从中断返回时进入sleep
 
-//定义scb_reg.CCR 配置与控制寄存器,0xE000_ED14 ,bm_为位掩码?bo_为位偏移
+//定义scb_reg.CCR 配置与控制寄存器,0xE000_ED14 ,bm_为位掩码,bo_为位偏移
 #define bm_scb_ccr_stkalign         (1<<9)
 #define bm_scb_ccr_bfhfnmign        (1<<8)
 #define bm_scb_ccr_div0trp          (1<<4)
@@ -127,7 +127,7 @@ extern struct scb_reg volatile * const pg_scb_reg;
 #define bo_scb_ccr_usersetmpend     1   //rw 1=允许用户代码设置stir
 #define bo_scb_ccr_nonbasethrdena   0   //rw,写1允许异服程序修改exc_return进入线程模式
 
-//定义scb_reg.SHCSR位掩码?0xE000ED24,bm_为位掩码?bo_为位偏移
+//定义scb_reg.SHCSR位掩码,0xE000ED24,bm_为位掩码,bo_为位偏移
 #define bm_scb_shcsr_usgfaultena    (1<<18)
 #define bm_scb_shcsr_busfaultena    (1<<17)
 #define bm_scb_shcsr_memfaultena    (1<<16)
@@ -157,33 +157,33 @@ extern struct scb_reg volatile * const pg_scb_reg;
 #define bo_scb_shcsr_busfaultact    1   //rw,b,1 = 总线 fault 异常活动中
 #define bo_scb_shcsr_memfaultact    0   //rw,b,1 = 存储器管理 fault 异常活动中
 
-//MFSR 存储器管理 fault 状态寄存器,0xE000_ED28 ,bm_为位掩码?bo_为位偏移
+//MFSR 存储器管理 fault 状态寄存器,0xE000_ED28 ,bm_为位掩码,bo_为位偏移
 #define bm_scb_mfsr_MMARVALID   (1<<7)
 #define bm_scb_mfsr_STKERR      (1<<4)
 #define bm_scb_mfsr_UNSTKERR    (1<<3)
 #define bm_scb_mfsr_DACCVIOL    (1<<1)
 #define bm_scb_mfsr_IACCVIOL    (1<<0)
-#define bo_scb_mfsr_MMARVALID   7      //r,存储器管理fault地址寄存器?MMAR?有效
+#define bo_scb_mfsr_MMARVALID   7      //r,存储器管理fault地址寄存器MMAR有效
 #define bo_scb_mfsr_STKERR      4      //r/Wc,入栈时发生错误
 #define bo_scb_mfsr_UNSTKERR    3      //r/Wc,出栈时发生错误
 #define bo_scb_mfsr_DACCVIOL    1      //r/Wc,数据访问违例
 #define bo_scb_mfsr_IACCVIOL    0      //r/Wc,取址访问违例
 
-//定义scb_reg.BFSR 总线 fault 状态寄存器,0xE000_ED29 ,bm_为位掩码?bo_为位偏移
+//定义scb_reg.BFSR 总线 fault 状态寄存器,0xE000_ED29 ,bm_为位掩码,bo_为位偏移
 #define bm_scb_bfsr_BFARVALID   (1<<7)
 #define bm_scb_bfsr_STKERR      (1<<4)
 #define bm_scb_bfsr_UNSTKERR    (1<<3)
 #define bm_scb_bfsr_IMPREISERR  (1<<2)
 #define bm_scb_bfsr_PRECISERR   (1<<1)
 #define bm_scb_bfsr_IACCVIOL    (1<<0)
-#define bo_scb_bfsr_BFARVALID   7    //r,总线fault地址寄存器?BFAR?有效
+#define bo_scb_bfsr_BFARVALID   7    //r,总线fault地址寄存器,BFAR,有效
 #define bo_scb_bfsr_STKERR      4    //r/Wc,入栈时发生错误
 #define bo_scb_bfsr_UNSTKERR    3    //r/Wc,出栈时发生错误
-#define bo_scb_bfsr_IMPREISERR  2    //r/Wc,不精确的数据访问违例?violation?
-#define bo_scb_bfsr_PRECISERR   1    //r/Wc,精确的数据访问违例?violation?
+#define bo_scb_bfsr_IMPREISERR  2    //r/Wc,不精确的数据访问违例,violation,
+#define bo_scb_bfsr_PRECISERR   1    //r/Wc,精确的数据访问违例,violation,
 #define bo_scb_bfsr_IACCVIOL    0    //r/Wc,取址访问违例
 
-//UFSR 用法 fault 状态寄存器?地址?0xE000_ED2A ,bm_为位掩码?bo_为位偏移
+//UFSR 用法 fault 状态寄存器,地址,0xE000_ED2A ,bm_为位掩码,bo_为位偏移
 #define bm_scb_ufsr_DIVBYZERO   (1<<9)
 #define bm_scb_ufsr_UNALIGNED   (1<<8)
 #define bm_scb_ufsr_NOCP        (1<<3)
@@ -191,26 +191,26 @@ extern struct scb_reg volatile * const pg_scb_reg;
 #define bm_scb_ufsr_INVSTATE    (1<<1)
 #define bm_scb_ufsr_UNDEFINSTR  (1<<0)
 #define bo_scb_ufsr_DIVBYZERO   9   //r/Wc,表示除法运算时除数为零
-#define bo_scb_ufsr_UNALIGNED   8   //r/Wc,未对齐访问导致的 fault?
-#define bo_scb_ufsr_NOCP        3   //r/Wc,试图执行协处理器相关指令?
+#define bo_scb_ufsr_UNALIGNED   8   //r/Wc,未对齐访问导致的 fault,
+#define bo_scb_ufsr_NOCP        3   //r/Wc,试图执行协处理器相关指令,
 #define bo_scb_ufsr_INVPC       2   //r/Wc,在异常返回时EXC_RETURN非法
 #define bo_scb_ufsr_INVSTATE    1   //r/Wc,试图切入 ARM 状态
 #define bo_scb_ufsr_UNDEFINSTR  0   //r/Wc,执行的指令其编码是未定义的
 
-//定义scb_reg.HFSR 硬 fault 状态寄存器  0xE000_ED2C ,bm_为位掩码?bo_为位偏移
+//定义scb_reg.HFSR 硬 fault 状态寄存器  0xE000_ED2C ,bm_为位掩码,bo_为位偏移
 #define bm_scb_hfsr_DEBUGEVT    (1<<31)
 #define bm_scb_hfsr_FORCED      (1<<30)
 #define bm_scb_hfsr_VECTBL      (1<<1)
 #define bo_scb_hfsr_DEBUGEVT    31  //r/Wc,因调试事件而产生
-#define bo_scb_hfsr_FORCED      30  //r/Wc,是总线 fault?存储器管理
+#define bo_scb_hfsr_FORCED      30  //r/Wc,是总线 fault,存储器管理
                                     //    fault 或是用法 fault 上访的结果
 #define bo_scb_hfsr_VECTBL      1    //r/Wc,在取向量时发生的
-struct scb_reg
+struct ScbReg
 {
     vuc32 CPUID;
-    vu32 ICSR;          //中断控制及状态寄存器?0xE000_ED04
-    vu32 VTOR;          //向量表偏移量寄存器?0xE000_ED08
-    vu32 AIRCR;         //应用程序中断及复位控制寄存器?0xE000_ED0c
+    vu32 ICSR;          //中断控制及状态寄存器,0xE000_ED04
+    vu32 VTOR;          //向量表偏移量寄存器,0xE000_ED08
+    vu32 AIRCR;         //应用程序中断及复位控制寄存器,0xE000_ED0c
     vu32 SCR;           //系统控制寄存器,0xE000_ED10
     vu32 CCR;           //配置与控制寄存器,0xE000_ED14
     vu8 mmf_pri4;       //存储器管理 fault 的优先级,0xE000_ED18
@@ -225,13 +225,13 @@ struct scb_reg
     vu32 SHCSR;
     vu8 MFSR;           //存储器管理 fault 状态寄存器(MFSR),0xE000_ED28
     vu8 BFSR;           //总线 fault 状态寄存器(MFSR),0xE000_ED29
-    vu16 UFSR;          //用法 fault 状态寄存器(UFSR)?地址?0xE000_ED2A
+    vu16 UFSR;          //用法 fault 状态寄存器(UFSR),地址,0xE000_ED2A
     vu32 HFSR;          //硬 fault 状态寄存器      0xE000_ED2C
     vu32 DFSR;          //调试 fault 状态寄存器(DFSR)    0xE000_ED30
     vu32 MMFAR;         //发生存储管理fault的地址寄存器(MMAR)    0xE000_ED34
     vu32 BFAR;          //发生总线fault的地址寄存器(MMAR)    0xE000_ED38
-    vu32 AFAR;          //由芯片制造商决定?可选?                    0xE000_ED3C
-    //以下定义?只有M4以上才有
+    vu32 AFAR;          //由芯片制造商决定,可选,                    0xE000_ED3C
+    //以下定义,只有M4以上才有
     vu32 PFR[2];        //Processor Feature Register            0xE000_ED40
     vu32 DFR;           //Debug Feature Register                0xE000_ED48
     vu32 ADR;           //Auxiliary Feature Register            0xE000_ED4C

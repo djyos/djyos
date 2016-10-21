@@ -64,9 +64,8 @@
 
 extern const ufast_t tg_IntUsed[];          //save the int number used  
 extern const ufast_t tg_IntUsedNum;         //本变量在int_config.c中定义
-extern ufast_t tg_int_lookup_table[];       //中断线查找表
-extern struct tagIntLine *tg_pIntSrcTable;   //在Int_Init函数中分配内存
-struct tagIntMasterCtrl  tg_int_global;     //定义并初始化总中断控制结构
+extern struct IntLine *tg_pIntLineTable[];       //中断线查找表
+struct IntMasterCtrl  tg_int_global;     //定义并初始化总中断控制结构
 //P1020的PIC实在是过于复杂，并且中断的控制器寄存器位置不是很规律，特此开辟
 //数组来存放其地址
 static u32 sgPicIvprAddrTab[CN_INT_LINE_LAST+1]; //IVPR地址
@@ -219,40 +218,13 @@ void Int_Init(void)
     u8 *src;
     
     Int_CutTrunk();//close the main int key
-    len = tg_IntUsedNum*sizeof(struct tagIntLine );
-    tg_pIntSrcTable = M_Malloc(len,CN_TIMEOUT_FOREVER);
-    if(tg_pIntSrcTable == NULL)
-    {
-        return;
-    }
-    else
-    {
-    	src = (u8 *)tg_pIntSrcTable;
-    	for(i =0; i < len;i++)
-    	{
-    		*src = 0;
-    		src++;
-    	}
-    }
     __Int_RstPic();
     //初始化查找表
     for(i=0;i <= CN_INT_LINE_LAST;i++)
     {
-        tg_int_lookup_table[i] = (ufast_t)CN_LIMIT_UFAST;
+        tg_pIntLineTable[i] = (ufast_t)NULL;
     }
-    //将tg_int_lookup_table表和tg_int_table表做映射
-    for(i=0;i < tg_IntUsedNum;i++)
-    {
-        tg_int_lookup_table[tg_IntUsed[i]] = i;
-        tg_pIntSrcTable[i].en_counter = 1;               //禁止中断,计数为1
-        tg_pIntSrcTable[i].int_type = CN_ASYN_SIGNAL;    //设为异步信号
-        tg_pIntSrcTable[i].clear_type = CN_INT_CLEAR_PRE;//设为调用ISR前应答
-        //所有中断函数指针指向空函数
-        tg_pIntSrcTable[i].ISR = (u32 (*)(ufast_t))NULL;
-        tg_pIntSrcTable[i].sync_event = NULL;                //同步事件空
-        tg_pIntSrcTable[i].my_evtt_id = CN_EVTT_ID_INVALID;  //不弹出事件
-        tg_pIntSrcTable[i].prio = cn_prior_asyn_signal;      //异步信号的固定优先级
-    }
+
     //将所有的中断进行初始化，记录其寄存器地址
     for(ufl_line=0;ufl_line <= CN_INT_LINE_LAST;ufl_line++)
     {
@@ -303,12 +275,12 @@ void Int_Init(void)
 
 bool_t __Int_ChkIntValid(ufast_t ufl_line)
 {
-	bool_t result = false;
-	if(ufl_line <= CN_INT_LINE_LAST)
-	{
-		result = true;
-	}
-	return result;
+    bool_t result = false;
+    if(ufl_line <= CN_INT_LINE_LAST)
+    {
+        result = true;
+    }
+    return result;
 }
 // =============================================================================
 // 函数功能：int_set_line_triger_type
@@ -378,19 +350,19 @@ bool_t  Int_ContactLine(ufast_t ufl_line)
     {
         addr =sgPicIvprAddrTab[ufl_line];
         value = read32(addr);
-		//异步信号和实时中断的关中断方式不一样,异步信号用prior控制，实时中断用MSK
-    	if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type == CN_ASYN_SIGNAL)
-    	{
+        //异步信号和实时中断的关中断方式不一样,异步信号用prior控制，实时中断用MSK
+        if(tg_pIntLineTable[ufl_line]->int_type == CN_ASYN_SIGNAL)
+        {
             value = value &(~cn_ivpr_prior_msk);
-            prior = tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].prio<<16;
+            prior = tg_pIntLineTable[ufl_line]->prio<<16;
             prior = prior&cn_ivpr_prior_msk;
             value = value|prior;
             value = value &(~cn_ivpr_en_msk); //alse must clear the msk
-    	}
-    	else
-    	{
+        }
+        else
+        {
             value = value &(~cn_ivpr_en_msk);
-    	}
+        }
         write32(addr, value);
         result = true;
     }
@@ -418,15 +390,15 @@ bool_t  Int_CutLine(ufast_t ufl_line)
     {
         addr =sgPicIvprAddrTab[ufl_line];
         value = read32(addr);
-		//异步信号和实时中断的关中断方式不一样,异步信号用prior控制，实时中断用MSK
-    	if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type == CN_ASYN_SIGNAL)
-    	{
+        //异步信号和实时中断的关中断方式不一样,异步信号用prior控制，实时中断用MSK
+        if(tg_pIntLineTable[ufl_line]->int_type == CN_ASYN_SIGNAL)
+        {
             value = value &(~cn_ivpr_prior_msk);
-    	}
-    	else
-    	{
+        }
+        else
+        {
             value = value |cn_ivpr_en_msk;
-    	}
+        }
         write32(addr, value);
         result = true;
     }
@@ -444,12 +416,12 @@ bool_t  Int_CutLine(ufast_t ufl_line)
 // =============================================================================
 ufast_t  Int_GetEIntNumber(void)
 {
-	u32       addr;
-	ufast_t   result;
-	
-	addr = cn_core_iack_addr;
-	result = read32(addr);
-	return result;
+    u32       addr;
+    ufast_t   result;
+    
+    addr = cn_core_iack_addr;
+    result = read32(addr);
+    return result;
 }
 // =============================================================================
 // 函数功能：Int_GetCIntNumber  获取实时信号号码
@@ -463,12 +435,12 @@ ufast_t  Int_GetEIntNumber(void)
 // =============================================================================
 ufast_t  Int_GetCIntNumber(void)
 {
-	u32       addr;
-	ufast_t   result;
-	
-	addr = cn_core_iack_addr;
-	result = read32(addr);
-	return result;
+    u32       addr;
+    ufast_t   result;
+    
+    addr = cn_core_iack_addr;
+    result = read32(addr);
+    return result;
 }
 
 // =============================================================================
@@ -491,7 +463,7 @@ bool_t Int_ClearLine(ufast_t ufl_line)
     
     if(__Int_ChkIntValid(ufl_line))
     {
-       if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type == CN_ASYN_SIGNAL)
+       if(tg_pIntLineTable[ufl_line]->int_type == CN_ASYN_SIGNAL)
        {
            addr = sgPicIvprAddrTab[ufl_line];
            value = read32(addr);
@@ -567,9 +539,9 @@ bool_t Int_SettoAsynSignal(ufast_t ufl_line)
     if(__Int_ChkIntValid(ufl_line))
     {
         high_atom = Int_HighAtomStart();
-        tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type = CN_ASYN_SIGNAL;
-        tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].enable_nest = false;
-        tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].prio = cn_prior_asyn_signal;
+        tg_pIntLineTable[ufl_line]->int_type = CN_ASYN_SIGNAL;
+        tg_pIntLineTable[ufl_line]->enable_nest = false;
+        tg_pIntLineTable[ufl_line]->prio = cn_prior_asyn_signal;
         tg_int_global.property_bitmap[ufl_line/CN_CPU_BITS]
                         &= ~(1<<(ufl_line % CN_CPU_BITS));   //设置位图
         //set the ivpr,the prior trigger type and int vector could not be set
@@ -604,15 +576,15 @@ bool_t Int_SettoReal(ufast_t ufl_line)
     {
         high_atom = Int_HighAtomStart();
 
-        if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].sync_event != NULL)
+        if(tg_pIntLineTable[ufl_line]->sync_event != NULL)
         {
             result = false;//有线程在等待这个中断，不能设为实时中断
         }
         else
         {
-            tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type = CN_REAL;    //中断线类型
-            tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].enable_nest = true;
-            tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].prio = cn_prior_real_int_default;
+            tg_pIntLineTable[ufl_line]->int_type = CN_REAL;    //中断线类型
+            tg_pIntLineTable[ufl_line]->enable_nest = true;
+            tg_pIntLineTable[ufl_line]->prio = cn_prior_real_int_default;
             tg_int_global.property_bitmap[ufl_line/CN_CPU_BITS]
                     |= 1<<(ufl_line % CN_CPU_BITS);   //设置位图
             //set the ivpr
@@ -648,9 +620,9 @@ bool_t Int_EnableNest(ufast_t ufl_line)
     bool_t result = false;
     if(__Int_ChkIntValid(ufl_line))
     {
-        if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type == CN_REAL)
+        if(tg_pIntLineTable[ufl_line]->int_type == CN_REAL)
         {
-            tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].enable_nest = true;
+            tg_pIntLineTable[ufl_line]->enable_nest = true;
             result = true;
         }
     }
@@ -669,9 +641,9 @@ bool_t Int_DisableNest(ufast_t ufl_line)
     bool_t result = false;
     if(__Int_ChkIntValid(ufl_line))
     {
-        if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type == CN_REAL)
+        if(tg_pIntLineTable[ufl_line]->int_type == CN_REAL)
         {
-            tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].enable_nest = false;
+            tg_pIntLineTable[ufl_line]->enable_nest = false;
             result = true;
         }
 
@@ -702,7 +674,7 @@ bool_t Int_SetPrio(ufast_t ufl_line,u32 prior)
     {
          high_atom = Int_HighAtomStart();
 
-         tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].prio = prior;
+         tg_pIntLineTable[ufl_line]->prio = prior;
          //看其原来的状态，修改后继续维持原来的状态
          addr = sgPicIvprAddrTab[ufl_line];
          value = read32(addr);
@@ -731,7 +703,7 @@ static atom_high_t  sgTrunkKey;
 // =============================================================================
 void Int_ContactTrunk(void)
 {
-	Int_HighAtomEnd(sgTrunkKey);
+    Int_HighAtomEnd(sgTrunkKey);
 }
 
 // =============================================================================
@@ -744,7 +716,7 @@ void Int_ContactTrunk(void)
 // =============================================================================
 void Int_CutTrunk(void)
 {
-	sgTrunkKey = Int_HighAtomStart();	
+    sgTrunkKey = Int_HighAtomStart();   
 }
 
 

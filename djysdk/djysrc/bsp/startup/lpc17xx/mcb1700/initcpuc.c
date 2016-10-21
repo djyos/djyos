@@ -6,11 +6,15 @@
 // 创建人员: hm
 // 创建时间: 11/08.2014
 // =============================================================================
-
+#include "arch_feature.h"
 #include "stdint.h"
 #include "cpu_peri.h"
-#include "exception.h"
+#include "hard-exp.h"
 #include "arch_feature.h"
+#include "lpc17xx.h"
+#include "core_cmFunc.h"
+
+#include "core_cm3.h"
 
 // 外部变量和函数声明
 // =============================================================================
@@ -19,10 +23,28 @@ extern void __set_PSP(uint32_t topOfProcStack);
 extern void __set_PRIMASK(uint32_t priMask);
 extern void __set_FAULTMASK(uint32_t faultMask);
 extern void __set_CONTROL(uint32_t control);
-extern void Load_Preload(void);
-// =============================================================================
 
-struct scb_reg volatile * const pg_scb_reg  = (struct scb_reg *)0xe000ed00;
+struct ScbReg volatile * const startup_scb_reg
+                        = (struct ScbReg *)0xe000ed00;
+void Startup_NMI(void)
+{
+    while(1);
+}
+void Startup_Hardfault(void)
+{
+    while(1);
+}
+void Init_Cpu(void);
+//为什么是256-3？ 编译生成rodata时，会在gc_u32StartupExpTable后面增加12字节的rodata
+//不知道为什么？如果
+const u32 gc_u32StartupExpTable[4] =
+{
+    (u32)msp_top,
+    (u32)Init_Cpu,
+    (u32) Startup_NMI,
+    (u32) Startup_Hardfault
+};
+// =============================================================================
 
 // 系统时钟模块初始化宏定义
 #define CLOCK_SETUP           1
@@ -128,22 +150,46 @@ void Init_Cpu(void)
     __set_PRIMASK(1);
     __set_FAULTMASK(1);
     __set_CONTROL(0);
-    switch(pg_scb_reg->CPUID)
+    switch(startup_scb_reg->CPUID)
     {
-        case cn_revision_r0p0:
+        case CN_M3_REVISION_R0P0:
             break;                              //市场没有版本0的芯片
-        case cn_revision_r1p0:
-            pg_scb_reg->CCR |= 1<<bo_scb_ccr_stkalign;
+        case CN_M3_REVISION_R1P0:
+        	startup_scb_reg->CCR |= 1<<bo_scb_ccr_stkalign;
             break;
-        case cn_revision_r1p1:
-            pg_scb_reg->CCR |= 1<<bo_scb_ccr_stkalign;
+        case CN_M3_REVISION_R1P1:
+        	startup_scb_reg->CCR |= 1<<bo_scb_ccr_stkalign;
             break;
-        case cn_revision_r2p0:break;            //好像没什么要做的
+        case CN_M3_REVISION_R2P0:break;            //好像没什么要做的
     }
     SystemInit();
 
-    Load_Preload();
-    return;
+    IAP_SelectLoadProgam();
+}
+
+
+
+extern char g_cIbootFlag[];
+const char bootflag[]="RunIboot";//要弄成const，若是局部变量，编译器将其放在ROM
+void IAP_GpioPinInit(void)
+{
+}
+
+bool_t IAP_IsForceIboot(void)
+{
+	return false;
+}
+bool_t IAP_IsRamIbootFlag(void)
+{
+	u8 i;
+	for(i=0;i<8;i++)
+	{
+		if(g_cIbootFlag[i]!=bootflag[i])
+		{
+			return false;
+		}
+	}
+	return true;
 }
 
 

@@ -55,14 +55,14 @@
 //------------------------------------------------------
 #include "stdint.h"
 
-#include "uart.h"
+#include <driver/include/uart.h>
 #include "cpu_peri_uart.h"
 #include <cdef21469.h>
 #include "def21469.h"
 
 
 
-static struct tagUartUCB tg_uart1_CB;
+static struct UartUCB tg_uart1_CB;
 static djy_handle_t pg_uart1_rhdl;
 
 #define uart1_buf_len  2048
@@ -179,8 +179,8 @@ bool_t __Uart_TxTranEmpty(volatile tag_UartReg *reg)
 ptu32_t __Uart_Ctrl(djy_handle_t uart_dev,
                             u32 cmd, u32 data1,u32 data2)
 {
-    struct tagUartUCB *uart_port;
-    uart_port = (struct tagUartUCB*)Driver_DevGetMyTag(uart_dev);
+    struct UartUCB *uart_port;
+    uart_port = (struct UartUCB*)Driver_DevGetMyTag(uart_dev);
 
     switch(cmd)
     {
@@ -227,9 +227,9 @@ u32 __Uart_SendDirectly(djy_handle_t uart_dev,
                                       u8 *send_buf,u32 len,u32 timeout)
 {
     u32  result,timecount;
-    struct tagUartUCB   *uart_port;
+    struct UartUCB   *uart_port;
 
-    uart_port = (struct tagUartUCB*)Driver_DevGetMyTag(uart_dev);
+    uart_port = (struct UartUCB*)Driver_DevGetMyTag(uart_dev);
     __Uart_SendIntDisable((tag_UartReg *)uart_port->my_reg);
     for(result=0; result < len; result ++)
     {
@@ -269,8 +269,8 @@ u32 __Uart_SendDirectly(djy_handle_t uart_dev,
 u32 __Uart_SendStart(djy_handle_t uart_dev)
 {
     u8 trans,num,ch[16];
-    struct tagUartUCB *uart_port;
-    uart_port = (struct tagUartUCB *)Driver_DevGetMyTag(uart_dev);
+    struct UartUCB *uart_port;
+    uart_port = (struct UartUCB *)Driver_DevGetMyTag(uart_dev);
 
     __Uart_SendIntDisable((tag_UartReg *)uart_port->my_reg);
     if(__Uart_TxTranEmpty((tag_UartReg *)uart_port->my_reg))
@@ -291,7 +291,7 @@ u32 __Uart_SendStart(djy_handle_t uart_dev)
 //参数: 中断号.
 //返回: 0.
 //-----------------------------------------------------------------------------
-uint32_t Uart_Int(ufast_t uart_int_line)
+uint32_t Uart_Int(ptu32_t uart_int_line)
 {
 
     static djy_handle_t *uart_rhdl;
@@ -343,7 +343,7 @@ uint32_t Uart_Int(ufast_t uart_int_line)
 ptu32_t Uart_ModuleInit(ptu32_t para)//todo fix
 {
     static djy_handle_t *uart_rhdl;
-    struct tagUartUCB *UCB;
+    struct UartUCB *UCB;
     char *name;
     uint8_t *sendbuf,*recvbuf;
     uint32_t sendbuflen,recvbuflen;
@@ -371,11 +371,13 @@ ptu32_t Uart_ModuleInit(ptu32_t para)//todo fix
     UCB->direct_send = __Uart_SendDirectly;
     UCB->Uart_Ctrl   = __Uart_Ctrl;
     //中断线的初始化
+//    Int_Register(cn_int_line_SP7I);
 //    Int_IsrConnect(cn_int_line_SP7I,Uart_Int);    Int_IsrConnect(cn_int_line_UARTI,Uart_Int);
 //    Int_SettoAsynSignal(cn_int_line_SP7I);
 //    Int_ClearLine(cn_int_line_SP7I);     //清掉初始化产生的发送fifo空的中断
 //    Int_RestoreAsynLine(cn_int_line_SP7I);
 
+    Int_Register(cn_int_line_UARTI);
     Int_IsrConnect(cn_int_line_UARTI,Uart_Int);
     Int_SettoAsynSignal(cn_int_line_UARTI);
     Int_ClearLine(cn_int_line_UARTI);     //清掉初始化产生的发送fifo空的中断

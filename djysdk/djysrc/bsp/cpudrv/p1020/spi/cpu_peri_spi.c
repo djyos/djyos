@@ -49,7 +49,7 @@
 // 创建时间: 08/10.2014
 // =============================================================================
 
-#include "config-prj.h"
+
 #include "os.h"
 #include "cpu_peri.h"
 #include "spibus.h"
@@ -108,7 +108,7 @@ struct SPI_IntParamSet
 
 #define CN_SPI_BASE        cn_spi_baddr
 #define CN_SPI_BUF_LEN      128
-static struct tagSPI_CB s_SPI_CB;
+static struct SPI_CB s_SPI_CB;
 static u8 s_SPI_Buf[CN_SPI_BUF_LEN];
 struct SPI_IntParamSet IntParamset;
 
@@ -271,23 +271,6 @@ static void __SPI_HardDefaultSet(u32 BaseAddr)
 }
 
 // =============================================================================
-// 功能: SPI中断配置函数
-// 参数: IntLine,中断线
-// 返回: 无
-// =============================================================================
-static void __SPI_IntConfig(void)
-{
-    u8 IntLine = cn_int_line_espi;
-    //中断线的初始化
-    u32 SPI_ISR(ufast_t IntLine);
-    Int_IsrConnect(IntLine,SPI_ISR);
-    Int_SettoAsynSignal(IntLine);
-    Int_SetLineTrigerType(IntLine,EN_INT_TRIGER_HIGHLEVEL);
-    Int_ClearLine(IntLine);
-    Int_RestoreAsynLine(IntLine);
-}
-
-// =============================================================================
 // 功能：SPI片选使能，使片选有效
 // 参数：Reg，本模块内即SPI寄存器基址
 //       cs,片选线
@@ -402,9 +385,9 @@ static bool_t __SPI_TransferTxRx(tagSpiReg *Reg,u32 sendlen,u32 recvlen,
 // 参数：spi_int_line,中断号，本函数没用到
 // 返回：无意义
 // =============================================================================
-u32 SPI_ISR(ufast_t IntLine)
+u32 SPI_ISR(ptu32_t IntLine)
 {
-    struct tagSPI_CB *SCB=NULL;
+    struct SPI_CB *SCB=NULL;
     struct SPI_IntParamSet *param;
     tagSpiReg *Reg;
     u8 ch[32],num,i,j,*tempdst,*tempdin,store_num;
@@ -506,6 +489,23 @@ u32 SPI_ISR(ufast_t IntLine)
 
 
 // =============================================================================
+// 功能: SPI中断配置函数
+// 参数: IntLine,中断线
+// 返回: 无
+// =============================================================================
+static void __SPI_IntConfig(void)
+{
+    u8 IntLine = cn_int_line_espi;
+    //中断线的初始化
+    Int_Register(IntLine);
+    Int_IsrConnect(IntLine,SPI_ISR);
+    Int_SettoAsynSignal(IntLine);
+    Int_SetLineTrigerType(IntLine,EN_INT_TRIGER_HIGHLEVEL);
+    Int_ClearLine(IntLine);
+    Int_RestoreAsynLine(IntLine);
+}
+
+// =============================================================================
 // 功能：SPI底层驱动的初始化，完成整个SPI总线的初始化，其主要工作如下：
 //       1.初始化总线控制块SPI_CB，回调函数和缓冲区的初始化赋值；
 //       2.默认的硬件初始化，如GPIO或SPI寄存器等；
@@ -516,8 +516,8 @@ u32 SPI_ISR(ufast_t IntLine)
 // =============================================================================
 ptu32_t SPI_ModuleInit(ptu32_t para)
 {
-    struct tagSPI_Param SPI_Config;
-    struct tagSPI_CB *SCB;
+    struct SPI_Param SPI_Config;
+    struct SPI_CB *SCB;
 
     SCB = &s_SPI_CB;
     SPI_Config.BusName          = "SPI0";
@@ -533,7 +533,7 @@ ptu32_t SPI_ModuleInit(ptu32_t para)
     __SPI_HardDefaultSet(SPI_Config.SpecificFlag);
     __SPI_IntConfig();
 
-    if(NULL == SPI_BusAdd_s(&SPI_Config,SCB))
+    if(NULL == SPI_BusAdd_s(SCB,&SPI_Config))
         return 0;
     return 1;
 }

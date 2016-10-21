@@ -1,0 +1,17 @@
+改为eabi后，内建-i目录，只在cache中出现，在debug和release中均没有出现，不知为啥。
+
+对未使用的局部变量，时而报错误时而报告警。
+
+-i目录，debug能导入，但release不能导入，但偶尔可以导入。
+
+该eabi后，链接器仍然是用PA的，怎么改？
+
+找不到libc_E500V2.a这3个库，从工程中删除。
+
+在这一行：    for(ufl_line=0;ufl_line < ufg_int_used_num;ufl_line++)
+出现这个错误：int_hard.c:310: undefined reference to `__start_asyn_signal
+
+用标准配置，只能产生elf文件，不能产生bin、lst文件和列size，可以在post_build中加一条命令，但只能加一条命令。使用dos的bat文件解决问题。
+但bat文件不知为何会被莫名其妙地删除？——clean时，会把target目录（debug）整个删掉。
+
+修改shell.c，编译的时候不出warning，在链接完成后才出？

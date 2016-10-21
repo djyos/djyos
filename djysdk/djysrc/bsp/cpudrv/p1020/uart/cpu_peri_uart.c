@@ -59,12 +59,18 @@
 #include "stddef.h"
 #include "stdlib.h"
 #include "string.h"
+#include "stdio.h"
 
-#include "uart.h"
+#include <driver/include/uart.h>
 #include "cpu_peri_uart.h"
 
 #include "os.h"
 #include "int_hard.h"
+
+
+extern const char *gc_pCfgStdinName;    //标准输入设备
+extern const char *gc_pCfgStdoutName;   //标准输出设备
+extern const char *gc_pCfgStderrName;   //标准错误输出设备
 
 #define CN_UART0_BASE   (cn_uart_baddr)
 #define CN_UART1_BASE   (cn_uart_baddr + 0x100)
@@ -75,7 +81,7 @@
 #define UART1_SendBufLen  2048
 #define UART1_RecvBufLen  2048
 
-static struct tagUartCB *pUartCB[CN_UART_NUM];
+static struct UartCB *pUartCB[CN_UART_NUM];
 //用于标识串口是否初始化标记，第0位表示UART0，第一位表UART1....
 //依此类推，1表示初始化，0表示未初始化
 static u8 sUartInited = 0;
@@ -170,12 +176,12 @@ bool_t __UART_TxTranEmpty(volatile tagUartReg *reg)
 //参数：串口号
 //返回: 无
 //-----------------------------------------------------------------------------
-void __UART_IntInit(u8 SerialNo)
+void __UART_IntInit(ptu32_t SerialNo)
 {
     u8 IntLine;
     IntLine = cn_int_line_duart;
     //中断线的初始化
-    uint32_t UART_ISR(ufast_t IntLine);
+    Int_Register(IntLine);
     Int_IsrConnect(IntLine,UART_ISR);
     Int_SettoAsynSignal(IntLine);
     Int_SetLineTrigerType(IntLine,EN_INT_TRIGER_HIGHLEVEL);//set the uart active high
@@ -252,28 +258,28 @@ ptu32_t __UART_Ctrl(tagUartReg *Reg,u32 cmd, u32 data1,u32 data2)
 //      timeout,超时
 //返回: 发送的个数
 //-----------------------------------------------------------------------------
-u32 __UART_SendDirectly(tagUartReg *Reg,u8 *send_buf,u32 len,u32 timeout)
-{
-    u32  result;
-
-    if(Reg == NULL)
-        return 0;
-    __UART_TxIntDisable(Reg);
-    for(result=0; result < len; result ++)
-    {
-        while((false == __UART_TxTranEmpty(Reg))
-            && (timeout > 0))//超时或者发送缓冲为空时退出
-        {
-            timeout--;
-            Djy_DelayUs(1);
-        }
-        if(timeout == 0)
-            break;
-        Reg->URBR_THR_DLB = send_buf[result];
-    }
-    __UART_TxIntEnable(Reg);
-    return result;
-}
+//u32 __UART_SendDirectly(tagUartReg *Reg,u8 *send_buf,u32 len,u32 timeout)
+//{
+//    u32  result;
+//
+//    if(Reg == NULL)
+//        return 0;
+//    __UART_TxIntDisable(Reg);
+//    for(result=0; result < len; result ++)
+//    {
+//        while((false == __UART_TxTranEmpty(Reg))
+//            && (timeout > 0))//超时或者发送缓冲为空时退出
+//        {
+//            timeout--;
+//            Djy_DelayUs(1);
+//        }
+//        if(timeout == 0)
+//            break;
+//        Reg->URBR_THR_DLB = send_buf[result];
+//    }
+//    __UART_TxIntEnable(Reg);
+//    return result;
+//}
 
 //----启动串口发送函数---------------------------------------------------------
 //功能: 启动串口发送，直接发送fifo大小的数据，并产生发送空中断，在中断中将
@@ -310,9 +316,9 @@ u32 __UART_SendStart(tagUartReg *Reg,u32 timeout)
 //参数: 中断号.
 //返回: 0.
 //-----------------------------------------------------------------------------
-uint32_t UART_ISR(ufast_t IntLine)
+uint32_t UART_ISR(ptu32_t IntLine)
 {
-    struct tagUartCB *UCB = NULL;
+    struct UartCB *UCB = NULL;
     tagUartReg *Reg;
     uint32_t recv_trans,num;
     uint8_t ch[20],IIR=0;
@@ -368,7 +374,7 @@ uint32_t UART_ISR(ufast_t IntLine)
 //-----------------------------------------------------------------------------
 ptu32_t ModuleInstall_UART(ptu32_t serial_no)
 {
-    struct tagUartParam UART_Param;
+    struct UartParam UART_Param;
 
     switch(serial_no)
     {
@@ -379,7 +385,7 @@ ptu32_t ModuleInstall_UART(ptu32_t serial_no)
         UART_Param.TxRingBufLen = UART0_SendBufLen;
         UART_Param.RxRingBufLen = UART0_RecvBufLen;
         UART_Param.StartSend    = (UartStartSend)__UART_SendStart;
-        UART_Param.DirectlySend = (UartDirectSend)__UART_SendDirectly;
+//        UART_Param.DirectlySend = (UartDirectSend)__UART_SendDirectly;
         UART_Param.UartCtrl     = (UartControl)__UART_Ctrl;
         break;
     case CN_UART1://串口1
@@ -389,7 +395,7 @@ ptu32_t ModuleInstall_UART(ptu32_t serial_no)
         UART_Param.TxRingBufLen = UART1_SendBufLen;
         UART_Param.RxRingBufLen = UART1_RecvBufLen;
         UART_Param.StartSend    = (UartStartSend)__UART_SendStart;
-        UART_Param.DirectlySend = (UartDirectSend)__UART_SendDirectly;
+//        UART_Param.DirectlySend = (UartDirectSend)__UART_SendDirectly;
         UART_Param.UartCtrl     = (UartControl)__UART_Ctrl;
         break;
     default:
@@ -408,26 +414,20 @@ ptu32_t ModuleInstall_UART(ptu32_t serial_no)
         return 1;
 }
 
+static tagUartReg  *PutStrDirectReg = NULL;
+static tagUartReg  *GetCharDirectReg = NULL;
+
 //----串行发送服务（直接写终端）-------------------------------------------------
 //功能: 这个是直接写串口函数，不会经过事件弹出
 //参数: 所需要发送的字符串，当然，前提是你提供的一定是字符串'\0'结束
 //返回: 发送的个数
 //-----------------------------------------------------------------------------
-u32 Uart_SendServiceDirectly(char *str)
+s32 Uart_PutStrDirect(const char *str,u32 len)
 {
-    u32  len,result,timeout,BaseAddr;
+    u32  result,timeout;
     tagUartReg *Reg;
 
-    len = strlen(str);
-
-    if(!strcmp(gc_pCfgStddevName,"UART0") && (sUartInited & (0x01 << CN_UART0)))
-        BaseAddr = CN_UART0_BASE;
-    else if(!strcmp(gc_pCfgStddevName,"UART1")&& (sUartInited & (0x01 << CN_UART1)))
-        BaseAddr = CN_UART1_BASE;
-    else
-        return 0;
-
-    Reg = (tagUartReg *)BaseAddr;
+    Reg = PutStrDirectReg;
     __UART_TxIntDisable(Reg);
     for(result=0; result < len; result ++)
     {
@@ -441,4 +441,74 @@ u32 Uart_SendServiceDirectly(char *str)
     __UART_TxIntEnable(Reg);
     return result;
 }
+
+// =============================================================================
+// 功能：字符终端直接接收函数，采用轮询方式，直接读寄存器，用于stdin初始化前
+// 参数：str，发送字符串指针
+//      len，发送的字节数
+// 返回：0，发生错误；result,发送数据长度，字节单位
+// =============================================================================
+char Uart_GetCharDirect(void)
+{
+    char result = '\n';
+
+
+    return result;
+}
+
+//----初始化内核级IO-----------------------------------------------------------
+//功能：初始化内核级输入和输出所需的runtime函数指针。
+//参数：无
+//返回：无
+//-----------------------------------------------------------------------------
+void Stdio_KnlInOutInit(u32 para)
+{
+    u32 TxDirectPort = 0;
+    u32 RxDirectPort = 0;
+    
+    if(!strcmp(gc_pCfgStdoutName,"/dev/UART0"))
+    {
+        PutStrDirectReg = (tagUartReg*)CN_UART0_BASE;
+        TxDirectPort = CN_UART0;
+    }
+    else if(!strcmp(gc_pCfgStdoutName,"/dev/UART1"))
+    {
+        PutStrDirectReg = (tagUartReg*)CN_UART1_BASE;
+        TxDirectPort = CN_UART1;
+    }
+    else
+    {
+        PutStrDirectReg = NULL ;
+    }
+
+    if(PutStrDirectReg != NULL)
+    {
+        __UART_DefaultSet(PutStrDirectReg);
+        PutStrDirect = Uart_PutStrDirect;
+    }
+
+    if(!strcmp(gc_pCfgStdinName,"/dev/UART0"))
+    {
+        GetCharDirectReg = (tagUartReg*)CN_UART0_BASE;
+        RxDirectPort = CN_UART0;
+    }
+    else if(!strcmp(gc_pCfgStdinName,"/dev/UART1"))
+    {
+        GetCharDirectReg = (tagUartReg*)CN_UART1_BASE;
+        RxDirectPort = CN_UART1;
+    }
+    else
+    {
+        GetCharDirectReg = NULL ;
+    }
+    if(GetCharDirectReg != NULL)
+    {
+        if(TxDirectPort != RxDirectPort)
+            __UART_DefaultSet(GetCharDirectReg);
+        GetCharDirect = Uart_GetCharDirect;
+    }
+    return;
+}
+
+
 

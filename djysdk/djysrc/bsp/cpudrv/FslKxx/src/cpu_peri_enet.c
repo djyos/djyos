@@ -51,14 +51,15 @@
 // 创建人员: HM
 // 创建时间: 28/07.2014
 // =============================================================================
-#include "config-prj.h"
+#if 1
+#include <stdint.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+
+#include <sys/socket.h>
 
 #include "cpu_peri.h"
-#include "stdio.h"
-#include "string.h"
-#include "netdev.h"
-#include "rout.h"
-#include "tcpip_cdef.h"
 
 // =============================================================================
 #define CN_SYS_CLK_MHZ          120         // 系统时钟频率MHZ
@@ -76,24 +77,21 @@
 #endif
 // =============================================================================
 // 定义MAC参数配置，默认配置为RMII，自适应，100M，全双工
-static tagEnetCfg s_EnetConfig = {MAC_RMII,AUTONEG_ON,MII_100BASET,
+static tagEnetCfg s_EnetConfig = {"ENET",MAC_RMII,AUTONEG_ON,MII_100BASET,
                                     MII_FDX,NO_LOOPBACK,EXTERNAL_NONE,
                                     0,{0x00,0x01,0x02,0x03,0x04,0x02}};
-//{0x00,0x04,0x9F,0x01,0x5F,0xA6}FreeScale MAC ADDR
 
-#define CN_HARD_BOARD            0x02
-static u8  sgNetHardMac[6] = {0x00,0x01, 0x02, 0x03, 0x04, CN_HARD_BOARD};
-static u32  sgNetHardIpAddrMain = 0xC0A80100;
-static u32  sgNetHardIpMsk = 0xFFFFFF00 ; //255.255.255.0
-static u32  sgNetHardGateWay = 0xC0A80101; //192.168.1.1
-
-#define CN_PKG_MAX_LEN  1500
-static tagNetDev *pgChkNetDev = NULL;
+#define CN_PKG_MAX_LEN  1522
+// =============================================================================
+static struct SemaphoreLCB *pEnetRcvSync;
+static struct MutexLCB     *pEnetSndSync;
+static ptu32_t              gEnetHandle = NULL;
 // 该指针初始化到按16字节对齐的BD表
 #ifdef __GNUC__
 static u8 txbd[(sizeof(NBUF) * NUM_TXBDS)] __attribute__ ((aligned(16)));
 static u8 rxbd[(sizeof(NBUF) * NUM_RXBDS)] __attribute__ ((aligned(16)));
 static u8 RxBuffer[(RX_BUFFER_SIZE * NUM_RXBDS)] __attribute__ ((aligned(16)));
+static u8 TxBuffer[(TX_BUFFER_SIZE * NUM_TXBDS)] __attribute__ ((aligned(16)));
 #else
 #error "bd must be 16-byte aligned"
 #endif
@@ -106,17 +104,12 @@ static NBUF *spRxBdTab;
 static int sNextTxBd=0;
 static int sNextRxBd=0;
 
-static tagNetPkg *spTxPkg[NUM_TXBDS];
-static u32 sFreeTxBd = 0;
-
-#define  SendPkgWaitMs  1000
-
 // =============================================================================
 // 功能：将32位value高低字节转换，主要用于大小端变换
 // 参数：value,转换值
 // 返回：result,转换结果
 // =============================================================================
-static u32 __REV(u32 value)
+static u32 ENET_REV(u32 value)
 {
   u32 result;
 
@@ -130,7 +123,7 @@ static u32 __REV(u32 value)
 // 参数：value,转换值
 // 返回：result,转换结果
 // =============================================================================
-static int32_t __REVSH(int32_t value)
+static int32_t ENET_REVSH(int32_t value)
 {
   u32 result;
 
@@ -341,7 +334,7 @@ static void __Enet_BD_Init(void)
     {
         spTxBdTab[i].status = 0x0000;
         spTxBdTab[i].length = 0;
-        spTxBdTab[i].data = NULL;//(u8 *)__REV((u32)&TxBuffer[i * TX_BUFFER_SIZE]);
+        spTxBdTab[i].data = (u8 *)ENET_REV((u32)&TxBuffer[i * TX_BUFFER_SIZE]);
     }
 
     // Initialize receive descriptor ring
@@ -349,7 +342,7 @@ static void __Enet_BD_Init(void)
     {
         spRxBdTab[i].status = RX_BD_E;
         spRxBdTab[i].length = 0;
-        spRxBdTab[i].data = (u8 *)__REV((u32)&RxBuffer[i * RX_BUFFER_SIZE]);
+        spRxBdTab[i].data = (u8 *)ENET_REV((u32)&RxBuffer[i * RX_BUFFER_SIZE]);
     }
 
     // Set the Wrap bit on the last one in the ring
@@ -422,10 +415,14 @@ static void Enet_PortInit(void)
 // =============================================================================
 static void Enet_IntInit(ufast_t IntLine,u32 (*isr)(ufast_t))
 {
-    Int_IsrConnect(IntLine,isr);
-    Int_SettoAsynSignal(IntLine);
-    Int_ClearLine(IntLine);
-    Int_ContactLine(IntLine);
+    if(true == Int_Register(IntLine))
+    {
+    	Int_Register(IntLine);
+		Int_IsrConnect(IntLine,isr);
+		Int_SettoAsynSignal(IntLine);
+		Int_ClearLine(IntLine);
+		Int_ContactLine(IntLine);
+    }
 }
 
 // =============================================================================
@@ -444,12 +441,12 @@ static bool_t PHY_Init(void)
     __MII_Init(CN_SYS_CLK_MHZ);
 
     /* Can we talk to the PHY? */
-    do
-    {
-      Djy_DelayUs(500);
-      usData = 0xFFFF;
-      __MII_Read( CN_PHY_ADDR, CN_PHY_IDR1, &usData );
-    } while( usData == 0xFFFF );
+//    do
+//    {
+//      Djy_DelayUs(500);
+//      usData = 0xFFFF;
+//      __MII_Read( CN_PHY_ADDR, CN_PHY_IDR1, &usData );
+//    } while( usData == 0xFFFF );
     ENET_DBG("START TO NEGOTIATION!\r\n");
     /* Start auto negotiate. */
     __MII_Write(CN_PHY_ADDR, PHY_BMCR,PHY_BMCR_AN_ENABLE | PHY_BMCR_AN_RESTART);
@@ -523,7 +520,11 @@ static void Enet_MAC_Init(void)
     ENET->GAUR = 0;
 
     __Enet_MAC_AddrSet(s_EnetConfig.mac);   // Set the Physical Address
-    ENET->EIMR |= ENET_EIMR_RXF_MASK;       // Enable RX,Mask other interrupts
+    ENET->EIMR = ENET_EIMR_RXF_MASK			// Enable RX and err interrupts
+    			| ENET_EIMR_BABR_MASK
+				| ENET_EIMR_BABT_MASK
+				| ENET_EIMR_EBERR_MASK
+				| ENET_EIMR_UN_MASK;
     ENET->EIR = 0xFFFFFFFF;                 // Clear all FEC interrupt events
 
     // Initialize the Receive Control Register
@@ -587,10 +588,10 @@ static void Enet_MAC_Init(void)
 // 参数：packet,接收到数据的首地址
 // 返回：接收到数据包长度，最大不会超过1518字节
 // =============================================================================
-static tagNetPkg *__Enet_RcvPacket(void)
+static tagNetPkg *__Enet_RcvPacket(ptu32_t handle)
 {
     tagNetPkg *pkg=NULL;
-    int LastBuffer,length,RxBdIndex;
+    int LastBuffer,length,len,RxBdIndex;
     u16 status;
     u8 *rcvbuf = NULL;
     atom_low_t atomop;
@@ -607,10 +608,10 @@ static tagNetPkg *__Enet_RcvPacket(void)
     }
     Int_LowAtomEnd(atomop);
 
-    //计算接收到数据包有几个BD表
+    //计算接收到数据包有几个BD表，todo----须做容错处理，如没有结束符
     while(!LastBuffer)
     {
-        length += __REVSH(spRxBdTab[RxBdIndex].length);
+        length = ENET_REVSH(spRxBdTab[RxBdIndex].length);
         status = spRxBdTab[RxBdIndex].status;
         if(status & RX_BD_W)
         {
@@ -625,7 +626,7 @@ static tagNetPkg *__Enet_RcvPacket(void)
 
     if(length >0)
     {
-        pkg =Pkg_Alloc(length,CN_PKGFLAG_FREE);
+        pkg =PkgMalloc(length,CN_PKLGLST_END);
         if(NULL != pkg)
         {
             rcvbuf = (u8 *)(pkg->buf + pkg->offset);
@@ -633,33 +634,40 @@ static tagNetPkg *__Enet_RcvPacket(void)
             pkg->partnext= NULL;
         }
         else
-            ENET_DBG("Enet_RcvPacket() pkg_alloc failed!\r\n ");
+        {
+            ENET_DBG("Enet_RcvPacket() pkg_alloc failed!\r\n ");//todo
+        }
+
     }
 
-    LastBuffer = 0;
-    RxBdIndex = sNextRxBd;
-    while(!LastBuffer)                             //是否为该Frame的最后一个BD项
-    {
-        status = spRxBdTab[RxBdIndex].status;
-        length = __REVSH(spRxBdTab[RxBdIndex].length);
+	LastBuffer = 0;
+	RxBdIndex = sNextRxBd;
+	while(!LastBuffer)                             //是否为该Frame的最后一个BD项
+	{
+		status = spRxBdTab[RxBdIndex].status;
+		len = ENET_REVSH(spRxBdTab[RxBdIndex].length);
+		len = (length > len) ? len : length;
+		length -= len;
 
-        if(length > 0)
-        {
-            memcpy(rcvbuf,(uint8_t *)__REV((u32)spRxBdTab[RxBdIndex].data),length);
-            rcvbuf = rcvbuf + length;
-        }
-        if(status & RX_BD_W)
-        {
-            spRxBdTab[RxBdIndex].status = (RX_BD_W | RX_BD_E);
-            RxBdIndex = 0;
-        }
-        else
-        {
-            spRxBdTab[RxBdIndex].status = RX_BD_E;
-            RxBdIndex++;
-        }
-        LastBuffer = (status & RX_BD_L);
-  }
+        //--TODO, this code has something err, you could't memcpy when
+        //        there is no pkg for you~!
+		if(len > 0)
+		{
+			memcpy(rcvbuf,(uint8_t *)ENET_REV((u32)spRxBdTab[RxBdIndex].data),len);
+			rcvbuf = rcvbuf + len;
+		}
+		if(status & RX_BD_W)
+		{
+			spRxBdTab[RxBdIndex].status = (RX_BD_W | RX_BD_E);
+			RxBdIndex = 0;
+		}
+		else
+		{
+			spRxBdTab[RxBdIndex].status = RX_BD_E;
+			RxBdIndex++;
+		}
+		LastBuffer = (status & RX_BD_L);
+	}
 
     sNextRxBd = RxBdIndex;                     // 更新读NEXT BD表标志
     ENET->RDAR = ENET_RDAR_RDAR_MASK;           // 更新RX BD列表
@@ -674,19 +682,12 @@ static tagNetPkg *__Enet_RcvPacket(void)
 u32 Enet_RxISR(ufast_t IntLine)
 {
     u32 event;
-    tagNetPkg  *pkglst;
 
     event = ENET->EIR;         // 获取中断寄存器
     ENET->EIR = ENET_EIR_RXF_MASK;                      // 清中断标志位
     if(event & ENET_EIR_RXF_MASK)
     {
-        while ((pkglst=__Enet_RcvPacket()) != NULL)
-        {
-            if(false == NetDev_PostPkg(pgChkNetDev,pkglst))
-            {
-                Pkg_LstFlagFree(pkglst);
-            }
-        }
+    	Lock_SempPost(pEnetRcvSync);
     }
     return 0;
 }
@@ -698,31 +699,14 @@ u32 Enet_TxISR(ufast_t IntLine)
 
 u32 Enet_ErrISR(ufast_t IntLine)
 {
-    return 0;
-}
+    u32 event;
 
-// =============================================================================
-// 功能：查询BD表里面还有多少个空闲控制块
-// 参数：txnbuf,查询的目标BD表
-//       index,当前查询位置
-//       bdnum,BD控制块总数
-// 返回：BD空闲块数
-// =============================================================================
-static u32 __CheckRdyBD(NBUF *txnbuf,u32 index,u32 bdnum)
-{
-    u32 RdyBdNum=0;
-    //查询有多少空BD表
-    while(!(txnbuf[index].status & TX_BD_R))
-    {
-        RdyBdNum ++;
-        if(RdyBdNum == bdnum)
-            break;
-        if(++index == NUM_TXBDS)
-        {
-            index = 0;
-        }
-    }
-    return RdyBdNum;
+    event = ENET->EIR;         				// 获取中断寄存器
+    ENET->EIR = event;          			// 清中断标志位
+
+	ENET_DBG("ENET error occurred, event = %8x !\r\n" ,event);
+
+    return 0;
 }
 
 // =============================================================================
@@ -737,84 +721,149 @@ static u32 __CheckRdyBD(NBUF *txnbuf,u32 index,u32 bdnum)
 // 输出参数：
 // 返回值  ：true发送成功  false发送失败。
 // =============================================================================
-static bool_t Enet_SendPacket(tagNetDev *netdev,tagNetPkg * pkg, u32 netdevtask)
+static bool_t Enet_SendPacket(ptu32_t hanlde,tagNetPkg * pkglst,u32 framlen, u32 netdevtask)
 {
     bool_t  result = false;
-    tagNetPkg *tmp;
-    u32 pkgnum = 0,TxBdIndex,temp = 0,i;
-    u32 SendBdWaitTime = SendPkgWaitMs;
+    tagNetPkg *tmppkg;
+    u32 TxBdIndex;
 
-    if((pgChkNetDev != netdev)||(NULL == pkg))
+    u8  *dst,*src;
+    u32 len,pkglen;
+
+    if((NULL == hanlde)||(NULL == pkglst))
         return result;
 
-    //释放上一次使用且已经发送完成的Pkg
-    if(sFreeTxBd != sNextTxBd)
+    if(Lock_MutexPend(pEnetSndSync,CN_TIMEOUT_FOREVER))
     {
-        while(!(spTxBdTab[sFreeTxBd].status & TX_BD_R))
+		TxBdIndex = sNextTxBd;
+
+		if( !(spTxBdTab[TxBdIndex].status & TX_BD_R) )		//当前BD已准备就绪
+		{
+			dst = (u8 *)ENET_REV((u32)spTxBdTab[TxBdIndex].data);
+
+            pkglen = 0;
+            len =0;
+			tmppkg = pkglst;
+			do{
+				//拷贝数据
+				src = (tmppkg->buf + tmppkg->offset);
+				len = tmppkg->datalen;
+				memcpy((void *)dst,(void *)src,len);
+				dst += len;
+				pkglen+=len;
+				if(pkglen > TX_BUFFER_SIZE)
+				{
+					break;//溢出
+				}
+
+				if(PKG_ISLISTEND(tmppkg))
+				{
+					tmppkg = NULL;
+					break;
+				}
+				else
+				{
+					tmppkg = tmppkg->partnext;
+				}
+			}while(tmppkg != NULL);
+
+	        spTxBdTab[TxBdIndex].status = TX_BD_TC | TX_BD_R | TX_BD_L;
+	        spTxBdTab[TxBdIndex].length = ENET_REVSH(pkglen);
+
+	        // Wrap if this was last TxBD
+	        if(++TxBdIndex == NUM_TXBDS)
+	        {
+	            spTxBdTab[NUM_TXBDS - 1].status |= TX_BD_W;
+	            TxBdIndex = 0;
+	        }
+
+	        // Update the global txbd index
+	        sNextTxBd = TxBdIndex;
+
+	        // Indicate that Descriptors are ready to transmit
+	        ENET->TDAR = ENET_TDAR_TDAR_MASK;
+
+	        result = true;
+		}
+        else
         {
-            Pkg_PartFlagFree(spTxPkg[sFreeTxBd]);
-            if(++sFreeTxBd == NUM_TXBDS)
-                sFreeTxBd = 0;
-            if(sFreeTxBd == sNextTxBd)
+            //no bd here
+        }
+        Lock_MutexPost(pEnetSndSync);
+    }
+
+    return result;
+}
+// =============================================================================
+// 功能：接收事件的函数，阻塞等待接收到完整数据包的信号量，并接收读取完网卡缓存的所有数据包
+// 参数：无
+// 返回：无
+// =============================================================================
+static ptu32_t __GmacRcvTask(void)
+{
+    tagNetPkg *pkg;
+    while(1)
+    {
+        Lock_SempPend(pEnetRcvSync,CN_TIMEOUT_FOREVER);
+        while((pkg = __Enet_RcvPacket(gEnetHandle))!= NULL)//不断读网卡直到没有完整数据包为止
+        {
+            LinkPost(gEnetHandle,pkg);
+            PkgTryFreePart(pkg);
+        }
+    }
+    return 0;
+}
+// =============================================================================
+// 功能：网卡接收数据的任务
+// 参数：网卡
+// 返回：true
+// =============================================================================
+static bool_t __CreateRcvTask(ptu32_t nethandle)
+{
+    bool_t result = false;
+    u16 evttID;
+    u16 eventID;
+
+    evttID = Djy_EvttRegist(EN_CORRELATIVE, CN_PRIO_RRS, 0, 1,
+        (ptu32_t (*)(void))__GmacRcvTask,NULL, 0x400, "ENETRcvTask");
+    if (evttID != CN_EVTT_ID_INVALID)
+    {
+        eventID=Djy_EventPop(evttID, NULL,  0,(ptu32_t)nethandle, 0, 0);
+        if(eventID != CN_EVENT_ID_INVALID)
+        {
+            result = true;
+        }
+        else
+        {
+            Djy_EvttUnregist(evttID);
+        }
+    }
+    return result;
+}
+
+bool_t Enet_Ctrl(ptu32_t handle,u8 cmd, ptu32_t para)
+{
+    atom_low_t  atom;
+    bool_t result = false;
+    if(0 != handle)
+    {
+        switch(cmd)
+        {
+            case EN_NETDEV_SETMAC:
+                memcpy(s_EnetConfig.mac,(u8 *)para, CN_MACADDR_LEN);
+                atom = Int_LowAtomStart();
+                Enet_MAC_Init();
+                Int_LowAtomEnd(atom);
+                result = true;
+                break;
+            case EN_NETDEV_GTETMAC:
+                break;
+            default:
                 break;
         }
     }
-
-    TxBdIndex = sNextTxBd;
-
-    //计算一个完整数据包由多少个pkg组成
-    tmp = pkg;
-    while(NULL != tmp)
-    {
-        pkgnum++;
-        tmp = tmp->partnext;
-    }
-    //查询有多少空BD表
-    do
-    {
-        temp = __CheckRdyBD(spTxBdTab,sNextTxBd,NUM_TXBDS);
-        if(temp >= pkgnum)
-            break;
-        Djy_EventDelay(1*mS);
-    }while(SendBdWaitTime-- > 0);
-
-    if(SendBdWaitTime == 0)
-        return result;
-
-    //到这一步，说明有足够多的空闲BD发送该帧数据
-    tmp = pkg;
-    for (i = 0; i < pkgnum; i++)
-    {
-        spTxBdTab[TxBdIndex].status = TX_BD_TC | TX_BD_R;
-        spTxBdTab[TxBdIndex].length = __REVSH(tmp->datalen);
-        spTxBdTab[TxBdIndex].data = (u8*)__REV((u32)(tmp->buf + tmp->offset));
-        if(i == pkgnum - 1)
-        {
-            // Set the Last bit on the last BD
-            spTxBdTab[TxBdIndex].status |= TX_BD_L;
-        }
-
-        // Wrap if this was last TxBD
-        if(++TxBdIndex == NUM_TXBDS)
-        {
-            spTxBdTab[NUM_TXBDS - 1].status |= TX_BD_W;
-            TxBdIndex = 0;
-        }
-
-        spTxPkg[TxBdIndex] = tmp;
-        tmp = tmp->partnext;
-    }
-
-    // Update the global txbd index
-    sNextTxBd = TxBdIndex;
-
-    // Indicate that Descriptors are ready to transmit
-    ENET->TDAR = ENET_TDAR_TDAR_MASK;
-//    while(spTxBdTab[TxBdIndex].status & TX_BD_R); //采用发送完再返回的方式
-//    Pkg_LstFlagFree(pkg);
-    return result = true;
+    return result;
 }
-
 // =============================================================================
 // 函数功能：NetHard_AddNetDev
 //          向协议栈添加一个网卡设备
@@ -826,35 +875,54 @@ static bool_t Enet_SendPacket(tagNetDev *netdev,tagNetPkg * pkg, u32 netdevtask)
 // =============================================================================
 static bool_t Enet_AddNetDev(void)
 {
-    bool_t  result = false;
-    tagNetDevPara  devpara;
-    tagHostIpv4Addr devaddr;
+    tagNetDevPara   devpara;
 
-    devpara.ifsend = (fnIfSend)Enet_SendPacket;
-
-    devpara.iftype = EN_LINK_INTERFACE_ETHERNET;
-    memcpy(devpara.mac, sgNetHardMac,6);
-    devpara.name = "K60NetDriver";
-    devpara.private = 0;
-
-    devpara.linklen = 14;
-    devpara.pkglen = 1500;
-    devpara.devfunc = 0;
-
-    pgChkNetDev = NetDev_AddDev(&devpara);
-    if(pgChkNetDev != NULL)
+    //创建发送和接收同步量
+    pEnetRcvSync = Lock_SempCreate(1,1,CN_SEMP_BLOCK_FIFO,NULL);
+    if(NULL == pEnetRcvSync)
     {
-        devaddr.ip = sgNetHardIpAddrMain|CN_HARD_BOARD;
-        devaddr.gateway = sgNetHardGateWay;
-        devaddr.ipmsk = sgNetHardIpMsk;
-        if(NULL != Rout_AddRout(pgChkNetDev, &devaddr))
-        {
-            result = true;
-        }
+        goto RcvSyncFailed;
+    }
+    pEnetSndSync = Lock_MutexCreate(NULL);
+    if(NULL == pEnetSndSync)
+    {
+        goto SndSyncFailed;
     }
 
-    return result;
+    //注册到网络设备链中
+    devpara.ifctrl = Enet_Ctrl;
+    devpara.ifsend = Enet_SendPacket;
+    devpara.iftype = EN_LINK_ETHERNET;
+    devpara.devfunc = 0;    //NO FUNC FOR THE DEV
+    memcpy(devpara.mac, s_EnetConfig.mac,6);
+    devpara.name = (char *)(s_EnetConfig.name);
+    devpara.private = 0;
+    devpara.mtu = CN_PKG_MAX_LEN;
+    devpara.private = (u32)NULL;
+    gEnetHandle = NetDevInstall(&devpara);
+    if(0 == gEnetHandle)
+    {
+        goto NetInstallFailed;
+    }
+    if(false == __CreateRcvTask(gEnetHandle))
+    {
+        goto RcvTaskFailed;
+    }
+    return true;
+
+RcvTaskFailed:
+	NetDevUninstall(s_EnetConfig.name);
+NetInstallFailed:
+	Lock_MutexDelete(pEnetSndSync);
+	pEnetSndSync = NULL;
+SndSyncFailed:
+	Lock_SempDelete(pEnetRcvSync);
+	pEnetRcvSync = NULL;
+RcvSyncFailed:
+	printf("%s:Install gmac failed\n\r",__FUNCTION__);
+	return false;
 }
+
 
 // =============================================================================
 // 功能：DM9000网卡和DJYIP驱动初始化函数
@@ -864,6 +932,11 @@ static bool_t Enet_AddNetDev(void)
 bool_t ModuleInstall_Enet(ptu32_t para)
 {
     bool_t result = false;
+
+    if(para == (u32)NULL)
+    	return false;
+
+    memcpy(&s_EnetConfig,(u8*)para,sizeof(tagEnetCfg));
 
     Enet_PortInit();                                // PORT初始化
     Enet_IntInit(CN_INT_LINE_ENET_RX,Enet_RxISR);   // INT初始化
@@ -876,3 +949,4 @@ bool_t ModuleInstall_Enet(ptu32_t para)
 
     return result;
 }
+#endif

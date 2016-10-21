@@ -60,7 +60,7 @@
 
 //应用程序应该调用此函数实现菜单的初始化并显示
 struct menu_displaypara* menuappinit_general(\
-		struct menu_item *menuitem,struct tagGkWinRsc *Appwin, u8 mydismode);
+        struct menu_item *menuitem,struct GkWinRsc *Appwin, u8 mydismode);
 
 //菜单显示退出
 bool_t menu_exit(struct menu_displaypara *dispara);
@@ -73,17 +73,17 @@ void   menu_display(struct menu_displaypara *dispara);
 //操作菜单项的接口，因此后续考虑删除这样的具体外设，和外设的耦合性太大了，外设应该只
 //使用通用外设接口即可。--TODO
 struct menu_displaypara*  menuperipheral_respond(\
-		struct menu_displaypara *operatingDispara, void* para );
+        struct menu_displaypara *operatingDispara, void* para );
 
 //执行显示参数的通用外设函数，para是具体的命令参见"MenuDisplay.h"
 struct menu_displaypara*  menupeiripheralrespondgeneral(\
-		struct menu_displaypara *operatingDispara, void* para );
+        struct menu_displaypara *operatingDispara, void* para );
 
 
 struct menu_displaypara*  menukeyboard_respond(\
-		struct menu_displaypara *operatingDispara, void* para );
+        struct menu_displaypara *operatingDispara, void* para );
 
 struct menu_displaypara*  menumousetouch_respond(\
-		struct menu_displaypara *operatingDispara, void* para );
+        struct menu_displaypara *operatingDispara, void* para );
 
 #endif /* MENUINITGENERAL_H_ */

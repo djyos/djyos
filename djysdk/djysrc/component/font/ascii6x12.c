@@ -333,7 +333,7 @@ const u8 cs_ascii_6x12[12*256] =
 bool_t __Font_Ascii6x12LoadFont(void *);
 void __Font_Ascii6x12UnloadFont(void);
 bool_t __Font_Ascii6x12GetCharBitMap(u32 charcode, u32 size,u32 resv,
-                                    struct tagRectBitmap *bitmap);
+                                    struct RectBitmap *bitmap);
 
 
 bool_t __Font_Ascii6x12LoadFont(void * ziku)
@@ -361,7 +361,7 @@ void __Font_Ascii6x12UnloadFont(void)
 //      Ä¬ÈÏ×Ö·ûµÄµãÕó
 //-----------------------------------------------------------------------------
 bool_t __Font_Ascii6x12GetCharBitMap(u32 charcode, u32 size,u32 resv,
-                                    struct tagRectBitmap *bitmap)
+                                    struct RectBitmap *bitmap)
 {
     u8 i;
     u32 offset;
@@ -417,7 +417,7 @@ s32 __Font_Ascii6x12GetCharHeight(u32 CharCode)
 //-----------------------------------------------------------------------------
 ptu32_t ModuleInstall_FontAscii6x12Font(ptu32_t para)
 {
-    static struct tagFontRsc font_a6x12;
+    static struct FontRsc font_a6x12;
 
     font_a6x12.MaxWidth = 6;
     font_a6x12.MaxHeight = 12;

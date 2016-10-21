@@ -72,7 +72,7 @@
 //      len,缓冲区长度.单位是字节数
 //返回: 无
 //-----------------------------------------------------------------------------
-void Ring_Init(struct tagRingBuf *ring, u8 *buf, u32 len)
+void Ring_Init(struct RingBuf *ring, u8 *buf, u32 len)
 {
     ring->buf = buf;
     ring->max_len = len;
@@ -86,7 +86,7 @@ void Ring_Init(struct tagRingBuf *ring, u8 *buf, u32 len)
 //参数: ring,目标线性缓冲区结构指针
 //返回: 缓冲区容量，就是调用ring_init时使用的len参数。
 //-----------------------------------------------------------------------------
-u32 Ring_Capacity(struct tagRingBuf *ring)
+u32 Ring_Capacity(struct RingBuf *ring)
 {
     return ring->max_len;
 }
@@ -101,7 +101,7 @@ u32 Ring_Capacity(struct tagRingBuf *ring)
 //      2、用户想自己动手访问该缓冲区，这不是一个明智的选择，有破坏模块独立性
 //         的嫌疑，这时候，使用者应该完全明白自己在干什么!
 //-----------------------------------------------------------------------------
-u8 *Ring_GetBuf(struct tagRingBuf *ring)
+u8 *Ring_GetBuf(struct RingBuf *ring)
 {
     return ring->buf;
 }
@@ -114,7 +114,7 @@ u8 *Ring_GetBuf(struct tagRingBuf *ring)
 //      len,待写入的数据长度.单位是字节数
 //返回: 实际写入的字节数,如果缓冲区有足够的空间,=len
 //-----------------------------------------------------------------------------
-u32 Ring_Write(struct tagRingBuf *ring,u8 *buffer,u32 len)
+u32 Ring_Write(struct RingBuf *ring,u8 *buffer,u32 len)
 {
     u32    wr_len;
     u32    partial;
@@ -141,6 +141,39 @@ u32 Ring_Write(struct tagRingBuf *ring,u8 *buffer,u32 len)
     return wr_len;
 }
 
+//----环形缓冲区伪写入---------------------------------------------------------
+//功能: 与Ring_Write类似，但不执行真正的写入操作，而是只移动写指针，可与
+//      Ring_SkipTail配套使用，用于恢复忽略的数据。
+//      ring并没有记录Ring_SkipTail掉的数据长度，Ring_PseudoWrite的len参数，超过
+//      忽略的数据量，也是允许的。
+//参数: ring,目标环形缓冲区结构指针
+//      len,伪写入的数据长度.单位是字节数
+//返回: 写指针移动的字节数,如果缓冲区有足够的空间,=len
+//-----------------------------------------------------------------------------
+u32 Ring_PseudoWrite(struct RingBuf *ring,u32 len)
+{
+    u32    wr_len;
+    u32    partial;
+    atom_low_t  atom_bak;
+    wr_len = ring->max_len - ring->len;
+    if(wr_len == 0)
+        return 0;
+    if(wr_len > len)
+        wr_len = len;
+    if((ring->offset_write + wr_len) > ring->max_len)
+    {   //数据发生环绕
+        partial = ring->max_len - ring->offset_write;
+        ring->offset_write = wr_len - partial;
+    }else
+    {   //不发生环绕
+        ring->offset_write +=wr_len;
+    }
+    atom_bak = Int_LowAtomStart();
+    ring->len += wr_len;
+    Int_LowAtomEnd(atom_bak);
+    return wr_len;
+}
+
 //----从环形缓冲区读-----------------------------------------------------------
 //功能: 从环形缓冲区读出若干个字节,返回实际读出的数据量,并且移动读指针如果
 //      缓冲区内数据不足，按实际数量读取。
@@ -149,7 +182,7 @@ u32 Ring_Write(struct tagRingBuf *ring,u8 *buffer,u32 len)
 //      len,待读出的数据长度.单位是字节数
 //返回: 实际读出的字节数,如果缓冲区有足够的数据,=len
 //------------------------------------------------------------------------------
-u32    Ring_Read(struct tagRingBuf *ring,u8 *buffer,u32 len)
+u32    Ring_Read(struct RingBuf *ring,u8 *buffer,u32 len)
 {
     u32    wr_len,ring_len;
     atom_low_t  atom_bak;
@@ -178,7 +211,7 @@ u32    Ring_Read(struct tagRingBuf *ring,u8 *buffer,u32 len)
 //参数: ring,目标环形缓冲区指针.
 //返回: 缓冲区中的数据量
 //------------------------------------------------------------------------------
-u32    Ring_Check(struct tagRingBuf *ring)
+u32    Ring_Check(struct RingBuf *ring)
 {
     return ring->len;       //len是ucpu_t类型的，可以确保读操作的原子性
 }
@@ -188,7 +221,7 @@ u32    Ring_Check(struct tagRingBuf *ring)
 //参数: ring,目标环形缓冲区指针.
 //返回: 空则返回true,非空返回false
 //------------------------------------------------------------------------------
-bool_t   Ring_IsEmpty(struct tagRingBuf *ring)
+bool_t   Ring_IsEmpty(struct RingBuf *ring)
 {
     return (ring->len ==0)? true:false;
 }
@@ -198,7 +231,7 @@ bool_t   Ring_IsEmpty(struct tagRingBuf *ring)
 //参数: ring,目标环形缓冲区指针.
 //返回: 满则返回true,非满返回false
 //------------------------------------------------------------------------------
-bool_t   Ring_IsFull(struct tagRingBuf *ring)
+bool_t   Ring_IsFull(struct RingBuf *ring)
 {
     return (ring->len == ring->max_len)? true:false;
 }
@@ -209,7 +242,7 @@ bool_t   Ring_IsFull(struct tagRingBuf *ring)
 //返回: 无
 //特别注意: 调用前，请确认没有其他线程在使用缓冲区，否则可能出现不可预料的结果
 //------------------------------------------------------------------------------
-void    Ring_Flush(struct tagRingBuf *ring)
+void    Ring_Flush(struct RingBuf *ring)
 {
     ring->len = 0;
     ring->offset_write = 0;
@@ -222,7 +255,7 @@ void    Ring_Flush(struct tagRingBuf *ring)
 //      len,释放的数据数量
 //返回: 实际释放的数据量
 //------------------------------------------------------------------------------
-u32 Ring_DumbRead(struct tagRingBuf *ring,u32 len)
+u32 Ring_PseudoRead(struct RingBuf *ring,u32 len)
 {
     u32    result,ring_len;
     atom_low_t  atom_bak;
@@ -242,20 +275,20 @@ u32 Ring_DumbRead(struct tagRingBuf *ring,u32 len)
 }
 
 //----退回若干数据-------------------------------------------------------------
-//功能: 本函数与ring_dumb_read函数正好相反，把缓冲区指针退回len字节，如果退回的
+//功能: 本函数与Ring_PseudoRead函数正好相反，把缓冲区指针退回len字节，如果退回的
 //      长度超过缓冲区的空闲长度，则取缓冲区空闲长度。相当于把缓冲区中已经读出
 //      的数据返回缓冲区，好像没有读过的样子。ring模块并不校验退回的部分是否包含
-//      原来的数据。
+//      原来的数据。还可以用buf指针传入的数据，覆盖被回退的数据。
 //参数: ring,目标环形缓冲区指针.
 //      len,退回的数据数量
+//      buf,保存须退回的数据，如果buf != NULL，则用其数据覆盖ring中原有数据
 //返回: 实际退回的数据量
 //-----------------------------------------------------------------------------
-u32 Ring_RecedeRead(struct tagRingBuf *ring,u32 len)
+u32 Ring_RecedeRead(struct RingBuf *ring,u32 len,u8 *buf)
 {
-    u32    result;
+    u32    result,offset;
     atom_low_t  atom_bak;
 
-    atom_bak = Int_LowAtomStart();
     if((ring->max_len - ring->len) > len)   //空闲长度大于欲退回的长度
         result = len;
     else
@@ -263,10 +296,20 @@ u32 Ring_RecedeRead(struct tagRingBuf *ring,u32 len)
     if(ring->offset_read < result)
     {   //数据发生环绕
         ring->offset_read = ring->max_len - (result - ring->offset_read);
+        offset = len - result;
+        if(buf != NULL)
+        {
+            memcpy(ring->buf + ring->offset_read,buf+offset,ring->max_len-ring->offset_read);
+            offset += ring->max_len-ring->offset_read;
+            memcpy(ring->buf,buf+offset,result - ring->max_len-ring->offset_read);
+        }
     }else
     {   //不发生环绕
         ring->offset_read -= result;
+        if(buf != NULL)
+            memcpy(ring->buf + ring->offset_read,buf+(len - result),result);
     }
+    atom_bak = Int_LowAtomStart();
     ring->len += result;
     Int_LowAtomEnd(atom_bak);
     return result;
@@ -278,7 +321,7 @@ u32 Ring_RecedeRead(struct tagRingBuf *ring,u32 len)
 //      len,退回的数据数量
 //返回: 实际退回的数据量
 //-----------------------------------------------------------------------------
-u32 Ring_SkipTail(struct tagRingBuf *ring,u32 size)
+u32 Ring_SkipTail(struct RingBuf *ring,u32 size)
 {
     u32 result;
     atom_low_t  atom_bak;
@@ -304,13 +347,25 @@ u32 Ring_SkipTail(struct tagRingBuf *ring,u32 size)
     return result;
 }
 
+//----清除所有数据-------------------------------------------------------------
+//功能: 清除唤醒缓冲区中的所有数据。
+//参数: ring,目标环形缓冲区结构指针
+//返回: 无
+//-----------------------------------------------------------------------------
+void Ring_Clean(struct RingBuf *ring)
+{
+    ring->offset_write = 0;
+    ring->offset_read  = 0;
+    ring->len = 0;
+}
+
 //----查找字符------------------------------------------------------------------
 //功能: 从ring当前读位置开始查找字符c的位置
 //参数: ring,目标环形缓冲区指针
 //      c,需查找的字符
 //返回: c出现的位置相对读指针的偏移量,如果没有出现则返回 CN_LIMIT_UINT32
 //------------------------------------------------------------------------------
-u32 Ring_SearchCh(struct tagRingBuf *ring, char c)
+u32 Ring_SearchCh(struct RingBuf *ring, char c)
 {
     u32    i;
     u8 *buf = ring->buf;
@@ -341,7 +396,7 @@ u32 Ring_SearchCh(struct tagRingBuf *ring, char c)
 //返回: string出现的位置相对offset_read的偏移量,如果没有出现返回 CN_LIMIT_UINT32
 //备注: 这个功能可能比较常用,所以在编写时注意了速度优化,但却使代码量大增.
 //------------------------------------------------------------------------------
-u32 Ring_SearchStr(struct tagRingBuf *ring, char *string,u32 str_len)
+u32 Ring_SearchStr(struct RingBuf *ring, char *string,u32 str_len)
 {
     u32 i,j;
     bool_t next;

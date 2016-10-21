@@ -92,7 +92,7 @@ typedef struct         //offset
 #define CN_UART_NUM 2
 
 ptu32_t ModuleInstall_UART(ptu32_t serial_no);//´®¿Ú³õÊ¼»¯
-u32 Uart_SendServiceDirectly(char *str);
+void Stdio_KnlInOutInit(u32 para);
 
 #ifdef __cplusplus
 }

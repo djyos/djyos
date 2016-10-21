@@ -62,9 +62,8 @@
 #ifndef __NLS_MODULE_H_
 #define __NLS_MODULE_H_
 
-#define CN_NLS_CHARSET_DEFAULT          CN_NLS_CHARSET_GB2312
 
-struct tagCharset* Charset_NlsGetLocCharset(const char* loc);
+struct Charset* Charset_NlsGetLocCharset(const char* loc);
 ptu32_t ModuleInstall_CharsetNls(const char * para);
 
 #endif

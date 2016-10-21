@@ -55,13 +55,14 @@
 //   修改说明: 原始版本
 //------------------------------------------------------
 #include "stdint.h"
+#include "core_config.h"
 
 #if 0
-static tagDevHandle s_pPipeParentDevice;
+static struct DjyDevice * s_pPipeParentDevice;
 #if(CN_CFG_PIPES_LIMIT != 0)
-static struct tagPipePCB s_tPipeMemBlock[CN_CFG_PIPES_LIMIT];
+static struct PipePCB s_tPipeMemBlock[CN_CFG_PIPES_LIMIT];
 #endif
-static struct tagMemCellPool *s_ptPipePool;  //信号量结构内存池头指针
+static struct MemCellPool *s_ptPipePool;  //信号量结构内存池头指针
 
 //----初始化pipe模块模块-------------------------------------------------------
 //功能：在"dev"设备下创建"pipe"设备，作为后续创建pipe设备的父设备，这是一个哑
@@ -71,7 +72,7 @@ static struct tagMemCellPool *s_ptPipePool;  //信号量结构内存池头指针
 //-----------------------------------------------------------------------------
 ptu32_t Pipe_ModuleInit(ptu32_t para)
 {
-    static struct tagMemCellPool pipe_pool;
+    static struct MemCellPool pipe_pool;
 
     para = para;        //消除编译器告警
     s_pPipeParentDevice = Driver_DevAddDevice( Driver_DevGetRootDevice(),"pipe",
@@ -92,14 +93,14 @@ ptu32_t Pipe_ModuleInit(ptu32_t para)
     s_ptPipePool = Mb_CreatePool_r( &pipe_pool,
                                     (void*)s_tPipeMemBlock,
                                     CN_CFG_PIPES_LIMIT,
-                                    sizeof(struct tagPipePCB),
+                                    sizeof(struct PipePCB),
                                     0,0,
                                     "pipe控制块池");
 #else
     s_ptPipePool = Mb_CreatePool_r( &pipe_pool,
                                     NULL,
                                     CN_CFG_PIPES_LIMIT,
-                                    sizeof(struct tagPipePCB),
+                                    sizeof(struct PipePCB),
                                     0,0,
                                     "pipe控制块池");
 #endif
@@ -116,14 +117,14 @@ ptu32_t Pipe_ModuleInit(ptu32_t para)
 //      name，管道的名字，所指向的字符串内存区不能是局部变量
 //返回：新建立的信号量指针
 //-----------------------------------------------------------------------------
-tagDevHandle Pipe_Create(u8* buf,u32 size,bool_t whole,
+struct DjyDevice * Pipe_Create(u8* buf,u32 size,bool_t whole,
                              u32 write_level,u32 read_level,char *name)
 {
-    struct tagPipePCB *pipe;
-    struct tagSemaphoreLCB *read_dev_semp,*write_dev_semp;
-    tagDevHandle pipe_device;
+    struct PipePCB *pipe;
+    struct SemaphoreLCB *read_dev_semp,*write_dev_semp;
+    struct DjyDevice * pipe_device;
 
-    pipe = (struct tagPipePCB *)Mb_Malloc(s_ptPipePool, 0);
+    pipe = (struct PipePCB *)Mb_Malloc(s_ptPipePool, 0);
     if(pipe == NULL)
         goto exit_from_malloc_PCB;
     //初始处于无信号状态，须读操作释放才处于有信号状态
@@ -181,12 +182,12 @@ exit_from_malloc_PCB:
 //      len，读出长度
 //返回: 总是返回len
 //-----------------------------------------------------------------------------
-ptu32_t Pipe_DevRead(tagDevHandle pipe_dev,ptu32_t dst_buf,
+ptu32_t Pipe_DevRead(struct DjyDevice * pipe_dev,ptu32_t dst_buf,
                                         ptu32_t len,u32 timeout)
 {
-    struct tagPipePCB *pipe;
+    struct PipePCB *pipe;
     u32 completed=0,temp;
-    pipe = (struct tagPipePCB *)Driver_DevGetMyTag(pipe_dev);
+    pipe = (struct PipePCB *)Driver_DevGetMyTag(pipe_dev);
     if(len > Ring_Capacity(&pipe->pipe_buf))    //一次读取数据不能超过管道容量
         return 0;
     temp = Ring_Check(&pipe->pipe_buf);
@@ -219,12 +220,12 @@ ptu32_t Pipe_DevRead(tagDevHandle pipe_dev,ptu32_t dst_buf,
 //      len，写入长度
 //返回: 实际写入数据量
 //-----------------------------------------------------------------------------
-u32 Pipe_DevWrite(tagDevHandle pipe_dev,ptu32_t src_buf,
+u32 Pipe_DevWrite(struct DjyDevice * pipe_dev,ptu32_t src_buf,
                             ptu32_t len,u32 timeout)
 {
-    struct tagPipePCB *pipe;
+    struct PipePCB *pipe;
     u32 completed = 0, temp;
-    pipe = (struct tagPipePCB *)Driver_DevGetMyTag(pipe_dev);
+    pipe = (struct PipePCB *)Driver_DevGetMyTag(pipe_dev);
     temp = Ring_Check(&pipe->pipe_buf);
     while(1)
     {
@@ -260,7 +261,7 @@ u32 Pipe_DevWrite(tagDevHandle pipe_dev,ptu32_t src_buf,
 //----控制管道-----------------------------------------------------------------
 //功能: 空函数
 //-----------------------------------------------------------------------------
-ptu32_t Pipe_DevCtrl(tagDevHandle pipe_dev,u32 cmd,
+ptu32_t Pipe_DevCtrl(struct DjyDevice * pipe_dev,u32 cmd,
                         u32 data1,u32 data2)
 {
     return 0;
@@ -270,11 +271,11 @@ ptu32_t Pipe_DevCtrl(tagDevHandle pipe_dev,u32 cmd,
 //参数：mutex，被删除的管道设备
 //返回：无
 //-----------------------------------------------------------------------------
-bool_t Pipe_Delete(tagDevHandle pipe_dev)
+bool_t Pipe_Delete(struct DjyDevice * pipe_dev)
 {
-    struct tagPipePCB *pipe;
-    struct tagSemaphoreLCB *pipe_left_semp,*pipe_right_semp;
-    pipe = (struct tagPipePCB *)Driver_DevGetMyTag(pipe_dev);
+    struct PipePCB *pipe;
+    struct SemaphoreLCB *pipe_left_semp,*pipe_right_semp;
+    pipe = (struct PipePCB *)Driver_DevGetMyTag(pipe_dev);
     pipe_left_semp = pipe_dev->left_semp;
     pipe_right_semp = pipe_dev->right_semp;
     if(Driver_DevDeleteDevice(pipe_dev))
@@ -294,10 +295,10 @@ bool_t Pipe_Delete(tagDevHandle pipe_dev)
 //参数：pipe_dev，被查询的管道句柄
 //返回：管道容量
 //-----------------------------------------------------------------------------
-u32 Pipe_Capacity(tagDevHandle pipe_dev)
+u32 Pipe_Capacity(struct DjyDevice * pipe_dev)
 {
-    struct tagPipePCB *pipe;
-    pipe = (struct tagPipePCB *)Driver_DevGetMyTag(pipe_dev);
+    struct PipePCB *pipe;
+    pipe = (struct PipePCB *)Driver_DevGetMyTag(pipe_dev);
     return Ring_Capacity(&pipe->pipe_buf);
 }
 
@@ -306,10 +307,10 @@ u32 Pipe_Capacity(tagDevHandle pipe_dev)
 //参数：pipe_dev，被查询的管道句柄
 //返回：管道中的数据量
 //-----------------------------------------------------------------------------
-u32 Pipe_Check(tagDevHandle pipe_dev)
+u32 Pipe_Check(struct DjyDevice * pipe_dev)
 {
-    struct tagPipePCB *pipe;
-    pipe = (struct tagPipePCB *)Driver_DevGetMyTag(pipe_dev);
+    struct PipePCB *pipe;
+    pipe = (struct PipePCB *)Driver_DevGetMyTag(pipe_dev);
     return Ring_Check(&pipe->pipe_buf);
 }
 

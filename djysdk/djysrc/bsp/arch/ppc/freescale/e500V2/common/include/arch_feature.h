@@ -75,8 +75,6 @@ extern "C" {
 #define CN_EMPTY_UP_STACK       3       //向上生长的空栈
 #define CN_STACK_TYPE           CN_FULL_DOWN_STACK
 
-#define CN_REGISTER_STACK       0x400
-
 //定义一些与对齐相关的宏
 #define CN_MEM_ALIGN            1    //如果目标系统没有对齐要求，改为0
 #define CN_ALIGN_SIZE           16   //E500V2 16字节对齐

@@ -60,12 +60,16 @@
 //   修改说明: 原始版本
 //------------------------------------------------------
 #include    "gdd.h"
-#include    "../include/gdd_private.h"
+#include    <gui/gdd/gdd_private.h>
+#include    <widget.h>
 
-/*============================================================================*/
 
-
-static  void checkbox_paint(MSG *pMsg)
+//----CheckBox绘制函数----------------------------------------------------------
+//功能：这是CheckBox控件的MSG_PAINT消息响应函数
+//参数：pMsg，消息指针
+//返回：固定true
+//-----------------------------------------------------------------------------
+static  bool_t CheckBox_Paint(struct WindowMsg *pMsg)
 {
     HWND hwnd;
     HDC hdc;
@@ -86,8 +90,6 @@ static  void checkbox_paint(MSG *pMsg)
 
         if(hwnd->Style&CBS_SELECTED)
         {
-
-
             CopyRect(&rc,&rc0);
             rc.right =rc.left+RectH(&rc0);
 
@@ -140,66 +142,83 @@ static  void checkbox_paint(MSG *pMsg)
         EndPaint(hwnd,hdc);
     }
 
+    return true;
 
 }
 
-u32 checkbox_proc(MSG *pMsg)
+
+//----左键选中响应函数---------------------------------------------------------
+//功能：略
+//参数：pMsg，消息指针
+//返回：固定true
+//-----------------------------------------------------------------------------
+static bool_t CheckBoxL_Down(struct WindowMsg *pMsg)
 {
-    HWND hwnd;
-    RECT rc;
+     HWND hwnd;
+     hwnd =pMsg->hwnd;
+     if(hwnd->Style&CBS_SELECTED)
+     {
+        hwnd->Style &= ~CBS_SELECTED;
+//      InvalidateWindow(hwnd,FALSE);   //父窗口消息处理可能导致按钮被删除，
+//                                      //InvalidateWindow不能在SendMessage之后调用
+        SendMessage(Gdd_GetWindowParent(hwnd),MSG_NOTIFY,(CBN_UNSELECTED<<16)|(hwnd->WinId),(ptu32_t)hwnd);
+     }
+     else
+     {
+        hwnd->Style |=  CBS_SELECTED;
+        PostMessage(Gdd_GetWindowParent(hwnd),MSG_NOTIFY,(CBN_SELECTED<<16)|(hwnd->WinId),(ptu32_t)hwnd);
+     }
 
-    hwnd =pMsg->hwnd;
-    switch(pMsg->Code)
-    {
-        case    MSG_CREATE:
-                GetWindowRect(hwnd,&rc);
-                printf("checkbox[%04XH]: MSG_CREATE.\r\n",hwnd->WinId);
-                return 1;
-                ////
-        case    MSG_LBUTTON_DOWN:
-                {
-                    if(hwnd->Style&CBS_SELECTED)
-                    {
-                        hwnd->Style &= ~CBS_SELECTED;
-                        SendMessage(GetParent(hwnd),MSG_NOTIFY,(CBN_UNSELECTED<<16)|(hwnd->WinId),(ptu32_t)hwnd);
-
-                    }
-                    else
-                    {
-                        hwnd->Style |=  CBS_SELECTED;
-                        SendMessage(GetParent(hwnd),MSG_NOTIFY,(CBN_SELECTED<<16)|(hwnd->WinId),(ptu32_t)hwnd);
-
-                    }
-                    InvalidateWindow(hwnd);
-                }
-                break;
-                ////
-        case    MSG_LBUTTON_UP:
-                {
-//                    int x,y;
-//                    x =LO16(pMsg->Param2);
-//                    y =HI16(pMsg->Param2);
-
-                //  InvalidateWindow(hwnd);
-
-                }
-                break;
-                ////
-
-        case    MSG_PAINT:
-                checkbox_paint(pMsg);
-                return 1;
-                ////
-        case    MSG_DESTROY:
-                printf("checkbox[%04XH]: MSG_DESTROY.\r\n",hwnd->WinId);
-                return 1;
-                ////
-
-        default:
-                return DefWindowProc(pMsg);
-
-    }
-    return 0;
+     InvalidateWindow(hwnd,FALSE);   //父窗口消息处理可能导致按钮被删除，
+                                     //InvalidateWindow不能在SendMessage之后调用
+     return true;
 
 }
+
+//----左键不选中响应函数---------------------------------------------------------
+//功能：略
+//参数：pMsg，消息指针
+//返回：固定true
+//-----------------------------------------------------------------------------
+static bool_t CheckBoxL_Up(struct WindowMsg *pMsg)
+{
+     return true;
+}
+
+//默认复选框消息处理函数表，处理用户函数表中没有处理的消息。
+static struct MsgProcTable s_gCheckBoxMsgProcTable[] =
+{
+    {MSG_LBUTTON_DOWN,CheckBoxL_Down},
+    {MSG_LBUTTON_UP,CheckBoxL_Up},
+    {MSG_PAINT,CheckBox_Paint}
+};
+
+static struct MsgTableLink  s_gCheckBoxMsgLink;
+
+HWND CreateCheckBox(  const char *Text,u32 Style,
+                    s32 x,s32 y,s32 w,s32 h,
+                    HWND hParent,u32 WinId,void *pdata,
+                    struct MsgTableLink *UserMsgTableLink)
+{
+    WINDOW *pGddWin=NULL;
+    struct MsgTableLink *Current;
+    if(UserMsgTableLink != NULL)
+    {
+        Current = UserMsgTableLink;
+        while(Current->LinkNext != NULL)
+            Current = Current->LinkNext;
+        Current->LinkNext = &s_gCheckBoxMsgLink;
+        Current = UserMsgTableLink;
+    }
+    else
+        Current = &s_gCheckBoxMsgLink;
+    s_gCheckBoxMsgLink.LinkNext = NULL;
+    s_gCheckBoxMsgLink.MsgNum = sizeof(s_gCheckBoxMsgProcTable) / sizeof(struct MsgProcTable);
+    s_gCheckBoxMsgLink.myTable = (struct MsgProcTable *)&s_gCheckBoxMsgProcTable;
+    pGddWin=CreateWindow(Text,WS_CHILD|Style,x,y,w,h,hParent,WinId,CN_WINBUF_PARENT,pdata,Current);
+    return pGddWin;
+}
+
+
+
 /*============================================================================*/

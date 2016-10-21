@@ -54,14 +54,12 @@
 #include "stddef.h"
 #include "int.h"
 #include "systime.h"
-#include "time.h"
-
-s64 __DjyGetTime(void);
+#include <sys/time.h>
 
 static s64               sgRtcTimeSet;             //手动设置或者系统从RTC设备中读取的RTC时间
 static s64               sgRtcUpdateTime2SysTime;  //读取或者设置RTC时间时系统的运行时刻
-static __rtcdev_gettime  fnRtcGetTime = NULL;      //获取RTC设备RTC时间
-static __rtcdev_settime  fnRtcSetTime = NULL;      //设置RTC设备RTC时间
+static fntRtc_GetTime    fnRtcGetTime = NULL;      //获取RTC设备RTC时间
+static fntRtc_SetTime    fnRtcSetTime = NULL;      //设置RTC设备RTC时间
 // =============================================================================
 // 函数功能：Rtc_RegisterDev
 //        注册RTC设备
@@ -72,18 +70,23 @@ static __rtcdev_settime  fnRtcSetTime = NULL;      //设置RTC设备RTC时间
 // 返回值  ：true 注册成功  false注册失败
 // 说明：必须同时提供两个才能注册成功，即使不提供RTC设置功能，也应该设置为空函数，返回false
 // =============================================================================
-bool_t Rtc_RegisterDev(__rtcdev_gettime gettimefunc,\
-                       __rtcdev_settime settimefunc)
+bool_t Rtc_RegisterDev(fntRtc_GetTime fnGetTime,
+                       fntRtc_SetTime fnSetTime)
 {
     bool_t result = false;
 
-    if((NULL != gettimefunc) && (NULL != settimefunc))
+    if(NULL != fnGetTime)
     {
-        fnRtcGetTime = gettimefunc;
-        fnRtcSetTime = settimefunc;
-
+        fnRtcGetTime = fnGetTime;
         result = true;
     }
+
+    if( (NULL != fnSetTime))
+    {
+        fnRtcSetTime = fnSetTime;
+        result = true;
+    }
+    
     return result;
 }
 
@@ -104,7 +107,7 @@ s64 __Rtc_Time(s64 *rtctime)
     s64 systime;
     atom_low_t atom;
 
-    systime = DjyGetTime();
+    systime = DjyGetSysTime();
 
     if((sgRtcUpdateTime2SysTime/CN_RTC_UNIT_SECOND) ==(systime/CN_RTC_UNIT_SECOND))
     {
@@ -190,7 +193,7 @@ s64 __Rtc_TimeUs(s64 *rtctime)
     s64 systime;
     atom_low_t atom;
 
-    systime = DjyGetTime();
+    systime = DjyGetSysTime();
     //we'd better to get the RTC time now
     if(NULL == fnRtcGetTime)
     {
@@ -237,7 +240,7 @@ s64 __Rtc_TimeUs(s64 *rtctime)
 #endif
         }
     }
-    result = result;
+//    result = result;
     if(NULL != rtctime)
     {
         *rtctime = result;
@@ -260,7 +263,7 @@ bool_t __Rtc_SetTime(s64 rtctime)
 
     s64 systime;
 
-    systime = DjyGetTime();
+    systime = DjyGetSysTime();
 
     if(NULL == fnRtcSetTime)
     {

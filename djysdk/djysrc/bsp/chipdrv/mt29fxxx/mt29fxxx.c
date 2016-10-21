@@ -68,7 +68,7 @@ static u32 u32g_sectors_per_block; //每块包含的扇区数
 static u32 u32g_sector_size;      //扇区数尺寸
 static u16 u16g_oob_size;
 
-static  struct tagFlashChip tg_micron_nand;    //芯片
+static  struct FlashChip tg_micron_nand;    //芯片
 
 struct nand_table tg_nand_table[] =
 {
@@ -276,7 +276,7 @@ bool_t __wait_ready_nand_slow(uint16_t wait_time)
 
     u32 timestart,timeend;
 
-    timestart = (u32)DjyGetTime( );
+    timestart = (u32)DjyGetSysTime( );
     timeend = timestart;
 
     while ( (timeend - timestart) < wait_time)
@@ -285,7 +285,7 @@ bool_t __wait_ready_nand_slow(uint16_t wait_time)
        {
           break;
        }
-      timeend = (u32)DjyGetTime( );
+      timeend = (u32)DjyGetSysTime( );
     }
 
     if( (timeend - timestart) >= wait_time)

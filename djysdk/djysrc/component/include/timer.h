@@ -60,30 +60,30 @@ extern "C" {
 #endif
 
 #include "stdint.h"
-#include "timer_hard.h"
 
 #define CN_TIMER_SOURCE_TICK   0
 #define CN_TIMER_SOURCE_HARD   1
 
-struct __tagTimerSoft;
-typedef void (*fnTimerSoftIsr)(struct __tagTimerSoft *timer);
-//timersoft的数据结构
-typedef struct __tagTimerSoft
+struct TimerSoft;
+typedef struct TimerSoft tagTimerSoft;
+typedef void (*fnTimerSoftIsr)(struct TimerSoft *timer);
+
+enum TimerSoftCmdCode
 {
-    struct __tagTimerSoft  *pre;
-    struct __tagTimerSoft  *nxt;
-    char                   *name;
-    u32                     cycle;       //定时器周期 (单位是微秒)
-    fnTimerSoftIsr          isr;         //定时器定时时间节点钩子函数
-    u32                     stat;        //定时器状态标志
-    s64                     deadline;    //定时器定时时间(单位是微秒)
-}tagTimerSoft;
-tagTimerSoft*  TimerSoft_Create_s(const char *name, u32 cycle,fnTimerSoftIsr isr,\
-                                  tagTimerSoft *timer);
+    EN_TIMER_SOFT_START,     //使能计数，inoutpara无意义
+    EN_TIMER_SOFT_PAUSE,     //停止计数，inoutpara无意义
+    EN_TIMER_SOFT_SETCYCLE,  //设置周期，inoutpara为u32,待设置的周期（uS数）
+    EN_TIMER_SOFT_SETRELOAD, //reload模式,true代表自动reload
+};
+
+tagTimerSoft*  TimerSoft_Create_s(tagTimerSoft *timer,const char *name, 
+                                  u32 cycle, fnTimerSoftIsr isr);
 tagTimerSoft*  TimerSoft_Delete_s(tagTimerSoft* timer);
 tagTimerSoft*  TimerSoft_Create(const char *name,u32 cycle,fnTimerSoftIsr isr);
 bool_t TimerSoft_Delete(tagTimerSoft* timer);
 bool_t TimerSoft_Ctrl(tagTimerSoft* timer,u32 opcode, ptu32_t para);
+char *TimerSoft_GetName(tagTimerSoft* timer);
+ptu32_t TimerSoft_GetTag(tagTimerSoft* timer);
 ptu32_t ModuleInstall_TimerSoft(ptu32_t para);
 
 #ifdef __cplusplus

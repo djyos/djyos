@@ -50,19 +50,50 @@
  *      Author: Administrator
  */
 
-#include "stdint.h"
-#include "systime.h"
+#include <stdint.h>
+#include <stddef.h>
+#include <stdio.h>
 
-extern ptu32_t MainTestEntry(void);
-ptu32_t djy_main(void)
+#include <os.h>
+#include "cpu_peri.h"
+
+#define GPIO_PIN_MASK            0x1Fu
+#define GPIO_PIN_NO(x)           (((1)<<(x & GPIO_PIN_MASK)))
+
+ptu32_t Led1Task(void)
 {
- //   MainTestEntry();
+    PORT_MuxConfig(PORT_PORT_A,PORT_PIN(28),PORT_PINMUX_GPIO);
+    PORT_MuxConfig(PORT_PORT_A,PORT_PIN(29),PORT_PINMUX_GPIO);
+
+    GPIO_PinConfig(GPIO_PORT_A,GPIO_PIN(28),GPIO_FUNC_OUTPUT);
+    GPIO_PinConfig(GPIO_PORT_A,GPIO_PIN(29),GPIO_FUNC_OUTPUT);
 
     while(1)
     {
-    	Djy_EventDelay(500*mS);
-        GDD_Demo();
+        GPIO_PinToggle(GPIO_PORT_A,GPIO_PIN(28));
+        Djy_EventDelay(1000000);
+    }
+    return 0;
+}
 
+void LedTest(void)
+{
+    uint16_t evtt_led;
+    evtt_led = Djy_EvttRegist(EN_CORRELATIVE,CN_PRIO_RRS,0,0,
+                                Led1Task,NULL,0x300,"led1 blink");
+
+    Djy_EventPop(evtt_led,NULL,0,NULL,0,0);
+}
+
+//extern void gdd_test(void);
+ptu32_t djy_main(void)
+{
+    printf("%s:welcom to APP  djyos--k70\n\r",__FUNCTION__);
+    LedTest();
+//    gdd_test();
+    while(1)
+    {
+    	Djy_EventDelay(500*mS);
     }
     return 0;
 }

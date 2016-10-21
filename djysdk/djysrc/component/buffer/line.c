@@ -68,7 +68,7 @@
 //      len,缓冲区长度.单位是字节数
 //返回: 无
 //-----------------------------------------------------------------------------
-void Line_Init(struct tagLineBuf *line, u8 *buf, u32 len)
+void Line_Init(struct LineBuf *line, u8 *buf, u32 len)
 {
     line->buf = buf;
     line->limit= len;
@@ -80,7 +80,7 @@ void Line_Init(struct tagLineBuf *line, u8 *buf, u32 len)
 //参数: line,目标线性缓冲区结构指针
 //返回: 缓冲区容量，就是调用line_init时使用的len参数。
 //-----------------------------------------------------------------------------
-u32 Line_Capacity(struct tagLineBuf *line)
+u32 Line_Capacity(struct LineBuf *line)
 {
     return line->limit;
 }
@@ -91,7 +91,7 @@ u32 Line_Capacity(struct tagLineBuf *line)
 //      len,退回的数据数量
 //返回: 实际退回的数据量
 //------------------------------------------------------------------------------
-u32 Line_SkipTail(struct tagLineBuf *line,u32 len)
+u32 Line_SkipTail(struct LineBuf *line,u32 len)
 {
     u32 result;
     if(line->current > len)
@@ -114,7 +114,7 @@ u32 Line_SkipTail(struct tagLineBuf *line,u32 len)
 //      len,待写入的数据长度.单位是字节数
 //返回: 实际写入的字节数,如果缓冲区有足够的空间,=len
 //-----------------------------------------------------------------------------
-u32 Line_Write(struct tagLineBuf *line,u8 *buffer,u32 len)
+u32 Line_Write(struct LineBuf *line,u8 *buffer,u32 len)
 {
     u32    wr_len;
     atom_low_t  atom_bak;
@@ -136,7 +136,7 @@ u32 Line_Write(struct tagLineBuf *line,u8 *buffer,u32 len)
 //      buffer,接收数据的缓冲区指针
 //返回: 实际读出的字节数
 //-----------------------------------------------------------------------------
-u32 Line_Read(struct tagLineBuf *line,u8 *buffer)
+u32 Line_Read(struct LineBuf *line,u8 *buffer)
 {
     u32    wr_len;
     wr_len = line->current;
@@ -155,7 +155,7 @@ u32 Line_Read(struct tagLineBuf *line,u8 *buffer)
 //      2、用户想自己动手访问该缓冲区，这不是一个明智的选择，有破坏模块独立性
 //         的嫌疑，这时候，使用者应该完全明白自己在干什么!
 //-----------------------------------------------------------------------------
-u8 *Line_GetBuf(struct tagLineBuf *line)
+u8 *Line_GetBuf(struct LineBuf *line)
 {
     return line->buf;
 }
@@ -164,7 +164,7 @@ u8 *Line_GetBuf(struct tagLineBuf *line)
 //参数: line,目标线性缓冲区指针.
 //返回: 缓冲区中的数据量
 //-----------------------------------------------------------------------------
-u32    Line_Check(struct tagLineBuf *line)
+u32    Line_Check(struct LineBuf *line)
 {
     return line->current;
 }
@@ -174,7 +174,7 @@ u32    Line_Check(struct tagLineBuf *line)
 //参数: line,目标线性缓冲区指针.
 //返回: 空则返回true,非空返回false
 //-----------------------------------------------------------------------------
-bool_t   Line_IsEmpty(struct tagLineBuf *line)
+bool_t   Line_IsEmpty(struct LineBuf *line)
 {
     return (line->current ==0)? true:false;
 }
@@ -184,7 +184,7 @@ bool_t   Line_IsEmpty(struct tagLineBuf *line)
 //参数: line,目标线性缓冲区指针.
 //返回: 满则返回true,非满返回false
 //-----------------------------------------------------------------------------
-bool_t   Line_IsFull(struct tagLineBuf *line)
+bool_t   Line_IsFull(struct LineBuf *line)
 {
     return (line->current == line->limit)? true:false;
 }
@@ -194,7 +194,7 @@ bool_t   Line_IsFull(struct tagLineBuf *line)
 //参数: line,目标线性缓冲区指针.
 //返回: 无
 //-----------------------------------------------------------------------------
-void    Line_Flush(struct tagLineBuf *line)
+void    Line_Flush(struct LineBuf *line)
 {
     line->current = 0;
 }
@@ -205,7 +205,7 @@ void    Line_Flush(struct tagLineBuf *line)
 //      c,需查找的字符
 //返回: c出现的位置,如果没有出现则返回 CN_LIMIT_UINT32
 //-----------------------------------------------------------------------------
-u32 Line_SearchCh(struct tagLineBuf *line, char c)
+u32 Line_SearchCh(struct LineBuf *line, char c)
 {
     u32    i;
     u8 *buf = line->buf;
@@ -225,7 +225,7 @@ u32 Line_SearchCh(struct tagLineBuf *line, char c)
 //返回: string出现的位置相对offset_read的偏移量,如果没有出现返回 CN_LIMIT_UINT32
 //备注: 这个功能可能比较常用,所以在编写时注意了速度优化,但却使代码量大增.
 //-----------------------------------------------------------------------------
-u32 Line_SearchStr(struct tagLineBuf *line, char *string,u32 str_len)
+u32 Line_SearchStr(struct LineBuf *line, char *string,u32 str_len)
 {
     u32 i,j;
     bool_t next;

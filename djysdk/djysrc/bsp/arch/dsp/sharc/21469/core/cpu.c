@@ -58,7 +58,7 @@
 //   修改说明: 原始版本
 //------------------------------------------------------
 #include "stdint.h"
-#include "core-cfg.h"
+#include "board-config.h"
 #include "stdlib.h"
 #include "align.h"
 #include "cpu_peri.h"
@@ -86,35 +86,33 @@ u32 volatile  core_time;
 
 void SetDelayHandler(int sig_int);
 
-u32 __DjyIsrTick(ufast_t line);
+u32 __DjyIsrTick(ptu32_t line);
 //----创建线程-----------------------------------------------------------------
 //功能：为事件类型创建伪虚拟机，初始化上下文环境，安装执行函数，构成完整线程
 //参数：evtt_id，待创建的线程所服务的事件类型id
 //返回：新创建的线程的虚拟机指针
 //注: 移植敏感函数
 //-----------------------------------------------------------------------------
-struct  tagThreadVm *__CreateThread(struct  tagEventType *evtt,u32 *stack_size)
+struct ThreadVm *__CreateThread(struct EventType *evtt,u32 *stack_size)
 {
-    struct  tagThreadVm  *result;
+    struct ThreadVm  *result;
     ptu32_t  len;
 
     //计算虚拟机栈:线程+最大单个api需求的栈
-    len = evtt->stack_size+CN_KERNEL_STACK+sizeof(struct  tagThreadVm);
+    len = evtt->stack_size;
     //栈顶需要对齐，malloc函数能保证栈底是对齐的，对齐长度可以使栈顶对齐
     len = align_up_sys(len);
-    result=(struct  tagThreadVm  *)__MallocStack(len);
+    result=(struct ThreadVm  *)__MallocStack(len);
     *stack_size = len;
     if(result==NULL)
     {
         Djy_SaveLastError(EN_MEM_TRIED);   //内存不足，返回错误
         return result;
     }
-#if CN_CFG_STACK_FILL != 0
-    memset(result,CN_CFG_STACK_FILL,len);
-#endif
+    memset(result,'d',len);
     result->stack_top = (u32*)((ptu32_t)result+len); //栈顶地址，移植敏感
     result->next = NULL;
-    result->stack_size = len - sizeof(struct tagThreadVm); //保存栈深度
+    result->stack_size = len - sizeof(struct ThreadVm); //保存栈深度
     result->host_vm = NULL;
     //复位虚拟机并重置线程
     __asm_reset_thread(evtt->thread_routine,result);
@@ -186,7 +184,7 @@ void __DjySetDelay(void)
 //        compatibal with th old while use line
 //-----------------------------------------------------------------------------
 
-void SetDelayHandler(int sig_int)
+void SetDelayHandler(ptu32_t sig_int)
 {
     //todo: 优化时加上实际ticks数
     uf_delay_counter++;
@@ -196,7 +194,7 @@ void SetDelayHandler(int sig_int)
 
 
 
-u32 __DjyIsrTick(ufast_t line)
+u32 __DjyIsrTick(ptu32_t line)
 {
     Djy_IsrTick(1);
     return 0;
@@ -215,6 +213,7 @@ u32 __DjyIsrTick(ufast_t line)
 //-----------------------------------------------------------------------------
 void __DjyInitTick(void)
 {
+    Int_Register(cn_int_line_TMZLI);
     Int_CutLine(cn_int_line_TMZLI);
     Int_IsrConnect(cn_int_line_TMZLI,__DjyIsrTick);  //将中断ISR与中断线相关联
     Int_RestoreAsynLine(cn_int_line_TMZLI);
@@ -231,9 +230,9 @@ void __DjyInitTick(void)
 //      周期,需要使用原子操作。
 //参数：无
 //返回：当前时钟
-//说明: 这是一个桩函数,被rtc.c文件的 DjyGetTime 函数调用
+//说明: 这是一个桩函数,被rtc.c文件的 DjyGetSysTime 函数调用
 //-----------------------------------------------------------------------------
-s64 __DjyGetTime(void)
+s64 __DjyGetSysTime(void)
 {
     s64 time;
     u32 narrow_cfg_mclk;
@@ -256,7 +255,7 @@ s64 __DjyGetTime(void)
 // =============================================================================
 bool_t DjyPoweronTime(s64 *time)
 {
-    *time = DjyGetTime();
+    *time = DjyGetSysTime();
     return true;
 }
 

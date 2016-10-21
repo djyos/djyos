@@ -1,0 +1,2 @@
+待解决的问题：当文件柜不需要ecc校验时，会导致fdt表也没有ecc校验，特别是，查是否需擦除时不用ecc，但写的时候又用了ecc，导致严重出错。
+DFFSD_item_traversal_son函数中current_file的内存管理，须好好整一下。

@@ -61,21 +61,42 @@
 //------------------------------------------------------
 #include "stdint.h"
 #include "stddef.h"
-#include "charset.h"
-#include "loc_string.h"
+#include "string.h"
+#include <charset.h>
+#include <loc_string.h>
+
+//----取串结束符长度-------------------------------------------------------------
+//功能: 不同的字符集，字符串结束符的长度，并不一定是1个字节的0。
+//参数: locale，字符集，NULL表示当前字符集
+//返回: 串结束符长度。
+//-----------------------------------------------------------------------------
+s32 GetEOC_Size (struct Charset* locale)
+{
+    struct Charset* cur_enc;
+
+    if(locale == NULL)
+    {
+        cur_enc = Charset_NlsGetCurCharset();
+        if(cur_enc == NULL)
+            return 0;
+    }
+    else
+        cur_enc = locale;
+
+    return cur_enc->EOC_Size;
+}
 
 //----计算字符长度-------------------------------------------------------------
 //功能: 计算一个当前字符集的多字节字符的长度(字节数)。
 //参数: mbs，保存多字节字符的缓冲区指针
 //      n，最大检测长度，
 //返回: 0: mbs是NULL指针或者指向空串。
-//      -1:mbs指向的不是合法多字节字符，或者长度n内未能检测到完整多字节字符
-//      其他:mbs缓冲区内第一个完整多字节字符的长度。
+//      -1:mbs指向的不是合法多字节字符
+//      其他:mbs指向的多字节字符字节数。
 //-----------------------------------------------------------------------------
 s32 mblen  (const char* mbs, u32 n)
 {
-    u32 wc;
-    struct tagCharset* cur_enc;
+    struct Charset* cur_enc;
 
     if(mbs == NULL)
         return 0;
@@ -84,26 +105,181 @@ s32 mblen  (const char* mbs, u32 n)
     if(cur_enc == NULL)
         return 0;
 
-    return cur_enc->mb_to_ucs4(&wc,mbs,n);
+    return cur_enc->MbToUcs4(NULL,mbs,n);
+}
+
+//----计算字符串长度-----------------------------------------------------------
+//功能: 计算一个当前字符集的字符串的长度(字节数)。其结果，绝大多数情况下，与
+//      strlen函数结果相同，非以单字节00结束的字符集中，与strlen不同
+//参数: mbs，保存多字节字符串的缓冲区指针
+//      n，最大检测长度，
+//返回: 0: mbs是NULL指针或者指向空串。
+//      -1:长度n内包含非法多字节字符
+//      其他：多字节字符串包含的字节数
+//-----------------------------------------------------------------------------
+s32 mbslen  (const char* mbs, u32 n)
+{
+    u32 len = 0,charlen;
+    struct Charset* cur_enc;
+
+    if(mbs == NULL)
+        return 0;
+
+    cur_enc = Charset_NlsGetCurCharset();
+    if(cur_enc == NULL)
+        return 0;
+
+    //返回0表示遇到串结束符
+    if(cur_enc->EOC_Size == 1)
+        return strlen(mbs);
+    else
+    {
+        while( (len < n)  || (n == -1) )
+        {
+            charlen = cur_enc->MbToUcs4(NULL,mbs,n);
+            if(charlen == 0)
+                break;
+            else  if(charlen == -1)
+                len = -1;
+            else
+                len += charlen;
+        }
+    }
+    return len;
+}
+
+//----查找一个字符-------------------------------------------------------------
+//功能: 从默认字符集的字符串中，查找指定字符的位置，并计算比较了多少字符（不
+//      被查找的字符），功能与strchr类似。
+//参数: mbs，保存多字节字符的缓冲区指针
+//      mbchar，待查找的字符指针
+//      count，用于返回被查找的字符数，非字节数数
+//返回: 指向被查找的字符位置的指针，没找到则返回NULL。
+//-----------------------------------------------------------------------------
+char * mbstrchr( char const *mbs, char const *mbchar, s32 *count )
+{
+    struct Charset* cur_enc;
+    char *result = mbs;
+    s32 len;
+    s32 num = 0;
+    if((mbs == NULL) || (mbchar == NULL) || (count == NULL) )
+        return NULL;
+    cur_enc = Charset_NlsGetCurCharset();
+    if(cur_enc == NULL)
+        return 0;
+    if(cur_enc->max_len == 1)
+    {
+        result = strchr(mbs, mbchar);
+        if(result != NULL)
+            num = (s32)(result - mbs);
+    }
+    else
+    {
+        while(1)
+        {
+            len = (cur_enc->GetOneMb(result, -1));
+            if(len == -1)
+            {
+                result = NULL;      //遇到非法字符
+                break;
+            }
+            else
+            {
+                if(memcmp(result, mbchar, len) == 0)	//找到字符
+                {
+                    break;
+                }
+                else if(memcmp(result, "\0", cur_enc->EOC_Size) == 0) //没找到，串结束
+                {
+                	result = NULL;
+                    break;
+                }
+                else
+                {
+                    result += len;
+                    num ++;
+                }
+            }
+        }
+    }
+    *count = num;
+    return result;
+
 }
 
 //----计算字符长度-------------------------------------------------------------
 //功能: 计算一个指定字符集多字节字符的长度(字节数)。
 //参数: mbs，保存多字节字符的缓冲区指针
 //      n，最大检测长度，
+//      locale，指定的字符集
 //返回: 0: mbs是NULL指针或者指向空串。
 //      -1:mbs指向的不是合法多字节字符，或者长度n内未能检测到完整多字节字符
 //      其他:mbs缓冲区内第一个完整多字节字符的长度。
 //-----------------------------------------------------------------------------
-s32 mblen_l(const char* mbs, u32 n, struct tagCharset* locale)
+s32 mblen_l(const char* mbs, u32 n, struct Charset* locale)
 {
-    u32 wc;
-
-    if((mbs == NULL) || (locale == NULL))
+    struct Charset* cur_enc;
+    if(mbs == NULL)
         return 0;
 
-    return locale->mb_to_ucs4(&wc,mbs,n);
+    if(locale == NULL)
+    {
+        cur_enc = Charset_NlsGetCurCharset();
+        if(cur_enc == NULL)
+            return 0;
+    }
+    else
+        cur_enc = locale;
+
+    return cur_enc->MbToUcs4(NULL,mbs,n);
 }
+
+//----计算字符串长度-----------------------------------------------------------
+//功能: 计算一个指定字符集的字符串的长度(字节数)。其结果，绝大多数情况下，与
+//      strlen函数结果相同，非以单字节00结束的字符集中，与strlen不同
+//参数: mbs，保存多字节字符串的缓冲区指针
+//      n，最大检测长度，
+//      locale，指定的字符集
+//返回: 0: mbs是NULL指针或者指向空串。
+//      -1:长度n内包含非法多字节字符
+//      其他：多字节字符串包含的字节数
+//-----------------------------------------------------------------------------
+s32 mbslen_l  (const char* mbs, u32 n, struct Charset* locale)
+{
+    u32 len = 0,charlen;
+    struct Charset* cur_enc;
+
+    if(mbs == NULL)
+        return 0;
+
+    if(locale == NULL)
+    {
+        cur_enc = Charset_NlsGetCurCharset();
+        if(cur_enc == NULL)
+            return 0;
+    }
+    else
+        cur_enc = locale;
+
+    //返回0表示遇到串结束符
+    if(cur_enc->EOC_Size == 1)
+        return strlen(mbs);
+    else
+    {
+        while( (len < n)  || (n == -1) )
+        {
+            charlen = cur_enc->MbToUcs4(NULL,mbs,n);
+            if(charlen == 0)
+                break;
+            else  if(charlen == -1)
+                len = -1;
+            else
+                len += charlen;
+        }
+    }
+    return len;
+}
+
 
 //----多字节字符转为ucs4字符---------------------------------------------------
 //功能: 把一个当前字符集的多字节字符转换为ucs4字符。
@@ -116,7 +292,7 @@ s32 mblen_l(const char* mbs, u32 n, struct tagCharset* locale)
 //-----------------------------------------------------------------------------
 s32 mbtowc(u32* pwc, const char* mbs, u32 n)
 {
-    struct tagCharset* cur_enc;
+    struct Charset* cur_enc;
 
     if((pwc == NULL) || (mbs == NULL))
         return 0;
@@ -124,7 +300,7 @@ s32 mbtowc(u32* pwc, const char* mbs, u32 n)
     cur_enc = Charset_NlsGetCurCharset();
     if(cur_enc == NULL)
         return 0;
-    return cur_enc->mb_to_ucs4(pwc,mbs,n);
+    return cur_enc->MbToUcs4(pwc,mbs,n);
 }
 
 //-----------------------------------------------------------------------------
@@ -152,12 +328,12 @@ s32 btowc(char c)
 //      -1:mbs指向的不是合法多字节字符，或者长度n内未能检测到完整多字节字符
 //      其他:mbs缓冲区内第一个完整多字节字符的长度。
 //-----------------------------------------------------------------------------
-s32 mbtowc_l(u32* pwc, const char* mbs, u32 n, struct tagCharset* locale)
+s32 mbtowc_l(u32* pwc, const char* mbs, u32 n, struct Charset* locale)
 {
     if((pwc == NULL) || (mbs == NULL) || (locale == NULL))
         return 0;
 
-    return locale->mb_to_ucs4(pwc,mbs,n);
+    return locale->MbToUcs4(pwc,mbs,n);
 }
 
 //----多字节字符串转为ucs4串---------------------------------------------------
@@ -172,7 +348,7 @@ s32 mbtowc_l(u32* pwc, const char* mbs, u32 n, struct tagCharset* locale)
 //-----------------------------------------------------------------------------
 s32 mbstowcs(u32* pwcs, const char* mbs, u32 n)
 {
-    struct tagCharset* cur_enc;
+    struct Charset* cur_enc;
 
     if(pwcs == NULL)
         return 0;
@@ -180,7 +356,7 @@ s32 mbstowcs(u32* pwcs, const char* mbs, u32 n)
     cur_enc = Charset_NlsGetCurCharset();
     if(cur_enc == NULL)
         return 0;
-    return cur_enc->mbs_to_ucs4s(pwcs,mbs,n);
+    return cur_enc->MbsToUcs4s(pwcs,mbs,n);
 }
 
 //----多字节字符串转为ucs4串---------------------------------------------------
@@ -194,12 +370,12 @@ s32 mbstowcs(u32* pwcs, const char* mbs, u32 n)
 //      其他:得到的字符数，=n表示源串是不包含串结束符'\0'。
 //-----------------------------------------------------------------------------
 s32 mbstowcs_l(u32* pwcs, const char* mbs, u32 n,
-                    struct tagCharset* locale)
+                    struct Charset* locale)
 {
     if((pwcs == NULL) || (locale == NULL))
         return 0;
 
-    return locale->mbs_to_ucs4s(pwcs,mbs,n);
+    return locale->MbsToUcs4s(pwcs,mbs,n);
 }
 
 //----ucs4字符转为多字节字符---------------------------------------------------
@@ -212,7 +388,7 @@ s32 mbstowcs_l(u32* pwcs, const char* mbs, u32 n,
 //-----------------------------------------------------------------------------
 s32 wctomb(char* mb, u32 wc)
 {
-    struct tagCharset* cur_enc;
+    struct Charset* cur_enc;
 
     if(mb == NULL)
         return 0;
@@ -220,7 +396,7 @@ s32 wctomb(char* mb, u32 wc)
     cur_enc = Charset_NlsGetCurCharset();
     if(cur_enc == NULL)
         return 0;
-    return cur_enc->ucs4_to_mb(mb, wc);
+    return cur_enc->Ucs4ToMb(mb, wc);
 }
 
 //----ucs4字符转为多字节字符---------------------------------------------------
@@ -231,13 +407,13 @@ s32 wctomb(char* mb, u32 wc)
 //      -1:wc不是待转换的字符集内有效的字符
 //      其他:转换结果的字符长度(字节数)
 //-----------------------------------------------------------------------------
-s32 wctomb_l(char* mb, u32 wc,struct tagCharset* locale)
+s32 wctomb_l(char* mb, u32 wc,struct Charset* locale)
 {
 
     if((mb == NULL) || (locale == NULL))
         return 0;
 
-    return locale->ucs4_to_mb(mb, wc);
+    return locale->Ucs4ToMb(mb, wc);
 }
 
 //----ucs4字符串转为多字节字符串-----------------------------------------------
@@ -253,7 +429,7 @@ s32 wctomb_l(char* mb, u32 wc,struct tagCharset* locale)
 //-----------------------------------------------------------------------------
 s32 wcstombs(char* mbs, const u32* pwcs, u32 n)
 {
-    struct tagCharset* cur_enc;
+    struct Charset* cur_enc;
 
     if(pwcs == NULL)
         return 0;
@@ -261,7 +437,7 @@ s32 wcstombs(char* mbs, const u32* pwcs, u32 n)
     cur_enc = Charset_NlsGetCurCharset();
     if(cur_enc == NULL)
         return 0;
-    return cur_enc->ucs4s_to_mbs(mbs,pwcs,n);
+    return cur_enc->Ucs4sToMbs(mbs,pwcs,n);
 }
 
 //----ucs4字符串转为多字节字符串-----------------------------------------------
@@ -276,11 +452,11 @@ s32 wcstombs(char* mbs, const u32* pwcs, u32 n)
 //      其他:写入mbs缓冲区的字节数，含串结束符'\0'
 //-----------------------------------------------------------------------------
 s32 wcstombs_l(char* mbs, const u32* pwcs, u32 n,
-                struct tagCharset* locale)
+                struct Charset* locale)
 {
     if((pwcs == NULL) || (locale == NULL))
         return 0;
 
-    return locale->ucs4s_to_mbs(mbs,pwcs,n);
+    return locale->Ucs4sToMbs(mbs,pwcs,n);
 }
 

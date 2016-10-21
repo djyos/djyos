@@ -307,28 +307,12 @@ static void  __EMAC_Init(void)
 }
 
 // =============================================================================
-// 功能：Enet中断初始化，使用中断的方式接收数据，用于配置中断寄存器
-// 参数：无
-// 返回：无
-// =============================================================================
-static void __EMAC_IntInit(void)
-{
-    ufast_t IntLine = CN_INT_LINE_ENET;
-    u32 Enet_ISR(ufast_t IntLine);
-    Int_SetClearType(IntLine,CN_INT_CLEAR_PRE);
-    Int_IsrConnect(IntLine,Enet_ISR);
-    Int_SettoAsynSignal(IntLine);
-    Int_ClearLine(IntLine);
-    Int_RestoreAsynLine(IntLine);
-}
-
-// =============================================================================
 // 功能：以太网模块中断服务函数，包括发送、接收帧完成和错误中断，对错误帧的处理表现在
 //       是否需对硬件复位，而发生溢出错误时，必须重新配置BD表
 // 参数：int_line,中断线号
 // 返回：0
 // =============================================================================
-u32 Enet_ISR(ufast_t IntLine)
+u32 Enet_ISR(ptu32_t IntLine)
 {
     u32 idx;
     //Tx Frame Done Int
@@ -353,6 +337,22 @@ u32 Enet_ISR(ufast_t IntLine)
 
     LPC_EMAC->IntClear = 0xFFFF;        //Clear The INT Flag
     return 0;
+}
+
+// =============================================================================
+// 功能：Enet中断初始化，使用中断的方式接收数据，用于配置中断寄存器
+// 参数：无
+// 返回：无
+// =============================================================================
+static void __EMAC_IntInit(void)
+{
+    ufast_t IntLine = CN_INT_LINE_ENET;
+    Int_Register(IntLine);
+    Int_SetClearType(IntLine,CN_INT_CLEAR_AUTO);
+    Int_IsrConnect(IntLine,Enet_ISR);
+    Int_SettoAsynSignal(IntLine);
+    Int_ClearLine(IntLine);
+    Int_RestoreAsynLine(IntLine);
 }
 
 u32 Enet_Ctrl(u32 cmd,ptu32_t data1, ptu32_t data2)

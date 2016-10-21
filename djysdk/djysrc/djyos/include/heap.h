@@ -61,6 +61,10 @@
 extern "C" {
 #endif
 
+#define     CN_SYS_HEAP_NAME    "sys"   //系统堆名字
+
+#define     CN_HEAP_GENERAL     0
+#define     CN_HEAP_PRIVATE     1
 enum _MEM_ERROR_CODE_
 {
     EN_MEM_NO_ERROR = CN_MEM_NO_ERROR,  //没有错误
@@ -70,7 +74,7 @@ enum _MEM_ERROR_CODE_
     EN_MEM_LEAK,                //内存泄漏
 };
 
-typedef struct tagHeapCB * pHeap_t;
+typedef struct HeapCB * pHeap_t;
 
 #ifdef __cplusplus
 }

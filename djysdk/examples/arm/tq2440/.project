@@ -7,7 +7,7 @@
 	<buildSpec>
 		<buildCommand>
 			<name>org.eclipse.cdt.managedbuilder.core.genmakebuilder</name>
-			<triggers>clean,full,incremental,</triggers>
+			<triggers>full,incremental,</triggers>
 			<arguments>
 			</arguments>
 		</buildCommand>
@@ -25,6 +25,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>src/test</name>
+			<type>2</type>
+			<locationURI>DJYOS_SRC_LOCATION/test</locationURI>
+		</link>
+		<link>
 			<name>src/OS_code/component</name>
 			<type>2</type>
 			<locationURI>DJYOS_SRC_LOCATION/component</locationURI>
@@ -35,9 +40,9 @@
 			<locationURI>DJYOS_SRC_LOCATION/djyos</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/exp-component</name>
+			<name>src/OS_code/extern-component</name>
 			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/exp-component</locationURI>
+			<locationURI>DJYOS_SRC_LOCATION/extern-component</locationURI>
 		</link>
 		<link>
 			<name>src/OS_code/libc</name>
@@ -45,14 +50,9 @@
 			<locationURI>DJYOS_SRC_LOCATION/libc</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/test</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/test</locationURI>
-		</link>
-		<link>
 			<name>src/OS_code/bsp/cpudrv</name>
 			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/cpudrv/samsung/s3c2440</locationURI>
+			<locationURI>DJYOS_SRC_LOCATION/bsp/cpudrv/s3c2440</locationURI>
 		</link>
 		<link>
 			<name>src/OS_code/bsp/startup</name>
@@ -75,39 +75,19 @@
 			<locationURI>DJYOS_SRC_LOCATION/bsp/arch/arm/arm32_stdint.h</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/bsp/arch/cache.h</name>
-			<type>1</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/arch/arm/arm7-11/include/cache.h</locationURI>
-		</link>
-		<link>
 			<name>src/OS_code/bsp/arch/common</name>
 			<type>2</type>
 			<locationURI>DJYOS_SRC_LOCATION/bsp/arch/arm/arm7-11/common</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/bsp/arch/core</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/arch/arm/arm7-11/arm9/samsung/s3c2440/core</locationURI>
-		</link>
-		<link>
 			<name>src/OS_code/bsp/arch/include</name>
 			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/arch/arm/arm7-11/arm9/samsung/s3c2440/include</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/djysrc/bsp/arch/arm/arm7-11/include</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/bsp/arch/mmu.h</name>
-			<type>1</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/arch/arm/arm7-11/include/mmu.h</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/bsp/arch/stdint.h</name>
-			<type>1</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/arch/arm/arm7-11/include/stdint.h</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/bsp/boarddrv/dm9000</name>
+			<name>src/OS_code/bsp/arch/s3c2440</name>
 			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/chipdrv/dm9000</locationURI>
+			<locationURI>DJYOS_SRC_LOCATION/bsp/arch/arm/arm7-11/arm9/s3c2440</locationURI>
 		</link>
 		<link>
 			<name>src/OS_code/bsp/boarddrv/k9f1208xxx</name>
@@ -115,9 +95,9 @@
 			<locationURI>DJYOS_SRC_LOCATION/bsp/chipdrv/k9f1208xxx</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/bsp/boarddrv/keypad</name>
+			<name>src/OS_code/bsp/boarddrv/tq2440</name>
 			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/chipdrv/board/tq2440/keypad</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/djysrc/bsp/boarddrv/tq2440</locationURI>
 		</link>
 	</linkedResources>
 	<variableList>

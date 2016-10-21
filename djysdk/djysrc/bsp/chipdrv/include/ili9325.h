@@ -56,25 +56,11 @@
 #ifndef __LCD_ILI9325_H__
 #define __LCD_ILI9325_H__
 
-#define LCD_ON_GPIOF10          GPIO_Pin_10
-#define LCD_RST_GPIOG8          GPIO_Pin_8
-#define LCD_CS_GPIOG10          GPIO_Pin_10
-
-//#define LCD_DATA          (u16*)(u32)(0x68000000)
-//#define LCD_CMD               (u16*)(u32)(0x68000002) //16位数据宽度A0=1
-#define LCD_DATA    (*(volatile u16*)  0x68000000)
-#define LCD_CMD     (*(volatile u16*)  0x68000002)
-
-#define LCD_XSIZE            240
-#define LCD_YSIZE            320
-#define cn_lcd_line_size        (LCD_XSIZE<<1)
-#define cn_frame_buffer_size    (cn_lcd_line_size * LCD_YSIZE)
-#define cn_lcd_pf               CN_SYS_PF_RGB565
-
-ptu32_t ModuleInstall_Lcd(ptu32_t para);
+ptu32_t ModuleInstall_ili9325(const char *DisplayName,const char* HeapName);
 void lcd_display_on(void);
 void lcd_display_off(void);
-
+void lcd_backlight_on(void);
+void lcd_backlight_off(void);
 
 #endif//__LCD_ILI9325_H__防止重复包含
 

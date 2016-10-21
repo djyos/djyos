@@ -68,7 +68,7 @@
 //       自己实现
 // =============================================================================
 struct menu_displaypara* menuappinit_general(struct menu_item *menuitem,\
-        struct tagGkWinRsc *Appwin, u8 mydismode)
+        struct GkWinRsc *Appwin, u8 mydismode)
 {
     struct menu_displaypara *operatingDispara;
 

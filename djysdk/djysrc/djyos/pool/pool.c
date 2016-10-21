@@ -54,16 +54,17 @@
 //   新版本号: V1.0.0
 //   修改说明: 原始版本
 //------------------------------------------------------
-#include "config-prj.h"
+
 #include "align.h"
 #include "stdint.h"
-#include "rsc.h"
+#include "object.h"
 #include "int.h"
 #include "lock.h"
 #include "stdlib.h"
 #include "pool.h"
+#include "core_config.h"
 
-static struct tagMemCellPool *s_ptPooCtrl;  //管理内存池控制块本身的内存池
+static struct MemCellPool *s_ptPooCtrl;  //管理内存池控制块本身的内存池
 
 //----初始化固定块分配模块------------------------------------------------------
 //功能: 初始化操作系统的固定块内存分配模块.内存池控制块本身也是按照内存池的方式
@@ -74,16 +75,16 @@ static struct tagMemCellPool *s_ptPooCtrl;  //管理内存池控制块本身的内存池
 //----------------------------------------------------------------------------
 ptu32_t Mb_ModuleInit(ptu32_t para)
 {
-    static struct tagMemCellPool cell_pool;
-    cell_pool.continue_pool = M_Malloc(gc_u32CfgMemPoolLimit * sizeof(struct tagMemCellPool),0);
+    static struct MemCellPool cell_pool;
+    cell_pool.continue_pool = M_Malloc(gc_u32CfgMemPoolLimit * sizeof(struct MemCellPool),0);
     if(cell_pool.continue_pool == NULL)
         return 0;
-    cell_pool.cell_size = sizeof(struct tagMemCellPool);
+    cell_pool.cell_size = sizeof(struct MemCellPool);
     cell_pool.free_list = NULL;
     cell_pool.pool_offset = (ptu32_t)cell_pool.continue_pool;
-    cell_pool.pool_offset += gc_u32CfgMemPoolLimit * sizeof(struct tagMemCellPool);
+    cell_pool.pool_offset += gc_u32CfgMemPoolLimit * sizeof(struct MemCellPool);
     s_ptPooCtrl = &cell_pool;
-    Rsc_AddTree(&cell_pool.memb_node,sizeof(struct tagMemCellPool),RSC_MEMPOOL,
+    OBJ_AddTree(&cell_pool.memb_node,sizeof(struct MemCellPool),RSC_MEMPOOL,
                     "固定块分配池");
     Lock_SempCreate_s(&cell_pool.memb_semp,gc_u32CfgMemPoolLimit,
                       gc_u32CfgMemPoolLimit,CN_SEMP_BLOCK_FIFO,"固定块分配池");
@@ -112,11 +113,11 @@ ptu32_t Mb_ModuleInit(ptu32_t para)
 //      name,给内存池起个名字，所指向的字符串内存区不能是局部变量，可以是空
 //返回: 内存池指针.
 //----------------------------------------------------------------------------
-struct tagMemCellPool *Mb_CreatePool(void *pool_original,u32 init_capacital,
+struct MemCellPool *Mb_CreatePool(void *pool_original,u32 init_capacital,
                                 u32 cell_size,u32 increment,
-                                u32 limit,char *name)
+                                u32 limit,const char *name)
 {
-    struct tagMemCellPool *pool;
+    struct MemCellPool *pool;
 
     //创建内存池时，可以不提供内存块，此时init_capacital也必须是0.
     //此功能结合内存池动态增量功能，可帮助应用程序优化内存配置，例如:
@@ -137,7 +138,7 @@ struct tagMemCellPool *Mb_CreatePool(void *pool_original,u32 init_capacital,
 #endif
 
     //分配一个内存池控制头
-    pool = (struct tagMemCellPool *)Mb_Malloc(s_ptPooCtrl,0);
+    pool = (struct MemCellPool *)Mb_Malloc(s_ptPooCtrl,0);
     if(pool == NULL)
         return NULL;    //内存池控制头分配不成功
 
@@ -149,9 +150,9 @@ struct tagMemCellPool *Mb_CreatePool(void *pool_original,u32 init_capacital,
     pool->cell_increment = increment;
     pool->cell_limit = limit;
     pool->next_inc_pool = NULL;
-    Rsc_AddSon(&s_ptPooCtrl->memb_node,
+    OBJ_AddChild(&s_ptPooCtrl->memb_node,
                 &pool->memb_node,
-                sizeof(struct tagMemCellPool),
+                sizeof(struct MemCellPool),
                 RSC_MEMPOOL,name);
     //init_capacital有可能是0
     Lock_SempCreate_s(&pool->memb_semp,init_capacital,init_capacital,
@@ -177,10 +178,10 @@ struct tagMemCellPool *Mb_CreatePool(void *pool_original,u32 init_capacital,
 //返回: 内存池指针.
 //注: 本函数是专门为内核准备的，故不作参数检查。
 //----------------------------------------------------------------------------
-struct tagMemCellPool *Mb_CreatePool_s(struct tagMemCellPool *pool,
+struct MemCellPool *Mb_CreatePool_s(struct MemCellPool *pool,
                                 void *pool_original,u32 init_capacital,
                                 u32 cell_size,u32 increment,
-                                u32 limit,char *name)
+                                u32 limit,const char *name)
 {
     pool->continue_pool = (void*)pool_original;     //连续池首地址
     pool->free_list = NULL;                 //开始时空闲链表是空的
@@ -190,9 +191,9 @@ struct tagMemCellPool *Mb_CreatePool_s(struct tagMemCellPool *pool,
     pool->cell_increment = increment;
     pool->cell_limit = limit;
     pool->next_inc_pool = NULL;
-    Rsc_AddSon(&s_ptPooCtrl->memb_node,
+    OBJ_AddChild(&s_ptPooCtrl->memb_node,
                 &pool->memb_node,
-                sizeof(struct tagMemCellPool),
+                sizeof(struct MemCellPool),
                 RSC_MEMPOOL,name);
     Lock_SempCreate_s(&pool->memb_semp,init_capacital,init_capacital,
                             CN_SEMP_BLOCK_FIFO,name);
@@ -205,7 +206,7 @@ struct tagMemCellPool *Mb_CreatePool_s(struct tagMemCellPool *pool,
 //参数: pool，内存池指针
 //返回: true= 成功删除，false=失败
 //-----------------------------------------------------------------------------
-bool_t Mb_DeletePool(struct tagMemCellPool *pool)
+bool_t Mb_DeletePool(struct MemCellPool *pool)
 {
     void *inc_memory,*temp;
     if(!Lock_SempDelete_s(&pool->memb_semp))
@@ -218,7 +219,7 @@ bool_t Mb_DeletePool(struct tagMemCellPool *pool)
         free(inc_memory);
         inc_memory = temp;
     }
-    if(!Rsc_DelNode(&pool->memb_node))
+    if(!OBJ_Del(&pool->memb_node))
         return false;
     Mb_Free(s_ptPooCtrl,pool);
     return true;
@@ -229,7 +230,7 @@ bool_t Mb_DeletePool(struct tagMemCellPool *pool)
 //参数: pool，内存池指针
 //返回: 无
 //-----------------------------------------------------------------------------
-bool_t Mb_DeletePool_r(struct tagMemCellPool *pool)
+bool_t Mb_DeletePool_r(struct MemCellPool *pool)
 {
     void *inc_memory,*temp;
     if(!Lock_SempDelete_s(&pool->memb_semp))
@@ -242,7 +243,7 @@ bool_t Mb_DeletePool_r(struct tagMemCellPool *pool)
         free(inc_memory);
         inc_memory = temp;
     }
-    if(!Rsc_DelNode(&pool->memb_node))
+    if(!OBJ_Del(&pool->memb_node))
         return false;
     return true;
 }
@@ -255,7 +256,7 @@ bool_t Mb_DeletePool_r(struct tagMemCellPool *pool)
 //      超时返回。非0值将被向上调整为cn_tick_us的整数倍
 //返回: 申请成功返回内存地址,否则返回NULL.
 //-----------------------------------------------------------------------------
-void *Mb_Malloc(struct tagMemCellPool *pool,u32 timeout)
+void *Mb_Malloc(struct MemCellPool *pool,u32 timeout)
 {
     void *result,*inc;
     u32 limit,inc_size,inc_cell,capacity,frees;
@@ -284,13 +285,13 @@ void *Mb_Malloc(struct tagMemCellPool *pool,u32 timeout)
                 capacity = Lock_SempQueryCapacital(&pool->memb_semp);
                 frees = Lock_SempQueryFree(&pool->memb_semp);
                 limit = capacity + inc_cell;
-                name = ((struct tagRscNode*)&pool->memb_semp)->name;
+                name = OBJ_Name((struct Object*)&pool->memb_semp);
                 Lock_SempDelete_s(&pool->memb_semp);      //删除原信号量
                 //按扩容后的容量重新申请信号量。
-                Lock_SempCreate_s(&pool->memb_semp,limit,frees+inc_cell,
+                Lock_SempCreate_s(&pool->memb_semp,limit,frees+inc_cell-1,
                                     CN_SEMP_BLOCK_FIFO,name);
                 pool->continue_pool = (void*)((ptu32_t)inc + align_up_sys(1));
-                pool->pool_offset = (ptu32_t)inc + inc_cell*pool->cell_size;
+                pool->pool_offset = (ptu32_t)pool->continue_pool + inc_cell*pool->cell_size;
                 //以下初始化增量表，该表用于标记动态增加的内存块，利于删除内存池
                 //时释放内存，以免内存丢失。
                 *(void **)inc = pool->next_inc_pool;
@@ -316,14 +317,14 @@ void *Mb_Malloc(struct tagMemCellPool *pool,u32 timeout)
     if(pool->free_list != NULL)     //空闲队列中有内存块
     {
         result = pool->free_list;   //取空队列表头部的内存块
-        if(((struct tagMemCellFree*)result)->next==(struct tagMemCellFree*)result)
+        if(((struct MemCellFree*)result)->next==(struct MemCellFree*)result)
             pool->free_list = NULL; //这是空闲队列中的最后一块了，但可能不是内存
                                     //池中的最后一块，因为连续池中可能还有
         else
         {
             pool->free_list = pool->free_list->next;  //空闲队列下移一格.
-            pool->free_list->previous=((struct tagMemCellFree*)result)->previous;
-            ((struct tagMemCellFree*)result)->previous->next = pool->free_list;
+            pool->free_list->previous=((struct MemCellFree*)result)->previous;
+            ((struct MemCellFree*)result)->previous->next = pool->free_list;
         }
     }else                   //空闲队列中无内存块，从连续池中取
     {
@@ -342,7 +343,7 @@ void *Mb_Malloc(struct tagMemCellPool *pool,u32 timeout)
 //      pool,目标内存池.
 //返回: 无
 //-----------------------------------------------------------------------------
-void Mb_Free(struct tagMemCellPool *pool,void *block)
+void Mb_Free(struct MemCellPool *pool,void *block)
 {
     atom_low_t atom_low;
     if(pool == NULL)
@@ -361,20 +362,20 @@ void Mb_Free(struct tagMemCellPool *pool,void *block)
     //查看待释放的内存块是否已经在free_list队列中。
     if(pool->free_list == NULL)
     {
-        pool->free_list = (struct tagMemCellFree*)block;
-        pool->free_list->next = (struct tagMemCellFree*)block;
-        pool->free_list->previous = (struct tagMemCellFree*)block;
+        pool->free_list = (struct MemCellFree*)block;
+        pool->free_list->next = (struct MemCellFree*)block;
+        pool->free_list->previous = (struct MemCellFree*)block;
 
      }
     else
     {
-        //if(((struct tagMemCellFree*)block)->previous->next
-         //                                   != (struct tagMemCellFree*)block)
+        //if(((struct MemCellFree*)block)->previous->next
+         //                                   != (struct MemCellFree*)block)
        // {   //以下4行把被释放的内存块插入到队列尾部
-            ((struct tagMemCellFree*)block)->next = pool->free_list;
-            ((struct tagMemCellFree*)block)->previous = pool->free_list->previous;
-            pool->free_list->previous->next = (struct tagMemCellFree*)block;
-            pool->free_list->previous = (struct tagMemCellFree*)block;
+            ((struct MemCellFree*)block)->next = pool->free_list;
+            ((struct MemCellFree*)block)->previous = pool->free_list->previous;
+            pool->free_list->previous->next = (struct MemCellFree*)block;
+            pool->free_list->previous = (struct MemCellFree*)block;
        // }
     }
     Int_LowAtomEnd(atom_low);
@@ -387,7 +388,7 @@ void Mb_Free(struct tagMemCellPool *pool,void *block)
 //参数: pool,目标内存池.
 //返回: 内存块数
 //-----------------------------------------------------------------------------
-u32 Mb_QueryFree(struct tagMemCellPool *pool)
+u32 Mb_QueryFree(struct MemCellPool *pool)
 {
     if(pool == NULL)
         return 0;
@@ -399,7 +400,7 @@ u32 Mb_QueryFree(struct tagMemCellPool *pool)
 //参数: pool,目标内存池.
 //返回: 内存块数
 //-----------------------------------------------------------------------------
-u32 Mb_QueryCapacital(struct tagMemCellPool *pool)
+u32 Mb_QueryCapacital(struct MemCellPool *pool)
 {
     if(pool == NULL)
         return 0;

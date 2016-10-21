@@ -51,7 +51,7 @@
 // <版本号> <修改日期>, <修改人员>: <修改功能概述>
 // =============================================================================
 // 备注：由于提供给timer_core.c使用，所以不再做参数检查之类的
-#include "config-prj.h"
+#include "cfg/misc_config.h"
 
 #include "cpu_peri.h"
 #include "int.h"
@@ -94,7 +94,7 @@ enum ENUM_LPC_TIMER
 };
 
 //各个定时器芯片的定时器应该有自己的句柄
-struct tagLPCTimerHandle
+struct LPCTimerHandle
 {
     u32     timerno;          //定时器号
     u32     irqline;          //中断号
@@ -104,7 +104,7 @@ struct tagLPCTimerHandle
 #define CN_LPCTIMER_NUM   (EN_LPCTIMER_3 +1)
 
 
-static struct tagLPCTimerHandle  stgTimerHandle[CN_LPCTIMER_NUM];
+static struct LPCTimerHandle  stgTimerHandle[CN_LPCTIMER_NUM];
 
 //最高位代表timer0 依次类推
 static u32  gs_dwLPCTimerBitmap;  //对于定时器这种东西，一般的不会很多，32个应该足够
@@ -134,7 +134,7 @@ u8 __LPCTimer_GetFirstZeroBit(u32 para)
 // 返回值  :true成功 fasle失败
 // 说明    :
 // =============================================================================
-bool_t __LPCTimer_PauseCount(struct tagLPCTimerHandle  *timer)
+bool_t __LPCTimer_PauseCount(struct LPCTimerHandle  *timer)
 {
     u8 timerno;
     if(timer->timerstate & CN_TIMER_ENUSE)
@@ -166,7 +166,7 @@ bool_t __LPCTimer_PauseCount(struct tagLPCTimerHandle  *timer)
 // 返回值  :true成功 fasle失败
 // 说明    :
 // =============================================================================
-bool_t __LPCTimer_StartCount(struct tagLPCTimerHandle  *timer)
+bool_t __LPCTimer_StartCount(struct LPCTimerHandle  *timer)
 {
     u8 timerno;
     if(timer->timerstate & CN_TIMER_ENUSE)
@@ -199,12 +199,12 @@ bool_t __LPCTimer_StartCount(struct tagLPCTimerHandle  *timer)
 //          设定计数器每计一次数为1us，可知最大时间不超-1
 //          设定周期
 // 输入参数:timer，PIC定时器
-//          cycle,周期（微秒），
+//          cycle,周期（定时器时钟个数），
 // 输出参数:
 // 返回值  :true成功 fasle失败
 // 说明    :如果设置周期太大（超过最大定时器能力），则设置为定时器的最大周期
 // =============================================================================
-bool_t  __LPCTimer_SetCycle(struct tagLPCTimerHandle  *timer, u32 cycle)
+bool_t  __LPCTimer_SetCycle(struct LPCTimerHandle  *timer, u32 cycle)
 {
     u8 timerno;
     if(timer->timerstate & CN_TIMER_ENUSE)
@@ -235,7 +235,7 @@ bool_t  __LPCTimer_SetCycle(struct tagLPCTimerHandle  *timer, u32 cycle)
 // 输出参数:
 // 返回值  :true成功 fasle失败
 // =============================================================================
-bool_t  __LPCTimer_SetAutoReload(struct tagLPCTimerHandle  *timer, bool_t autoreload)
+bool_t  __LPCTimer_SetAutoReload(struct LPCTimerHandle  *timer, bool_t autoreload)
 {
     bool_t result;
     u8 timerno;
@@ -270,17 +270,16 @@ bool_t  __LPCTimer_SetAutoReload(struct tagLPCTimerHandle  *timer, bool_t autore
 // =============================================================================
 // 函数功能:__LPCTimer_Alloc
 //          分配定时器
-// 输入参数:cycle，定时器周期
-//          timerisr,定时器的中断处理函数
+// 输入参数:timerisr,定时器的中断处理函数
 // 输出参数:
 // 返回值  :分配的定时器句柄，NULL则分配不成功
 // 说明    :
 // =============================================================================
-ptu32_t __LPCTimer_Alloc(u32 cycle,fnTimerIsr timerisr)
+ptu32_t __LPCTimer_Alloc(fntTimerIsr timerisr)
 {
     u8 timerno;
     u8 irqline;
-    struct tagLPCTimerHandle  *timer;
+    struct LPCTimerHandle  *timer;
     ptu32_t timerhandle;
     //原子操作，防止资源竞争
     atom_low_t  timeratom;
@@ -300,15 +299,16 @@ ptu32_t __LPCTimer_Alloc(u32 cycle,fnTimerIsr timerisr)
     }
     irqline = sgHaltimerIrq[timerno];
     timer = &stgTimerHandle[timerno];
-    timer->cycle = cycle;
+    timer->cycle = 0;
     timer->timerno = timerno;
     timer->irqline = irqline;
     timer->timerstate = CN_TIMER_ENUSE;
     //好了，中断号和定时器号码都有了，该干嘛就干嘛了。
     //先设置好定时器周期
     __LPCTimer_PauseCount(timer);
-    __LPCTimer_SetCycle(timer,cycle);
+//    __LPCTimer_SetCycle(timer,cycle);
     //设置定时器中断,先结束掉该中断所有的关联相关内容
+    Int_Register(irqline);
     Int_CutLine(irqline);
     Int_IsrDisConnect(irqline);
     Int_EvttDisConnect(irqline);
@@ -333,8 +333,8 @@ bool_t  __LPCTimer_Free(ptu32_t timerhandle)
     u8 timerno;
     u8 irqline;
     atom_low_t  timeratom;  //保护公用资源
-    struct tagLPCTimerHandle  *timer;
-    timer = (struct tagLPCTimerHandle  *)timerhandle;
+    struct LPCTimerHandle  *timer;
+    timer = (struct LPCTimerHandle  *)timerhandle;
 
     if(timer->timerstate & CN_TIMER_ENUSE)
     {
@@ -349,7 +349,7 @@ bool_t  __LPCTimer_Free(ptu32_t timerhandle)
             Int_CutLine(irqline);
             Int_IsrDisConnect(irqline);
             Int_EvttDisConnect(irqline);
-
+	        Int_UnRegister(irqline);
             Int_LowAtomEnd(timeratom);  //原子操作完毕
 
             return true;
@@ -376,7 +376,7 @@ bool_t  __LPCTimer_Free(ptu32_t timerhandle)
 // 返回值  :分配的定时器，NULL则分配不成功
 // 说明    :
 // =============================================================================
-bool_t  __LPCTimer_SetIntPro(struct tagLPCTimerHandle  *timer, bool_t real_prior)
+bool_t  __LPCTimer_SetIntPro(struct LPCTimerHandle  *timer, bool_t real_prior)
 {
     if(timer->timerstate & CN_TIMER_ENUSE)
     {
@@ -406,7 +406,7 @@ bool_t  __LPCTimer_SetIntPro(struct tagLPCTimerHandle  *timer, bool_t real_prior
 // 返回值  :true成功false失败
 // 说明    :
 // =============================================================================
-bool_t  __LPCTimer_EnInt(struct tagLPCTimerHandle  *timer)
+bool_t  __LPCTimer_EnInt(struct LPCTimerHandle  *timer)
 {
     if(timer->timerstate & CN_TIMER_ENUSE)
     {
@@ -426,7 +426,7 @@ bool_t  __LPCTimer_EnInt(struct tagLPCTimerHandle  *timer)
 // 返回值  :true成功false失败
 // 说明    :
 // =============================================================================
-bool_t  __LPCTimer_DisInt(struct tagLPCTimerHandle  *timer)
+bool_t  __LPCTimer_DisInt(struct LPCTimerHandle  *timer)
 {
     if(timer->timerstate & CN_TIMER_ENUSE)
     {
@@ -444,9 +444,9 @@ bool_t  __LPCTimer_DisInt(struct tagLPCTimerHandle  *timer)
 // 输入参数:timer，待操作的定时器
 // 输出参数:time，走时（微秒）
 // 返回值  :true成功false失败
-// 说明    :从设定的周期算起，即cycle-剩余时间,表示已经走掉的时间
+// 说明    :从设定的周期算起，即cycle-剩余时间,表示已经走掉的时间(单位：定时器主频时钟个数)
 // =============================================================================
-bool_t __LPCTimer_GetTime(struct tagLPCTimerHandle  *timer, u32 *time)
+bool_t __LPCTimer_GetTime(struct LPCTimerHandle  *timer, u32 *time)
 {
     u8 timerno;
     u32 counter;
@@ -458,7 +458,8 @@ bool_t __LPCTimer_GetTime(struct tagLPCTimerHandle  *timer, u32 *time)
             return false;
         }
         counter = tg_TIMER_Reg[timerno]->TC;    //TCR即是微秒数
-        return counter;
+        *time = counter;
+        return true;
     }
     else
     {
@@ -473,7 +474,7 @@ bool_t __LPCTimer_GetTime(struct tagLPCTimerHandle  *timer, u32 *time)
 // 返回值  :true成功 false失败
 // 说明    :
 // =============================================================================
-bool_t __LPCTimer_CheckTimeout(struct tagLPCTimerHandle  *timer, bool_t *timeout)
+bool_t __LPCTimer_CheckTimeout(struct LPCTimerHandle  *timer, bool_t *timeout)
 {
     bool_t result=true;
     u8 timerno;
@@ -515,7 +516,7 @@ bool_t __LPCTimer_CheckTimeout(struct tagLPCTimerHandle  *timer, bool_t *timeout
 // 返回值  ：true 成功 false失败
 // 说明    : 本层实现
 // =============================================================================
-bool_t __LPCTimer_GetID(struct tagLPCTimerHandle   *timer,u32 *timerId)
+bool_t __LPCTimer_GetID(struct LPCTimerHandle   *timer,u32 *timerId)
 {
     u16 irqno;
     u16 timerno;
@@ -537,10 +538,10 @@ bool_t __LPCTimer_GetID(struct tagLPCTimerHandle   *timer,u32 *timerId)
 // 函数功能：__LPCTimer_GetCycle
 //          获取定时器周期
 // 输入参数：timer，待操作定时器，
-// 输出参数：cycle，定时器周期(微秒)
+// 输出参数：cycle，定时器周期(单位：定时器主频时钟个数)
 // 返回值  ：true 成功 false失败
 // =============================================================================
-bool_t __LPCTimer_GetCycle(struct tagLPCTimerHandle   *timer, u32 *cycle)
+bool_t __LPCTimer_GetCycle(struct LPCTimerHandle   *timer, u32 *cycle)
 {
     if(NULL == timer)
     {
@@ -560,7 +561,7 @@ bool_t __LPCTimer_GetCycle(struct tagLPCTimerHandle   *timer, u32 *cycle)
 // 返回值  ：true 成功 false失败
 // 说明    : 本层实现
 // =============================================================================
-bool_t __LPCTimer_GetState(struct tagLPCTimerHandle   *timer, u32 *timerflag)
+bool_t __LPCTimer_GetState(struct LPCTimerHandle   *timer, u32 *timerflag)
 {
 
     if(NULL == timer)
@@ -583,12 +584,12 @@ bool_t __LPCTimer_GetState(struct tagLPCTimerHandle   *timer, u32 *timerflag)
 // 说明    :
 // =============================================================================
 bool_t __LPCTimer_Ctrl(ptu32_t timerhandle, \
-                         enum _ENUM_TIMER_CTRL_TYPE_ ctrlcmd, \
+                         enum TimerCmdCode ctrlcmd, \
                          ptu32_t inoutpara)
 {
     bool_t result;
-    struct tagLPCTimerHandle  *timer;
-    timer = (struct tagLPCTimerHandle  *)timerhandle;
+    struct LPCTimerHandle  *timer;
+    timer = (struct LPCTimerHandle  *)timerhandle;
     if(NULL == timer)
     {
         result = false;
@@ -639,6 +640,21 @@ bool_t __LPCTimer_Ctrl(ptu32_t timerhandle, \
 }
 
 // =============================================================================
+// 函数功能:__LPCTimer_GetFreq
+//       获取定时器主频
+// 输入参数:timerhandle 待操作的定时器句柄
+// 输出参数:
+// 返回值  :定时器主频
+// 说明    :单位（HZ）
+// =============================================================================
+u32  __LPCTimer_GetFreq(ptu32_t timerhandle)
+{
+    //定时器使用四分频，得25M时钟
+    //25M时钟，预分频为25，即，PC计数一次为1uS，主频为1MHz
+    return 1000000;
+}
+
+// =============================================================================
 // 函数功能:module_init_timer
 //          P1020的PICtimer初始化
 // 输入参数:
@@ -648,7 +664,7 @@ bool_t __LPCTimer_Ctrl(ptu32_t timerhandle, \
 // =============================================================================
 void ModuleInstall_HardTimer(void)
 {
-    struct tagTimerChip  LPCtimer;
+    struct TimerChip  LPCtimer;
     u32 temp;
     //做基本的初始化，定时器使用四分频，得25M时钟
     LPC_SC->PCONP |= (1<<1)|(1<<2) | (1<<22)|(1<<23);//timer 0/1/2/3时钟使能
@@ -665,9 +681,10 @@ void ModuleInstall_HardTimer(void)
     }
 
     LPCtimer.chipname = "LPCTIMER";
-    LPCtimer.timerhardalloc = __LPCTimer_Alloc;
-    LPCtimer.timerhardfree = __LPCTimer_Free;
-    LPCtimer.timerhardctrl = __LPCTimer_Ctrl;
+    LPCtimer.TimerHardAlloc = __LPCTimer_Alloc;
+    LPCtimer.TimerHardFree = __LPCTimer_Free;
+    LPCtimer.TimerHardCtrl = __LPCTimer_Ctrl;
+    LPCtimer.TimerHardGetFreq = __LPCTimer_GetFreq;
     TimerHard_RegisterChip(&LPCtimer);
 
     return ;

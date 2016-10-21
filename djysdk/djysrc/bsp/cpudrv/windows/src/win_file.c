@@ -14,14 +14,14 @@
 //   修改说明: 原始版本
 //------------------------------------------------------
 
+#include <windows.h>
+#include <tchar.h>
+#include <ntsecapi.h>
 #include "stdint.h"
 #include "stdlib.h"
 #include "time.h"
 #include "file.h"
 #include "lock.h"
-#include <windows.h>
-#include <tchar.h>
-#include <ntsecapi.h>
 
 #define From1601To1970US    10000000000
 //#pragma comment (lib,"ntdll_32.lib")  // Copy From DDK  64位系统改为ntdll_64.lib
@@ -82,7 +82,7 @@ bool_t __winfs_move_file_write_ptr(FILE *fp,sint64_t new_ptr)
 //本函数功能就是GetFinalPathNameByHandle的返回值减去当前目录，可惜
 //GetFinalPathNameByHandle函数在xp及以下版本的windows中不支持。
 //如果hnd是通过look_for_item得到的，怎么办?该hnd不在资源链表中!!    lst
-void __winfs_GetFileNameFromRsc(char *name,struct tagFileRsc *parent,char *buf)
+void __winfs_GetFileNameFromRsc(char *name,struct FileRsc *parent,char *buf)
 {
 //    char name_temp[cn_winpath_limit+1];
     char *pwn;
@@ -104,7 +104,7 @@ void __winfs_GetFileNameFromRsc(char *name,struct tagFileRsc *parent,char *buf)
 //      fp，被操作的文件指针
 //返回：本次写入的数据量
 //-----------------------------------------------------------------------------
-uint32_t winfs_write_file(struct tagFileRsc *fp,uint8_t *buf,uint32_t len)
+uint32_t winfs_write_file(struct FileRsc *fp,uint8_t *buf,uint32_t len)
 {
     uint32_t completed = 0;
     if((fp==NULL)||(len==0)||(buf==NULL))
@@ -112,7 +112,6 @@ uint32_t winfs_write_file(struct tagFileRsc *fp,uint8_t *buf,uint32_t len)
     if(! WriteFile((HANDLE)(fp->file_medium_tag),buf,len,(PDWORD)&completed,NULL))
         completed = 0;
     __winfs_move_file_write_ptr(fp,fp->write_ptr + completed);
-    printf("%s    %d \n\r",__FUNCTION__ ,completed);
     return completed;
 }
 
@@ -123,7 +122,7 @@ uint32_t winfs_write_file(struct tagFileRsc *fp,uint8_t *buf,uint32_t len)
 //      fp，被操作的文件指针
 //返回：实际读取的字节数
 //-----------------------------------------------------------------------------
-uint32_t winfs_read_file(struct tagFileRsc *fp,uint8_t *buf,uint32_t len)
+uint32_t winfs_read_file(struct FileRsc *fp,uint8_t *buf,uint32_t len)
 {
     uint32_t completed = 0;
     if((fp==NULL)||(len==0)||(buf==NULL))
@@ -131,7 +130,6 @@ uint32_t winfs_read_file(struct tagFileRsc *fp,uint8_t *buf,uint32_t len)
     if(! ReadFile((HANDLE)(fp->file_medium_tag),buf,len,(PDWORD)&completed,NULL))
         completed = 0;
     fp->read_ptr += completed;
-    printf("%s    %d \n\r",__FUNCTION__ ,completed);
     return completed;
 }
 
@@ -140,9 +138,8 @@ uint32_t winfs_read_file(struct tagFileRsc *fp,uint8_t *buf,uint32_t len)
 //参数：fp，被操作的文件指针
 //返回：实际写入flash的字节数
 //-----------------------------------------------------------------------------
-uint32_t winfs_flush_file(struct tagFileRsc *fp)
+uint32_t winfs_flush_file(struct FileRsc *fp)
 {
-    printf("%s    %s \n\r",__FUNCTION__ ,fp->name);
     return FlushFileBuffers((HANDLE)(fp->file_medium_tag));
 }
 
@@ -154,9 +151,8 @@ uint32_t winfs_flush_file(struct tagFileRsc *fp)
 //参数：fp，被操作的文件指针
 //返回：文件可读数据的字节数
 //-----------------------------------------------------------------------------
-sint64_t winfs_query_file_stocks(struct tagFileRsc *fp)
+sint64_t winfs_query_file_stocks(struct FileRsc *fp)
 {
-    printf("%s    %d \n\r",__FUNCTION__ ,fp->file_size);
     return fp->file_size - fp->read_ptr;
 }
 
@@ -166,7 +162,7 @@ sint64_t winfs_query_file_stocks(struct tagFileRsc *fp)
 //参数：fp，被操作的文件指针
 //返回：文件还能写入的字节数
 //-----------------------------------------------------------------------------
-s64 winfs_query_file_cubage(struct tagFileRsc *fp)
+s64 winfs_query_file_cubage(struct FileRsc *fp)
 {
     ULARGE_INTEGER size;
     if(GetDiskFreeSpaceEx(NULL,&size,NULL,NULL))
@@ -181,7 +177,7 @@ s64 winfs_query_file_cubage(struct tagFileRsc *fp)
 //      new_size，新的文件长度。
 //返回：新的文件长度，若与new_size参数不等，一般是因为分区没有足够的容量导致
 //-----------------------------------------------------------------------------
-sint64_t winfs_set_file_size(struct tagFileRsc *fp,s64 new_size)
+sint64_t winfs_set_file_size(struct FileRsc *fp,s64 new_size)
 {
     LARGE_INTEGER liDistanceToMove;
     liDistanceToMove.QuadPart = new_size;
@@ -200,7 +196,6 @@ sint64_t winfs_set_file_size(struct tagFileRsc *fp,s64 new_size)
         fp->write_ptr = new_size;
     }
     fp->file_size = new_size;
-    printf("%s    %d \n\r",__FUNCTION__ ,new_size);
     return new_size;
 }
 
@@ -212,13 +207,12 @@ sint64_t winfs_set_file_size(struct tagFileRsc *fp,s64 new_size)
 //          whence，从何处开始计算移动长度，参见SEEK_CUR等的定义
 //返回：0=成功，1=失败
 //-----------------------------------------------------------------------------
-uint32_t winfs_seek_file(struct tagFileRsc *fp,struct tagSeekPara *position)
+uint32_t winfs_seek_file(struct FileRsc *fp,struct SeekPara *position)
 {
     sint64_t new_position;
 //    uint32_t buffed_size;
     uint8_t  whence;
     LARGE_INTEGER liDistanceToMove;
-    printf("%s    %s \n\r",__FUNCTION__ ,fp->name);
     if((position == NULL) ||(fp == NULL))
         return 1;
     whence = position->whence;
@@ -338,8 +332,8 @@ uint32_t winfs_seek_file(struct tagFileRsc *fp,struct tagSeekPara *position)
 //特注：本函数不检查重名，由调用者保证。作为存储介质，专守存储数据的职责，是否
 //      允许重名是上一层的责任。
 //-----------------------------------------------------------------------------
-bool_t winfs_create_item(char *name,struct tagFileRsc *parent,
-                         struct tagFileRsc *result,union file_attrs attr,
+bool_t winfs_create_item(char *name,struct FileRsc *parent,
+                         struct FileRsc *result,union file_attrs attr,
                          enum _FILE_OPEN_MODE_ mode)
 {
     s64 s64Time;
@@ -395,7 +389,7 @@ bool_t winfs_create_item(char *name,struct tagFileRsc *parent,
                     NULL
                     );
     }
-    s64Time = TM_Time(NULL);
+    s64Time = Tm_Time(NULL);
 #if 0
     file_time = Tm_LocalTime(&s64Time);      //取系统时间
     result->second_create = (u8)file_time->tm_sec;
@@ -440,7 +434,7 @@ bool_t winfs_create_item(char *name,struct tagFileRsc *parent,
 //      attr，新文件（目录）的属性
 //返回：true=成功，false=失败，
 //-----------------------------------------------------------------------------
-bool_t winfs_move_file(struct tagFileRsc *src_fp,   struct tagFileRsc *dest_fp)
+bool_t winfs_move_file(struct FileRsc *src_fp,   struct FileRsc *dest_fp)
 {
     return false;
 }
@@ -451,7 +445,7 @@ bool_t winfs_move_file(struct tagFileRsc *src_fp,   struct tagFileRsc *dest_fp)
 //      fp，目标文件夹的文件指针
 //返回：子文件（目录）数
 //-----------------------------------------------------------------------------
-uint32_t winfs_check_folder(struct tagFileRsc *parent)
+uint32_t winfs_check_folder(struct FileRsc *parent)
 {
     char name_buf[cn_winpath_limit+1];
     u32 items_num = 0;
@@ -479,7 +473,6 @@ uint32_t winfs_check_folder(struct tagFileRsc *parent)
         FindClose(hWnd);
     }
 
-    printf("%s    %d \n\r",__FUNCTION__ ,items_num);
     return items_num;
 }
 
@@ -488,7 +481,7 @@ uint32_t winfs_check_folder(struct tagFileRsc *parent)
 //参数：fp，被删除的目录（文件）指针
 //返回：true=成功，false=失败
 //-----------------------------------------------------------------------------
-bool_t winfs_remove_file(struct tagFileRsc *fp)
+bool_t winfs_remove_file(struct FileRsc *fp)
 {
     char name_buf[cn_winpath_limit+1];
 
@@ -526,8 +519,8 @@ bool_t winfs_remove_file(struct tagFileRsc *fp)
 //      整个目录，内存管理将完全正常，否则，为struct file_rsc结构分配的内存将需
 //      要用户手动释放
 //---------------------------------------------------------------------
-struct tagFileRsc * winfs_item_traversal_son(struct tagFileRsc *parent,
-                                            struct tagFileRsc *current)
+struct FileRsc * winfs_item_traversal_son(struct FileRsc *parent,
+                                            struct FileRsc *current)
 {
     char name_buf[cn_winpath_limit+1];
     HANDLE *hWnd;
@@ -540,7 +533,7 @@ struct tagFileRsc * winfs_item_traversal_son(struct tagFileRsc *parent,
         return NULL;
     if(current == NULL)
     {
-        current = M_MallocLc(sizeof(struct tagFileRsc),CN_TIMEOUT_FOREVER + sizeof(HANDLE*));
+        current = M_MallocLc(sizeof(struct FileRsc),CN_TIMEOUT_FOREVER + sizeof(HANDLE*));
         if(current == NULL)
             return NULL;
         hWnd = (HANDLE*)(current+1);
@@ -672,8 +665,8 @@ struct tagFileRsc * winfs_item_traversal_son(struct tagFileRsc *parent,
 //      CN_FS_ITEM_INEXIST,文件(目录)不存在
 //      cn_limit_uint32，其他错误
 //----------------------------------------------------------------------------
-uint32_t winfs_open_item(char *name,struct tagFileRsc *parent,
-                       struct tagFileRsc *result,enum _FILE_OPEN_MODE_ access_mode)
+uint32_t winfs_open_item(char *name,struct FileRsc *parent,
+                       struct FileRsc *result,enum _FILE_OPEN_MODE_ access_mode)
 {
     char name_buf[cn_winpath_limit+1];
     u32 dwCreationDisposition = 0;
@@ -684,7 +677,6 @@ uint32_t winfs_open_item(char *name,struct tagFileRsc *parent,
 //    SYSTEMTIME syst;
     char *pchar,*pwn;
 
-    printf("%s    %s \n\r",__FUNCTION__ ,name);
     if(parent == NULL)
         return CN_LIMIT_UINT32;
     if(parent->file_attr.bits.folder == 0)
@@ -819,8 +811,8 @@ uint32_t winfs_open_item(char *name,struct tagFileRsc *parent,
 //返回：true=文件/目录存在，并在result中返回文件信息(不分配文件缓冲区)。
 //      false = 文件/目录不存在，不修改result。
 //----------------------------------------------------------------------------
-bool_t winfs_lookfor_item(char *name,struct tagFileRsc *parent,
-                         struct tagFileRsc *result)
+bool_t winfs_lookfor_item(char *name,struct FileRsc *parent,
+                         struct FileRsc *result)
 {
     char name_buf[cn_winpath_limit+1];
     HANDLE fhandle;
@@ -828,7 +820,6 @@ bool_t winfs_lookfor_item(char *name,struct tagFileRsc *parent,
 //    SYSTEMTIME syst;
     char *pchar,*pwn;
 
-    printf("%s    %s \n\r",__FUNCTION__ ,name);
     if(parent == NULL)
         return false;
     if(parent->file_attr.bits.folder == 0)
@@ -917,9 +908,8 @@ bool_t winfs_lookfor_item(char *name,struct tagFileRsc *parent,
 //参数：fp，被操作的文件指针
 //返回：true=成功，false=失败
 //-----------------------------------------------------------------------------
-bool_t winfs_close_item(struct tagFileRsc *fp)
+bool_t winfs_close_item(struct FileRsc *fp)
 {
-    printf("%s    %s \n\r",__FUNCTION__ ,fp->name);
     if(fp == NULL)
         return false;
     if(CloseHandle((HANDLE)fp->file_medium_tag))
@@ -934,7 +924,7 @@ bool_t winfs_close_item(struct tagFileRsc *fp)
 //参数：fp，被操作的文件指针
 //返回：true=成功，false=失败
 //-----------------------------------------------------------------------------
-bool_t winfs_rename_item(struct tagFileRsc *fp,char *newname)
+bool_t winfs_rename_item(struct FileRsc *fp,char *newname)
 {
     return true;
 }
@@ -944,7 +934,7 @@ bool_t winfs_rename_item(struct tagFileRsc *fp,char *newname)
 //参数:
 //返回: 无
 //-----------------------------------------------------------------------------
-void winfs_check_PTT(struct tagPTTDevice *PTT_device_tag,
+void winfs_check_PTT(struct PTTDevice *PTT_device_tag,
                      sint64_t *sum_size,sint64_t *valid_size,sint64_t *free_size)
 {
     u32 SectorsPerCluster;
@@ -983,12 +973,12 @@ void winfs_check_PTT(struct tagPTTDevice *PTT_device_tag,
 //参数：PTT_device_tag，被操作的分区指针，通用结构，非flash专用。
 //返回：目录表尺寸
 //-----------------------------------------------------------------------------
-uint32_t winfs_check_FDT_size(struct tagPTTDevice *PTT_device_tag)
+uint32_t winfs_check_FDT_size(struct PTTDevice *PTT_device_tag)
 {
     printf("%s    \n\r",__FUNCTION__);
     return 0;
 }
-bool_t winfs_Format(u32 fmt_para1,u32 fmt_para2,struct tagPTTDevice *PTT_device_tag)
+bool_t winfs_Format(u32 fmt_para1,u32 fmt_para2,struct PTTDevice *PTT_device_tag)
 {
     return true;
 }
@@ -1000,8 +990,8 @@ bool_t winfs_Format(u32 fmt_para1,u32 fmt_para2,struct tagPTTDevice *PTT_device_
 //-----------------------------------------------------------------------------
 ptu32_t ModuleInstall_WinFs(ptu32_t para)
 {
-    static struct tagPTTDevice PTT_device_tag[3];
-    struct tagFileRsc *root_file;
+    static struct PTTDevice PTT_device_tag[3];
+    struct FileRsc *root_file;
     char *pchar;
     char buf[256];
     u32 dbx_num = 0;
@@ -1062,7 +1052,7 @@ ptu32_t ModuleInstall_WinFs(ptu32_t para)
                 PTT_device_tag[dbx_num].rename_item = winfs_rename_item;
                 PTT_device_tag[dbx_num].item_traversal_son = winfs_item_traversal_son;
                 PTT_device_tag[dbx_num].check_fdt_size = winfs_check_FDT_size;
-                PTT_device_tag[dbx_num].read_fdt = (void (*)(struct tagPTTDevice *,u8 *))NULL_func;
+                PTT_device_tag[dbx_num].read_fdt = (void (*)(struct PTTDevice *,u8 *))NULL_func;
                 PTT_device_tag[dbx_num].check_folder = winfs_check_folder;
                 PTT_device_tag[dbx_num].opened_sum = 0;
 

@@ -67,14 +67,15 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "config-prj.h"
+
+#include "board-config.h"
 #include "stdint.h"
 #include "djyos.h"
 #include "systime.h"
 #include "int.h"
 #include "stdint.h"
 #include "stddef.h"
-#include "LPC17xx.h"
+#include "lpc17xx.h"
 #include "cpu_peri_int_line.h"
 #include "cpu_peri_gpio.h"
 #include "cpu_peri_uart.h"

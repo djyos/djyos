@@ -61,63 +61,127 @@
 #include "Touch.h"
 #include "string.h"
 #include "stmpe811.h"
-#include "I2C2.h"
-#include "TS_I2C.h"
 #include "gkernel.h"
+#include "cpu_peri_iic.h"
+#include "iicbus.h"
 
-struct tagST_TouchAdjust tg_touch_adjust;
+static struct ST_TouchAdjust tg_touch_adjust;
 
-void touch_ratio_adjust(char *display_name);
-ufast_t read_touch_stmpe811(struct tagSingleTouchMsg *touch_data);
-bool_t touch_hard_init(void);
+static struct IIC_Device *ps_CRT_Dev = NULL;//定义IICBUS架构下的IIC设备结构
 
-//----初始化触摸屏模块---------------------------------------------------------
-//功能:
-//参数: display_name,本触摸屏对应的显示器名(资源名)
-//返回: 无
-//-----------------------------------------------------------------------------
-ptu32_t ModuleInstall_Touch_Stmpe811(ptu32_t para)
+#define CRT_CLK_FRE         (100*1000)      //总线速度，单位Hz
+#define CRT_ADDRESS         0x49            //设备地址
+#define STMPE811_DEVADDR    0x41            /* 7-bit I2C address */
+/* =============================================================================
+ 功能：stmpe811芯片初始化，初始化和加载设备到对应的IIC总线.
+ 参数：无
+ 返回：true,成功;false,失败
+ =============================================================================*/
+
+static bool_t STMPE811_Init(void)
 {
-    static struct tagSingleTouchPrivate stmpe811;
-    if(!touch_hard_init( ))
-        return -1;
-    touch_ratio_adjust((char*)para);
-    stmpe811.read_touch = read_touch_stmpe811;
-    Touch_InstallDevice("stmpe811",&stmpe811);
-    return 1;
-}
 
-//----触摸屏硬件初始化---------------------------------------------------------
+    static struct  IIC_Device s_CRT_Dev;
+    s_CRT_Dev.DevAddr=CRT_ADDRESS;
+    s_CRT_Dev.BitOfMemAddr=8;
+    s_CRT_Dev.BitOfMemAddrInDevAddr=0;
+
+    if(NULL != IIC_DevAdd_s(&s_CRT_Dev,"IIC2","STMPE811",STMPE811_DEVADDR,7,23))
+    {
+        ps_CRT_Dev = &s_CRT_Dev;
+        IIC_BusCtrl(ps_CRT_Dev,CN_IIC_SET_CLK,CRT_CLK_FRE,0);//设置时钟大小
+        IIC_BusCtrl(ps_CRT_Dev,CN_IIC_SET_UNPOLL,0,0);       //使用中断方式发送
+        return true;
+    }
+
+    return false;
+}
+// =============================================================================
+// 功能：    读函数，
+// 参数：    RegAddr 寄存器地址  num 数据长度
+// 返回：接收的字
+// =============================================================================
+static u32 TS_Read ( u8 RegAddr, u8 num)
+{
+
+   static u8 buf[4];
+   num = IIC_Read(ps_CRT_Dev,RegAddr,buf,num,0xffffffff);
+	switch (num)
+	{   case 1:
+			return buf[0];
+
+		case 2:
+			return ((buf[1]) | buf[0]<<8);
+
+		case 3:
+			return (buf[2]|(buf[1]<<8)|(buf[0]<<16));
+
+		default:
+			return(buf[3]|(buf[2]<<8)|(buf[1]<<16)|(buf[0]<<24));
+	}
+
+}
+// =============================================================================
+// 功能：写寄存器
+// 参数：DelDev,器件结构体指针
+//       addr,发送地址，即指存储地址
+//       buf,发送数据缓冲区指针
+//       len,发送数据长度，字节单位
+//       block_option,阻塞选项,true表示阻塞发送，false为非阻塞发送
+//       timeout,超时时间，us
+// =============================================================================
+static  void TS_Write (u8 reg, u8 num, u32 val)
+{
+	u8 buf[4];
+	buf[0]=(u8)(val & 0x000000ff);
+	IIC_Write( ps_CRT_Dev , reg,buf,num, true,0xffffffff );
+
+}
+//---------------------------------------------------------------------------
 //功能: 触摸屏硬件初始化
 //参数: 无
 //返回: 键盘设备号，-1表示按照键盘设备失败
 //-----------------------------------------------------------------------------
-bool_t touch_hard_init(void)
+static bool_t touch_hard_init(void)
 {
     u16 chipid;
 
-    I2C2_Init();
-    chipid = TS_Read (CHIP_ID, 2);                      //Read CHIP_ID
-
+    chipid = TS_Read (CHIP_ID, 2);                      //测试通信是否正常
     if(chipid ==0x811)
     {
         TS_Write(SYS_CTRL2, 1, 0x0C);                   //打开TSC及ADC的时钟
+        Djy_DelayUs(100);
         TS_Write(INT_EN, 1, 0x07);                      //使能中断
         //ADC分辨率（12bit），参考电压（内部）及采样时间（124）
+        Djy_DelayUs(100);
         TS_Write(ADC_CTRL1 , 1, 0x68);
+        Djy_DelayUs(100);
         TS_Write(ADC_CTRL2 , 1, 0x01);                  //ADC采样频率（3.25Mhz）
+        Djy_DelayUs(100);
         TS_Write(GPIO_AF , 1, 0x00);                    //端口选择为触摸屏使用
+        Djy_DelayUs(100);
         TS_Write(TSC_CFG, 1, 0x92);                     //TSC_CFG
-        TS_Write (FIFO_TH, 1, 16);          //触摸屏的触发门限1（测量的是单击）
-        //TS_Write (FIFO_TH, 1, 0x05);        //触摸屏的触发门限5（测量的是轨迹）
+        Djy_DelayUs(100);
+        TS_Write (FIFO_TH, 1, 16);             //触摸屏的触发门限1（测量的是单击）
+        //TS_Write (FIFO_TH, 1, 0x05);         //触摸屏的触发门限5（测量的是轨迹）
+        Djy_DelayUs(100);
         TS_Write(FIFO_STA, 1, 0x01);                    //FIFO复位
+        Djy_DelayUs(100);
         TS_Write(FIFO_STA, 1, 0x00);
+        Djy_DelayUs(100);
         TS_Write(TSC_FRACT_XYZ, 1, 0x07);
+        Djy_DelayUs(100);
         TS_Write(TSC_I_DRIVE, 1, 0x01);
+        Djy_DelayUs(100);
 
         TS_Write(TSC_CTRL, 1, 0x01 | stmpe811_opmode<<1); //使能TSC
+        Djy_DelayUs(100);
         TS_Write(INT_STA, 1, 0xFF);                       //清除所有中断
+        Djy_DelayUs(100);
         TS_Write(INT_CTRL, 1, 0x01);                      //不使能TSC
+        Djy_DelayUs(100);
+
+
         return true;
     }
     else
@@ -132,12 +196,11 @@ bool_t touch_hard_init(void)
 //参数: touch_data，采集到的坐标
 //返回: 1=触摸笔按下，0=触摸笔提起，
 //-----------------------------------------------------------------------------
-ufast_t read_touch_stmpe811(struct tagSingleTouchMsg *touch_data)
+static ufast_t read_touch_stmpe811(struct SingleTouchMsg *touch_data)
 {
     s32 i, n, tch_data;
     s32 tch_x,tch_y,tch_z;
     u8 tmp,tch_int;
-
     tch_int = TS_Read (INT_STA, 1);     //Read Touch-screen interrupt status
 
     if ((tch_int & 0x02))                 //过了门限,或FIFO满，或FIFO溢出
@@ -201,10 +264,13 @@ ufast_t read_touch_stmpe811(struct tagSingleTouchMsg *touch_data)
 
         TS_Write(INT_EN, 1, tmp | (tch_int & 0x0E));    //重新使能中断
         TS_Write(INT_STA, 1, 0x02);
+        if(n!=0)
+        {
+            tch_x /=n;       //平均多次座标值
+            tch_y /=n;
+            tch_z /=n;
+        }
 
-        tch_x /=n;       //平均多次座标值
-        tch_y /=n;
-        tch_z /=n;
 
         if(tg_touch_adjust.ratio_x != 0)
         {
@@ -218,6 +284,15 @@ ufast_t read_touch_stmpe811(struct tagSingleTouchMsg *touch_data)
                                 / tg_touch_adjust.ratio_y;
         }
         touch_data->z = tch_z;
+        if (TS_Read(FIFO_SIZE, 1))
+        {
+			TS_Write(INT_STA, 1, 0xFF);                //清除所有中断
+			Djy_EventDelay(100);
+			TS_Write(FIFO_STA, 1, 0x01);                //FIFO复位
+			Djy_EventDelay(100);
+            TS_Write(FIFO_STA, 1, 0x00);
+            Djy_EventDelay(100);
+        }
         return 1;
     }
     else
@@ -229,20 +304,21 @@ ufast_t read_touch_stmpe811(struct tagSingleTouchMsg *touch_data)
 //----触摸屏校准---------------------------------------------------------------
 //功能: 触摸屏的尺寸可能与液晶可显示区域不完全一致，安装也可能有偏差，需要计算
 //      校准系数和偏移量。为获得更高精度，使用定点小数。
-//参数: display_name,本触摸屏对应的显示器名(资源名)
+//参数: display_name,本触摸屏对应的显示器名(资源名)//用静态变量存储每次开机校准一次//
 //返回: 无
 //-----------------------------------------------------------------------------
-void touch_ratio_adjust(char *display_name)
+static void touch_ratio_adjust(char *display_name)
 {
-    struct tagGkWinRsc *desktop;
-    struct tagSingleTouchMsg touch_xyz0,touch_xyz1;
+    struct GkWinRsc *desktop;
+    struct SingleTouchMsg touch_xyz0,touch_xyz1;
     FILE *touch_init;
     s32 limit_left,limit_top,limit_right,limit_bottom;
 
     if((touch_init = fopen("sys:\\touch_init.dat","r")) != NULL)
     {
 
-        fread(&tg_touch_adjust,sizeof(struct tagST_TouchAdjust),1,touch_init);
+        fread(&tg_touch_adjust,sizeof(struct ST_TouchAdjust),1,touch_init);
+        while(1);// added by jzl for test!
     }
     else
     {
@@ -257,19 +333,19 @@ void touch_ratio_adjust(char *display_name)
     //    GK_ApiSetPrio(desktop,-1,CN_GK_SYNC);
         GK_ApiFillWin(desktop,CN_COLOR_WHITE,0);
         GK_ApiDrawText(desktop,NULL,NULL,limit_left+10,limit_top+50,
-                            "触摸屏矫正",21,CN_COLOR_WHITE,CN_R2_COPYPEN,0);
+                       "触摸屏矫正", 21, CN_COLOR_BLACK, CN_R2_COPYPEN, 0);
         GK_ApiDrawText(desktop,NULL,NULL,limit_left+10,limit_top+70,
-                            "请准确点击十字交叉点",21,CN_COLOR_WHITE,CN_R2_COPYPEN,0);
+                       "请准确点击十字交叉点", 21, CN_COLOR_BLACK, CN_R2_COPYPEN, 0); 
         GK_ApiLineto(desktop,0,20,40,20,CN_COLOR_RED,CN_R2_COPYPEN,0);
         GK_ApiLineto(desktop,20,0,20,40,CN_COLOR_RED,CN_R2_COPYPEN,CN_TIMEOUT_FOREVER);
-
+        GK_ApiSyncShow(CN_TIMEOUT_FOREVER);
         while(!read_touch_stmpe811(&touch_xyz0));           //记录触摸屏第一点校正值
 
         GK_ApiFillWin(desktop,CN_COLOR_WHITE,0);
         GK_ApiDrawText(desktop,NULL,NULL,limit_left+10,limit_top+50,
-                            "触摸屏矫正",21,CN_COLOR_WHITE,CN_R2_COPYPEN,0);
+                       "触摸屏矫正", 21, CN_COLOR_BLACK, CN_R2_COPYPEN, 0); 
         GK_ApiDrawText(desktop,NULL,NULL,limit_left+10,limit_top+70,
-                            "再次准确点击十字交叉点",21,CN_COLOR_WHITE,CN_R2_COPYPEN,0);
+                       "再次准确点击十字交叉点", 21, CN_COLOR_BLACK, CN_R2_COPYPEN, 0); 
         GK_ApiLineto(desktop,limit_right-40,limit_bottom-20,
                       limit_right,limit_bottom-20,
                       CN_COLOR_RED,CN_R2_COPYPEN,0);
@@ -280,24 +356,50 @@ void touch_ratio_adjust(char *display_name)
 
         if (TS_Read(FIFO_SIZE, 1))
         {
-            TS_Write(FIFO_STA, 1, 0x01);                //FIFO复位
+			TS_Write(INT_STA, 1, 0xFF);                //清除所有中断
+			Djy_DelayUs(100);
+			TS_Write(FIFO_STA, 1, 0x01);                //FIFO复位
+			Djy_DelayUs(100);
             TS_Write(FIFO_STA, 1, 0x00);
+            Djy_DelayUs(100);
         }
 
         while(!read_touch_stmpe811(&touch_xyz1));           //记录触摸屏第二点校正值
-
+        GK_ApiFillWin(desktop,CN_COLOR_WHITE,0);
         tg_touch_adjust.ratio_x = ((touch_xyz1.x - touch_xyz0.x)<<16)
                         /(limit_right - limit_left -40);
         tg_touch_adjust.offset_x = (touch_xyz0.x<<16) - 20*tg_touch_adjust.ratio_x;
         tg_touch_adjust.ratio_y = ((touch_xyz1.y - touch_xyz0.y)<<16)
                         /(limit_bottom- limit_top-40);
         tg_touch_adjust.offset_y= (touch_xyz0.y<<16) - 20*tg_touch_adjust.ratio_y;
-        GK_ApiFillWin(desktop,CN_COLOR_WHITE,0);
+        GK_ApiFillWin(desktop,CN_COLOR_BLUE,0);
+        GK_ApiSyncShow(CN_TIMEOUT_FOREVER);
     //    GK_DestroyWin(desktop);
         touch_init = fopen("sys:\\touch_init.dat","w+");
-        fwrite(&tg_touch_adjust,sizeof(struct tagST_TouchAdjust),1,touch_init);
+        if(touch_init)
+        	fwrite(&tg_touch_adjust,sizeof(struct ST_TouchAdjust),1,touch_init);
     }
     fclose(touch_init);
 
 }
+//----初始化触摸屏模块---------------------------------------------------------
+//功能:
+//参数: display_name,本触摸屏对应的显示器名(资源名)
+//返回: true,成功;false,失败
+//-----------------------------------------------------------------------------
+ptu32_t ModuleInstall_Touch_Stmpe811(void)
+{
+    static struct SingleTouchPrivate stmpe811;
+
+    if(!STMPE811_Init( ))//将器件挂到IIC2总线上
+        return false;
+    if(!touch_hard_init())//触摸屏初始化
+    	 return false;
+    touch_ratio_adjust("ili9325");          //屏幕校准
+    stmpe811.read_touch = read_touch_stmpe811;//读触摸点的坐标函数
+    Touch_InstallDevice("stmpe811",&stmpe811);//添加驱动到Touch
+    return true;
+}
+
+
 

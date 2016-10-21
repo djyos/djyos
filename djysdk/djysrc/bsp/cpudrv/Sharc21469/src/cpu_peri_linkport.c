@@ -407,7 +407,7 @@ u32 LinkPort_RecvData(u32 LinkPortNum)
 //  返回：成功，返回true，否则返回false。
 
 **--------------------------------------------------------------------*/
-u32 LinkPort0_RecvISR(ufast_t linkport0_int_line)
+u32 LinkPort0_RecvISR(ptu32_t linkport0_int_line)
 {
     volatile tag_LinkPortReg *tplinkport;
     int lstat = 0;
@@ -435,7 +435,7 @@ u32 LinkPort0_RecvISR(ufast_t linkport0_int_line)
 //  返回：成功，返回true，否则返回false。
 
 **--------------------------------------------------------------------*/
-u32 LinkPort0_SendISR(ufast_t linkport0_int_line)
+u32 LinkPort0_SendISR(ptu32_t linkport0_int_line)
 {
     volatile tag_LinkPortReg *tplinkport;
     int lstat = 0;
@@ -462,7 +462,7 @@ u32 LinkPort0_SendISR(ufast_t linkport0_int_line)
 //  返回：成功，返回true，否则返回false。
 
 **--------------------------------------------------------------------*/
-u32  LinkPort1_RecvISR(ufast_t linkport1_int_line)
+u32  LinkPort1_RecvISR(ptu32_t linkport1_int_line)
 {
     volatile tag_LinkPortReg *tplinkport;
     int lstat = 0;
@@ -487,7 +487,7 @@ u32  LinkPort1_RecvISR(ufast_t linkport1_int_line)
 //  返回：成功，返回true，否则返回false。
 
 **--------------------------------------------------------------------*/
-u32 LinkPort1_SendISR(ufast_t linkport1_int_line)
+u32 LinkPort1_SendISR(ptu32_t linkport1_int_line)
 {
      volatile tag_LinkPortReg *tplinkport;
     int lstat = 0;
@@ -519,6 +519,7 @@ bool_t LinkPort_InterruptInit(u32 LinkPortNum,u32 TransMode)
 
      if(LinkPortNum == 0)
     {
+    	Int_Register(cn_int_line_LP0I);
         //tpdmalinkport = pg_dma_linkport0_reg;
       if(TransMode==0)
          {
@@ -534,6 +535,7 @@ bool_t LinkPort_InterruptInit(u32 LinkPortNum,u32 TransMode)
     else if (LinkPortNum == 1)
     {
          //tpdmalinkport = pg_dma_linkport1_reg;
+         Int_Register(cn_int_line_LP1I);
        //中断线初始化
     if(TransMode==0)
         {

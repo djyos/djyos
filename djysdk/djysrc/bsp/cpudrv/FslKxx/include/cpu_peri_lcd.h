@@ -67,7 +67,7 @@ struct DisplayPara
 }tagDisplayPara;
 
 
-struct tagDisplayRsc* ModuleInstall_LCD(s32 width,s32 height,const char *DisplayName,const char* HeapName);
+struct DisplayRsc* ModuleInstall_LCD(s32 width,s32 height,const char *DisplayName,const char* HeapName);
 
 #ifdef __cplusplus
 }

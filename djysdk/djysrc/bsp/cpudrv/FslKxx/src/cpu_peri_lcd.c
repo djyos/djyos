@@ -46,7 +46,7 @@
 #include "stdint.h"
 #include "stdlib.h"
 
-#include "gk_display.h"
+#include <gui/gkernel/gk_display.h>
 #include "board-config.h"
 
 #include "cpu_peri.h"
@@ -68,7 +68,7 @@ static u32 cfg_LcdPf = CN_SYS_PF_ERGB8888;
 // |----------------------------------------------------
 // |(ymax-1)*xmax,(ymax-1)*xmax+1------------ymax*xmax-1    右下角
 //\/
-struct tagDisplayRsc tg_lcd_display;
+struct DisplayRsc tg_lcd_display;
 static u8 *pg_video_buf,*pg_frame_buffer;
 
 
@@ -118,9 +118,9 @@ void __lcd_controller_init(void)
     // set LCD Screen Start Address
     LCDC->LSSAR = FRAME_START_ADDRESS;
     // set LCD Size. The XMAX bitfield is the screen x-size/16.
-    LCDC->LSR = LCDC_LSR_XMAX( (LCD_XSIZE / 16) ) | LCDC_LSR_YMAX( LCD_YSIZE );
+    LCDC->LSR = LCDC_LSR_XMAX( (CN_LCD_XSIZE / 16) ) | LCDC_LSR_YMAX( CN_LCD_YSIZE );
     // set LCD virtual page width
-    LCDC->LVPWR = LCDC_LVPWR_VPW( LCD_XSIZE );
+    LCDC->LVPWR = LCDC_LVPWR_VPW( CN_LCD_XSIZE );
     // set LCD cursor positon & settings (turn off)
     LCDC->LCPR = 0;
     LCDC->LCWHB = 0;
@@ -232,7 +232,7 @@ void __lcd_power_enable(int invpwren,int pwren)
 //参数: disp，显示器指针
 //返回: true=成功，false=失败
 //-----------------------------------------------------------------------------
-bool_t __lcd_disp_ctrl(struct tagDisplayRsc *disp)
+bool_t __lcd_disp_ctrl(struct DisplayRsc *disp)
 {
     return true;
 }
@@ -247,7 +247,7 @@ bool_t __lcd_disp_ctrl(struct tagDisplayRsc *disp)
 //      r2_code，二元光栅操作码
 //返回: 无
 //-----------------------------------------------------------------------------
-bool_t __lcd_set_pixel_bm(struct tagRectBitmap *bitmap,
+bool_t __lcd_set_pixel_bm(struct RectBitmap *bitmap,
                      s32 x,s32 y,u32 color,u32 r2_code)
 {
     return false;
@@ -261,7 +261,7 @@ bool_t __lcd_set_pixel_bm(struct tagRectBitmap *bitmap,
 //      r2_code，二元光栅操作码
 //返回: true=成功绘制，false=失败，无硬件加速或不支持按r2_code画线
 //-----------------------------------------------------------------------------
-bool_t __lcd_line_bm(struct tagRectBitmap *bitmap,struct tagRectangle *limit,
+bool_t __lcd_line_bm(struct RectBitmap *bitmap,struct Rectangle *limit,
                         s32 x1,s32 y1,s32 x2,s32 y2,u32 color,u32 r2_code)
 {
     return false;
@@ -275,7 +275,7 @@ bool_t __lcd_line_bm(struct tagRectBitmap *bitmap,struct tagRectangle *limit,
 //      r2_code，二元光栅操作码
 //返回: true=成功绘制，false=失败，无硬件加速或不支持按r2_code画线
 //-----------------------------------------------------------------------------
-bool_t __lcd_line_bm_ie(struct tagRectBitmap *bitmap,struct tagRectangle *limit,
+bool_t __lcd_line_bm_ie(struct RectBitmap *bitmap,struct Rectangle *limit,
                         s32 x1,s32 y1,s32 x2,s32 y2,u32 color,u32 r2_code)
 {
     return false;
@@ -287,14 +287,15 @@ bool_t __lcd_line_bm_ie(struct tagRectBitmap *bitmap,struct tagRectangle *limit,
 //      color，填充颜色，cn_sys_pf_e8r8g8b8格式
 //返回: true=成功绘制，false=失败
 //-----------------------------------------------------------------------------
-bool_t __lcd_fill_rect_bm(struct tagRectBitmap *dst_bitmap,
-                          struct tagRectangle *Target,
-                          struct tagRectangle *Focus,
+bool_t __lcd_fill_rect_bm(struct RectBitmap *dst_bitmap,
+                          struct Rectangle *Target,
+                          struct Rectangle *Focus,
                           u32 Color0,u32 Color1,u32 Mode)
 {
     u32 x,y;
     u32 pixel;
     u32 *dst,*p;
+    s32 m,n;
     if(Mode != CN_FILLRECT_MODE_N)
         return false;
 
@@ -310,9 +311,22 @@ bool_t __lcd_fill_rect_bm(struct tagRectBitmap *dst_bitmap,
     for(y = Focus->top; y < Focus->bottom; y++)
     {
         p =dst;
-        for(x=Focus->left; x<Focus->right;x++)
+        n=(Focus->right-Focus->left+7)/8;
+        m=(Focus->right-Focus->left)%8;
+        for(x=0; x<n;x++)
         {
-            *p++ =pixel;
+           switch (m)
+           {
+           	   case 0:*p++ =pixel;
+			   case 7:*p++ =pixel;
+			   case 6:*p++ =pixel;
+			   case 5:*p++ =pixel;
+			   case 4:*p++ =pixel;
+			   case 3:*p++ =pixel;
+			   case 2:*p++ =pixel;
+			   case 1:*p++ =pixel;
+           }
+           m=0;
         }
         dst += dst_bitmap->linebytes >> 2;
     }
@@ -331,17 +345,19 @@ bool_t __lcd_fill_rect_bm(struct tagRectBitmap *dst_bitmap,
 //      transparentcolor，透明色
 //返回: true=成功,false=失败
 //-----------------------------------------------------------------------------
-bool_t __lcd_blt_bm_to_bm( struct tagRectBitmap *dst_bitmap,
-                            struct tagRectangle *DstRect,
-                            struct tagRectBitmap *src_bitmap,
-                            struct tagRectangle *SrcRect,
-                            u32 RopCode, u32 KeyColor)
+bool_t __lcd_blt_bm_to_bm( struct RectBitmap *dst_bitmap,
+                            struct Rectangle *DstRect,
+                            struct RectBitmap *src_bitmap,
+                            struct Rectangle *SrcRect,
+                            struct RopGroup RopCode, u32 HyalineColor)
 {
     u32 *src_offset,*dst_offset;    //源位图点阵缓冲区可能不对齐!!!
     u32 y;
+    struct RopGroup Rop = { 0, 0, 0, CN_R2_COPYPEN, 0, 0, 0  };
+
     if((dst_bitmap->PixelFormat != CN_SYS_PF_ERGB8888)
              ||(src_bitmap->PixelFormat != CN_SYS_PF_ERGB8888)
-             ||(RopCode != 0))
+             ||(memcmp(&RopCode, &Rop ,sizeof(struct RopGroup))!=0))
     {
         return false;
     }
@@ -376,21 +392,9 @@ bool_t __lcd_blt_bm_to_bm( struct tagRectBitmap *dst_bitmap,
 //      x、y，坐标
 //返回: 读取的像素值，cn_sys_pf_e8r8g8b8格式
 //-----------------------------------------------------------------------------
-u32 __lcd_get_pixel_bm(struct tagRectBitmap *bitmap,s32 x,s32 y)
+u32 __lcd_get_pixel_bm(struct RectBitmap *bitmap,s32 x,s32 y)
 {
     return 0;
-}
-//----读取bitmap中矩形块-------------------------------------------------------
-//功能: 把一个位图中的矩形读取到另一个位图中。
-//参数: src，源位图
-//      rect，欲读取的矩形
-//      dest，保存矩形的位图，其长宽必须与rect相同
-//返回: true=成功读取，false=失败，原因可能是提供了不支持的像素格式
-//-----------------------------------------------------------------------------
-bool_t __lcd_get_rect_bm(struct tagRectBitmap *src,struct tagRectangle *rect,
-                     struct tagRectBitmap *dest)
-{
-    return false;
 }
 //----screen中画像素-----------------------------------------------------------
 //功能: 在screen中画一个像素.
@@ -403,7 +407,7 @@ bool_t __lcd_set_pixel_screen(s32 x,s32 y,u32 color,u32 rop2_code)
 {
     u32 dest,pen;
     u32 byteoffset;
-    byteoffset = y*LCD_XSIZE + x;
+    byteoffset = y*CN_LCD_XSIZE + x;
     pen = GK_ConvertRGB24ToPF(CN_SYS_PF_ERGB8888,color);
     dest = (u32)pg_video_buf[byteoffset];
     dest = GK_BlendRop2(dest,pen,rop2_code);
@@ -419,7 +423,7 @@ bool_t __lcd_set_pixel_screen(s32 x,s32 y,u32 color,u32 rop2_code)
 //      r2_code，二元光栅操作码
 //返回: true=成功绘制，false=失败，无硬件加速或不支持按r2_code画线
 //-----------------------------------------------------------------------------
-bool_t __lcd_line_screen(struct tagRectangle *limit,
+bool_t __lcd_line_screen(struct Rectangle *limit,
                     s32 x1,s32 y1,s32 x2,s32 y2,u32 color,u32 r2_code)
 {
     return false;
@@ -432,7 +436,7 @@ bool_t __lcd_line_screen(struct tagRectangle *limit,
 //      r2_code，二元光栅操作码
 //返回: true=成功绘制，false=失败，无硬件加速或不支持按r2_code画线
 //-----------------------------------------------------------------------------
-bool_t __lcd_line_screen_ie(struct tagRectangle *limit,
+bool_t __lcd_line_screen_ie(struct Rectangle *limit,
                         s32 x1,s32 y1,s32 x2,s32 y2,u32 color,u32 r2_code)
 {
     return false;
@@ -443,8 +447,8 @@ bool_t __lcd_line_screen_ie(struct tagRectangle *limit,
 //      color，填充颜色
 //返回: true=成功绘制，false=失败
 //-----------------------------------------------------------------------------
-bool_t __lcd_fill_rect_screen(struct tagRectangle *Target,
-                              struct tagRectangle *Focus,
+bool_t __lcd_fill_rect_screen(struct Rectangle *Target,
+                              struct Rectangle *Focus,
                               u32 Color0,u32 Color1,u32 Mode)
 {
 //  int x,y;
@@ -476,8 +480,8 @@ bool_t __lcd_fill_rect_screen(struct tagRectangle *Target,
 //      xsrc、ysrc，源位图中被传送的区域左上角坐标(以源位图左上角坐标为原点)
 //返回: true=成功，false=失败
 //-----------------------------------------------------------------------------
-bool_t __lcd_bm_to_screen(struct tagRectangle *dst_rect,
-                struct tagRectBitmap *src_bitmap,s32 xsrc,s32 ysrc)
+bool_t __lcd_bm_to_screen(struct Rectangle *dst_rect,
+                struct RectBitmap *src_bitmap,s32 xsrc,s32 ysrc)
 {
     u32 size,double_width_src;
     u32 byteoffset_rect,byteoffset_bitmap;
@@ -490,7 +494,7 @@ bool_t __lcd_bm_to_screen(struct tagRectangle *dst_rect,
     byteoffset_bitmap = ysrc*double_width_src + xsrc*2;
     //目标矩形左上角坐标的双字节偏移量，因为pg_video_buf为u16的指针
     //因为是传送到screen上，所以每行双字节数取LCD_XSIZE
-    byteoffset_rect = dst_rect->top*LCD_XSIZE + dst_rect->left;
+    byteoffset_rect = dst_rect->top*CN_LCD_XSIZE + dst_rect->left;
 
     //bitmap到screen位块传送
     for(y = dst_rect->top;y < dst_rect->bottom;y++)
@@ -498,7 +502,7 @@ bool_t __lcd_bm_to_screen(struct tagRectangle *dst_rect,
         memcpy(&(pg_video_buf[byteoffset_rect]),
                     &src_bitmap->bm_bits[byteoffset_bitmap],size);
         byteoffset_bitmap += double_width_src;
-        byteoffset_rect += LCD_XSIZE;
+        byteoffset_rect += CN_LCD_XSIZE;
     }
     return true;
 }
@@ -512,7 +516,7 @@ u32 __lcd_get_pixel_screen(s32 x,s32 y)
     u32 color,offset;
 
     offset = LCDC->LSSAR;
-    offset += y*LCD_XSIZE*2;
+    offset += y*CN_LCD_XSIZE*2;
     offset += x*2;
     color = (u32)(*(u32*)offset);
     //R5G6B5
@@ -530,7 +534,7 @@ u32 __lcd_get_pixel_screen(s32 x,s32 y)
 //      dest，保存矩形的位图，其长宽必须与rect相同
 //返回: true=成功读取，false=失败，原因可能是提供了不支持的像素格式
 //-----------------------------------------------------------------------------
-bool_t __lcd_get_rect_screen(struct tagRectangle *rect,struct tagRectBitmap *dest)
+bool_t __lcd_get_rect_screen(struct Rectangle *rect,struct RectBitmap *dest)
 {
     return false;
 }
@@ -540,11 +544,11 @@ bool_t __lcd_get_rect_screen(struct tagRectangle *rect,struct tagRectBitmap *des
 //参数: 无
 //返回: 显示器资源指针
 //-----------------------------------------------------------------------------
-struct tagDisplayRsc* ModuleInstall_LCD(s32 width,s32 height,const char *DisplayName,const char* HeapName)
+struct DisplayRsc* ModuleInstall_LCD(s32 width,s32 height,const char *DisplayName,const char* HeapName)
 {
 
-    static struct tagGkWinRsc frame_win;
-    static struct tagRectBitmap FrameBitmap;
+    static struct GkWinRsc frame_win;
+    static struct RectBitmap FrameBitmap;
 
     __lcd_hard_init();
     __lcd_power_enable(0,1);
@@ -568,22 +572,20 @@ struct tagDisplayRsc* ModuleInstall_LCD(s32 width,s32 height,const char *Display
     tg_lcd_display.framebuf_direct = true;
     //无须初始化frame_buffer和desktop，z_topmost三个成员
 
-    tg_lcd_display.draw.set_pixel_bm = __lcd_set_pixel_bm;
-    tg_lcd_display.draw.fill_rect_bm = __lcd_fill_rect_bm;
-    tg_lcd_display.draw.line_bm = __lcd_line_bm;
-    tg_lcd_display.draw.line_bm_ie = __lcd_line_bm_ie;
-    tg_lcd_display.draw.blt_bm_to_bm = __lcd_blt_bm_to_bm;
-    tg_lcd_display.draw.get_pixel_bm = NULL;
-    tg_lcd_display.draw.get_rect_bm = __lcd_get_rect_bm;
-    tg_lcd_display.draw.set_pixel_screen = __lcd_set_pixel_screen;
-    tg_lcd_display.draw.line_screen = __lcd_line_screen;
-    tg_lcd_display.draw.line_screen_ie = __lcd_line_screen_ie;
-    tg_lcd_display.draw.fill_rect_screen = __lcd_fill_rect_screen;
-    tg_lcd_display.draw.bm_to_screen = __lcd_bm_to_screen;
-    tg_lcd_display.draw.get_pixel_screen = __lcd_get_pixel_screen;
-    tg_lcd_display.draw.get_rect_screen = __lcd_get_rect_screen;
+    tg_lcd_display.draw.SetPixelToBitmap = __lcd_set_pixel_bm;
+    tg_lcd_display.draw.FillRectToBitmap = __lcd_fill_rect_bm;
+    tg_lcd_display.draw.LineToBitmap = __lcd_line_bm;
+    tg_lcd_display.draw.LineToBitmapIe = __lcd_line_bm_ie;
+    tg_lcd_display.draw.BltBitmapToBitmap = __lcd_blt_bm_to_bm;
+    tg_lcd_display.draw.SetPixelToScreen = __lcd_set_pixel_screen;
+    tg_lcd_display.draw.LineToScreen = __lcd_line_screen;
+    tg_lcd_display.draw.LineToScreenIe = __lcd_line_screen_ie;
+    tg_lcd_display.draw.FillRectToScreen = __lcd_fill_rect_screen;
+    tg_lcd_display.draw.CopyBitmapToScreen = __lcd_bm_to_screen;
+    tg_lcd_display.draw.GetPixelFromScreen = __lcd_get_pixel_screen;
+    tg_lcd_display.draw.GetRectFromScreen = __lcd_get_rect_screen;
 
-    tg_lcd_display.DisplayHeap = (struct tagHeapCB *)M_FindHeap(HeapName);
+    tg_lcd_display.DisplayHeap = (struct HeapCB *)M_FindHeap(HeapName);
     tg_lcd_display.disp_ctrl = __lcd_disp_ctrl;
 
     if(GK_InstallDisplay(&tg_lcd_display,(char*)DisplayName))

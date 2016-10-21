@@ -59,60 +59,21 @@
 //   新版本号：V1.0.0
 //   修改说明: 原始版本
 //------------------------------------------------------
-
-
-#include    "gdd.h"
-#include    "./include/gdd_private.h"
-
-/*============================================================================*/
-
-void list_init(list_t *l)
-{
-        l->next = l->prev = l;
-}
-
-void list_insert_after(list_t *l, list_t *n)
-{
-        l->next->prev = n;
-        n->next = l->next;
-
-        l->next = n;
-        n->prev = l;
-}
-
-void list_insert_before(list_t *l, list_t *n)
-{
-        l->prev->next = n;
-        n->prev = l->prev;
-
-        l->prev = n;
-        n->next = l;
-}
-
-void list_remove(list_t *n)
-{
-        n->next->prev = n->prev;
-        n->prev->next = n->next;
-
-        n->next = n->prev = n;
-}
-
-int list_isempty(const list_t *l)
-{
-        return l->next == l;
-}
-
-
+#include "stdint.h"
+#include <gui\gkernel\gk_display.h>
+#include    <gui/gdd/gdd_private.h>
+#include    <cfg/gui_config.h>
+#include "list.h"
 /*============================================================================*/
 u32 GUI_GetTickMS(void)
 {
-    return (u32)(DjyGetTime( )/1000);
+    return ((u32)DjyGetSysTime( )/1000);
 }
 
 
-static  struct tagMutexLCB *gdd_mutex_lock=NULL;
+static  struct MutexLCB *gdd_mutex_lock=NULL;
 
-BOOL    GDD_Lock(void)
+bool_t    GDD_Lock(void)
 {
         Lock_MutexPend(gdd_mutex_lock,5000*mS);
         return TRUE;
@@ -139,152 +100,245 @@ void    GDD_Init(void)
 
 /*============================================================================*/
 
-static	u16 evtt_gui_server;
-
-
-static struct tagGkWinRsc *pGkDesktop;
-
-static	const char **GDD_InputDevName;
+static  const char **GDD_InputDevName;
 
 static void gdd_input_handler(void)
 {
-	tpInputMsgQ pMsgQ;
-	struct tagInputDeviceMsg msg;
-	int i;
 
-	pMsgQ=Stddev_CreatInputMsgQ(20,"input_msg");
-
-	if(pMsgQ!=NULL)
-	{
-		if(GDD_InputDevName!=NULL)
-		{
-			i=0;
-			while(1)
-			{
-				if(GDD_InputDevName[i] == NULL)
-				{
-					break;
-				}
-
-				Stddev_SetFocus(GDD_InputDevName[i],pMsgQ);
-				i++;
-			}
-		}
-
-		while(1)
-		{
-			if(Stddev_ReadMsg(pMsgQ,&msg,0xFFFFFFFF)!=false)
-			{
-				switch(msg.input_type)
-				{
-					case EN_STDIN_SINGLE_TOUCH:
-					{
-						static int x=0,y=0,z=0;
-
-						x =msg.input_data.tagSingleTouchMsg.x;
-						y =msg.input_data.tagSingleTouchMsg.y;
-						z =msg.input_data.tagSingleTouchMsg.z;
-						if(z>0)
-						{
-							MouseInput(x,y,MK_LBUTTON);
-						}
-						else
-						{
-							MouseInput(x,y,0);
-						}
-						//printf("ts: x=%d,y=%d,z=%d\r\n",x,y,z);
-					}
-					break;
-					////
-					case EN_STDIN_KEYBOARD:
-					{
-						u8* key;
-						u32 time;
-						u8 val,event;
-
-						key  =msg.input_data.key_board.key_value;
-						time =msg.input_data.key_board.time;
-
-						val  =key[0];
-						event =key[1];
-
-						if(event==0x00)
-						{
-							KeyboardInput(val,KEY_EVENT_DOWN,time);
-						}
-
-						if(event==0xF0)
-						{
-							KeyboardInput(val,KEY_EVENT_UP,time);
-						}
-
-						//printf("KBD_Event: val:%02XH,%02XH; time:%d\r\n",val,event,time);
-					}
-					break;
-					////
-				}
-
-
-			}
-		}
-
-		Stddev_DeleteInputMsgQ(pMsgQ);
-	}
 }
 
-
-
-
-static	ptu32_t gdd_input_thread(void)
+static HWND sg_pMouseHwnd;
+static  ptu32_t gdd_input_thread(void)
 {
-	//Djy_EventDelay(100*mS);
-	printf("GDD_Input_Thread.\r\n");
-	Djy_EventPop(evtt_gui_server, NULL, 0, NULL, 0, 0);
-	while(1)
-	{
-		gdd_input_handler();
-	}
-	return 0;
-}
+    HWND hwnd;
+    tpInputMsgQ pMsgQ;
+    struct InputDeviceMsg msg;
+    s32 i;
 
-static  ptu32_t gdd_server_thread(void)
-{
-	Djy_EventDelay(100*mS);
-    printf("GDD_Server_Thread.\r\n");
+    pMsgQ=HmiIn_CreatInputMsgQ(20,"input_msg");
 
-    while(1)
+    if(pMsgQ!=NULL)
     {
-        GDD_Execu(pGkDesktop);
+        if(GDD_InputDevName!=NULL)
+        {
+            i=0;
+            while(1)
+            {
+                if(GDD_InputDevName[i] == NULL)
+                {
+                    break;
+                }
+
+                HmiIn_SetFocus((char*)GDD_InputDevName[i],pMsgQ);
+                i++;
+            }
+        }
+
+        while(1)
+        {
+            if(HmiIn_ReadMsg(pMsgQ, &msg, CN_TIMEOUT_FOREVER) != false)
+            {
+                //单点触摸屏消息，模拟成鼠标消息
+                if(msg.input_type == EN_HMIIN_SINGLE_TOUCH)
+                {
+                    struct SingleTouchMsg *TouchMsg;
+                    static s32 z=0;
+                    s32 LButton_Msg;
+                    bool_t NC;
+//                    s32 x,y;
+                    POINT pt;
+                    RECT rc;
+                    TouchMsg = &msg.input_data.SingleTouchMsg;
+                    pt.x = TouchMsg->x;
+                    pt.y = TouchMsg->y;
+                    GDD_Lock();
+                    //LButtonDown所在窗口.
+                    if(TouchMsg->display != NULL)
+                        hwnd = GetWindowFromPoint(TouchMsg->display->desktop, &pt);
+                    else
+                        hwnd = GetWindowFromPoint(GetDesktopWindow()->pGkWin, &pt);
+                    MoveWindow(sg_pMouseHwnd, pt.x-4, pt.y-4);
+                    UpdateDisplay(CN_TIMEOUT_FOREVER);
+                    if(hwnd != NULL)
+                    {
+                        GetClientRectToScreen(hwnd,&rc);
+                        if(PtInRect(&rc, &pt))
+                            NC = false;
+                        else
+                            NC = true;
+
+                        if(z == TouchMsg->z)    //相等，必然是按下并拖动
+                        {
+                            if(NC )
+                                LButton_Msg = MSG_MOUSE_MOVE;
+                            else
+                                LButton_Msg = MSG_NCMOUSE_MOVE;
+                            PostMessage(hwnd, LButton_Msg, MK_LBUTTON, (pt.y << 16) | pt.x);
+                        }
+                        else
+                        {
+                            z = TouchMsg->z;
+                            if(z>0)     //touch按下，模拟成鼠标左键按下
+                            {
+                                if(NC)
+                                    LButton_Msg = MSG_NCLBUTTON_DOWN;
+                                else
+                                    LButton_Msg = MSG_LBUTTON_DOWN;
+                            }
+                            else        //touch离开，模拟成鼠标左键松开
+                            {
+                                if(NC)
+                                    LButton_Msg = MSG_NCLBUTTON_UP;
+                                else
+                                    LButton_Msg = MSG_LBUTTON_UP;
+                            }
+                            PostMessage(hwnd, LButton_Msg, 0, (pt.y << 16) | pt.x);
+                        }
+                    }
+                    GDD_Unlock();
+                }
+
+                if(msg.input_type == EN_HMIIN_KEYBOARD)
+                {
+                    u8* key;
+                    u8 val,event;
+                    u32 KeyTime;
+
+                    hwnd = GetFocusWindow();
+                    if(NULL != hwnd)
+                    {
+                        key  = msg.input_data.key_board.key_value;
+                        KeyTime = msg.input_data.key_board.time;
+
+                        val  =key[0];
+                        event =key[1];
+
+                        if(event==0x00)
+                        {
+                            PostMessage(hwnd, MSG_KEY_DOWN, val, KeyTime);
+                        }
+
+                        if(event==0xF0)
+                        {
+                            PostMessage(hwnd, MSG_KEY_UP, val, KeyTime);
+                        }
+                    }
+                }
+
+
+            }
+        }
+
+        HmiIn_DeleteInputMsgQ(pMsgQ);
     }
     return 0;
 }
 
-void    ModuleInstall_GDD(struct tagGkWinRsc *desktop,const char *InputDevName[])
+//----GDD主函数-----------------------------------------------------------------
+//描述: GDD服务执行函数,该函数不会返回.
+//参数：无
+//返回：无
+//------------------------------------------------------------------------------
+void    GDD_TimerExecu(u32 tick_time_ms);
+static  ptu32_t gdd_server_thread(void)
 {
-	u16 evtt;
+    HWND hwnd;
+    struct WindowMsg msg;
 
-	GDD_Init();
+//  hwnd =InitGddDesktop(desktop);
+    hwnd = GetDesktopWindow( );
+    UpdateDisplay(CN_TIMEOUT_FOREVER);
 
-    pGkDesktop =desktop;
+    while(1)
+    {
+
+        if(PeekMessage(&msg,hwnd))
+        {
+            DispatchMessage(&msg);
+        }
+        else
+        {
+            Djy_EventDelay(mS*50);
+            GDD_TimerExecu(GUI_GetTickMS());
+          //  TouchScreenExecu();
+        }
+    }
+    return 0;
+}
+//----鼠标绘制函数-------------------------------------------------------------
+//功能：这是按钮控件的MSG_PAINT消息响应函数
+//参数：pMsg，消息指针
+//返回：固定true
+//-----------------------------------------------------------------------------
+static  bool_t MousePaint(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    HDC hdc;
+    RECT rc;
+
+    hwnd=pMsg->hwnd;
+    hdc =BeginPaint(hwnd);
+    if(NULL!=hdc)
+    {
+        GetClientRect(hwnd,&rc);
+        SetFillColor(hdc,RGB(0,0,0));
+        FillRect(hdc,&rc);
+
+        SetDrawColor(hdc,RGB(255,255,255));
+        DrawLine(hdc,0,4,8,4);
+        DrawLine(hdc,4,0,4,8);
+
+        EndPaint(hwnd,hdc);
+    }
+    return true;
+}
+
+//鼠标消息处理函数表，处理用户函数表中没有处理的消息。
+static struct MsgProcTable s_gMouseMsgProcTable[] =
+{
+    {MSG_CREATE,MousePaint}
+};
+
+static struct MsgTableLink  s_gMouseMsgLink;
+
+void    ModuleInstall_GDD(struct GkWinRsc *desktop,const char *InputDevName[])
+{
+    u16 evtt;
+    HWND hWnd;
+    struct RopGroup RopCode;
+
+    GDD_Init();
 
     GDD_InputDevName =InputDevName;
+    InitGddDesktop(desktop);
+    if(gc_bShowMouse == true)
+    {
+        s_gMouseMsgLink.LinkNext = NULL;
+        s_gMouseMsgLink.MsgNum = sizeof(s_gMouseMsgProcTable) / sizeof(struct MsgProcTable);
+        s_gMouseMsgLink.myTable = &s_gMouseMsgProcTable;
+        sg_pMouseHwnd = CreateWindow("Cursor", 0, desktop->right / 2,
+                                      desktop->bottom / 2, 8, 8, NULL, 0,
+                                      CN_WINBUF_BUF, NULL, &s_gMouseMsgLink);
+        GK_ApiSetPrio(sg_pMouseHwnd->pGkWin,CN_WINDOW_ZPRIO_MOUSE , CN_TIMEOUT_FOREVER);
+//        GK_ApiSetHyalineColor(sg_pMouseHwnd->pGkWin,RGB(0, 0, 0));
+        RopCode = (struct RopGroup){ 0, 0, 0, CN_R2_XORPEN, 0, 0, 0  };
+        GK_ApiSetRopCode(sg_pMouseHwnd->pGkWin, RopCode, CN_TIMEOUT_FOREVER);
+    }
 
     ////gdd_server
-    evtt_gui_server = Djy_EvttRegist(  EN_CORRELATIVE, CN_PRIO_RRS, 0, 0,
+    evtt = Djy_EvttRegist(  EN_CORRELATIVE, CN_PRIO_RRS, 0, 0,
                            gdd_server_thread, NULL,2048,"gdd server");
-  /*
     if (evtt != CN_EVTT_ID_INVALID)
     {
-    	Djy_EventPop(evtt, NULL, 0, NULL, 0, 0);
+        Djy_EventPop(evtt, NULL, 0, NULL, 0, 0);
     }
-*/
 
     ////gdd_input
     evtt = Djy_EvttRegist(  EN_CORRELATIVE, CN_PRIO_RRS, 0, 0,
                           gdd_input_thread, NULL,2048,"gdd input");
     if (evtt != CN_EVTT_ID_INVALID)
     {
-    	Djy_EventPop(evtt, NULL, 0, NULL, 0, 0);
+        Djy_EventPop(evtt, NULL, 0, 0, 0, 0);
     }
 
 

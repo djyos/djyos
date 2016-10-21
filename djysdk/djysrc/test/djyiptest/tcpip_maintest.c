@@ -70,32 +70,26 @@
 //u32  spider_data_test __attribute__((section(".Cached_datasec")));
 //void code_test() __attribute__((section(".Cached_textsec")));
 
-
-extern bool_t Ping_Shell(char *param);
+extern void   reset(void);
 extern bool_t TcpServer_SndTask(char *param);
+extern bool_t TcpServer_BlockSendTest(char *param);
 extern bool_t UdpServer_SndTask(char *param);
-extern ptu32_t Telnet_Init(char *param);
+extern bool_t UdpServer_RcvTask(char *param);
 //------------------------------------------------------------------------------
 //monitor测试表
 //------------------------------------------------------------------------------
-struct tagShellCmdTab  shellstackdebug[] =
+struct ShellCmdTab  shellstackdebug[] =
 {
-    {
-        "ping",
-        Ping_Shell,
-        "Ping应用",
-        NULL
-    },
-//    {
-//        "netio",
-//        netio_main,
-//        "netio测试",
-//        NULL
-//    },
     {
         "tcpserversnd",
         TcpServer_SndTask,
         "tcpserver发送测试",
+        NULL
+    },
+    {
+        "tcpserverblocksnd",
+        TcpServer_BlockSendTest,
+        "tcpserverblock发送测试",
         NULL
     },
     {
@@ -105,31 +99,32 @@ struct tagShellCmdTab  shellstackdebug[] =
         NULL
     },
     {
-        "telnet",
-        Telnet_Init,
-        "telnet服务器",
+        "udpserverrcv",
+        UdpServer_RcvTask,
+        "udpserver接收测试",
+        NULL
+    },
+    {
+        "reset",
+         reset,
+        "重启机器",
         NULL
     }
 };
-#define cn_monitor_test_num  ((sizeof(shellstackdebug))/(sizeof(struct tagShellCmdTab)))
-static struct tagShellCmdRsc tg_monitorshell_cmd_rsc[cn_monitor_test_num];
+#define cn_monitor_test_num  ((sizeof(shellstackdebug))/(sizeof(struct ShellCmdTab)))
+static struct ShellCmdRsc tg_monitorshell_cmd_rsc[cn_monitor_test_num];
 void djyip_main(void)
 {
-	printk("DJYOS NETSTACK TEST\n\r");
+    printk("DJYOS NETSTACK TEST\n\r");
 
-	if(Sh_InstallCmd(shellstackdebug,tg_monitorshell_cmd_rsc,cn_monitor_test_num))
-	{
-		printk("ADD TEST SHELL SUCCESS!\n\r");
-	}
-	else
-	{
-		printk("ADD TEST SHELL FAILED!\n\r");
-	}	
-	extern bool_t ping_test(void);
-	ping_test();
-//	TEST FOR THE TCP SEND
-//	TcpServer_SndTask(NULL);
-
+    if(Sh_InstallCmd(shellstackdebug,tg_monitorshell_cmd_rsc,cn_monitor_test_num))
+    {
+        printk("ADD TEST SHELL SUCCESS!\n\r");
+    }
+    else
+    {
+        printk("ADD TEST SHELL FAILED!\n\r");
+    }   
 }
 
 

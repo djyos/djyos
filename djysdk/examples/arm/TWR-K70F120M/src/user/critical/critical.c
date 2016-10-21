@@ -58,27 +58,27 @@
 
 const ufast_t tg_IntUsed[] =
 {
-	CN_INT_LINE_PORTA,			//(0x57)
-	CN_INT_LINE_PORTB,			//(0x58)
-	CN_INT_LINE_PORTC,			//(0x59)
-	CN_INT_LINE_PORTD,          //(0x5A)
-	CN_INT_LINE_PORTE,          //(0x5B)
-	CN_INT_LINE_PORTF,			//(0x5C)
-	CN_INT_LINE_RTC_SEC,
-	CN_INT_LINE_ENET_TX,
-	CN_INT_LINE_ENET_RX,
-	CN_INT_LINE_ENET_ERR,
-	CN_INT_LINE_UART2_ERR,
-	CN_INT_LINE_UART2_RX_TX,
-	CN_INT_LINE_UART0_ERR,
-	CN_INT_LINE_UART0_RX_TX,
-	CN_INT_LINE_PIT0,
-	CN_INT_LINE_PIT1,
-	CN_INT_LINE_PIT2,
-	CN_INT_LINE_PIT3,
-	CN_INT_LINE_I2C0,
-	CN_INT_LINE_I2C1,
-	CN_INT_LINE_PORTB
+    CN_INT_LINE_PORTA,          //(0x57)
+    CN_INT_LINE_PORTB,          //(0x58)
+    CN_INT_LINE_PORTC,          //(0x59)
+    CN_INT_LINE_PORTD,          //(0x5A)
+    CN_INT_LINE_PORTE,          //(0x5B)
+    CN_INT_LINE_PORTF,          //(0x5C)
+    CN_INT_LINE_RTC_SEC,
+    CN_INT_LINE_ENET_TX,
+    CN_INT_LINE_ENET_RX,
+    CN_INT_LINE_ENET_ERR,
+    CN_INT_LINE_UART2_ERR,
+    CN_INT_LINE_UART2_RX_TX,
+    CN_INT_LINE_UART0_ERR,
+    CN_INT_LINE_UART0_RX_TX,
+    CN_INT_LINE_PIT0,
+    CN_INT_LINE_PIT1,
+    CN_INT_LINE_PIT2,
+    CN_INT_LINE_PIT3,
+    CN_INT_LINE_I2C0,
+    CN_INT_LINE_I2C1,
+    CN_INT_LINE_PORTB
 };
 
 const ufast_t tg_IntUsedNum = sizeof(tg_IntUsed)/sizeof(ufast_t);
@@ -98,18 +98,18 @@ void critical(void)
 #if 0 //ARM版本认为程序加载过程无误
     //定时器初始化
 #if(CN_CFG_SYSTIMER == 1)
-    extern void Timer_ModuleInit(void);
-    Timer_ModuleInit();
+    extern void ModuleInstall_Timer(void);
+    ModuleInstall_Timer();
 #endif
 #if(CN_CFG_WDT == 1)
-	//  初始化硬件看门狗
-	extern bool_t WDT_FslInit(u32 setcycle);
-	WDT_FslInit(1000);
+    //  初始化硬件看门狗
+    extern bool_t WDT_FslInit(u32 setcycle);
+    WDT_FslInit(1000);
 
-	// 看门狗组件HAL喂狗
-	//  开启中断并注册相关的服务函数
-	bool_t WdtHal_BootStart(u32 bootfeedtimes);
-	WdtHal_BootStart(20);
+    // 看门狗组件HAL喂狗
+    //  开启中断并注册相关的服务函数
+    bool_t WdtHal_BootStart(u32 bootfeedtimes);
+    WdtHal_BootStart(20);
 #endif
 #endif
 }

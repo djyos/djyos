@@ -55,6 +55,7 @@
 //   修改说明: 从原int.c中把硬件无关代码剥离后而成
 //------------------------------------------------------
 #include "windows.h"
+#include "cpu.h"
 #include "stdint.h"
 #include "stdlib.h"
 #include "cpu_peri.h"
@@ -68,11 +69,10 @@ ufast_t ufg_int_number;
 HANDLE win32_int_event;
 HANDLE win32_int_engine;
 
-extern ufast_t tg_int_lookup_table[];       //中断线查找表
-extern struct tagIntLine *tg_pIntSrcTable;     //在Int_Init函数中分配内存
-extern struct tagIntMasterCtrl  tg_int_global;          //定义并初始化总中断控制结构
+extern struct IntLine *tg_pIntLineTable[];       //中断线查找表
+extern struct IntMasterCtrl  tg_int_global;          //定义并初始化总中断控制结构
 extern void __Djy_ScheduleAsynSignal(void);
-void __Djy_EventReady(struct  tagEventECB *event_ready);
+void __Djy_EventReady(struct EventECB *event_ready);
 
 //----进入高级原子操作---------------------------------------------------------
 //功能?读当前总中断状态?然后禁止总中断。高级原子操作是指期间不容许任何原因
@@ -249,7 +249,7 @@ bool_t Int_TapLine(ufast_t ufl_line)
             & ((ucpu_t)1<<(ufl_line % CN_CPU_BITS) ))
         {
             //中断线属于实时中断,或者异步信号使能
-            if( (tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type ==CN_REAL)
+            if( (tg_pIntLineTable[ufl_line]->int_type ==CN_REAL)
                         ||(tg_int_global.en_asyn_signal_counter == 0) )
             {
                 ufg_int_number = ufl_line;
@@ -297,9 +297,9 @@ bool_t Int_QueryLine(ufast_t ufl_line)
 bool_t Int_SettoAsynSignal(ufast_t ufl_line)
 {
     if( (ufl_line > CN_INT_LINE_LAST)
-            || (tg_int_lookup_table[ufl_line] == CN_LIMIT_UFAST) )
+            || (tg_pIntLineTable[ufl_line] == NULL) )
         return false;
-    tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type = CN_ASYN_SIGNAL;   //中断线类型
+    tg_pIntLineTable[ufl_line]->int_type = CN_ASYN_SIGNAL;   //中断线类型
 
     tg_int_global.property_bitmap[ufl_line/CN_CPU_BITS]
                     &= ~(1<<(ufl_line % CN_CPU_BITS));   //设置位图
@@ -315,12 +315,12 @@ bool_t Int_SettoAsynSignal(ufast_t ufl_line)
 bool_t Int_SettoReal(ufast_t ufl_line)
 {
     if( (ufl_line > CN_INT_LINE_LAST)
-            || (tg_int_lookup_table[ufl_line] == CN_LIMIT_UFAST) )
+            || (tg_pIntLineTable[ufl_line] == NULL) )
         return false;
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].sync_event != NULL)
+    if(tg_pIntLineTable[ufl_line]->sync_event != NULL)
         return false;     //有线程在等待这个中断?不能设为实时中断
-    tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type = CN_REAL;    //中断线类型
-    tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].enable_nest = false;   //本实现不支持实时中断嵌套
+    tg_pIntLineTable[ufl_line]->int_type = CN_REAL;    //中断线类型
+    tg_pIntLineTable[ufl_line]->enable_nest = false;   //本实现不支持实时中断嵌套
     tg_int_global.property_bitmap[ufl_line/CN_CPU_BITS]
             |= 1<<(ufl_line % CN_CPU_BITS);   //设置位图
     return true;
@@ -427,25 +427,12 @@ void Int_Init(void)
 {
     ufast_t ufl_line;
     InitializeCriticalSection(&int_cs);
-    tg_pIntSrcTable = malloc(tg_IntUsedNum * sizeof(struct tagIntLine));
-    if(tg_pIntSrcTable == NULL)
-        return;
+
     __Int_InitHard();
     __Int_ClearAllLine();
     for(ufl_line=0;ufl_line <= CN_INT_LINE_LAST;ufl_line++)
     {
-        tg_int_lookup_table[ufl_line] = (ufast_t)CN_LIMIT_UFAST;
-    }
-    for(ufl_line = 0; ufl_line < tg_IntUsedNum; ufl_line++)
-    {
-        tg_int_lookup_table[tg_IntUsed[ufl_line]] = ufl_line;
-        tg_pIntSrcTable[ufl_line].en_counter = 1;               //禁止中断,计数为1
-        tg_pIntSrcTable[ufl_line].int_type = CN_ASYN_SIGNAL;    //设为异步信号
-        tg_pIntSrcTable[ufl_line].clear_type = CN_INT_CLEAR_PRE;//设为调用ISR前应答
-        //所有中断函数指针指向空函数
-        tg_pIntSrcTable[ufl_line].ISR = (u32 (*)(ufast_t))NULL_func;
-        tg_pIntSrcTable[ufl_line].sync_event = NULL;                //同步事件空
-        tg_pIntSrcTable[ufl_line].my_evtt_id = CN_EVTT_ID_INVALID;  //不弹出事件
+        tg_pIntLineTable[ufl_line] = (ufast_t)NULL;
     }
 
     for(ufl_line=0; ufl_line < CN_INT_BITS_WORDS; ufl_line++)
@@ -477,7 +464,7 @@ void Int_Init(void)
 
 void __Int_EngineAll(ufast_t ufl_line)
 {
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].int_type == CN_REAL)
+    if(tg_pIntLineTable[ufl_line]->int_type == CN_REAL)
         __Int_EngineReal(ufl_line);                //是实时中断
     else
         __Int_EngineAsynSignal(ufl_line);         //是异步信号
@@ -490,7 +477,9 @@ void __Int_EngineAll(ufast_t ufl_line)
 //-----------------------------------------------------------------------------
 void __Int_EngineReal(ufast_t ufl_line)
 {
+    struct IntLine *ptIntLine;
     tg_int_global.nest_real++;
+    ptIntLine = tg_pIntLineTable[ufl_line];
 
     //本if语句与移植敏感?跟cpu的中断管理器的几个特性有关:
     //1、异步信号是否有独立的开关?例如cortex-m3、omapl138等是有的?2440、2416、
@@ -500,14 +489,14 @@ void __Int_EngineReal(ufast_t ufl_line)
     //3、实时中断响应后?是否自动关闭实时中断
     //4、该具体实现是否支持实时中断嵌套
     //5、本实现支持实时中断嵌套?故整个注释掉
-//    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].enable_nest == true)
+//    if(tg_pIntLineTable[ufl_line]->enable_nest == true)
 //    {
 //        real_save_asyn = Int_LowAtomStart();
 //        Int_ContactTrunk();
 //    }
     Int_ClearLine(ufl_line);        //中断应答
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].ISR != NULL)
-        tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].ISR(ufl_line);  //调用用户中断函数
+    if(tg_pIntLineTable[ufl_line]->ISR != NULL)
+        tg_pIntLineTable[ufl_line]->ISR(ptIntLine->para);  //调用用户中断函数
 
 
     //如果该实现支持实时中断嵌套?启用以下4句
@@ -524,32 +513,34 @@ void __Int_EngineReal(ufast_t ufl_line)
 //-----------------------------------------------------------------------------
 void __Int_EngineAsynSignal(ufast_t ufl_line)
 {
-    struct tagEventECB *event;
+    struct EventECB *event;
+    struct IntLine *ptIntLine;
     u32 isr_result;
 
     g_bScheduleEnable = false;
+    ptIntLine = tg_pIntLineTable[ufl_line];
     tg_int_global.nest_asyn_signal=1;
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].clear_type == CN_INT_CLEAR_PRE)
+    if(ptIntLine->clear_type == CN_INT_CLEAR_AUTO)
         Int_ClearLine(ufl_line);        //中断应答,
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].ISR != NULL)
-        isr_result = tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].ISR(ufl_line);
+    if(ptIntLine->ISR != NULL)
+        isr_result = ptIntLine->ISR(ptIntLine->para);
     else
     {
-        if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].clear_type == CN_INT_CLEAR_USER)
+        if(ptIntLine->clear_type == CN_INT_CLEAR_USER)
             Int_ClearLine(ufl_line);        //中断应答,
     }
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].clear_type == CN_INT_CLEAR_POST)
-        Int_ClearLine(ufl_line);        //中断应答,
-    event = tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].sync_event;
+//    if(ptIntLine->clear_type == CN_INT_CLEAR_POST)
+//        Int_ClearLine(ufl_line);        //中断应答,
+    event = ptIntLine->sync_event;
     if(event != NULL)   //看同步指针中有没有事件(注?单个事件?不是队列)
     {
         event->event_result = isr_result;
         __Djy_EventReady(event);   //把该事件放到ready队列
-        tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].sync_event = NULL;   //解除同步
+        ptIntLine->sync_event = NULL;   //解除同步
     }
-    if(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].my_evtt_id != CN_EVTT_ID_INVALID)
+    if(ptIntLine->my_evtt_id != CN_EVTT_ID_INVALID)
     {
-        Djy_EventPop(tg_pIntSrcTable[tg_int_lookup_table[ufl_line]].my_evtt_id,
+        Djy_EventPop(ptIntLine->my_evtt_id,
                         NULL,0,(ptu32_t)isr_result, (ptu32_t)ufl_line,0);
     }
     tg_int_global.nest_asyn_signal = 0;

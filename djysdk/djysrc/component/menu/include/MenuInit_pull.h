@@ -58,7 +58,7 @@
 
 #include "MenuDisplay.h"
 
-struct menu_displaypara  *module_menu_init_pull(struct menu_item *menuitem, struct tagGkWinRsc *win);
+struct menu_displaypara  *module_menu_init_pull(struct menu_item *menuitem, struct GkWinRsc *win);
 
 
 #endif /* MENUMINIT_PULL_H_ */

@@ -59,8 +59,7 @@
 //   新版本号：V1.0.0
 //   修改说明: 原始版本
 //------------------------------------------------------
-#include    "gdd.h"
-#include    "./include/gdd_private.h"
+#include    <gui/gdd/gdd_private.h>
 
 static  list_t  list_system_timer;
 
@@ -74,10 +73,6 @@ static  TIMER*  TMR_Alloc(void)
     TIMER *tmr;
 
     tmr =malloc(sizeof(TIMER));
-    if(NULL!=tmr)
-    {
-        tmr->Tag =TMR_TAG;
-    }
     return tmr;
 }
 
@@ -88,7 +83,6 @@ static  TIMER*  TMR_Alloc(void)
 //------------------------------------------------------------------------------
 static  void    TMR_Free(TIMER *ptmr)
 {
-    ptmr->Tag =INVALD_TAG;
     free(ptmr);
 }
 
@@ -98,14 +92,12 @@ static  void    TMR_Free(TIMER *ptmr)
 //参数：定时器对象指针
 //返回：成功:TRUE; 失败:FLASE;
 //------------------------------------------------------------------------------
-BOOL    TMR_Lock(TIMER *ptmr)
+bool_t    TMR_Lock(TIMER *ptmr)
 {
-    GDD_Lock();
-    if(NULL!=ptmr)
-    if(TMR_TAG==ptmr->Tag)
-    {
+    if(NULL == ptmr)
+        return FALSE;
+    if(GDD_Lock())
         return TRUE;
-    }
 
     GDD_Unlock();
     return  FALSE;
@@ -128,12 +120,12 @@ void    TMR_Unlock(TIMER *ptmr)
 //------------------------------------------------------------------------------
 void    GDD_TimerInit(void)
 {
-    list_init(&list_system_timer);
+    dListInit(&list_system_timer);
 }
 
 //----创建定时器----------------------------------------------------------------
 //描述: 略
-//参数：hwnd: 定时器所属窗口.
+//参数：hwnd: 定时器所属窗口.定时到则给该窗口发定时器消息。
 //      Id:   定时器Id.
 //      Flag: 定时器标记.
 //      IntervalMS: 定时间隔时间(毫秒数).
@@ -149,9 +141,9 @@ TIMER*  GDD_CreateTimer(HWND hwnd,u16 Id,u32 IntervalMS,u16 Flag)
         if(NULL!=ptmr)
         {
 
-            list_init(&ptmr->node_sys);
-            list_init(&ptmr->node_hwnd);
-            list_init(&ptmr->node_msg_timer);
+            dListInit(&ptmr->node_sys);
+            dListInit(&ptmr->node_hwnd);
+            dListInit(&ptmr->node_msg_timer);
 
             ptmr->hwnd          =hwnd;
             ptmr->Id            =Id;
@@ -160,8 +152,8 @@ TIMER*  GDD_CreateTimer(HWND hwnd,u16 Id,u32 IntervalMS,u16 Flag)
             ptmr->HoldTime      =GUI_GetTickMS();
 
             GDD_Lock();
-            list_insert_before(&list_system_timer,&ptmr->node_sys);
-            list_insert_before(&hwnd->list_timer,&ptmr->node_hwnd);
+            dListInsertBefore(&list_system_timer,&ptmr->node_sys);
+            dListInsertBefore(&hwnd->list_timer,&ptmr->node_hwnd);
             GDD_Unlock();
 
         }
@@ -189,7 +181,7 @@ TIMER*  GDD_FindTimer(HWND hwnd,u16 Id)
             n   =lst->next;
             while(n!=lst)
             {
-                ptmr =(TIMER*)list_entry(n,TIMER,node_hwnd);
+                ptmr =(TIMER*)dListEntry(n,TIMER,node_hwnd);
                 if(NULL!=ptmr)
                 {
                     if(ptmr->Id==Id)
@@ -213,9 +205,9 @@ TIMER*  GDD_FindTimer(HWND hwnd,u16 Id)
 //      IntervalMS: 定时间隔时间(毫秒数).
 //返回：TRUE:成功; FALSE:失败;
 //------------------------------------------------------------------------------
-BOOL    GDD_ResetTimer(TIMER *ptmr,u32 IntervalMS,u32 Flag)
+bool_t    GDD_ResetTimer(TIMER *ptmr,u32 IntervalMS,u32 Flag)
 {
-    BOOL res=FALSE;
+    bool_t res=FALSE;
 
     if(TMR_Lock(ptmr))
     {
@@ -224,7 +216,7 @@ BOOL    GDD_ResetTimer(TIMER *ptmr,u32 IntervalMS,u32 Flag)
             ptmr->Flag      =Flag;
             ptmr->Interval  =IntervalMS;
             ptmr->HoldTime  =GUI_GetTickMS();
-            list_remove(&ptmr->node_msg_timer);
+            dListRemove(&ptmr->node_msg_timer);
 
             res =TRUE;
             HWND_Unlock(ptmr->hwnd);
@@ -241,12 +233,12 @@ BOOL    GDD_ResetTimer(TIMER *ptmr,u32 IntervalMS,u32 Flag)
 //参数：ptmr: 定时器对象.
 //返回：无
 //------------------------------------------------------------------------------
-static void _DeleteTimer(TIMER*ptmr)
+static void __DeleteTimer(TIMER*ptmr)
 {
 
-    list_remove(&ptmr->node_hwnd);
-    list_remove(&ptmr->node_sys);
-    list_remove(&ptmr->node_msg_timer);
+    dListRemove(&ptmr->node_hwnd);
+    dListRemove(&ptmr->node_sys);
+    dListRemove(&ptmr->node_msg_timer);
 
     TMR_Free(ptmr);
 
@@ -257,7 +249,7 @@ static void _DeleteTimer(TIMER*ptmr)
 //参数：ptmr: 定时器对象.
 //返回：TRUE:成功; FALSE:失败;
 //------------------------------------------------------------------------------
-BOOL    GDD_DeleteTimer(TIMER *ptmr)
+bool_t    GDD_DeleteTimer(TIMER *ptmr)
 {
     HWND hwnd;
 
@@ -266,7 +258,7 @@ BOOL    GDD_DeleteTimer(TIMER *ptmr)
         hwnd =ptmr->hwnd;
         if(HWND_Lock(hwnd))
         {
-            _DeleteTimer(ptmr);
+            __DeleteTimer(ptmr);
             HWND_Unlock(hwnd);
             return TRUE;
         }
@@ -276,12 +268,12 @@ BOOL    GDD_DeleteTimer(TIMER *ptmr)
     return FALSE;
 }
 
-//----删除窗口所有定时器---------------------------------------------------------
+//----删除窗口所有定时器-------------------------------------------------------
 //描述: 该函数为GDD内部调用
 //参数：hwnd: 窗口句柄.
 //返回：无.
 //------------------------------------------------------------------------------
-void _RemoveWindowTimer(HWND hwnd)
+void __RemoveWindowTimer(HWND hwnd)
 {
     list_t *lst,*n,*next;
     TIMER *ptmr;
@@ -289,15 +281,15 @@ void _RemoveWindowTimer(HWND hwnd)
     lst =&hwnd->list_timer;
     n   =lst->next;
 
-    while(!list_isempty(n))
+    while(!dListIsEmpty(n))
     {
         next =n->next;
-        ptmr =(TIMER*)list_entry(n,TIMER,node_hwnd);
+        ptmr =(TIMER*)dListEntry(n,TIMER,node_hwnd);
         if(NULL!=ptmr)
         {
             if(TMR_Lock(ptmr))
             {
-                _DeleteTimer(ptmr);
+                __DeleteTimer(ptmr);
                 TMR_Unlock(ptmr);
             }
         }
@@ -312,7 +304,7 @@ void _RemoveWindowTimer(HWND hwnd)
 //     tick_time_ms: 当前tick时间,这个必须由GUI_GetTickMS提供.
 //返回：TRUE:定时器超时; FALSE:定时器未超时.
 //------------------------------------------------------------------------------
-BOOL    _TimerHandler(TIMER *ptmr,u32 tick_time_ms)
+bool_t    _TimerHandler(TIMER *ptmr,u32 tick_time_ms)
 {
     u32 time;
 
@@ -363,12 +355,12 @@ void    GDD_TimerExecu(u32 tick_time_ms)
         n =lst->next;
         while(n!=lst)
         {
-            ptmr =(TIMER*)list_entry(n,TIMER,node_sys);
+            ptmr =(TIMER*)dListEntry(n,TIMER,node_sys);
             if(TMR_Lock(ptmr))
             {
                 if(_TimerHandler(ptmr,tick_time_ms))
                 {
-                    _PostTimerMessage(ptmr);
+                    __PostTimerMessage(ptmr);
                 }
                 TMR_Unlock(ptmr);
             }

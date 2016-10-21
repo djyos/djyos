@@ -35,9 +35,9 @@
 			<locationURI>DJYOS_SRC_LOCATION/djyos</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/exp-component</name>
+			<name>src/OS_code/extern-component</name>
 			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/exp-component</locationURI>
+			<locationURI>DJYOS_SRC_LOCATION/extern-component</locationURI>
 		</link>
 		<link>
 			<name>src/OS_code/libc</name>

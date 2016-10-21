@@ -358,37 +358,28 @@ void GPIO_PowerOff(u32 port)
 // =============================================================================
 void GPIO_CfgIntMode(u32 port,u32 pinnum,u32 mode)
 {
-	vu32 intmode;
 	if((port != 0) && (port != 2))
 		return;
 	if(port == 0)
 	{
-		if(mode)			//rising mode
+		if(mode == CN_GPIO_INT_RISING)			//rising mode
 		{
-			intmode = LPC_GPIOINT->IO0IntEnR;
-			intmode |= 1<<pinnum;
-			LPC_GPIOINT->IO0IntEnR = intmode;
+			LPC_GPIOINT->IO0IntEnR = 1<<pinnum;
 		}
 		else
 		{
-			intmode = LPC_GPIOINT->IO0IntEnR;
-			intmode &= ~(1<<pinnum);
-			LPC_GPIOINT->IO0IntEnR = intmode;
+			LPC_GPIOINT->IO0IntEnF = 1<<pinnum;
 		}
 	}
 	else
 	{
-		if(mode)			//rising mode
+		if(mode == CN_GPIO_INT_RISING)			//rising mode
 		{
-			intmode = LPC_GPIOINT->IO2IntEnR;
-			intmode |= 1<<pinnum;
-			LPC_GPIOINT->IO2IntEnR = intmode;
+			LPC_GPIOINT->IO2IntEnR = 1<<pinnum;
 		}
 		else
 		{
-			intmode = LPC_GPIOINT->IO2IntEnR;
-			intmode &= ~(1<<pinnum);
-			LPC_GPIOINT->IO2IntEnR = intmode;
+			LPC_GPIOINT->IO2IntEnF = 1<<pinnum;
 		}
 	}
 }
@@ -400,12 +391,12 @@ void GPIO_CfgIntMode(u32 port,u32 pinnum,u32 mode)
 //      mode，1表示上升沿触发，0表示下降沿触发
 // 返回：0，无中断；非0，中断挂起
 // =============================================================================
-u32 GPIO_GetIntStatus(u32 port,u32 msk,u32 mode)
+u32 GPIO_GetIntStat(u32 port,u32 msk,u32 mode)
 {
 	u32 result = 0xFF;
 	if(port == 0)
 	{
-		if(mode)			//rising mode
+		if(mode == CN_GPIO_INT_RISING)			//rising mode
 		{
 			result = LPC_GPIOINT->IO0IntStatR & msk;
 		}
@@ -416,7 +407,7 @@ u32 GPIO_GetIntStatus(u32 port,u32 msk,u32 mode)
 	}
 	else
 	{
-		if(mode)			//rising mode
+		if(mode == CN_GPIO_INT_RISING)			//rising mode
 		{
 			result = LPC_GPIOINT->IO2IntStatR & msk;
 		}
@@ -434,15 +425,56 @@ u32 GPIO_GetIntStatus(u32 port,u32 msk,u32 mode)
 //      msk，掩码，如操作1.5，msk = 1<<5
 // 返回：无
 // =============================================================================
-void GPIO_ClearIntStatus(u32 port,u32 msk)
+void GPIO_ClearIntStat(u32 port,u32 msk)
 {
 	if(port == 0)
 	{
-		LPC_GPIOINT->IO0IntClr |= msk;
+		LPC_GPIOINT->IO0IntClr = msk;
 	}
 	else
 	{
-		LPC_GPIOINT->IO2IntClr |= msk;
+		LPC_GPIOINT->IO2IntClr = msk;
 	}
+}
+
+// =============================================================================
+// 功能：外部中断初始化
+// 参数： exti,包括外部中断0，1，2，3
+//       mode,包括1，边沿触发，0，水平触发
+//       edge,1,高电平断或上升沿触发中，0，反之
+// 返回：无
+// =============================================================================
+void ExtInt_Cfg(u8 exti,u8 mode,u8 edge)
+{
+	if(exti > 3)
+		return ;
+
+	if(mode)
+		mode = 1;
+	else
+		mode = 0;
+
+	if(edge)
+		edge = 1;
+	else
+		edge = 0;
+
+	LPC_SC->EXTMODE &= ~(1<<exti);
+	LPC_SC->EXTPOLAR &= ~(1<<exti);
+
+	LPC_SC->EXTMODE |= (mode << exti);
+	LPC_SC->EXTPOLAR |= (edge << exti);
+}
+
+// =============================================================================
+// 功能：清外部中断
+// 参数： 外部中断号，0，1，2，3
+// 返回：无
+// =============================================================================
+void ExtInt_FlagClear(u8 exti)
+{
+	if(exti > 3)
+		return ;
+	LPC_SC->EXTINT = (1 << exti);		//写1清除中断
 }
 

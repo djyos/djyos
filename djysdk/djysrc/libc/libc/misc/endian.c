@@ -78,7 +78,7 @@ u16 pick_little_16bit(u8 *buf,u32 index)
     if(((CN_MEM_ALIGN == 0)&&(CN_CFG_BYTE_ORDER==CN_CFG_LITTLE_ENDIAN))
         ||  ((CN_MEM_ALIGN == 1)&&(align8 == 0)&&(CN_CFG_BYTE_ORDER==CN_CFG_LITTLE_ENDIAN)))
     {
-        return *(u16 *)buf;
+        return *(u16 *) (buf + 2*index);
     }
     else
     {
@@ -122,7 +122,7 @@ u32 pick_little_32bit(u8 *buf,u32 index)
     if(((CN_MEM_ALIGN == 0)&&(CN_CFG_BYTE_ORDER==CN_CFG_LITTLE_ENDIAN))
         ||  ((CN_MEM_ALIGN == 1)&&(align8 == 0)&&(CN_CFG_BYTE_ORDER==CN_CFG_LITTLE_ENDIAN)))
     {
-        return *(u32 *)buf;
+        return *(u32 *) (buf + 4*index);
     }
     else
     {
@@ -172,7 +172,7 @@ u64 pick_little_64bit(u8 *buf,u32 index)
     if(((CN_MEM_ALIGN == 0)&&(CN_CFG_BYTE_ORDER==CN_CFG_LITTLE_ENDIAN))
         ||  ((CN_MEM_ALIGN == 1)&&(align8 == 0)&&(CN_CFG_BYTE_ORDER==CN_CFG_LITTLE_ENDIAN)))
     {
-        return *(u64 *)buf;
+        return *(u64 *) (buf + 8*index);
     }
     else
     {
@@ -325,7 +325,7 @@ u16 pick_big_16bit(u8 *buf,u32 index)
     if(((CN_MEM_ALIGN == 0)&&(CN_CFG_BYTE_ORDER==CN_CFG_BIG_ENDIAN))
         ||  ((CN_MEM_ALIGN == 1)&&(align8 == 0)&&(CN_CFG_BYTE_ORDER==CN_CFG_BIG_ENDIAN)))
     {
-        return *(u16 *)buf;
+        return *(u16 *) (buf + 2*index);
     }
     else
     {
@@ -369,7 +369,7 @@ u32 pick_big_32bit(u8 *buf,u32 index)
     if(((CN_MEM_ALIGN == 0)&&(CN_CFG_BYTE_ORDER==CN_CFG_BIG_ENDIAN))
         ||  ((CN_MEM_ALIGN == 1)&&(align8 == 0)&&(CN_CFG_BYTE_ORDER==CN_CFG_BIG_ENDIAN)))
     {
-        return *(u32 *)buf;
+        return *(u32 *) (buf + 4*index);
     }
     else
     {
@@ -419,7 +419,7 @@ u64 pick_big_64bit(u8 *buf,u32 index)
     if(((CN_MEM_ALIGN == 0)&&(CN_CFG_BYTE_ORDER==CN_CFG_BIG_ENDIAN))
         ||  ((CN_MEM_ALIGN == 1)&&(align8 == 0)&&(CN_CFG_BYTE_ORDER==CN_CFG_BIG_ENDIAN)))
     {
-        return *(u64 *)buf;
+        return *(u64 *) (buf + 8*index);
     }
     else
     {
@@ -441,23 +441,23 @@ u64 pick_big_64bit(u8 *buf,u32 index)
         data<<=8;
         data+=buf[8*index+7];*/
 #if (CN_CFG_BYTE_ORDER==CN_CFG_LITTLE_ENDIAN)
-        *((u8*)(&data)+7) = buf[4*index+0];//数据高位
-        *((u8*)(&data)+6) = buf[4*index+1];
-        *((u8*)(&data)+5) = buf[4*index+2];
-        *((u8*)(&data)+4) = buf[4*index+3];
-        *((u8*)(&data)+3) = buf[4*index+4];
-        *((u8*)(&data)+2) = buf[4*index+5];
-        *((u8*)(&data)+1) = buf[4*index+6];
-        *((u8*)(&data)+0) = buf[4*index+7];
+        *((u8*)(&data)+7) = buf[8*index+0];//数据高位
+        *((u8*)(&data)+6) = buf[8*index+1];
+        *((u8*)(&data)+5) = buf[8*index+2];
+        *((u8*)(&data)+4) = buf[8*index+3];
+        *((u8*)(&data)+3) = buf[8*index+4];
+        *((u8*)(&data)+2) = buf[8*index+5];
+        *((u8*)(&data)+1) = buf[8*index+6];
+        *((u8*)(&data)+0) = buf[8*index+7];
 #elif (CN_CFG_BYTE_ORDER==CN_CFG_BIG_ENDIAN)
-        *((u8*)(&data)+0) = buf[4*index+0];
-        *((u8*)(&data)+1) = buf[4*index+1];
-        *((u8*)(&data)+2) = buf[4*index+2];
-        *((u8*)(&data)+3) = buf[4*index+3];
-        *((u8*)(&data)+4) = buf[4*index+4];
-        *((u8*)(&data)+5) = buf[4*index+5];
-        *((u8*)(&data)+6) = buf[4*index+6];
-        *((u8*)(&data)+7) = buf[4*index+7];
+        *((u8*)(&data)+0) = buf[8*index+0];
+        *((u8*)(&data)+1) = buf[8*index+1];
+        *((u8*)(&data)+2) = buf[8*index+2];
+        *((u8*)(&data)+3) = buf[8*index+3];
+        *((u8*)(&data)+4) = buf[8*index+4];
+        *((u8*)(&data)+5) = buf[8*index+5];
+        *((u8*)(&data)+6) = buf[8*index+6];
+        *((u8*)(&data)+7) = buf[8*index+7];
 #endif
         return (u64)data;
     }
@@ -574,7 +574,7 @@ void fill_big_64bit(u8 *buf,u32 index,u64 data)
 //
 //u32 swapl(u32 value)
 //{
-//    return ((value&((u32)0xff000000))>>24)|((value&((u32)0xff0000))>>8)|\
+//    return ((value&((u32)0xff000000))>>24)|((value&((u32)0xff0000))>>8)|
 //            ((value&((u32)0xff00))<<8)|((value&((u32)0xff))<<24);
 //}
 //

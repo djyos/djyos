@@ -590,7 +590,7 @@ const u8 cs_ascii_8x16[16*256] =
 bool_t __Font_Ascii8x16LoadFont(void *);
 void __Font_Ascii8x16UnloadFont(void);
 bool_t __Font_Ascii8x16GetCharBitMap(u32 charcode, u32 size,u32 resv,
-                                    struct tagRectBitmap *bitmap);
+                                    struct RectBitmap *bitmap);
 
 
 bool_t __Font_Ascii8x16LoadFont(void* zk)
@@ -618,7 +618,7 @@ void __Font_Ascii8x16UnloadFont(void)
 //      Ä¬ÈÏ×Ö·ûµÄµãÕó
 //-----------------------------------------------------------------------------
 bool_t __Font_Ascii8x16GetCharBitMap(u32 charcode, u32 size,u32 resv,
-                                    struct tagRectBitmap *bitmap)
+                                    struct RectBitmap *bitmap)
 {
     u8 i;
     u32 offset;
@@ -674,7 +674,7 @@ s32 __Font_Ascii8x16GetCharHeight(u32 CharCode)
 //-----------------------------------------------------------------------------
 ptu32_t ModuleInstall_FonAscii8x16Font(ptu32_t para)
 {
-    static struct tagFontRsc font_a8x16;
+    static struct FontRsc font_a8x16;
 
     font_a8x16.MaxWidth = 8;
     font_a8x16.MaxHeight = 16;

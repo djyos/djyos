@@ -59,8 +59,8 @@
 #include "wdt_hal.h"
 
 #define CN_WDTHAL_HARDCYCLE_SCALE    8/10      //缩放比例
-///////禁止其他文件以任何技术手段引用修改该文件定义的全局静态变量（后果自负）///////
-static struct tagWdtHalChipInfo    s_tWdtHalChipInfo; //存储注册的WDT信息
+
+static struct WdtHalChipInfo    s_tWdtHalChipInfo; //存储注册的WDT信息
 static fnWdtBootFeedStart          fnBootFeedStart = NULL;
 static fnWdtBootFeedEnd            fnBootFeedEnd = NULL;
 
@@ -77,7 +77,7 @@ bool_t WdtHal_BootStart(u32 bootfeedtime)
     bool_t result = true;
     if(NULL != fnBootFeedStart)
     {
-    	result = fnBootFeedStart(bootfeedtime);
+        result = fnBootFeedStart(bootfeedtime);
     }
     
     return result;
@@ -93,12 +93,12 @@ bool_t WdtHal_BootStart(u32 bootfeedtime)
 // =============================================================================
 bool_t WdtHal_BootEnd(void)
 {
-	bool_t result = true;
-	if(NULL != fnBootFeedEnd)
-	{
-		result = fnBootFeedEnd();
-	}
-	return result;
+    bool_t result = true;
+    if(NULL != fnBootFeedEnd)
+    {
+        result = fnBootFeedEnd();
+    }
+    return result;
 }
 
 // =============================================================================
@@ -109,7 +109,7 @@ bool_t WdtHal_BootEnd(void)
 // 返回值  ：true成功 false失败
 // 说明    ：务必检查返回值
 // =============================================================================
-bool_t WdtHal_GetChipPara(struct tagWdtHalChipInfo *hardpara)
+bool_t WdtHal_GetChipPara(struct WdtHalChipInfo *hardpara)
 {
     if(NULL != s_tWdtHalChipInfo.wdtchip_feed)
     {
@@ -126,21 +126,20 @@ bool_t WdtHal_GetChipPara(struct tagWdtHalChipInfo *hardpara)
 }
 
 // =============================================================================
-// 函数功能：WdtHal_RegisterWdtChip
+// 功能：WdtHal_RegisterWdtChip
 //          注册硬件看门狗芯片
-// 输入参数：chipname,芯片名字
-//           yipcycle,芯片的周期，老老实实的交代就OK，内部会做参数评估的
-//           可以设置CYCLE的WDT，该值为设置好后的CYCLE
-//           wdtchip_feed,硬件看门狗的喂狗方法
-//           bootfeedstart,在启动过程中开始喂狗
-//           bootfeedend,在启动过程中结束喂狗
-// 返回值  ：true成功 false失败
-// 说明    ：失败一定是参数不正确，name存储的地方一定是const型，千万别是局部变量
+// 参数：chipname,芯片名字
+//       yipcycle,WDT芯片狗叫周期，填芯片手册中的最小值即可，函数内部做了冗余处理。
+//       wdtchip_feed,硬件看门狗的喂狗方法
+//       bootfeedstart,在启动过程中开始喂狗
+//       bootfeedend,在启动过程中结束喂狗
+// 返回值 ：true成功 false失败
+// 说明   ：失败一定是参数不正确，name存储的地方一定是const型，千万别是局部变量
 // =============================================================================
 bool_t WdtHal_RegisterWdtChip(char *chipname, u32 yipcycle,\
-		                      bool_t (*wdtchip_feed)(void),\
-		                      fnWdtBootFeedStart bootfeedstart,\
-		                      fnWdtBootFeedEnd   bootfeedend)
+                              bool_t (*wdtchip_feed)(void),\
+                              fnWdtBootFeedStart bootfeedstart,\
+                              fnWdtBootFeedEnd   bootfeedend)
 {
     bool_t  result;
 

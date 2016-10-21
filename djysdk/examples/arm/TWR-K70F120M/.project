@@ -25,84 +25,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>src/OS_code/component</name>
+			<name>src/user/test</name>
 			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/component</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/djyos</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/djyos</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/exp-component</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/exp-component</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/libc</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/libc</locationURI>
-		</link>
-		<link>
-			<name>src/user/gdd_test</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/test/gdd_test</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/bsp/cpudrv</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/cpudrv/FslKxx</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/bsp/startup</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/startup/FslKxx</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/loader/si</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/loader/si</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/bsp/arch/arm32_feature.h</name>
-			<type>1</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/arch/arm/arm32_feature.h</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/bsp/arch/arm32_stdint.h</name>
-			<type>1</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/arch/arm/arm32_stdint.h</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/bsp/arch/armv7m.h</name>
-			<type>1</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/arch/arm/cortex-m/armv7m.h</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/bsp/arch/core</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/arch/arm/cortex-m/armv7e-m/cortex-m4/core</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/bsp/arch/cortex-m.h</name>
-			<type>1</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/arch/arm/cortex-m/cortex-m.h</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/bsp/arch/include</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/arch/arm/cortex-m/armv7e-m/cortex-m4/include</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/bsp/chips/crtch</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/chipdrv/crtch</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/bsp/chips/mt29fxxx</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/chipdrv/mt29fxxx</locationURI>
+			<locationURI>DJYOS_SRC_LOCATION/test</locationURI>
 		</link>
 	</linkedResources>
 	<variableList>

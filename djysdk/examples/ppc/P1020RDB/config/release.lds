@@ -28,7 +28,7 @@ SECTIONS
 {
     /*first command**/
     text_resetvec :
-    { 
+    {
         . = ALIGN(0x04);
         *liblibos_release.a:resetvec.o(.text .text.*)
     }>RESETVEC
@@ -37,33 +37,26 @@ SECTIONS
     text_romstart :
     {
         . = ALIGN(0x04);
-        *liblibos_release.a:start.o(.text .text.* .rodata .rodata.* )    
-        *liblibos_release.a:routsetups.o(.text .text.* .rodata .rodata.* )    
-        *liblibos_release.a:routsetup.o(.text .text.* .rodata .rodata.* )    
-        *liblibos_release.a:ddrc.o(.text .text.* .rodata .rodata.* )    
-        *liblibos_release.a:law.o(.text .text.* .rodata .rodata.* )            
-        *liblibos_release.a:loadloader2mem.o(.text .text.* .rodata .rodata.*)  
-        *liblibos_release.a:cache.o(.text .text.* .rodata .rodata.* )         
-        
+        *liblibos_release.a:start.o(.text .text.* .rodata .rodata.* )
+        *liblibos_release.a:routsetups.o(.text .text.* .rodata .rodata.* )
+        *liblibos_release.a:routsetup.o(.text .text.* .rodata .rodata.* )
+        *liblibos_release.a:ddrc.o(.text .text.* .rodata .rodata.* )
+        *liblibos_release.a:law.o(.text .text.* .rodata .rodata.* )
+        *liblibos_release.a:loadloader2mem.o(.text .text.* .rodata .rodata.*)
+        *liblibos_release.a:boardroutcfg.o(.text .text.* .rodata .rodata.*  .data .data.* .sdata  .sdata.*)
     }>ROMSTART
-    data_romstart :
-    {
-        *liblibos_release.a:boardroutcfg.o(.rodata .rodata.*  .data .data.* .sdata  .sdata.*)
-    }>ROMSTART
-    
+
     /*loader txt*/
     text_loader :
     {
         . = ALIGN(0x04);
-        *liblibos_release.a:cpustarts.o(.text .text.* .rodata .rodata.* ) 
-        *liblibos_release.a:cpustart.o(.text .text.* .rodata .rodata.* ) 
-        *liblibos_release.a:elbc.o(.text .text.* .rodata .rodata.* ) 
-        *liblibos_release.a:cpus.o(.text .text.* .rodata .rodata.* ) 
-         
-         *liblibos_release.a:pre_loader.o (.text .text.* .rodata .rodata.*) 
-           
+        *liblibos_release.a:cpustarts.o(.text .text.* .rodata .rodata.* )
+        *liblibos_release.a:cpustart.o(.text .text.* .rodata .rodata.* )
+        *liblibos_release.a:elbc.o(.text .text.* .rodata .rodata.* )
+        *liblibos_release.a:cpus.o(.text .text.* .rodata .rodata.* )
+        *liblibos_release.a:pre_loader.o (.text .text.* .rodata .rodata.*)
     }>SYSCODE AT>FLASHROM
-    
+
 
     /*prepare the loader envirionment--code to preload*/
     rw_preload_rDDR3_lnorflash_text :
@@ -74,19 +67,19 @@ SECTIONS
          *liblibos_release.a:wdt_hal.o(.text .text.* .rodata .rodata.* )
          *liblibos_release.a:timer_hard.o(.text .text.* .rodata .rodata.* )
          *liblibos_release.a:cpu_peri_gpio.o(.text .text.* .rodata .rodata.*)
-         *liblibos_release.a:exp_decoder.o(.text .text.* .rodata .rodata.*) 
-         *liblibos_release.a:heap-static.o(.text .text.* .rodata .rodata.*) 
-          
-         
-         *liblibos_release.a:exp_asm.o(.text .text.* .rodata .rodata.*)  
-         *liblibos_release.a:exp_c.o(.text .text.* .rodata .rodata.*)  
-         *liblibos_release.a:exp_vec.o(.text .text.* .rodata .rodata.*)  
-         *liblibos_release.a:cpu.o(.text .text.* .rodata .rodata.*)  
-         *liblibos_release.a:int_hard.o(.text .text.* .rodata .rodata.*)  
-         *liblibos_release.a:pic_timer.o(.text .text.* .rodata .rodata.*)  
-                
-         ./src/OS_prjcfg/config/int_config.o(.text .text.* .rodata .rodata.*)  
-         ./src/user/critical/*(.text .text.* .rodata .rodata.* )     
+         *liblibos_release.a:exp_decoder.o(.text .text.* .rodata .rodata.*)
+         *liblibos_release.a:heap-static.o(.text .text.* .rodata .rodata.*)
+
+		 *liblibos_release.a:hard-exp.o(.text .text.* .rodata .rodata.*)
+         *liblibos_release.a:exp_asm.o(.text .text.* .rodata .rodata.*)
+         *liblibos_release.a:exp_c.o(.text .text.* .rodata .rodata.*)
+         *liblibos_release.a:exp_vec.o(.text .text.* .rodata .rodata.*)
+         *liblibos_release.a:cpu.o(.text .text.* .rodata .rodata.*)
+         *liblibos_release.a:int_hard.o(.text .text.* .rodata .rodata.*)
+         *liblibos_release.a:pic_timer.o(.text .text.* .rodata .rodata.*)
+
+         ./src/OS_prjcfg/config/int_config.o(.text .text.* .rodata .rodata.*)
+         ./src/user/critical/*(.text .text.* .rodata .rodata.* )
     }>SYSCODE AT>FLASHROM
 
     rw_preload_rDDR3_lnorflash_data :
@@ -98,19 +91,19 @@ SECTIONS
          *liblibos_release.a:timer_hard.o(.data .data.* .sdata  .sdata.*)
          *liblibos_release.a:cpu_peri_gpio.o(.data .data.* .sdata  .sdata.*)
          *liblibos_release.a:exp_decoder.o(.data .data.* .sdata  .sdata.*)
-         *liblibos_release.a:heap-static.o(.data .data.* .sdata  .sdata.*)  
-           
-         
-         *liblibos_release.a:exp_asm.o(.data .data.* .sdata  .sdata.*)  
-         *liblibos_release.a:exp_c.o(.data .data.* .sdata  .sdata.*)  
-         *liblibos_release.a:exp_vec.o(.data .data.* .sdata  .sdata.*) 
-         *liblibos_release.a:cpu.o(.data .data.* .sdata  .sdata.*)   
-         *liblibos_release.a:int_hard.o(.data .data.* .sdata  .sdata.*)  
-         *liblibos_release.a:pic_timer.o(.data .data.* .sdata  .sdata.*)  
-                
-         ./src/OS_prjcfg/config/int_config.o(.data .data.* .sdata  .sdata.*)  
+         *liblibos_release.a:heap-static.o(.data .data.* .sdata  .sdata.*)
+
+		 *liblibos_release.a:hard-exp.o(.data .data.* .sdata  .sdata.*)
+         *liblibos_release.a:exp_asm.o(.data .data.* .sdata  .sdata.*)
+         *liblibos_release.a:exp_c.o(.data .data.* .sdata  .sdata.*)
+         *liblibos_release.a:exp_vec.o(.data .data.* .sdata  .sdata.*)
+         *liblibos_release.a:cpu.o(.data .data.* .sdata  .sdata.*)
+         *liblibos_release.a:int_hard.o(.data .data.* .sdata  .sdata.*)
+         *liblibos_release.a:pic_timer.o(.data .data.* .sdata  .sdata.*)
+
+         ./src/OS_prjcfg/config/int_config.o(.data .data.* .sdata  .sdata.*)
          ./src/user/critical/*(.data .data.* .sdata  .sdata.*)
-         
+
     }>SYSDATA AT>FLASHROM
 
     zi_preload_rDDR3_lDDR3 (NOLOAD) :
@@ -121,17 +114,18 @@ SECTIONS
          *liblibos_release.a:wdt_hal.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)
          *liblibos_release.a:timer_hard.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)
          *liblibos_release.a:cpu_peri_gpio.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)
-         *liblibos_release.a:exp_decoder.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)  
-         *liblibos_release.a:heap-static.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON) 
-                  
-         *liblibos_release.a:exp_asm.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)  
-         *liblibos_release.a:exp_c.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)  
-         *liblibos_release.a:exp_vec.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)  
-         *liblibos_release.a:cpu.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)  
-         *liblibos_release.a:int_hard.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)  
-         *liblibos_release.a:pic_timer.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)  
-                
-         ./src/OS_prjcfg/config/int_config.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)  
+         *liblibos_release.a:exp_decoder.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)
+         *liblibos_release.a:heap-static.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)
+         
+		 *liblibos_release.a:hard-exp.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)
+         *liblibos_release.a:exp_asm.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)
+         *liblibos_release.a:exp_c.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)
+         *liblibos_release.a:exp_vec.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)
+         *liblibos_release.a:cpu.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)
+         *liblibos_release.a:int_hard.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)
+         *liblibos_release.a:pic_timer.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)
+
+         ./src/OS_prjcfg/config/int_config.o(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)
          ./src/user/critical/*(.bss .bss.* .sbss .sbss.* SCOMMON COMMON)
 
     }>SYSDATA
@@ -164,7 +158,7 @@ SECTIONS
         Cached_bsssec_end = .;
         * (.bss .bss.* .sbss .sbss.* SCOMMON COMMON)
     }>SYSDATA
-    
+
     stack_rDDR3_lDDR3 (NOLOAD) :
     {
         . = ALIGN(0x04);
@@ -179,14 +173,14 @@ SECTIONS
         cint_exp_bottom = .;
         KEEP(* (.stack.cint_exp .stack.cint_exp.*))
         cint_exp_top = ALIGN(0x10);
-        
+
         sys_exp_bottom = .;
         KEEP(* (.stack.prg_exp .stack.prg_exp.*))
         sys_exp_top = ALIGN(0x10);
-        
+
         sys_heap_bottom = .;
     }>SYSDATA
-    
+
     preload_cp_table :
     {
         . = ALIGN(0x04);
@@ -232,15 +226,18 @@ SECTIONS
         LONG(SIZEOF(zi_sysload_rDDR3_lDDR3))
         LONG(0)
     }>FLASHROM
-    
+
     heap_cp_table :
     {
         . = ALIGN(0x04);
         pHeapList = .;
+
+/* 默认堆，必须排首位，名字必须是“sys” */
         LONG(1)                     /*表示该堆由1段内存组成*/
         LONG(0)                     /*该堆上分配的内存的对齐尺寸，0表示使用系统对齐*/
-        LONG(sys_heap_bottom)   /*第一段基址，须符合对齐要求*/
-        LONG(sys_heap_top)      /*第一段地址上限（不含），须符合对齐要求*/
+        LONG(0)                     /*0=通用堆,1=专用堆,如果系统只有唯一一个堆,则只能是通用堆*/
+        LONG(sys_heap_bottom)       /*第一段基址，须符合对齐要求*/
+        LONG(sys_heap_top)          /*第一段地址上限（不含），须符合对齐要求*/
         LONG(128)                   /*第一段页尺寸=128bytes*/
         BYTE(0x73)                  /*'s'*/
         BYTE(0x79)                  /*'y'*/
@@ -250,7 +247,7 @@ SECTIONS
         LONG(0)                     /*结束标志*/
     }>FLASHROM
     sys_heap_top = sys_heap_bottom + 128M;
-    
+
     tab_CpyForLoader :
     {
        . = ALIGN(0x04);

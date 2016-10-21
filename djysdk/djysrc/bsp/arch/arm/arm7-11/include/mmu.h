@@ -89,7 +89,34 @@ extern u32 mmu_page_table[];
 #define CN_BM_FIRST_LEVEL_DES_BUFFER 0x00000004 //BŒª
 #define CN_BO_FIRST_LEVEL_DES_BUFFER 2 //BŒª
 
-u32 MMU_MapSection(u32 vaddr, u32 paddr, int properties);
+////////////////////////////////////
+
+//AP
+#define AP_ROM                  0
+#define AP_USER_NO              1
+#define AP_USER_RO              2  //supervisor=RW, user=RO
+#define AP_USER_RW              3  //supervisor=RW, user=RW
+
+//Domain
+#define DOMAIN_NO_ACCESS        0
+#define DOMAIN_CHECK            1
+#define DOMAIN_NO_CHECK         3
+
+//Cache + Buffer
+#define	NCNB	0
+#define	NCB		1
+#define	CNB		2
+#define	CB		3
+
+// ∂Œ Ù–‘
+#define	SECTION_ATTR_FAULT	(0)
+#define SECTION_ATTR(ap, domain, cache_buffer) \
+        				(ap << 10) | (domain << 5) | (1 << 4) | (cache_buffer << 2) | (1 << 1) | (0 << 0)
+
+////////////////////////////////////
+
+void MMU_MapSection(u32 *tt_base,u32 va_start,u32 pa_start,u32 sec_count,u32 attr);
+
 void MMU_LockEntry();
 void MMU_InvalidateTlbInstructionEntry(void);
 void MMU_InvalidateTlbDatasEntry(void);

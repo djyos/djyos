@@ -58,7 +58,7 @@
 #include "arch_feature.h"
 #include "stdint.h"
 #include "cpu_peri.h"
-#include "exception.h"
+#include "hard-exp.h"
 #include "sysctl.h"
 #include "MMU.h"
 
@@ -106,70 +106,38 @@ static  void __memcpy(char *dst,char *src,int count)
 
 
 // ---- 初始化MMU ----
-// 映射控制，将SDRAM的向量表映射到0x00000000的地址上去（注意映射的主语与宾语）
-// S3C2440的指令和数据的Cache是分开的。
-// 在进行映射控制时，还需要控制C及B位。
-// CB:   0xC1E
-// NCNB: 0xC12
 void MMU_Init(void)
 {
-    register vu32 i;
+       MMU_MapSection(mmu_page_table,0x00000000,0x00000000,4096,
+                SECTION_ATTR(AP_USER_RW,DOMAIN_NO_CHECK,NCNB));
 
-  //  MMU_Disable();
+        MMU_MapSection(mmu_page_table,0x08000000,0x08000000,4,
+                SECTION_ATTR(AP_USER_RW,DOMAIN_NO_CHECK,NCNB)); //SMC BANK1
 
-    //初始化整个4GB L1页表为平板映射，无Cache,无Buffer.
-    for(i=0;i<4096;i++)
-    {
-        MMU_MapSection(i<<12,i<<12,0xC12);
-    }
+        MMU_MapSection(mmu_page_table,0x20000000,0x20000000,4,
+                SECTION_ATTR(AP_USER_RW,DOMAIN_NO_CHECK,NCNB)); //SMC BANK4
 
-    // 0~0x2FFFFFFF段的初始化，这里很有可能放置的是ROM，开启Cache、Buffer
-    for(i=0x00000000; i<0x20000000; )
-    {
-        MMU_MapSection(i, i, 0xc1e);    // 平板式的映射
-        i += 0x100000;
-    }
+        MMU_MapSection(mmu_page_table,0x30000000,0x30000000,8,
+                SECTION_ATTR(AP_USER_RW,DOMAIN_NO_CHECK,CB));   //ROM1
 
-    // 0x30000000~0x3FFFFFFF段映射
-    MMU_MapSection(0x20000000, 0x20000000, 0xc12);  //非cache区，HM add for DM9000
-    MMU_MapSection(0x30000000, 0x30000000, 0xc12);  //非cache区
-    // 其中0x30100000~0x33FFFFFF的63MB是SDRAM，开启Cache、Buffer
-    for(i=0x30100000; i<0x40000000; )
-    {
-        MMU_MapSection(i, i, 0xC1E);    // 平板式的映射
-        i += 0x100000;
-    }
+        MMU_MapSection(mmu_page_table,0x30800000,0x30800000,8,
+                SECTION_ATTR(AP_USER_RW,DOMAIN_NO_CHECK,NCNB)); //RAM_nocache
 
-    // 0x40000000~0x5FFFFFFF段映射
-    // 这里是外设寄存器段的地址，由于操作IO口，因而这里不能使能Cache，但可以开启Buffer
-    for(i=0x40000000; i<0x60000000; )
-    {
-        MMU_MapSection(i, i, 0xc12);    // 平板式的映射
-        i += 0x100000;
-    }
+        MMU_MapSection(mmu_page_table,0x31000000,0x31000000,16,
+                SECTION_ATTR(AP_USER_RW,DOMAIN_NO_CHECK,CB));   //RAM1
 
-//    // 其余地址都不可用
-//    for(i=0x60000000; i != 0; i += 0x100000) {
-//      mmu_map(i, i, 0x016);   // 平板式的映射
-//    }
+        MMU_MapSection(mmu_page_table,0x32000000,0x32000000,16,
+                SECTION_ATTR(AP_USER_RW,DOMAIN_NO_CHECK,CNB));  //RAM2
 
-    //映射并复制向量表到0xFFFF0000
-//    MMU_MapSection(0xFFF00000, 0x33F00000, 0xC1E);
-//    __memcpy((char*)0xFFF000000,(char*)0x00000000,4096);
+        MMU_MapSection(mmu_page_table,0x48000000,0x48000000,384,
+                SECTION_ATTR(AP_USER_RW,DOMAIN_NO_CHECK,NCNB)); //SFR
+
+        MMU_MapSection(mmu_page_table,0xFFF00000,0x33F00000,1,
+                SECTION_ATTR(AP_USER_RW,DOMAIN_NO_CHECK,CB));   //Last 1MB
 
 
-    MMU_MapSection(0xFFF00000, 0x33F00000, 0xc1e);
-
-
-    MMU_SetSectionsBase((u32*)mmu_page_table);
-    MMU_SetDomainAccess(0xffffffff);          //所有域具有管理者权限
-
-    //Cache_EnableAll();
-    //Cache_EnableWriteBuf();
-    // MMU_Enable();
-
-
-     //__memcpy((char*)0xFFFF0000,isr_vector,1024);
+        MMU_SetSectionsBase((u32*)mmu_page_table);
+        MMU_SetDomainAccess(0xffffffff);          //所有域具有管理者权限
 
 
 }
@@ -202,7 +170,7 @@ void Mem_BusInit(void)
 {
     register struct memory_ctrl_reg volatile * const memory_ctrl
                                 = (struct memory_ctrl_reg*)0x48000000;
-    register u32 xr0;
+    register vu32 xr0;
     xr0 = memory_ctrl->BWSCON;
     xr0 &= 0x00fffff0;       //清掉bank0,bank6/7
     xr0  |= (0<<bo_bus_ublb_bank7) +(0<<bo_bus_wait_bank7)

@@ -2,240 +2,243 @@
 <Project
     Version="10.0"
     VendorName="SlickEdit"
-    TemplateName="GNU C/C++"
-    WorkingDir="."
-    BuildSystem="vsbuild">
+    TemplateName="Other C/C++"
+    WorkingDir=".">
     <Config
         Name="Debug"
-        Type="gnuc"
+        Type="cpp"
         DebugCallbackName="gdb"
-        Version="1"
-        OutputFile="%bdtq2440.exe"
+        OutputFile="%bdtq2440"
         CompilerConfigName="Latest Version">
         <Menu>
             <Target
                 Name="Compile"
                 MenuCaption="&amp;Compile"
-                Dialog="_gnuc_options_form Compile"
                 CaptureOutputWith="ProcessBuffer"
-                Deletable="0"
                 OutputExts="*.o"
                 SaveOption="SaveCurrent"
                 RunFromDir="%rw">
-                <Exec CmdLine='g++ -c %xup  %defd -g -o "%bd%n%oe" %i "%f"'/>
+                <Exec CmdLine='cc -c -g %i %defd -o "%bd%n.o" "%f"'/>
             </Target>
             <Target
                 Name="Link"
-                MenuCaption="&amp;Link"
-                ShowOnMenu="Never"
-                Dialog="_gnuc_options_form Link"
-                CaptureOutputWith="ProcessBuffer"
-                Deletable="0"
-                SaveOption="SaveCurrent"
-                RunFromDir="%rw">
-                <Exec CmdLine='g++ %xup -g -o "%o" %f %libs'/>
+                MenuCaption="&amp;Link">
+                <Exec CmdLine='cc -g -o "%o" %f %libs'/>
             </Target>
             <Target
                 Name="Build"
                 MenuCaption="&amp;Build"
-                Dialog="_gnuc_options_form Compile"
                 CaptureOutputWith="ProcessBuffer"
-                Deletable="0"
                 SaveOption="SaveWorkspaceFiles"
                 RunFromDir="%rw">
-                <Exec CmdLine='"%(VSLICKBIN1)vsbuild" "%w" "%r" -t build'/>
+                <Exec CmdLine='"%(VSLICKBIN1)vsbuild" build "%w" "%r"'/>
             </Target>
             <Target
                 Name="Rebuild"
                 MenuCaption="&amp;Rebuild"
-                Dialog="_gnuc_options_form Compile"
                 CaptureOutputWith="ProcessBuffer"
-                Deletable="0"
                 SaveOption="SaveWorkspaceFiles"
                 RunFromDir="%rw">
-                <Exec CmdLine='"%(VSLICKBIN1)vsbuild" "%w" "%r" -t rebuild'/>
+                <Exec CmdLine='"%(VSLICKBIN1)vsbuild" rebuild "%w" "%r"'/>
             </Target>
             <Target
                 Name="Debug"
                 MenuCaption="&amp;Debug"
-                Dialog="_gnuc_options_form Run/Debug"
+                SaveOption="SaveNone"
                 BuildFirst="1"
                 CaptureOutputWith="ProcessBuffer"
-                Deletable="0"
-                SaveOption="SaveNone"
                 RunFromDir="%rw">
                 <Exec CmdLine='vsdebugio -prog "%o"'/>
             </Target>
             <Target
                 Name="Execute"
                 MenuCaption="E&amp;xecute"
-                Dialog="_gnuc_options_form Run/Debug"
+                SaveOption="SaveNone"
                 BuildFirst="1"
                 CaptureOutputWith="ProcessBuffer"
-                Deletable="0"
-                SaveOption="SaveWorkspaceFiles"
                 RunFromDir="%rw">
                 <Exec CmdLine='"%o"'/>
             </Target>
-            <Target
-                Name="dash"
-                MenuCaption="-"
-                Deletable="0">
-                <Exec/>
-            </Target>
-            <Target
-                Name="GNU C Options"
-                MenuCaption="GNU C &amp;Options..."
-                ShowOnMenu="HideIfNoCmdLine"
-                Deletable="0"
-                SaveOption="SaveNone">
-                <Exec
-                    CmdLine="gnucoptions"
-                    Type="Slick-C"/>
-            </Target>
         </Menu>
-        <List Name="GNUC Options">
-            <Item
-                Name="LinkerOutputType"
-                Value="Executable"/>
-        </List>
     </Config>
     <Config
         Name="Release"
-        Type="gnuc"
+        Type="cpp"
         DebugCallbackName="gdb"
-        Version="1"
-        OutputFile="%bdtq2440.exe"
+        OutputFile="%bdtq2440"
         CompilerConfigName="Latest Version">
         <Menu>
             <Target
                 Name="Compile"
                 MenuCaption="&amp;Compile"
-                Dialog="_gnuc_options_form Compile"
                 CaptureOutputWith="ProcessBuffer"
-                Deletable="0"
-                OutputExts="*.o"
                 SaveOption="SaveCurrent"
+                OutputExts="*.o"
                 RunFromDir="%rw">
-                <Exec CmdLine='g++ -c %xup %defd -o "%bd%n%oe" %i "%f"'/>
+                <Exec CmdLine='cc -c -O %i %defd -o "%bd%n.o" "%f"'/>
             </Target>
             <Target
                 Name="Link"
-                MenuCaption="&amp;Link"
-                ShowOnMenu="Never"
-                Dialog="_gnuc_options_form Link"
-                CaptureOutputWith="ProcessBuffer"
-                Deletable="0"
-                SaveOption="SaveCurrent"
-                RunFromDir="%rw">
-                <Exec CmdLine='g++ %xup -o "%o" %f %libs'/>
+                MenuCaption="&amp;Link">
+                <Exec CmdLine='cc -O -o "%o" %f %libs'/>
             </Target>
             <Target
                 Name="Build"
                 MenuCaption="&amp;Build"
-                Dialog="_gnuc_options_form Compile"
                 CaptureOutputWith="ProcessBuffer"
-                Deletable="0"
                 SaveOption="SaveWorkspaceFiles"
                 RunFromDir="%rw">
-                <Exec CmdLine='"%(VSLICKBIN1)vsbuild" "%w" "%r" -t build'/>
+                <Exec CmdLine='"%(VSLICKBIN1)vsbuild" build "%w" "%r"'/>
             </Target>
             <Target
                 Name="Rebuild"
                 MenuCaption="&amp;Rebuild"
-                Dialog="_gnuc_options_form Compile"
                 CaptureOutputWith="ProcessBuffer"
-                Deletable="0"
                 SaveOption="SaveWorkspaceFiles"
                 RunFromDir="%rw">
-                <Exec CmdLine='"%(VSLICKBIN1)vsbuild" "%w" "%r" -t rebuild'/>
+                <Exec CmdLine='"%(VSLICKBIN1)vsbuild" rebuild "%w" "%r"'/>
             </Target>
             <Target
                 Name="Debug"
                 MenuCaption="&amp;Debug"
-                Dialog="_gnuc_options_form Run/Debug"
+                SaveOption="SaveNone"
                 BuildFirst="1"
                 CaptureOutputWith="ProcessBuffer"
-                Deletable="0"
-                SaveOption="SaveNone"
                 RunFromDir="%rw">
                 <Exec CmdLine='vsdebugio -prog "%o"'/>
             </Target>
             <Target
                 Name="Execute"
                 MenuCaption="E&amp;xecute"
-                Dialog="_gnuc_options_form Run/Debug"
+                SaveOption="SaveNone"
                 BuildFirst="1"
                 CaptureOutputWith="ProcessBuffer"
-                Deletable="0"
-                SaveOption="SaveWorkspaceFiles"
                 RunFromDir="%rw">
                 <Exec CmdLine='"%o"'/>
             </Target>
-            <Target
-                Name="dash"
-                MenuCaption="-"
-                Deletable="0">
-                <Exec/>
-            </Target>
-            <Target
-                Name="GNU C Options"
-                MenuCaption="GNU C &amp;Options..."
-                ShowOnMenu="HideIfNoCmdLine"
-                Deletable="0"
-                SaveOption="SaveNone">
-                <Exec
-                    CmdLine="gnucoptions"
-                    Type="Slick-C"/>
-            </Target>
         </Menu>
-        <List Name="GNUC Options">
-            <Item
-                Name="LinkerOutputType"
-                Value="Executable"/>
-        </List>
     </Config>
-    <CustomFolders>
-        <Folder
-            Name="Source Files"
-            Filters="*.c;*.C;*.cc;*.cpp;*.cp;*.cxx;*.c++;*.prg;*.pas;*.dpr;*.asm;*.s;*.bas;*.java;*.cs;*.sc;*.e;*.cob;*.html;*.rc;*.tcl;*.py;*.pl;*.d;*.m;*.mm;*.go"/>
-        <Folder
-            Name="Header Files"
-            Filters="*.h;*.H;*.hh;*.hpp;*.hxx;*.inc;*.sh;*.cpy;*.if"/>
-        <Folder
-            Name="Resource Files"
-            Filters="*.ico;*.cur;*.dlg"/>
-        <Folder
-            Name="Bitmaps"
-            Filters="*.bmp"/>
-        <Folder
-            Name="Other Files"
-            Filters=""/>
-        <Folder
-            Name="src"
-            Filters=""></Folder>
+    <Rules Name="Compile">
+        <Rule
+            InputExts="*.s"
+            OutputExts="*.o"
+            LinkObject="1">
+            <Exec CmdLine='as -o "%bd%n.o" "%f"'/>
+        </Rule>
+    </Rules>
+    <Files>
         <Folder
             Name="config"
-            Filters=""></Folder>
-    </CustomFolders>
-    <Files AutoFolders="DirectoryView">
-        <Folder Name="config">
+            Filters="">
             <F N="config/Debug.lds"/>
             <F N="config/Release.lds"/>
         </Folder>
-        <Folder Name="src">
-            <Folder Name="OS_prjcfg">
-                <Folder Name="include">
-                    <F N="src/OS_prjcfg/include/board-cfg.h"/>
-                    <F N="src/OS_prjcfg/include/config-prj.h"/>
-                </Folder>
+        <Folder
+            Name="src"
+            Filters="">
+            <Folder
+                Name="user"
+                Filters="">
+                <F
+                    N="src/user/*.c"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/user/*.c++"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/user/*.cc"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/user/*.cp"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/user/*.cpp"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/user/*.cxx"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/user/*.h"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/user/*.hh"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/user/*.hpp"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/user/*.hxx"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/user/*.inl"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/user/*.xpm"
+                    Recurse="1"
+                    Excludes=""/>
             </Folder>
-            <Folder Name="user">
-                <Folder Name="critical">
-                    <F N="src/user/critical/critical.c"/>
-                </Folder>
-                <F N="src/user/main.c"/>
-                <F N="src/user/module-trim.c"/>
+            <Folder
+                Name="OS_prjcfg"
+                Filters="">
+                <F
+                    N="src/OS_prjcfg/include/*.c"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/OS_prjcfg/include/*.c++"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/OS_prjcfg/include/*.cc"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/OS_prjcfg/include/*.cp"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/OS_prjcfg/include/*.cpp"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/OS_prjcfg/include/*.cxx"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/OS_prjcfg/include/*.h"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/OS_prjcfg/include/*.hh"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/OS_prjcfg/include/*.hpp"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/OS_prjcfg/include/*.hxx"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/OS_prjcfg/include/*.inl"
+                    Recurse="1"
+                    Excludes=""/>
+                <F
+                    N="src/OS_prjcfg/include/*.xpm"
+                    Recurse="1"
+                    Excludes=""/>
             </Folder>
         </Folder>
     </Files>

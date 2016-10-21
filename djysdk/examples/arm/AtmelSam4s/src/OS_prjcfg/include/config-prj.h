@@ -28,10 +28,10 @@ extern const u32 gc_u32CfgGuiCmdDeep;   //gkernelÃüÁî»º³åÇøÉî¶È(×Ö½ÚÊı,·ÇÃüÁîÌõÊ
 extern const u32 gc_u32CfgGuiStsDeep;    //gkernel×´Ì¬»º³åÇøÉî¶È(×Ö½ÚÊı,·ÇÃüÁîÌõÊı)
 
 extern const u32 gc_u32CfgDeviceLimit;     //¶¨ÒåÉè±¸ÊıÁ¿¡£
-extern const u32 gc_u32CfgLockLimit;      //¶¨ÒåËøÊıÁ¿¡£ÓÃ»§µ÷ÓÃsemp_createºÍmutex_create´´½¨µÄËø£¬²»°üÀ¨ÄÚºËÓÃµ½µÄËø¡£
-extern const u32 gc_u32CfgEventLimit;     //ÊÂ¼şÊıÁ¿
-extern const u32 gc_u32CfgEvttLimit;      //×ÜÊÂ¼şÀàĞÍÊı
-extern const u32 gc_u32CfgWdtLimit;       //ÔÊĞíÑø¹·ÊıÁ¿
+extern const u32 gc_u32CfgLockLimit;       //¶¨ÒåËøÊıÁ¿¡£ÓÃ»§µ÷ÓÃsemp_createºÍmutex_create´´½¨µÄËø£¬²»°üÀ¨ÄÚºËÓÃµ½µÄËø¡£
+extern const u32 gc_u32CfgEventLimit;      //ÊÂ¼şÊıÁ¿
+extern const u32 gc_u32CfgEvttLimit;       //×ÜÊÂ¼şÀàĞÍÊı
+extern const u32 gc_u32CfgWdtLimit;        //ÔÊĞíÑø¹·ÊıÁ¿
 extern const u32 gc_u32CfgPipeLimit;       //¹ÜµÀÊıÁ¿
 extern const u32 gc_u32CfgMemPoolLimit;    //ÔÊĞí½¨Á¢5¸öÄÚ´æ³Ø
 extern const u32 gc_u32CfgStdinDeviceLimit;
@@ -40,8 +40,10 @@ extern const u32 gc_u32CfgMainStackLen;
 extern const u32 gc_u32CfgOpenedfileLimit;
 extern const u32 gc_u32CfgTimerLimit;
 
-extern const char *gc_pCfgStddevName;  //±ê×¼ÊäÈëÊä³öÉè±¸
-extern const char *gc_pCfgWorkPath;   //¹¤×÷Â·¾¶ÉèÖÃ
+extern const char *gc_pCfgStdinName;        //±ê×¼ÊäÈëÉè±¸
+extern const char *gc_pCfgStdoutName;       //±ê×¼Êä³öÉè±¸
+extern const char *gc_pCfgStderrName;       //±ê×¼´íÎóÊä³öÉè±¸
+extern const char *gc_pCfgWorkPath;         //¹¤×÷Â·¾¶ÉèÖÃ
 #ifdef __cplusplus
 }
 #endif

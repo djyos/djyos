@@ -66,10 +66,10 @@
 #include <string.h>
 #include "k9fxxx.h"
 
-static  struct tagFlashChip tg_samsung_nand;    //芯片
+static  struct FlashChip tg_samsung_nand;    //芯片
 
 //扇区缓冲区指针，扇区读写函数内部专用，djyffs中，扇区不是所有flash的共性，故不
-//出现在struct tagFlashChip 结构中。动态分配内存而不定义成静态数组，是因为chip作
+//出现在struct FlashChip 结构中。动态分配内存而不定义成静态数组，是因为chip作
 //为一个资源，是可以删除的，删除时可以回收资源。
 static u8 *pg_sector_buf;      //扇区缓冲区指针
 static u32 u32g_sectors_per_block; //每块包含的扇区数

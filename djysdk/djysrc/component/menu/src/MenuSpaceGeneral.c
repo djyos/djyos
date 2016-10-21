@@ -61,9 +61,9 @@
 // 输出参数：
 // 返回值  ： 一个内部成员全为0的矩形结构体
 // =========================================================================
-struct tagRectangle  zero_strect(void)
+struct Rectangle  zero_strect(void)
 {
-  struct tagRectangle result={0,0,0,0};
+  struct Rectangle result={0,0,0,0};
   return result;
 }
 
@@ -232,8 +232,8 @@ struct menu_item_space cal_textarea(const char *text, u32 count )
 
     s32 len, src_len,size_bak;
     u32 wc;
-    struct tagFontRsc* cur_font;
-    struct tagGkscParaDrawBitmapRop bitmap_para;
+    struct FontRsc* cur_font;
+    struct GkscParaDrawBitmapRop bitmap_para;
     struct menu_item_space   result={0,0};
 
     cur_font = Font_GetCurFont();
@@ -353,12 +353,12 @@ struct menu_displaypara*  getmainmenudispara(struct menu_displaypara *cur)
 // 返回值  :
 //需要说明的是:位置前面都计算好了，已经没有啥子好说的了
 // =========================================================================
-bool_t create_menudisparawin(struct menu_displaypara  *menudispara,struct tagRectangle win_rec,const char *win_name)
+bool_t create_menudisparawin(struct menu_displaypara  *menudispara,struct Rectangle win_rec,const char *win_name)
 {
 
   bool_t result=false;
 
-  struct tagGkWinRsc  *parwin;
+  struct GkWinRsc  *parwin;
 
   //参数检查
   if(NULL==menudispara)
@@ -398,7 +398,7 @@ bool_t create_menudisparawin(struct menu_displaypara  *menudispara,struct tagRec
     }
   }
      //分配窗口空间，如果分配不到，一切都是浮云
-  menudispara->CurWin=(struct tagGkWinRsc *)M_MallocLc(sizeof(struct tagGkWinRsc),0);
+  menudispara->CurWin=(struct GkWinRsc *)M_MallocLc(sizeof(struct GkWinRsc),0);
 
   if(NULL == menudispara->CurWin)
   {

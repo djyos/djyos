@@ -57,59 +57,14 @@
 #define __UART_H__
 #include "driver.h"
 #include "ring.h"
-
+#include <uartctrl.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
-struct tagUartCB;
-// 串口波特率定义
-enum tagUartBaud
-{
-    CN_UART_BAUD_110     =  110,
-    CN_UART_BAUD_300     =  300,
-    CN_UART_BAUD_600     =  600,
-    CN_UART_BAUD_1200    =  1200,
-    CN_UART_BAUD_2400    =  2400,
-    CN_UART_BAUD_4800    =  4800,
-    CN_UART_BAUD_9600    =  9600,
-    CN_UART_BAUD_19200   =  19200,
-    CN_UART_BAUD_38400   =  38400,
-    CN_UART_BAUD_57600   =  57600,
-    CN_UART_BAUD_115200  =  115200,
-    CN_UART_BAUD_230400  =  230400,
-    CN_UART_BAUD_460800  =  460800,
-    CN_UART_BAUD_921600  =  921600,
-};
+struct UartCB;
 
-// 串口数据位
-enum tagUartDataBits
-{
-    CN_UART_DATABITS_5  = 5,
-    CN_UART_DATABITS_6  = 6,
-    CN_UART_DATABITS_7  = 7,
-    CN_UART_DATABITS_8  = 8,
-    CN_UART_DATABITS_9  = 9
-};
-
-// 串口奇偶校验
-enum tagUartParity
-{
-    CN_UART_PARITY_NONE = 0,
-    CN_UART_PARITY_ODD,
-    CN_UART_PARITY_EVEN,
-    CN_UART_PARITY_MARK,
-    CN_UART_PARITY_SPACE
-};
-
-// 串口停止位
-enum tagUartStopBits
-{
-    CN_UART_STOPBITS_1 = 0,
-    CN_UART_STOPBITS_1_5,
-    CN_UART_STOPBITS_2
-};
 // 串口传输参数结构体
-struct tagCOMParam
+struct COMParam
 {
     enum tagUartBaud       BaudRate;
     enum tagUartDataBits   DataBits;
@@ -118,63 +73,31 @@ struct tagCOMParam
 };
 
 typedef u32 (* UartStartSend)(ptu32_t PrivateTag,u32 timeout);
-typedef u32 (* UartDirectSend)(ptu32_t PrivateTag,u8 *send_buf,u32 len,u32 timeout);
+//typedef u32 (* UartDirectSend)(ptu32_t PrivateTag,u8 *send_buf,u32 len,u32 timeout);
 typedef ptu32_t (*UartControl)(ptu32_t PrivateTag,u32 cmd, u32 data1,u32 data2);
 
 // 串口模块初始化结构体
-struct tagUartParam
+struct UartParam
 {
-    const char *Name;					//UART名称，如UART0
-    u32 TxRingBufLen;					//发送缓冲区配置字节数
-    u32 RxRingBufLen;					//接收缓冲区配置字节数
-    u32 Baud;							//默认的波特率
-    ptu32_t UartPortTag;				//UART私有标签，如寄存器基址
-    UartStartSend StartSend;			//启动发送回调函数指针
-    UartDirectSend DirectlySend;		//直接轮询发送回调函数指针
-    UartControl UartCtrl;				//控制函数回调函数指针
+    const char *Name;                   //UART名称，如UART0
+    u32 TxRingBufLen;                   //发送缓冲区配置字节数
+    u32 RxRingBufLen;                   //接收缓冲区配置字节数
+    u32 Baud;                           //默认的波特率
+    ptu32_t UartPortTag;                //UART私有标签，如寄存器基址
+    UartStartSend StartSend;            //启动发送回调函数指针
+//    UartDirectSend DirectlySend;        //直接轮询发送回调函数指针
+    UartControl UartCtrl;               //控制函数回调函数指针
 };
 
-//串口错误类型,使用MULPLEX的SENSINGBIT第4个比特到第31个比特
-#define CN_UART_FIFO_OVER_ERR    (1<<3) //硬件缓冲区溢出错误
-#define CN_UART_BUF_OVER_ERR     (1<<4) //接收缓冲区溢出错误
-#define CN_UART_HARD_COMM_ERR    (1<<5) //串口硬件通信错误
-
-//串口设备控制命令常数，用于uart_ctrl函数。
-#define CN_UART_START                 0   //启动串口
-#define CN_UART_STOP                  1   //停止串口
-#define CN_UART_SET_BAUD              2   //设置uartBaud.
-#define CN_UART_COM_SET               3   //设置串口参数
-#define CN_UART_SEND_DATA             4   //发送数据
-#define CN_UART_RECV_DATA             5   //接收数据
-#define CN_UART_COMPLETED_SEND        6   //完成发送工作
-#define CN_UART_RX_PAUSE              7   //暂停接收数据到缓冲区
-#define CN_UART_RX_RESUME             8   //重新开始接收数据到缓冲区
-#define CN_UART_RX_OVERTIME           9   //设置接收超时时间，毫秒数
-#define CN_UART_RECV_SOFT_LEVEL       10  //设置接收软件缓冲区触发水平
-#define CN_UART_SEND_SOFT_LEVEL       11  //设置接收软件缓冲区触发水平
-#define CN_UART_RECV_HARD_LEVEL       12  //设置接收fifo触发水平
-#define CN_UART_SEND_HARD_LEVEL       13  //设置发送fifo触发水平
-#define CN_UART_RECV_ERROR_EVTT       14  //设置错误弹出事件类型
-#define CN_UART_EN_RTS                15  //使能rts流控
-#define CN_UART_DIS_RTS               16  //禁止rts流控
-#define CN_UART_EN_CTS                17  //使能cts流控
-#define CN_UART_DIS_CTS               18  //禁止cts流控
-#define CN_UART_DMA_USED              19  //使用dma传输
-#define CN_UART_DMA_UNUSED            20  //禁止dma传输
-#define CN_UART_HALF_DUPLEX_SEND      21   //发送数据
-#define CN_UART_HALF_DUPLEX_RECV      22   //接收数据
-#define CN_UART_SETTO_ALL_DUPLEX      23  //设置为全双工方式
-
-
-ptu32_t UART_AppWrite(struct tagUartCB *UCB,u8* src_buf,u32 len,
+ptu32_t UART_AppWrite(struct UartCB *UCB,u8* src_buf,u32 len,
         u32 offset,bool_t block_option,u32 timeout);
-ptu32_t UART_AppRead(struct tagUartCB *UCB,u8* dst_buf,u32 len,
+ptu32_t UART_AppRead(struct UartCB *UCB,u8* dst_buf,u32 len,
         u32 offset,u32 timeout);
-ptu32_t UART_PortWrite(struct tagUartCB *UCB,u8* buf,u32 len,u32 res);
-ptu32_t UART_PortRead(struct tagUartCB *UCB,u8* dst_buf,u32 len,u32 res);
-ptu32_t UART_ErrHandle(struct tagUartCB *UCB,u32 ErrNo);
-ptu32_t UART_Ctrl(struct tagUartCB *UCB,u32 cmd,ptu32_t data1,ptu32_t data2);
-struct tagUartCB *UART_InstallPort(struct tagUartParam *Param);
+ptu32_t UART_PortWrite(struct UartCB *UCB,u8* buf,u32 len,u32 res);
+ptu32_t UART_PortRead(struct UartCB *UCB,u8* dst_buf,u32 len,u32 res);
+ptu32_t UART_ErrHandle(struct UartCB *UCB,u32 ErrNo);
+ptu32_t UART_Ctrl(struct UartCB *UCB,u32 cmd,ptu32_t data1,ptu32_t data2);
+struct UartCB *UART_InstallPort(struct UartParam *Param);
 #ifdef __cplusplus
 }
 #endif

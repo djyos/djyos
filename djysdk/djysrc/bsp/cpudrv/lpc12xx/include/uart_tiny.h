@@ -62,13 +62,13 @@ extern "C" {
 #endif
 
 //串口状态控制结构
-typedef struct tagUartUCB
+typedef struct UartUCB
 {
-    struct tagRingBuf send_ring_buf;           //环形发送缓冲区.
-    struct tagRingBuf recv_ring_buf;           //环形接收缓冲区.
+    struct RingBuf send_ring_buf;           //环形发送缓冲区.
+    struct RingBuf recv_ring_buf;           //环形接收缓冲区.
 
-    struct tagSemaphoreLCB *send_buf_semp;     //发送缓冲区锁
-    struct tagSemaphoreLCB *recv_buf_semp;     //接收缓冲区锁
+    struct SemaphoreLCB *send_buf_semp;     //发送缓冲区锁
+    struct SemaphoreLCB *recv_buf_semp;     //接收缓冲区锁
 
     u32 baud;
     bool_t sendding;                //若为true，则设备从左手写入后，无需重新启动

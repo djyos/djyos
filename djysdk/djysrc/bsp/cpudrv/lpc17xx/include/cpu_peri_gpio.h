@@ -74,6 +74,9 @@ extern "C" {
 #define CN_GPIO_MODE_NOOD_NOPULL          0x06    //无开漏，无上下拉
 #define CN_GPIO_MODE_NOOD_PULLDOWN        0x07    //无开漏，下拉
 
+#define CN_GPIO_INT_FALLING    1
+#define CN_GPIO_INT_RISING    0
+
 // GPIO 模块的API申明
 void GPIO_CfgPinFunc(u32 port,u32 pinnum,u32 func_no);
 void GPIO_CfgPinMode(u32 port,u32 pinnum,u32 mode);
@@ -88,8 +91,11 @@ void GPIO_PowerOff(u32 port);
 
 // GPIO外部中断配置
 void GPIO_CfgIntMode(u32 port,u32 pinnum,u32 mode);
-u32 GPIO_GetIntStatus(u32 port,u32 msk,u32 mode);
-void GPIO_ClearIntStatus(u32 port,u32 msk);
+u32 GPIO_GetIntStat(u32 port,u32 msk,u32 mode);
+void GPIO_ClearIntStat(u32 port,u32 msk);
+
+void ExtInt_FlagClear(u8 exti);
+void ExtInt_Cfg(u8 exti,u8 mode,u8 edge);
 
 #ifdef __cplusplus
 }

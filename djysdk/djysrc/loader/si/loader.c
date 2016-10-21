@@ -60,9 +60,10 @@
 #include "stdint.h"
 #include "int_hard.h"
 #include "copy_table.h"
+#include "cpu-optional.h"
 
-#if CN_CFG_CACHE_USED == 1
-#include "cache.h"
+#if CN_CPU_OPTIONAL_CACHE == 1
+#include "set-cache.h"
 #endif
 
 extern struct copy_table sysload_copy_table;
@@ -96,9 +97,9 @@ void loader(void)
         }
     }
 
-#if CN_CFG_CACHE_USED == 1
- //   Cache_CleanData();
- //   Cache_InvalidInst();
+#if CN_CPU_OPTIONAL_CACHE == 1
+    Cache_CleanData();
+    Cache_InvalidInst();
 #endif
 }
 
@@ -114,11 +115,11 @@ void Sys_Start(void);
 //----------------------------------------------------------------------------
 void Pre_Start(void)
 {
-    extern bool_t Exp_Init(void);
+    extern bool_t HardExp_Init(void);
     //自此可以调用malloc族函数，用准静态堆分配算法，若要释放内存，要求严格配对
     //调用malloc-free函数，或者不调用
     Heap_StaticModuleInit(0);
-    Exp_Init();
+    HardExp_Init();
     Int_Init();
     critical();
     loader();

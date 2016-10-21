@@ -68,7 +68,7 @@
 #include "stm32f10x.h"
 #include "k9f1208xxx.h"
 
-struct tagFlashChip tg_samsung_nand;    //芯片
+struct FlashChip tg_samsung_nand;    //芯片
 
 u8 *pg_nand_cmd = (u8*)(Bank_NAND_ADDR | CMD_AREA);
 u8 *pg_nand_addr = (u8*)(Bank_NAND_ADDR | ADDR_AREA);
@@ -78,7 +78,7 @@ u8 *pg_nand_data = (u8*)(Bank_NAND_ADDR);
 #define ce_inactive()
 
 //扇区缓冲区指针，扇区读写函数内部专用，djyffs中，扇区不是所有flash的共性，故不
-//出现在struct tagFlashChip 结构中。动态分配内存而不定义成静态数组，是因为chip作
+//出现在struct FlashChip 结构中。动态分配内存而不定义成静态数组，是因为chip作
 //为一个资源，是可以删除的，删除时可以回收资源。
 static u8 *pg_sector_buf;      //扇区缓冲区指针
 static u32 u32g_sectors_per_block; //每块包含的扇区数
@@ -256,7 +256,7 @@ bool_t __wait_ready_nand(void)
 {
     u32 timestart,timeend;
 
-    timestart = (u32)DjyGetTime( );
+    timestart = (u32)DjyGetSysTime( );
     timeend = timestart;
 
 
@@ -266,7 +266,7 @@ bool_t __wait_ready_nand(void)
        {
           break;
        }
-      timeend = (u32)DjyGetTime( );
+      timeend = (u32)DjyGetSysTime( );
     }
 
     if( (timeend - timestart) >= 100)
@@ -301,7 +301,7 @@ bool_t __wait_ready_nand_slow(u16 wait_time)
 
     u32 timestart,timeend;
 
-    timestart = (u32)DjyGetTime( );
+    timestart = (u32)DjyGetSysTime( );
     timeend = timestart;
 
     while ( (timeend - timestart) < wait_time)
@@ -310,7 +310,7 @@ bool_t __wait_ready_nand_slow(u16 wait_time)
        {
           break;
        }
-      timeend = (u32)DjyGetTime( );
+      timeend = (u32)DjyGetSysTime( );
     }
 
     if( (timeend - timestart) >= wait_time)
@@ -1226,7 +1226,7 @@ void __read_sector_and_oob(u32 sector,u8 *data)
 //参数: 无
 //返回: 1= 成功，0=失败
 //-----------------------------------------------------------------------------
-struct tagShellCmdTab const ShellNandCmdTab[] =
+struct ShellCmdTab const ShellNandCmdTab[] =
 {
     {
         "chip-erase",
@@ -1236,8 +1236,8 @@ struct tagShellCmdTab const ShellNandCmdTab[] =
     },
 };
 
-static struct tagShellCmdRsc tg_NandCmdRsc
-                        [sizeof(ShellNandCmdTab)/sizeof(struct tagShellCmdTab)];
+static struct ShellCmdRsc tg_NandCmdRsc
+                        [sizeof(ShellNandCmdTab)/sizeof(struct ShellCmdTab)];
 ptu32_t module_init_fs_k9f1208xxx(const char *FlashHeapName)
 {
     struct nand_chip_id chip_id;
@@ -1276,7 +1276,7 @@ ptu32_t module_init_fs_k9f1208xxx(const char *FlashHeapName)
     if(DFFSD_InstallChip(&tg_samsung_nand,name,cn_reserve_blocks))
     {
          Sh_InstallCmd(ShellNandCmdTab,tg_NandCmdRsc,
-            sizeof(ShellNandCmdTab)/sizeof(struct tagShellCmdTab));
+            sizeof(ShellNandCmdTab)/sizeof(struct ShellCmdTab));
          return 1;
     }
     else

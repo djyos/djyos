@@ -63,7 +63,7 @@ extern "C" {
 #endif
 
 //------------------------ SystemTick ----------------------------------------
-//CTRL 中断控制及状态寄存器?0xE000_E010,bm_为位掩码?bo_为位偏移
+//CTRL 中断控制及状态寄存器,0xE000_E010,bm_为位掩码,bo_为位偏移
 #define bm_systick_ctrl_countflag   (1<<16) //rc,计数值变为0时自动置1?读清零
 #define bm_systick_ctrl_clksource   (1<<2)  //rw,时钟选择?0=外部时钟stclk?1=内核fclk
 #define bm_systick_ctrl_tickint     (1<<1)  //rw,1=SysTick 数到0 时产生SysTick 异常请求
@@ -73,7 +73,7 @@ extern "C" {
 #define bo_systick_ctrl_tickint     1    //rw,1=SysTick 数到0 时产生SysTick 异常请求
 #define bo_systick_ctrl_enable      0    //rw,SysTick 定时器的使能位
 
-//CTRL SysTick校准数值寄存器 0xE000_E01c,bm_为位掩码?bo_为位偏移
+//CTRL SysTick校准数值寄存器 0xE000_E01c,bm_为位掩码,bo_为位偏移
 #define bm_systick_calib_NOREF  (1<<31)  //r,1=STCLK 不可用,0=可用
 #define bm_systick_calib_SKEW   (1<<30)  //r,1=校准值不是准确的10ms?0=是
 #define bo_systick_calib_NOREF  31  //r,1=STCLK 不可用,0=可用
@@ -83,7 +83,7 @@ extern "C" {
 #define bm_systick_calib_TENMS  (0xffffff<<0)
 #define bo_systick_calib_TENMS  0
 
-struct tagSystickReg      //0xe000e010
+struct SystickReg      //0xe000e010
 {
     vu32 ctrl;
     vu32 reload;    //当倒数至零时?将被重装载的值

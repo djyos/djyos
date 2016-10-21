@@ -55,13 +55,13 @@ extern "C" {
 
 u32 cmd_int(ufast_t uart_int_line);
 ptu32_t module_init_uart0(ptu32_t para);
-ptu32_t cmd_hard_write(struct  tagPanDevice *cmd_dev,ptu32_t buf,
+ptu32_t cmd_hard_write(struct PanDevice *cmd_dev,ptu32_t buf,
                             ptu32_t res2,ptu32_t len);
-ptu32_t cmd_app_write(struct  tagPanDevice *cmd_dev,ptu32_t src_buf,
+ptu32_t cmd_app_write(struct PanDevice *cmd_dev,ptu32_t src_buf,
                             ptu32_t res,ptu32_t len);
-ptu32_t cmd_app_read(struct  tagPanDevice *uart_dev,ptu32_t res,
+ptu32_t cmd_app_read(struct PanDevice *uart_dev,ptu32_t res,
                                         ptu32_t dst_buf,ptu32_t len);
-ptu32_t cmd_ctrl(struct tagPanDevice *uart_dev,u32 cmd,
+ptu32_t cmd_ctrl(struct PanDevice *uart_dev,u32 cmd,
                    u32 data1,u32 data2);
 /**
  * @brief Disables interrupts specified by the Mask parameter.

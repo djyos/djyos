@@ -14,10 +14,11 @@
 //   新版本号：V1.0.0
 //   修改说明: 原始版本
 //------------------------------------------------------
+#include "arch_feature.h"
 #include "stdint.h"
 #include "cpu_peri.h"
-
-struct scb_reg volatile * const pg_scb_reg  = (struct scb_reg *)0xe000ed00;
+#include "lpc17xx.h"
+#include "core_cmFunc.h"
 
 #define cn_fcco             (CN_CFG_MCLK* 3)    //  PLL频率(275Mhz~550Mhz)
 #define cn_pll_n            1               //  1~256
@@ -36,15 +37,15 @@ void Init_Cpu(void)
     __set_CONTROL(0);
     switch(pg_scb_reg->CPUID)
     {
-        case cn_revision_r0p0:
+        case CN_M3_REVISION_R0P0:
             break;    //市场没有版本0的芯片
-        case cn_revision_r1p0:
+        case CN_M3_REVISION_R1P0:
             pg_scb_reg->CCR |= 1<<bo_scb_ccr_stkalign;
             break;
-        case cn_revision_r1p1:
+        case CN_M3_REVISION_R1P1:
             pg_scb_reg->CCR |= 1<<bo_scb_ccr_stkalign;
             break;
-        case cn_revision_r2p0:break;    //好像没什么要做的
+        case CN_M3_REVISION_R2P0:break;    //好像没什么要做的
     }
 
 

@@ -47,7 +47,7 @@
 #define __MSGQUEUE_H__
 
 #include "stdint.h"
-#include "rsc.h"
+#include "object.h"
 #include "lock.h"
 #ifdef __cplusplus
 extern "C" {
@@ -61,27 +61,28 @@ extern "C" {
 #define CN_MSGQ_PRIO_NORMAL 0       //普通消息
 #define CN_MSGQ_PRIO_URGENT 1       //高优先级消息
 
-struct tagMsgQueue
+struct MsgQueue
 {
-    struct tagRscNode MsgNode;
-    struct tagSemaphoreLCB MsgSendSemp;   //发送端控制信号量
-    struct tagSemaphoreLCB MsgRecvSemp;   //接收端控制信号量
+    struct Object MsgNode;
+    struct SemaphoreLCB MsgSendSemp;   //发送端控制信号量
+    struct SemaphoreLCB MsgRecvSemp;   //接收端控制信号量
 
     u32    MsgSize;                     //
     u32    MsgUsed;                     //
     u32    ReadOffset;                  //
     u8     *buf;                        //
 };
+typedef struct MsgQueue tagMsgQueue;
 
-struct tagMsgQueue *MsgQ_Create( u32 MaxMsgs,u32  MsgLength,u32 Options);
+struct MsgQueue *MsgQ_Create( u32 MaxMsgs,u32  MsgLength,u32 Options);
 ptu32_t ModuleInstall_MsgQ (ptu32_t para);
-struct tagMsgQueue *MsgQ_Create_s(struct tagMsgQueue *pMsgQ, u32 MaxMsgs,
+struct MsgQueue *MsgQ_Create_s(struct MsgQueue *pMsgQ, u32 MaxMsgs,
                                   u32  MsgLength,u32 Options,void *buf);
-bool_t MsgQ_Delete(struct tagMsgQueue *pMsgQ);
-bool_t MsgQ_Delete_s(struct tagMsgQueue *pMsgQ);
-bool_t MsgQ_Send(struct tagMsgQueue *pMsgQ,u8 *buffer,u32 nBytes,u32 Timeout,
+bool_t MsgQ_Delete(struct MsgQueue *pMsgQ);
+bool_t MsgQ_Delete_s(struct MsgQueue *pMsgQ);
+bool_t MsgQ_Send(struct MsgQueue *pMsgQ,u8 *buffer,u32 nBytes,u32 Timeout,
                  bool_t priority);
-bool_t MsgQ_Receive(struct tagMsgQueue *pMsgQ,u8 *buffer,u32 nBytes,u32 Timeout);
+bool_t MsgQ_Receive(struct MsgQueue *pMsgQ,u8 *buffer,u32 nBytes,u32 Timeout);
 
 #ifdef __cplusplus
 }

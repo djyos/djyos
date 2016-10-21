@@ -65,11 +65,14 @@ extern "C" {
 #include "errno.h"
 #include "arch_feature.h"
 //结构类型声明,来自其他文件定义的结构
-struct tagSemaphoreLCB;
+struct SemaphoreLCB;
 //结构类型声明,本文件定义的结构
-struct  tagThreadVm;
-struct  tagEventECB;
-struct  tagEventType;
+struct ThreadVm;
+struct EventECB;
+struct EventType;
+
+// todo:这里命名为ContainerOf就报错
+#define Container(Ptr, Type, Member)  ((Type *)((char *)(Ptr)-(unsigned long)(&((Type *)0)->Member)))/* 引自Linux */
 
 //无论事件还是事件类型id，都小于0x8000。0x8000以上的数有特殊用途，例如内存管理
 //模块中用来标识内存page的分配情况，具体见struct mem_global的index_event_id成员
@@ -112,26 +115,15 @@ enum _KNL_ERROR_CODE_
 
 //事件优先级名称定义
 #define CN_PRIO_CRITICAL    (100)
+#define CN_PRIO_RLYMAIN     (110)
+#define CN_PRIO_RECORD      (112)
 #define CN_PRIO_REAL        (130)
 #define CN_PRIO_RRS         (200)
 #define CN_PRIO_WDT         (1)
 #define CN_PRIO_SYS_SERVICE (250)
 #define CN_PRIO_INVALID     (255)   //非法优先级
 
-//线程需要为系统服务额外增加的栈,计算方法:栈需求最深的那个系统服务,目前最大api
-//函数dev_add_root_device 需256bytes----2009-10-11
-#define CN_KERNEL_STACK     (0x200+CN_REGISTER_STACK)
-
-//container_of宏的定义,这是来自linux的代码,但被修改成更广泛支持的c90格式
-//container_of - 根据结构成员指针计算容器结构地址
-//ptr:      结构成员指针
-//type:     容器结构的类型
-//member:   成员名称
-#define container_of(container,ptr, type, member) do{         \
-        const void *__mptr = (void*)(ptr);    \
-        container = (type *)( (char *)__mptr - offsetof(type,member) );}while(0)
-
- struct tagProcessVm       //进程
+struct ProcessVm       //进程
 {
     u8  res;
 };
@@ -140,15 +132,15 @@ enum _KNL_ERROR_CODE_
 #define CN_SAVE_CONTEXT_NOINT   0
 //有mmu的机器上,地址分配:0~1G操作系统,1~2G进程共享区,2~4G进程私有空间.
 //特别注意:本结构要被汇编访问，其成员顺序不能改变，也不能随意增加成员
- struct tagThreadVm          //线程数据结构
+ struct ThreadVm          //线程数据结构
 {
     //线程栈指针,在线程被抢占时保存sp,运行时并不动态跟踪sp变化
     u32    *stack;
     u32    *stack_top;     //线程的栈顶指针
-    struct tagThreadVm *next;     //用于把evtt的所有空闲线程连成一个单向开口链表
+    struct ThreadVm *next;     //用于把evtt的所有空闲线程连成一个单向开口链表
                                 //该链表由evtt的my_free_vm指针索引
     u32    stack_size;     //栈深度
-    struct tagProcessVm *host_vm;  //宿主进程，在si和dlsp模式中为NULL
+    struct ProcessVm *host_vm;  //宿主进程，在si和dlsp模式中为NULL
 };
 
 //事件进入运行态的原因.
@@ -193,50 +185,50 @@ enum _KNL_ERROR_CODE_
 //2、如果参数尺寸小于cn_para_limited，将直接copy到参数控制块的static_para成员中。
 //3、如果大于cn_para_limited，则视调用djy_event_pop函数时的para_options参数而定。
 //   详见djy_event_pop函数的注释。
-struct  tagParaPCB
+//struct ParaPCB
+//{
+//    struct ParaPCB *next,*previous;
+//    struct EventECB *sync;     //等待本参数所代表的事件处理完成的事件队列，
+//                                //若为NULL,则不等待处理，直接返回
+////#if(CN_CFG_DEBUG_INFO == 1)
+////    s64 ParaStartTime;             //参数产生的时间，uS
+////#endif
+//    bool_t dynamic_mem;         //true=保存参数的内存是动态申请的
+//    void *event_para;
+//    //事件参数，参数尺寸少于32字节，直接存在这里，格式由弹出和处理事件的双方协商
+//    //确定.已按最严格的对齐，应用程序可以直接把它强制类型转换到任何需要的类型。
+//    align_type static_para[32/sizeof(align_type)];
+//};
+struct EventInfo
 {
-    struct  tagParaPCB *next,*previous;
-    struct tagEventECB *sync;     //等待本参数所代表的事件处理完成的事件队列，
-                                //若为NULL,则不等待处理，直接返回
-//#if(CN_CFG_DEBUG_INFO == 1)
-//    s64 ParaStartTime;             //参数产生的时间，uS
-//#endif
-    bool_t dynamic_mem;         //true=保存参数的内存是动态申请的
-    void *event_para;
-    //事件参数，参数尺寸少于32字节，直接存在这里，格式由弹出和处理事件的双方协商
-    //确定.已按最严格的对齐，应用程序可以直接把它强制类型转换到任何需要的类型。
-    align_type static_para[32/sizeof(align_type)];
-};
-struct tagEventInfo
-{
-    s64    EventStartTime;          //事件发生时间，uS
+    s64    EventStartTime;      //事件发生时间，uS
     s64    consumed_time;       //事件消耗的总时间
     u32    error_no;            //本事件执行产生的最后一个错误号
     ptu32_t event_result;       //如果本事件处理时弹出了事件，并且等待处理结果
                                 //(即调用pop函数时，timeout !=0)，且正常返回，这
                                 //里保存该事件处理结果。
 };
-struct tagEventECB
+struct EventECB
 {
     //事件链指针,用于构成下列链表
     //pg_event_free: 特殊，参见文档
     //g_ptEventReady:特殊链表，参见文档
     //g_ptEventDelay:双向循环
-    struct  tagEventECB *next,*previous;
+    struct EventECB *next,*previous;
     //多功能链表指针，用于连接以下链表:
     //1、各同步队列，比如事件同步，事件类型弹出同步等
     //2、就绪队列中优先级单调队列，双向循环，用以实现轮询和y_event_ready中
     //   的O(1)算法。
-    struct  tagEventECB *multi_next,*multi_previous;      //条件同步队列
-    struct  tagThreadVm  *vm;               //处理本事件的线程指针,
+    struct EventECB *multi_next,*multi_previous;      //条件同步队列
+    struct ThreadVm  *vm;               //处理本事件的线程指针
     ptu32_t param1,param2;                  //事件参数,只保存最后一次弹出传入的参数
-//    struct  tagParaPCB *para_high_prio;   //高优先级参数队列
-//    struct  tagParaPCB *para_low_prio;    //低优先级参数队列
-//    struct  tagParaPCB *para_current;     //当前将要或正在处理的参数。
-    struct  tagEventECB *sync;            //同步于本事件的队列，当本事件完成后，
+//    struct ParaPCB *para_high_prio;   //高优先级参数队列
+//    struct ParaPCB *para_low_prio;    //低优先级参数队列
+//    struct ParaPCB *para_current;     //当前将要或正在处理的参数。
+    struct EventECB *sync;            //同步于本事件的队列，当本事件完成后，
                                         //激活队列中的事件
                                         //与参数同步不一样，参数同步是弹出时用的
-    struct  tagEventECB **sync_head;      //记住自己在哪一个同步队列中，以便超时
+    struct EventECB **sync_head;      //记住自己在哪一个同步队列中，以便超时
                                         //返回时从该同步队列取出事件
 
     s64    EventStartTime;              //事件发生时间，uS
@@ -275,7 +267,7 @@ struct tagEventECB
 #define CN_EXIT_ACTION_RESTART  1   //重新开始线程
 
 //事件属性定义表
-struct tagEvttStatus
+struct EvttStatus
 {
     u16 correlative:1;  //0=表示独立事件,事件队列中可能同时存在多条该类事件
                         //1=同一类型的多次事件间是有关联的，必须协作处理
@@ -287,7 +279,7 @@ struct tagEvttStatus
     u16 deleting:1;     //0=正常状态，1=等待注销状态。
 };
 
-enum _EVENT_RELATION_
+enum enEventRelation
 {
     EN_INDEPENDENCE=0,//逻辑上，可称作独立型事件,每次弹出本类型事件，都将分配
                         //独立的事件控制块；从处理过程看，可称作是并行事件，每次
@@ -297,12 +289,27 @@ enum _EVENT_RELATION_
                         //过程看，是串行事件，同一类型事件多次弹出，必须串行处理
                         //每条事件。
 };
-struct tagEventType
+
+enum enSwitchType
+{
+    EN_SWITCH_IN=0,     //上下文切换时切入某事件。
+    EN_SWITCH_OUT,      //上下文切换时切离某事件。
+};
+typedef void (*SchHookFunc)(ucpu_t SchType);
+
+struct EventType
 {
     //同一类型的事件可以有多条正在执行或等待调度,但这些事件有相同的属性.
-    struct tagEvttStatus    property;
+    struct EvttStatus    property;
     //空闲线程指针,分配线程给事件时，优先从这里分配
-    struct  tagThreadVm  *my_free_vm;
+    struct ThreadVm  *my_free_vm;
+    // 事件调度回调函数,在本类型事件上下文切入和切离时调用.
+    // 本函数使用的栈,如果是正常调度,则无论切入还是切离,都使用切离事件的栈.
+    // 如果是中断引发切换,则使用中断栈.
+    // 参数:
+    // SchType: EN_SWITCH_IN = 切入,EN_SWITCH_OUT=切离
+    // event_id: 切入或切离的事件ID
+    SchHookFunc SchHook;
     char evtt_name[32]; //事件类型允许没有名字，但只要有名字，就不允许同名
                         //如果一个类型只在模块内部使用，可以不用名字。
                         //如模块间需要交叉弹出事件，用名字访问。
@@ -319,25 +326,25 @@ struct tagEventType
     u32 stack_size;              //thread_routine所需的栈大小
     u32 pop_times;     //本类型事件历史累计弹出次数，超过0xffffffff将回绕0
 
-    struct tagEventECB *mark_event;
+    struct EventECB *mark_event;
     //关联型事件才有效，指向事件队列中的本类型事件
     //对于独立型事件，该队列仅仅是用于存放那些没有分配到VM的ECB,按照优先级从高
     //到低的顺序
 
     //这两队列都是以剩余次数排队的双向循环链表
-    struct  tagEventECB *done_sync,*pop_sync;//弹出同步和完成同步队列头指针,
+    struct EventECB *done_sync,*pop_sync;//弹出同步和完成同步队列头指针,
 };
 
 //就绪队列(优先级队列),始终执行队列头部的事件,若有多个优先级相同,轮流执行
-extern struct  tagEventECB  *g_ptEventReady;
-extern struct  tagEventECB  *g_ptEventRunning;   //当前正在执行的事件
+extern struct EventECB  *g_ptEventReady;
+extern struct EventECB  *g_ptEventRunning;   //当前正在执行的事件
 extern bool_t g_bScheduleEnable;
 
 void Djy_IsrTick(u32 inc_ticks);
 void Djy_SetRRS_Slice(u32 slices);
 u32 Djy_GetRRS_Slice(void);
 void Djy_CreateProcessVm(void);
-u16 Djy_EvttRegist(enum _EVENT_RELATION_ relation,
+u16 Djy_EvttRegist(enum enEventRelation relation,
                         ufast_t default_prio,
                         u16 vpu_res,
                         u16 vpus_limit,
@@ -368,7 +375,7 @@ u16 Djy_EventPop(  u16  evtt_id,
 u32 Djy_GetEvttPopTimes(u16 evtt_id);
 ptu32_t Djy_GetEventResult(void);
 void Djy_GetEventPara(ptu32_t *Param1,ptu32_t *Param2);
-void Djy_EventExit(struct tagEventECB *event, u32 exit_code,u32 action);
+void Djy_EventExit(struct EventECB *event, u32 exit_code,u32 action);
 void Djy_EventComplete(ptu32_t result);
 void Djy_EventSessionComplete(ptu32_t result);
 //void Djy_ParaUsed(ptu32_t result);
@@ -378,7 +385,7 @@ u16 Djy_MyEventId(void);
 void Djy_ApiStart(u32 api_no);
 void Djy_DelayUs(u32 time);
 
-bool_t Djy_GetEventInfo(u16 id, struct tagEventInfo *info);
+bool_t Djy_GetEventInfo(u16 id, struct EventInfo *info);
 bool_t Djy_GetEvttName(u16 evtt_id, char *dest, u32 len);
 
 #ifdef __cplusplus

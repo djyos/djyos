@@ -55,11 +55,11 @@
 //   修改说明: 原始版本，本文件内容原来和加载器放在一起
 //------------------------------------------------------
 #include "stdint.h"
-#include "rsc.h"
+#include "object.h"
 #include "lock.h"
 #include "pool.h"
 #include "driver.h"
-//#include "exception.h"
+//#include "hard-exp.h"
 
 extern void prj_module_init(void);
 extern ptu32_t ModuleInstall_FsNandFlash(ptu32_t para);
@@ -77,9 +77,9 @@ void Sys_Start(void)
 {
     __DjySetDelay( );
     __Djy_InitSys( );
-    Rsc1_ModuleInit(0);
+    ModuleInstall_OBJ(0);
     ModuleInstall_Lock1(0);
-    Rsc2_ModuleInit(0);
+//    Rsc2_ModuleInit(0);
     Mb_ModuleInit(0);
     ModuleInstall_Lock2(0);
 

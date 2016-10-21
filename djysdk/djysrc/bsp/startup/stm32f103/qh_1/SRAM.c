@@ -47,7 +47,7 @@
 #include "stm32f10x.h"
 #include "SRAM.h"
 
-
+#if 0
 void SRAM_GPIO_Init(void)
 {
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_FSMC, ENABLE);
@@ -110,6 +110,41 @@ void SRAM_GPIO_Init(void)
     GPIO_CfgPinFunc(CN_GPIO_E, 1, CN_GPIO_MODE_PERI_OUT_PP_50Mhz);    //ub
 
 }
+#else
+void SRAM_GPIO_Init(void)
+{
+	RCC->AHBENR|=1<<8;     	 	//使能FSMC时钟
+	RCC->APB2ENR|=1<<0;
+	RCC->APB2ENR|=1<<5;     	//使能PORTD时钟
+	RCC->APB2ENR|=1<<6;     	//使能PORTE时钟
+	RCC->APB2ENR|=1<<7;     	//使能PORTF时钟
+ 	RCC->APB2ENR|=1<<8;      	//使能PORTG时钟
+
+	//PORTD复用推挽输出
+	GPIOD->CRH &=0X00000000;		//8,9,10,11,12,13,14,15
+	GPIOD->CRH |=0XBBBBBBBB;
+	GPIOD->CRL &=0X0F00FF00;		//0,1,4,5,7
+	GPIOD->CRL |=0XB0BB00BB;
+
+	//PORTE复用推挽输出
+	GPIOE->CRH &=0X00000000;		//8~15
+	GPIOE->CRH |=0XBBBBBBBB;
+	GPIOE->CRL &=0X0F000F00;		//0,1,3,4,5,7
+	GPIOE->CRL |=0XB0BBB0BB;
+
+	//PORTF复用推挽输出
+	GPIOF->CRH &=0X0000FFFF;		//12,13,14,15
+	GPIOF->CRH |=0XBBBB0000;
+	GPIOF->CRL &=0XFF000000;		//0,1,2,3,4,5
+	GPIOF->CRL |=0X00BBBBBB;
+
+	GPIOG->CRH&=0XFFF0F00F;			//9,10,12
+	GPIOG->CRH|=0X000B0BB0;
+	GPIOG->CRL&=0XFF000000;			//0,1,2,3,4,5
+	GPIOG->CRL|=0X00BBBBBB;
+}
+
+#endif
 
 void SRAM_FSMCConfig(void)
 {

@@ -69,8 +69,8 @@ static bool_t DrawMenuLayerBox_V(struct menu_displaypara*  dispara)
  {
     bool_t result=false;
     u8   num_item=0;
-    struct tagRectangle temp_rec={0,0,0,0};
-    struct tagGkWinRsc  *win;
+    struct Rectangle temp_rec={0,0,0,0};
+    struct GkWinRsc  *win;
 
     win=dispara->CurWin;
     num_item=CalDisBettween2Menuitem(dispara->FVisualMenuitem, dispara->LVisualMenuitem)+1;
@@ -102,8 +102,8 @@ static bool_t DrawMenuLayerBox_V(struct menu_displaypara*  dispara)
   {
     bool_t result=false;
     u8   num_item=0;
-    struct tagRectangle temp_rec={0,0,0,0};
-    struct tagGkWinRsc  *win;
+    struct Rectangle temp_rec={0,0,0,0};
+    struct GkWinRsc  *win;
 
     win=dispara->CurWin;
     num_item=CalDisBettween2Menuitem(dispara->FVisualMenuitem, dispara->LVisualMenuitem)+1;
@@ -131,8 +131,8 @@ static bool_t DrawMenuLayerBox_V(struct menu_displaypara*  dispara)
 static bool_t DrawMenuLayerBox_3by3(struct menu_displaypara*  dispara)
  {
        bool_t result=false;
-       struct tagRectangle temp_rec={0,0,0,0};
-       struct tagGkWinRsc  *win;
+       struct Rectangle temp_rec={0,0,0,0};
+       struct GkWinRsc  *win;
 
       win=dispara->CurWin;
       temp_rec.left=cn_space_margin/4;
@@ -196,10 +196,10 @@ static void  draw_win_text(struct draw_wintext_para *para,const char *text)//È·È
     s32 colortext; //×ÖÌåÑÕÉ«
     s32 colorback;  //±³¾°ÑÕÉ«  int k=0;
     s32  colorsize=32*16;
-    struct tagFontRsc* cur_font;
+    struct FontRsc* cur_font;
     u8       *colorbuf;//´æ´¢ÕûÌõ×Ö·û´®µÄÈİÁ¿
-    struct tagGkscParaDrawBitmapRop bitmap_para;
-    struct tagGkscParaDrawBitmapRop mpara;
+    struct GkscParaDrawBitmapRop bitmap_para;
+    struct GkscParaDrawBitmapRop mpara;
     u8 buf[128],*dbuf;  //¶¨ÒåÒ»¸ö×ã¹»´æ32µãÕóºº×ÖµÄ»º³åÇø£¬Èç¹ûĞèÒªÏÔÊ¾µÄ×Ö·û
                         //³¬¹ı´ËµãÕó£¬¾ÍĞèÒª¶¯Ì¬·ÖÅä
 
@@ -353,7 +353,7 @@ bool_t display_menu_horizontal(struct menu_displaypara * dispara)//µ÷ÓÃĞ´²Ëµ¥ÄÚÈ
       bool_t  result=false;
       s32     x,y;                //´æ´¢Ğ´×ÖµÄÎ»ÖÃ
       struct menu_item   *temp;//ÁÙÊ±menuitem±äÁ¿
-      struct tagRectangle    LightedRec;
+      struct Rectangle    LightedRec;
 
       if(NULL==dispara->FVisualMenuitem)
       {
@@ -417,7 +417,7 @@ bool_t display_menu_vertical(struct menu_displaypara * dispara)//µ÷ÓÃĞ´²Ëµ¥ÄÚÈİº
       bool_t  result=false;
       s32     x,y;                //´æ´¢Ğ´×ÖµÄÎ»ÖÃ
       struct menu_item   *temp;//ÁÙÊ±menuitem±äÁ¿
-      struct tagRectangle    LightedRec;
+      struct Rectangle    LightedRec;
 
       if(NULL==dispara->FVisualMenuitem)
       {
@@ -483,7 +483,7 @@ bool_t display_menu_3by3(struct menu_displaypara * dispara)//µ÷ÓÃĞ´²Ëµ¥ÄÚÈİº¯Êıº
   s32     x,y;                //´æ´¢Ğ´×ÖµÄÎ»
   s32     x0,y0;              //¼ÇÂ¼¿ªÊ¼ÏÔÊ¾µÄÔ­µã
   struct menu_item   *temp;//ÁÙÊ±menuitem±äÁ¿
-  struct tagRectangle    LightedRec;//¼ÓÁÁµÄÇøÓò
+  struct Rectangle    LightedRec;//¼ÓÁÁµÄÇøÓò
 
 
   if(NULL==dispara->FVisualMenuitem)
@@ -559,9 +559,9 @@ struct menu_displaypara *exe_menuitemfunc(struct menu_displaypara *operatingDisp
    struct menu_item  *OperatingMenuitem=NULL;
    struct menu_displaypara  *pMainmenuDispara=NULL;
    struct menu_item  *FirstMenuitem=NULL;//Õû¸ö²Ëµ¥µÄµÚÒ»¸ö²Ëµ¥Ïî£¬ÓÃÓÚ»Ö¸´Ê±ÓÃ
-   struct tagGkWinRsc  *Appwin=NULL;
+   struct GkWinRsc  *Appwin=NULL;
 
-   ptu32_t (*menu_init_function)(struct menu_item *FirstMenuitem, struct tagGkWinRsc *Appwin);
+   ptu32_t (*menu_init_function)(struct menu_item *FirstMenuitem, struct GkWinRsc *Appwin);
 
    if(NULL==operatingDispara)
    {
@@ -620,15 +620,15 @@ struct menu_displaypara *exe_menuitemfunc(struct menu_displaypara *operatingDisp
 // =========================================================================
 void  my_draw_text(struct draw_wintext_para *para,const char *text)//È·ÈÏ
 {
-    struct tagGkscParaDrawBitmapRop bitmap_para;
+    struct GkscParaDrawBitmapRop bitmap_para;
     s32 len, src_len,size,size_bak;
     u32 wc;
-    struct tagFontRsc* cur_font;
+    struct FontRsc* cur_font;
     u8 buf[128],*dbuf;  //¶¨ÒåÒ»¸ö×ã¹»´æ32µãÕóºº×ÖµÄ»º³åÇø£¬Èç¹ûĞèÒªÏÔÊ¾µÄ×Ö·û
                         //³¬¹ı´ËµãÕó£¬¾ÍĞèÒª¶¯Ì¬·ÖÅä
 //ĞŞ¸ÄµÄ²¿·Ö
     u8       *colorbuf;//´æ´¢ÕûÌõ×Ö·û´®µÄÈİÁ¿
-    struct tagGkscParaDrawBitmapRop mpara;
+    struct GkscParaDrawBitmapRop mpara;
     s32 colortext; //×ÖÌåÑÕÉ«
     s32 colorback;  //±³¾°ÑÕÉ«
     s32 k=0;
@@ -925,10 +925,10 @@ void goto_menuitem_inslayers(struct menu_displaypara *operatingDispara, s8 step)
     s32 colortext; //×ÖÌåÑÕÉ«
     s32 colorback;  //±³¾°ÑÕÉ«  int k=0;
     s32  colorsize=32*16;
-    struct tagFontRsc* cur_font;
+    struct FontRsc* cur_font;
     u8       *colorbuf;//´æ´¢ÕûÌõ×Ö·û´®µÄÈİÁ¿
-    struct tagGkscParaDrawBitmapRop bitmap_para;
-    struct tagGkscParaDrawBitmapRop mpara;
+    struct GkscParaDrawBitmapRop bitmap_para;
+    struct GkscParaDrawBitmapRop mpara;
     u8 buf[128],*dbuf;  //¶¨ÒåÒ»¸ö×ã¹»´æ32µãÕóºº×ÖµÄ»º³åÇø£¬Èç¹ûĞèÒªÏÔÊ¾µÄ×Ö·û
                         //³¬¹ı´ËµãÕó£¬¾ÍĞèÒª¶¯Ì¬·ÖÅä
 
@@ -1043,10 +1043,10 @@ void goto_menuitem_inslayers(struct menu_displaypara *operatingDispara, s8 step)
 //  s32 colortext; //×ÖÌåÑÕÉ«
 //  s32 colorback;  //±³¾°ÑÕÉ«
 //  s32  colorsize=32*128;
-//    struct tagFontRsc* cur_font;
+//    struct FontRsc* cur_font;
 //    u8       *colorbuf;//´æ´¢ÕûÌõ×Ö·û´®µÄÈİÁ¿
-//    struct tagGkscParaDrawBitmap bitmap_para;
-//    struct tagGkscParaDrawBitmap mpara;
+//    struct GkscParaDrawBitmap bitmap_para;
+//    struct GkscParaDrawBitmap mpara;
 //    u8 buf[128],*dbuf;  //¶¨ÒåÒ»¸ö×ã¹»´æ32µãÕóºº×ÖµÄ»º³åÇø£¬Èç¹ûĞèÒªÏÔÊ¾µÄ×Ö·û
 //                        //³¬¹ı´ËµãÕó£¬¾ÍĞèÒª¶¯Ì¬·ÖÅä
 //

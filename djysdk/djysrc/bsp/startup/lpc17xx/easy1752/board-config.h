@@ -71,7 +71,7 @@ extern "C" {
 #define CN_CFG_EXTCLK 12000000  //晶振频率
 #define CN_CFG_CCLK (96*Mhz)  //特注:nxp的cpu要求主频必须是晶振的整数倍
 #define CN_CFG_PCLK (CN_CFG_CCLK)  //外设时钟?须是主频的1/1、1/2、1/4
-#define CN_CFG_MCLK CN_CFG_CCLK  //主频
+#define CN_CFG_MCLK CN_CFG_CCLK  //主频，内核要用，必须定义
 #define CN_CFG_FCLK CN_CFG_MCLK  //cm3自由运行外设时钟
 #define CN_CFG_TIMER_CLK CN_CFG_PCLK  //定时器时钟源
 #define CN_CFG_FINE_US 0x02ab  //10.42nS,精密时钟脉冲长度?以uS为单位?32位定点数?整数小数各占16位?这也限制了ticks最长不超过65535uS
@@ -84,8 +84,8 @@ extern "C" {
 #define CN_CFG_BIG_ENDIAN           1
 #define CN_CFG_BYTE_ENDIAN          CN_CFG_LITTLE_ENDIAN
 
-#define LCD_XSIZE 240
-#define LCD_YSIZE 320
+#define CN_LCD_XSIZE 240
+#define CN_LCD_YSIZE 320
 
 
 #ifdef __cplusplus

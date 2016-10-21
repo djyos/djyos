@@ -61,15 +61,15 @@
 //------------------------------------------------------
 #include "stdint.h"
 #include "stdio.h"
-#include "rsc.h"
+#include "object.h"
 #include "font.h"
 #include "ascii8x8.h"
 #include "ascii8x16.h"
 #include "gb2312_16.h"
 #include "string.h"
-#include "config-prj.h"
+#include <cfg/local_config.h>
 
-static struct tagFontRsc *s_ptCurFont;
+static struct FontRsc *s_ptCurFont;
 
 
 //----获取字体资源-------------------------------------------------------------
@@ -77,9 +77,9 @@ static struct tagFontRsc *s_ptCurFont;
 //参数: 字体名称
 //返回: 匹配的字体，若未有匹配编码，使用默认的ASCII编码
 //-----------------------------------------------------------------------------
-struct tagFontRsc* Font_GetLocFont(const char* font_name)
+struct FontRsc* Font_GetLocFont(const char* font_name)
 {
-    struct tagFontRsc* font;
+    struct FontRsc* font;
 
     if(strcmp(font_name, "C") == 0){
 
@@ -99,14 +99,14 @@ struct tagFontRsc* Font_GetLocFont(const char* font_name)
 //      name，新增字体名
 //返回: true
 //-----------------------------------------------------------------------------
-bool_t Font_InstallFont(struct tagFontRsc *font, char* name)
+bool_t Font_InstallFont(struct FontRsc *font,const char* name)
 {
-    struct tagRscNode *rsc;
-    rsc = Rsc_SearchTree(CN_FONT_RSC_TREE);
+    struct Object *rsc;
+    rsc = OBJ_SearchTree(CN_FONT_RSC_TREE);
     if(rsc == NULL)
         return false;       //字体资源根结点未创建
 
-    Rsc_AddSon(rsc,&font->node,sizeof(struct tagFontRsc),RSC_FONT,name);
+    OBJ_AddChild(rsc,&font->node,sizeof(struct FontRsc),RSC_FONT,name);
     if(s_ptCurFont == NULL)
         s_ptCurFont = font;
 
@@ -120,12 +120,12 @@ bool_t Font_InstallFont(struct tagFontRsc *font, char* name)
 //-----------------------------------------------------------------------------
 ptu32_t ModuleInstall_Font(ptu32_t para)
 {
-    static struct tagRscNode font_root_rsc;    // 字体资源
+    static struct Object font_root_rsc;    // 字体资源
 
     s_ptCurFont = NULL;
     // 添加字体资源根节点
-    if(Rsc_AddTree(&font_root_rsc,
-                   sizeof(struct tagRscNode),RSC_RSCNODE,
+    if(OBJ_AddTree(&font_root_rsc,
+                   sizeof(struct Object),RSC_RSCNODE,
                    CN_FONT_RSC_TREE))
     {
         return 1;
@@ -140,7 +140,7 @@ ptu32_t ModuleInstall_Font(ptu32_t para)
 //功能: 获取当前使用的字体
 //返回: 当前字体
 //-----------------------------------------------------------------------------
-struct tagFontRsc* Font_GetCurFont(void)
+struct FontRsc* Font_GetCurFont(void)
 {
     return s_ptCurFont;
 }
@@ -152,18 +152,20 @@ struct tagFontRsc* Font_GetCurFont(void)
 //返回: NULL，设定失败
 //      设定之前的字体。
 //-----------------------------------------------------------------------------
-struct tagFontRsc* Font_SetCurFont(struct tagFontRsc* font)
+struct FontRsc* Font_SetCurFont(struct FontRsc* font)
 {
-    struct tagRscNode *rsc;
+    struct Object *rsc;
+    char *Name;
     if(font == NULL)
         return NULL;
-    rsc = Rsc_SearchTree(CN_FONT_RSC_TREE);
+    rsc = OBJ_SearchTree(CN_FONT_RSC_TREE);
     if(rsc == NULL)
         return NULL;       //字体资源树未创建
-    rsc = Rsc_SearchSon(rsc,font->node.name);
+    Name = OBJ_Name(&font->node);
+    rsc = OBJ_SearchChild(rsc,(const char*)Name);
     if(rsc != NULL)
     {
-        s_ptCurFont = (struct tagFontRsc*)rsc;
+        s_ptCurFont = (struct FontRsc*)rsc;
     }
     return s_ptCurFont;
 }
@@ -174,15 +176,15 @@ struct tagFontRsc* Font_SetCurFont(struct tagFontRsc* font)
 //返回: NULL，无此字体资源
 //      要找的字体资源
 //-----------------------------------------------------------------------------
-struct tagFontRsc* Font_SearchFont(const char* name)
+struct FontRsc* Font_SearchFont(const char* name)
 {
-    struct tagRscNode *rsc;
+    struct Object *rsc;
 
-    rsc = Rsc_SearchTree(CN_FONT_RSC_TREE);
+    rsc = OBJ_SearchTree(CN_FONT_RSC_TREE);
     if(rsc == NULL)
         return NULL;       //字体资源树未创建
 
-    return (struct tagFontRsc*)Rsc_SearchSon(rsc, (char*)name);
+    return (struct FontRsc*)OBJ_SearchChild(rsc, name);
 }
 
 //----取字体点阵行高-----------------------------------------------------------
@@ -190,7 +192,7 @@ struct tagFontRsc* Font_SearchFont(const char* name)
 //参数: font, 被查询的字体.
 //返回: 该字库最高的那个字符的高度(像素值)
 //-----------------------------------------------------------------------------
-s32 Font_GetFontLineHeight(struct tagFontRsc* font)
+s32 Font_GetFontLineHeight(struct FontRsc* font)
 {
     if(font == NULL)
         return 0;
@@ -202,7 +204,7 @@ s32 Font_GetFontLineHeight(struct tagFontRsc* font)
 //参数: font, 被查询的字体.
 //返回: 该字库最宽的那个字符的宽度(像素值)
 //-----------------------------------------------------------------------------
-s32 Font_GetFontLineWidth(struct tagFontRsc* font)
+s32 Font_GetFontLineWidth(struct FontRsc* font)
 {
     if(font == NULL)
         return 0;
@@ -214,7 +216,7 @@ s32 Font_GetFontLineWidth(struct tagFontRsc* font)
 //参数: font, 被查询的字体.
 //返回: 字体属性字,font.c模块并不解析该属性字
 //-----------------------------------------------------------------------------
-s32 Font_GetFontAttr(struct tagFontRsc* font)
+s32 Font_GetFontAttr(struct FontRsc* font)
 {
     if(font == NULL)
         return 0;

@@ -70,7 +70,7 @@
 //对于主菜单，依然建立的是铺满整屏的窗口
 //对于以及主菜单，建立在当前操作项的正下面（优先），如果位置不够，要向左移动。
 //对于二级子菜单及其以后的子菜单，都优先建立在当前菜单的右边，如果右边位置不够，则建立在左边；
-struct tagRectangle   CalDisAreaFromPre_pull(struct menu_displaypara *pre,struct menu_displaypara  *cur)
+struct Rectangle   CalDisAreaFromPre_pull(struct menu_displaypara *pre,struct menu_displaypara  *cur)
 {
    u8        number=0;//用于计算第几个窗口弹出的
    u32                     menuitem_num;//当前菜单有多少个菜单项
@@ -82,7 +82,7 @@ struct tagRectangle   CalDisAreaFromPre_pull(struct menu_displaypara *pre,struct
    u32     length=0;
    s32    length_left=0;//存储可以划分的显示区域
    s32    length_need=0;//存储需要的显示区域
-   struct tagRectangle  result={0,0,0,0};//计算的结果
+   struct Rectangle  result={0,0,0,0};//计算的结果
    struct menu_displaypara  *pMainMenuDispara;//暂时页节点
 
     //只是内部调用，不再进行参数检测，以提高效率
@@ -393,13 +393,13 @@ void adjustvisualmenuitem_pull(struct menu_displaypara  *dispara)
 // 返回值  :
 //需要说明的是:位置前面都计算好了，已经没有啥子好说的了
 // =========================================================================
-struct menu_displaypara *createmenudisparabypre_pull(struct menu_displaypara *pre,struct menu_item *menuitem,struct tagGkWinRsc  *Appwin)
+struct menu_displaypara *createmenudisparabypre_pull(struct menu_displaypara *pre,struct menu_item *menuitem,struct GkWinRsc  *Appwin)
 {
 
   bool_t  result;
   struct menu_displaypara  *cur=NULL;
-  struct tagRectangle   Disparawin_rec;
- // struct tagGkWinRsc  *win;
+  struct Rectangle   Disparawin_rec;
+ // struct GkWinRsc  *win;
    //简单的根据前一个菜单窗口创建
 
   if((NULL==pre)&&((NULL==menuitem)||(NULL==Appwin)))

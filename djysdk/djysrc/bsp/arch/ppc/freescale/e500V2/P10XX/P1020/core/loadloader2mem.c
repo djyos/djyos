@@ -16,11 +16,14 @@ void LoadLoader2Mem(void)
 	src = tgLoaderRecord.laddr;
 	dst = tgLoaderRecord.raddr;
 	j = tgLoaderRecord.size/4;
-	for(i =0; i < j; i++)
+	if(src != dst)
 	{
-		k = *src;
-		*dst = k;
-		src++;
-		dst++;
+		for(i =0; i < j; i++)
+		{
+			k = *src;
+			*dst = k;
+			src++;
+			dst++;
+		}
 	}
 }

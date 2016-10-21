@@ -58,20 +58,17 @@
 //   修改说明: 原始版本
 //------------------------------------------------------
 #include "stdint.h"
-#include "core-cfg.h"
+#include "board-config.h"
 #include "stdlib.h"
 #include "cortexm0.h"
-#include "exception.h"
+#include "hard-exp.h"
 
 void __start_systick(void);
-struct tagSystickReg volatile * const pg_systick_reg
-                        = (struct tagSystickReg *)0xE000E010;
+struct SystickReg volatile * const pg_systick_reg
+                        = (struct SystickReg *)0xE000E010;
 
-struct scb_reg volatile * const pg_scb_reg
-                        = (struct scb_reg *)0xe000ed00;
-
-struct nvic_reg volatile * const pg_nvic_reg
-                        = (struct nvic_reg *)0xe000e100;
+struct ScbReg volatile * const pg_scb_reg
+                        = (struct ScbReg *)0xe000ed00;
 
 extern s64  g_s64OsTicks;             //操作系统运行ticks数
 u32 g_u32CycleSpeed; //for(i=j;i>0;i--);每循环纳秒数*1.024
@@ -82,26 +79,24 @@ u32 g_u32CycleSpeed; //for(i=j;i>0;i--);每循环纳秒数*1.024
 //返回：新创建的线程指针
 //注: 移植敏感函数
 //-----------------------------------------------------------------------------
-struct  tagThreadVm *__CreateThread(struct  tagEventType *evtt,u32 *stack_size)
+struct ThreadVm *__CreateThread(struct EventType *evtt,u32 *stack_size)
 {
-    struct  tagThreadVm  *result;
+    struct ThreadVm  *result;
     ptu32_t  len;
 
     //计算线程栈:线程+最大单个api需求的栈
-    len = evtt->stack_size+CN_KERNEL_STACK+sizeof(struct  tagThreadVm);
+    len = evtt->stack_size;
     //栈顶需要对齐，malloc函数能保证栈底是对齐的，对齐长度可以使栈顶对齐
     len = align_up_sys(len);
-    result=(struct  tagThreadVm  *)__MallocStack(len);
+    result=(struct ThreadVm  *)__MallocStack(len);
     *stack_size = len;
     if(result==NULL)
     {
         Djy_SaveLastError(EN_MEM_TRIED);   //内存不足，返回错误
         return result;
     }
-#if CN_CFG_STACK_FILL != 0
     len = M_CheckSize(result);
-    memset(result,CN_CFG_STACK_FILL,len);
-#endif
+    memset(result,'d',len);
 
     //看实际分配了多少内存，djyos内存分配使用块相联策略，如果分配的内存量大于
     //申请量，可以保证其实际尺寸是对齐的。之所以注释掉，是因为当len大于申请量时，
@@ -110,15 +105,44 @@ struct  tagThreadVm *__CreateThread(struct  tagEventType *evtt,u32 *stack_size)
 //    len = M_CheckSize(result);
     result->stack_top = (u32*)((ptu32_t)result+len); //栈顶地址，移植敏感
     result->next = NULL;
-    result->stack_size = len - sizeof(struct tagThreadVm); //保存栈深度
+    result->stack_size = len - sizeof(struct ThreadVm); //保存栈深度
     result->host_vm = NULL;
     //复位线程并重置线程
     __asm_reset_thread(evtt->thread_routine,result);
     return result;
 }
+ 
+//----静态创建线程-------------------------------------------------------------
+//功能：为事件类型创建线程，初始化上下文环境，安装执行函数，构成完整线程
+//参数：evtt_id，待创建的线程所服务的事件类型id
+//返回：新创建的线程指针
+//注: 移植敏感函数
+//-----------------------------------------------------------------------------
+struct ThreadVm *__CreateStaticThread(struct EventType *evtt,void *Stack,
+                                    u32 StackSize)
+{
+    struct ThreadVm  *result;
 
+    result = (struct ThreadVm  *)align_up_sys(Stack);
+
+    memset(Stack, 'd', StackSize-((ptu32_t)result - (ptu32_t)Stack));
+
+    //看实际分配了多少内存，djyos内存分配使用块相联策略，如果分配的内存量大于
+    //申请量，可以保证其实际尺寸是对齐的。之所以注释掉，是因为当len大于申请量时，
+    //对齐只是实际结果，而不是内存管理的规定动作，如果不注释掉，就要求内存管理
+    //模块必须提供对齐的结果，对模块独立性是不利的。
+//    len = M_CheckSize(result);
+    result->stack_top = (u32*)align_down_sys((ptu32_t)Stack+StackSize); //栈顶地址，移植敏感
+    result->next = NULL;
+    result->stack_size = (ptu32_t)(result->stack_top) - (ptu32_t)result
+                            - sizeof(struct ThreadVm);       //保存栈深度
+    result->host_vm = NULL;
+    //复位线程并重置线程
+    __asm_reset_thread(evtt->thread_routine,result);
+    return result;
+}
 //----测量指令指令延时常数-----------------------------------------------------
-//功能: 设置指令延时常数,使不管用何种编译器和编译优化选项y_delay_us函数准确延时，
+//功能: 设置指令延时常数,使不管用何种编译器和编译优化选项,djy_delay_us函数准确延时，
 //参数：无
 //返回: 无
 //备注: 本函数移植敏感
@@ -150,7 +174,7 @@ void __DjySetDelay(void)
             break;      //循环过程中没有发生中断，满足要求。
     };
     counter = clksum - counter;    //取实际脉冲数。
-    g_u32CycleSpeed = (uint64_t)counter * 10E8/CN_CFG_FCLK/u32_fors;//防溢出，用64位
+    g_u32CycleSpeed = (uint64_t)counter * (u64)10E8/CN_CFG_FCLK/u32_fors;//防溢出，用64位
     g_u32CycleSpeed = (g_u32CycleSpeed << 10) / 1000;     //扩大1.024倍
 
 }
@@ -163,8 +187,9 @@ void __DjySetDelay(void)
 //-----------------------------------------------------------------------------
 void __DjyInitTick(void)
 {
-    Exp_ConnectSystick(Djy_IsrTick);
+    HardExp_ConnectSystick(Djy_IsrTick);
     pg_systick_reg->reload = CN_CFG_FCLK/CN_CFG_TICK_HZ;
+    pg_systick_reg->current =CN_CFG_FCLK/CN_CFG_TICK_HZ;
     pg_systick_reg->ctrl =   (1<<bo_systick_ctrl_enable)    //使能
                             |(1<<bo_systick_ctrl_tickint)   //允许产生中断
                             |(1<<bo_systick_ctrl_clksource);//用内核时钟
@@ -176,23 +201,25 @@ void __DjyInitTick(void)
 //      周期,需要使用原子操作。
 //参数：无
 //返回：当前时钟
-//说明: 这是一个桩函数,被rtc.c文件的 DjyGetTime 函数调用
+//说明: 这是一个桩函数,被systime.c文件的 DjyGetSysTime 函数调用。
+//      如果systime不使用ticks作为时基，本函数可保持空函数。
 //-----------------------------------------------------------------------------
-s64 __DjyGetTime(void)
+s64 __DjyGetSysTime(void)
 {
-    u32 time1;
-    s64 time2;
+    s64 time;
+    static s64 BakTime = 0;
+    u32 temp;
     atom_low_t atom_low;
+    temp =CN_CFG_FCLK/CN_CFG_TICK_HZ - pg_systick_reg->current;
+
     atom_low = Int_LowAtomStart();
-
-    time1 = pg_systick_reg->current;
-    if(pg_systick_reg->ctrl & bm_systick_ctrl_countflag)
-        time2 = (g_s64OsTicks+1)*CN_CFG_TICK_US;
-    else
-        time2 = g_s64OsTicks*CN_CFG_TICK_US
-                    + ((pg_systick_reg->reload-time1)*CN_CFG_FINE_US >>16);
-
+    time = g_s64OsTicks;
     Int_LowAtomEnd(atom_low);
-    return time2;
+    time = time*CN_CFG_TICK_US + (temp*CN_CFG_FINE_US >>16);
+    if(time < BakTime)
+        time += CN_CFG_TICK_US;
+    BakTime = time;
+
+    return time;
 }
 

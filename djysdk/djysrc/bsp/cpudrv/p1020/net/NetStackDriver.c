@@ -56,16 +56,13 @@
 #include "stdint.h"
 #include "string.h"
 
+#include "os.h"
+
 #include "cpu_peri_tsec.h"
-#include "netdev.h"
-#include "rout.h"
+#include <tcpip/netdev.h>
 
 #define CN_HARD_BOARD            0x02
 u8  sgNetHardMac[6] = {0x00,0x01, 0x02, 0x03, 0x04, CN_HARD_BOARD};
-static u32  sgNetHardIpAddrMain = 0xC0A80100;
-static u32  sgNetHardIpMsk = 0xFFFFFF00 ; //255.255.255.0
-static u32  sgNetHardGateWay = 0xC0A80101; //192.168.1.1
-
 #define CN_PKG_LEN  1536
 static tagNetDev *pgChkNetDev = NULL;
 
@@ -82,37 +79,36 @@ static u8  sgSndBuf[CN_PKG_LEN];
 // =============================================================================
 bool_t NetHard_Send(tagNetDev *netdev,tagNetPkg *pkg,u32 netdevtask)
 {
-	bool_t  result;
-	tagNetPkg *tmp;
-	u8 *src;
-	u8 *dst;
-	u32 sndlen;
-	
-	result = false;
-	if((pgChkNetDev == netdev)&&(NULL != pkg))
-	{
-		sndlen = 0;
-		tmp = pkg;
-		//拷贝完毕之后记得释放
-		while(NULL != tmp)
-		{
-			src = (u8 *)(tmp->buf + tmp->offset);
-			dst = (u8 *)(sgSndBuf + sndlen);
-			memcpy(dst, src, tmp->datalen);
-			sndlen += tmp->datalen;
-			tmp = tmp->partnext;
-		}
-		Pkg_LstFlagFree(pkg);
-		if(sndlen < 60)//小于60的包，记得填充
-		{
-			dst = (u8 *)(sgSndBuf + sndlen);
-			memset(dst,0 ,60-sndlen);
-			sndlen = 60;
-		}
-		Net_SendPacket(1,sgSndBuf,sndlen);
-		result = true;
-	}
-	return result;
+    bool_t  result;
+    tagNetPkg *tmp;
+    u8 *src;
+    u8 *dst;
+    u32 sndlen;
+    
+    result = false;
+    if((pgChkNetDev == netdev)&&(NULL != pkg))
+    {
+        sndlen = 0;
+        tmp = pkg;
+        //拷贝完毕之后记得释放
+        while(NULL != tmp)
+        {
+            src = (u8 *)(tmp->buf + tmp->offset);
+            dst = (u8 *)(sgSndBuf + sndlen);
+            memcpy(dst, src, tmp->datalen);
+            sndlen += tmp->datalen;
+            tmp = tmp->partnext;
+        }
+        if(sndlen < 60)//小于60的包，记得填充
+        {
+            dst = (u8 *)(sgSndBuf + sndlen);
+            memset(dst,0 ,60-sndlen);
+            sndlen = 60;
+        }
+        Net_SendPacket(1,sgSndBuf,sndlen);
+        result = true;
+    }
+    return result;
 }
 
 // =============================================================================
@@ -125,40 +121,41 @@ bool_t NetHard_Send(tagNetDev *netdev,tagNetPkg *pkg,u32 netdevtask)
 // =============================================================================
 void NetHard_RcvIntIsr(void)
 {
-	bool_t      newpkg;
-	s32         rcvlen;
-	u8          *rcvbuf;
-	tagNetPkg *pkg;
+    bool_t      newpkg;
+    s32         rcvlen;
+    u8          *rcvbuf;
+    tagNetPkg *pkg;
 
-	newpkg = true;
-	pkg =NULL;
-	while(1)
-	{
-		if(newpkg)
-		{
-			pkg =Pkg_Alloc(CN_PKG_LEN, CN_PKGFLAG_FREE);
-		}
+    newpkg = true;
+    pkg =NULL;
+    while(1)
+    {
+        if(newpkg)
+        {
+            pkg =PkgMalloc(CN_PKG_LEN, CN_PKLGLST_END);
+        }
 
-		if(NULL != pkg)
-		{
-			rcvbuf = (u8 *)(pkg->buf + pkg->offset);
+        if(NULL != pkg)
+        {
+            rcvbuf = (u8 *)(pkg->buf + pkg->offset);
 
-			rcvlen = Net_RecvPacket(1,rcvbuf);//轮询，里面添加了延时
-			if(0 != rcvlen)
-			{
-				pkg->datalen = rcvlen;
-				pkg->partnext = NULL;
-				newpkg = true;
-				NetDev_PostPkg(pgChkNetDev,pkg);
-			}
-			else
-			{
-				newpkg = false;
-			}
-		}
-		Djy_EventDelay(1*mS);
-	}
-	return;
+            rcvlen = Net_RecvPacket(1,rcvbuf);//轮询，里面添加了延时
+            if(0 != rcvlen)
+            {
+                pkg->datalen = rcvlen;
+                pkg->partnext = NULL;
+                newpkg = true;
+                NetDev_PostPkg(pgChkNetDev,pkg);
+                PkgTryFreePart(pkg);
+            }
+            else
+            {
+                newpkg = false;
+            }
+        }
+        Djy_EventDelay(1*mS);
+    }
+    return;
 }
 
 
@@ -173,45 +170,37 @@ void NetHard_RcvIntIsr(void)
 // =============================================================================
 bool_t NetHard_AddNetDev(void)
 {
-	u16   evtt_id;
-	bool_t  result;
-	tagNetDevPara  devpara;
-	tagHostIpv4Addr devaddr;
+    u16   evtt_id;
+    bool_t  result;
+    tagNetDevPara  devpara;
 
-//初始化网卡	
-	extern bool_t module_tsec_init(s32 num,u8 last_mac);//eTSECx初始化
-	module_tsec_init(1,10);
-	
-	devpara.ifsend = NetHard_Send;
-	
-	devpara.iftype = EN_LINK_INTERFACE_ETHERNET;
-	memcpy(devpara.mac, sgNetHardMac,6); 
-	devpara.name = "TestDriver";
-	devpara.private = 0;
-	devpara.linklen = 14;
-	devpara.pkglen = 1500;
-	devpara.devfunc = 0;
-	
-	result = false;
-	pgChkNetDev = NetDev_AddDev(&devpara);
-	if(pgChkNetDev != NULL)
-	{
-		devaddr.ip = sgNetHardIpAddrMain|CN_HARD_BOARD;
-		devaddr.gateway = sgNetHardGateWay;
-		devaddr.ipmsk = sgNetHardIpMsk;
-		if(NULL !=Rout_AddRout(pgChkNetDev, &devaddr))
-		{
-			result = true;
-		}
-	}
-	//添加接收线程
+//初始化网卡    
+    extern bool_t module_tsec_init(s32 num,u8 last_mac);//eTSECx初始化
+    module_tsec_init(1,10);
+    
+    devpara.ifsend = NetHard_Send;
+    devpara.iftype = EN_LINK_INTERFACE_ETHERNET;
+    memcpy(devpara.mac, sgNetHardMac,6); 
+    devpara.name = "TestDriver";
+    devpara.private = 0;
+    devpara.linklen = 14;
+    devpara.pkglen = 1500;
+    devpara.devfunc = 0;
+    
+    result = false;
+    pgChkNetDev = NetDev_InstallDev(&devpara);
+    if(pgChkNetDev != NULL)
+    {
+        result = true;
+    }
+    //添加接收线程
     evtt_id = Djy_EvttRegist(EN_CORRELATIVE, CN_PRIO_RRS-2, 0, 1,
-    		(ptu32_t (*)(void))NetHard_RcvIntIsr,NULL, 0x100, "NetHard_RcvIsr");
-	if (evtt_id != CN_EVTT_ID_INVALID)
-	{
-		evtt_id = Djy_EventPop(evtt_id, NULL, 0,0, 0, 0);
-	}
-	return result;
+            (ptu32_t (*)(void))NetHard_RcvIntIsr,NULL, 0x100, "NetHard_RcvIsr");
+    if (evtt_id != CN_EVTT_ID_INVALID)
+    {
+        evtt_id = Djy_EventPop(evtt_id, NULL, 0,0, 0, 0);
+    }
+    return result;
 }
 
 

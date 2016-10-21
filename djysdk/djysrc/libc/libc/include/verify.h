@@ -61,9 +61,11 @@
 extern "C" {
 #endif
 
-u16 Crc_16(u8 *buf, u32 len);
+u16 crc16(u8 *buf, u32 len);
 void Ecc_Make256(const u8 *data,u8 *ecc);
 s32 Ecc_Corect256(u8 *data, const u8 *old_ecc);
+u32 crc32( char *buf, int len);
+
 
 #ifdef __cplusplus
 }

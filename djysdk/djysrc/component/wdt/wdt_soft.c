@@ -54,40 +54,47 @@
 // 1,在看门狗监控主任务启动之前，所有的看门狗API都是直接操作看门狗队列
 // 2,在看门狗监控主任务启动之后，所有的看门狗API都是直接发送给看门狗监控主任务进行
 // =============================================================================
-#include "config-prj.h"
-#include "arch_feature.h"
-#include "stdint.h"
-#include "stdio.h"
-#include "stdlib.h"
-#include "string.h"
-#include "int.h"
-#include "pool.h"
-#include "msgqueue.h"
-#include "endian.h"
-#include "wdt_soft.h"
-#include "wdt_hal.h"
-#include "systime.h"
-#include "djyos.h"
+#include <stdint.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <endian.h>
+
+#include <os.h>
+#include <wdt_soft.h>
+#include <wdt_hal.h>
+#include <exp.h>
+
+
+#include "core_config.h"
+
 #define CN_WDT_YIP_NEVER      CN_LIMIT_SINT64     //当timeout为该时间时表示该看门狗暂停状态
 #define CN_WDT_YIP_PRECISION  CN_CFG_TICK_US      //软件看门狗模块的精度
 
 //软件看门狗的消息类型
 typedef struct
 {
-    tagWdt       *pwdt;        //待操作的看门狗
-    u32          opcode;       //操作类型
-    ptu32_t      para;         //操作类型指定的参数
+    tagWdt       *pwdt;         //待操作的看门狗
+    u32           opcode;       //操作类型
+    ptu32_t       para;         //操作类型指定的参数
 }tagWdtMsg;
 
+//看门狗异常信息组织结构
+struct WdtExpInfo
+{
+    char       wdtname[CN_EXP_NAMELEN_LIMIT];    //异常的看门狗的名字
+    tagWdt     wdt;                              //异常的看门狗
+};
+
 //该模块使用的静态全局变量
-static tagWdt                     *g_ptWdtPool; //看门狗内存池资源
-static struct tagMemCellPool      *ptWdtPool = NULL;             //看门狗内存池
+static struct MemCellPool         *ptWdtPool = NULL;             //看门狗内存池
 static tagWdt                     *ptWdtHead = NULL;             //看门狗队列头
 static tagWdt                     *ptWdtTail = NULL;             //看门狗队列尾
 static tagWdt                     *ptWdtHard = NULL;             //硬件看门狗对应的软件看门狗
-static bool_t (*fnWdtHardFeed)(void) = NULL;       //硬件看门狗的喂狗方法
-#define CN_WDTMSG_LIMIT       0x20                 //看门狗消息队列的最大长度
-static struct tagMsgQueue     *ptWdtMsgBox = NULL; //看门狗消息队列
+static bool_t (*fnWdtHardFeed)(void) = NULL;                     //硬件看门狗的喂狗方法
+#define CN_WDTMSG_LIMIT            0x20                          //看门狗消息队列的最大长度
+static struct MsgQueue            *ptWdtMsgBox = NULL;           //看门狗消息队列
 
 //看门狗狗叫的原因：
 //正常的看门狗不会叫，只有没有按时喂的狗才会叫；因此看门狗叫是因为没有按时喂
@@ -102,46 +109,58 @@ enum __EN_WDTYIP
     EN_WDT_YIPFORLOGIC,            //逻辑错误引起的看门狗狗叫
     EN_WDT_YIPFORSHEDULE,          //调度原因引起的看门狗狗叫
     EN_WDT_YIPOTHERS,              //未知原因引起的看门狗狗叫
+    EN_WDT_YIPLENTH,               //未知原因引起的看门狗狗叫
 };
+#define CN_WDT_EXPDECODERNAME   "WdtExp Decoder"    //看门狗异常信息解析器名称
 
-#include "exp_api.h"
-#define CN_WDT_EXPDECODERNAME           "WDTEXP DECODER"   //看门狗异常消息解析器
-//看门狗异常信息组织结构
-typedef struct
+//获取YIP原因
+const char *gWdtYipReason[EN_WDT_YIPLENTH]={
+
+        "NOYIP",
+        "YIPFORLOGIC",
+        "YIPFORSHEDULE",
+        "YIPOTHERS"
+};
+const char *WdtYipReasonName(enum __EN_WDTYIP  yipreason)
 {
-    char       wdtname[CN_EXP_NAMELEN_LIMIT];    //异常的看门狗的名字
-    tagWdt     wdt;                              //异常的看门狗
-}tagWdtExpInfo;
+    if(yipreason < EN_WDT_YIPLENTH)
+    {
+        return gWdtYipReason[yipreason];
+    }
+    else
+    {
+        return NULL;
+    }
+}
 // =============================================================================
 // 函数功能：抛出具体的看门狗异常
 // 输入参数：result, 看门狗的异常时需要做的处理
-//          wdt, 异常的看门狗
+//        wdt, 异常的看门狗
 // 输出参数：
 // 返回值  ：最终的处理结果
 // 说明    ：主要是搜集WDT异常时的信息，该函数仅限内部调用，当发现看门狗异常并且需要处理该
 //        异常的时候调用该函数
 // =============================================================================
-enum _EN_EXP_DEAL_TYPE_ __Wdt_TrowWdtExp(enum _EN_EXP_DEAL_TYPE_ result,\
+enum EN_ExpAction __Wdt_TrowWdtExp(enum EN_ExpAction WdtAction,
                                             tagWdt *wdt)
 {
-    struct tagExpThrowPara  parahead;
-    tagWdtExpInfo wdtexp;
+    struct ExpThrowPara  parahead;
+    struct WdtExpInfo wdtexp;
     wdtexp.wdt = *wdt;
     memcpy(wdtexp.wdtname,wdt->pname,CN_EXP_NAMELEN_LIMIT);
-    parahead.name = CN_WDT_EXPDECODERNAME;
-    parahead.dealresult = result;
-    parahead.para = (u8 *)&wdtexp;
-    parahead.para_len = sizeof(wdtexp);
-    parahead.validflag = true;
-    Exp_Throw(&parahead, (u32*)&result);
-    return  result;
+    parahead.DecoderName = CN_WDT_EXPDECODERNAME;
+    parahead.ExpAction = WdtAction;
+    parahead.ExpInfo = (u8 *)&wdtexp;
+    parahead.ExpInfoLen = sizeof(wdtexp);
+    parahead.ExpType = CN_EXP_TYPE_WDT;
+    return Exp_Throw(&parahead);
 }
 
 // =============================================================================
 // 函数功能：WDT异常信息字节序转换
 // 输入参数：wdt, 待转换的看门狗,
 //          endian, 大端还是小端
-//          todo:前福,注释不能这样写,谁知道怎么表示大端和小段?
+//          CN_CFG_LITTLE_ENDIAN/CN_CFG_BIG_ENDIAN
 // 输出参数：wdt, 转换后的看门狗
 // 返回值  ：无
 // 说明    ：由于异常信息是按照异常时的机器的本地端格式存储的，如果发生异常的机器和异常信息
@@ -155,12 +174,13 @@ void __Wdt_SwapWdtInfoByEndian(tagWdt *wdt, u32 endian)
     {
         wdt->action = swapl(wdt->action);
         wdt->cycle =  swapl(wdt->cycle);
-        wdt->runtimelevel = swapl(wdt->runtimelevel);
-        wdt->sheduletimeslevel = swaps(wdt->sheduletimeslevel);
+        wdt->ExhaustLevelSet = swapl(wdt->ExhaustLevelSet);
+        wdt->ExhaustLimit = swaps(wdt->ExhaustLimit);
         wdt->shyiptimes = swaps(wdt->shyiptimes);
-        wdt->taskownerid = swapl(wdt->taskownerid);
+        wdt->WdtOnwer = swapl(wdt->WdtOnwer);
         wdt->timeoutreason = swapl(wdt->timeoutreason);
     }
+    return;
 }
 // =============================================================================
 // 函数功能：看门狗异常信息解析
@@ -170,21 +190,20 @@ void __Wdt_SwapWdtInfoByEndian(tagWdt *wdt, u32 endian)
 // 返回值  ：
 // 说明    ：注册异常解析器的时候会将该异常解析器注册进去
 // =============================================================================
-bool_t __Wdt_WdtExpInfoDecoder(tagWdtExpInfo  *wdtinfo,u32 endian)
+bool_t __Wdt_WdtExpInfoDecoder(struct ExpThrowPara  *WdtinfoHead,u32 endian)
 {
     tagWdt  *wdt;
-
+    struct WdtExpInfo *wdtinfo = (struct WdtExpInfo *)WdtinfoHead->ExpInfo;
     wdt = &wdtinfo->wdt;
     __Wdt_SwapWdtInfoByEndian(wdt, endian);
-
-    printk("wdtinfo:wdtname                :%s\n\r",    wdtinfo->wdtname);
-    printk("wdtinfo:wdtowner event_id      :0x%08x\n\r",wdt->taskownerid);
-    printk("wdtinfo:wdt_action             :0x%08x\n\r",wdt->action);
-    printk("wdtinfo:yip_cycle              :0x%08x\n\r",wdt->cycle);
-    printk("wdtinfo:yip_reason             :0x%08x\n\r",wdt->timeoutreason);
-    printk("wdtinfo:yip_consumed_time_level:0x%08x\n\r",wdt->runtimelevel);
-    printk("wdtinfo:yip_for_shedule_times  :0x%08x\n\r",wdt->shyiptimes);
-    printk("wdtinfo:yip_shedule_times_level:0x%08x\n\r",wdt->sheduletimeslevel);
+    printf("wdtinfo:name               :%s\n\r",    wdtinfo->wdtname);
+    printf("wdtinfo:Owner              :0x%04x\n\r",wdt->WdtOnwer);
+    printf("wdtinfo:Action             :%s\n\r",ExpActionName(wdt->action));
+    printf("wdtinfo:Cycle              :%d(us)\n\r",wdt->cycle);
+    printf("wdtinfo:Reason             :%s\n\r",WdtYipReasonName(wdt->timeoutreason));
+    printf("wdtinfo:OwnerTimeLevel     :0x%08x(us)\n\r",wdt->ExhaustLevelSet);
+    printf("wdtinfo:TimeoutForShedule  :0x%08x\n\r",wdt->shyiptimes);
+    printf("wdtinfo:SheduleTimeoutLimit:0x%08x\n\r",wdt->ExhaustLimit);
     return true;
 }
 
@@ -312,9 +331,9 @@ static void __Wdt_RemovefQueue(tagWdt *wdt)
 static void __Wdt_DealMsg(tagWdtMsg *msg)
 {
     u32                  opcode;
-    u32                  oppara;
+    ptu32_t              oppara;
     tagWdt               *wdt;
-    struct tagEventInfo  eventinfo;
+    struct EventInfo  eventinfo;
     s64                  ostime;
 
     wdt = msg->pwdt;
@@ -323,9 +342,9 @@ static void __Wdt_DealMsg(tagWdtMsg *msg)
     if(NULL != wdt)
     {
         //更新WDT线程拥有者最后一次操作WDT时间
-        if(CN_EVENT_ID_INVALID != wdt->taskownerid)
+        if(CN_EVENT_ID_INVALID != wdt->WdtOnwer)
         {
-            if(Djy_GetEventInfo(wdt->taskownerid, &eventinfo))
+            if(Djy_GetEventInfo(wdt->WdtOnwer, &eventinfo))
             {
                 wdt->runtime = eventinfo.consumed_time;
             }
@@ -334,7 +353,7 @@ static void __Wdt_DealMsg(tagWdtMsg *msg)
         wdt->shyiptimes = 0;
         wdt->timeoutreason = EN_WDT_NOYIP;
 
-        ostime = DjyGetTime();
+        ostime = DjyGetSysTime();
         switch (opcode)
         {
             case EN_WDTCMD_ADD:
@@ -370,10 +389,10 @@ static void __Wdt_DealMsg(tagWdtMsg *msg)
                 __Wdt_Add2Queque(wdt);
                 break;
             }
-            case EN_WDTCMD_SETTASKID:
+            case EN_WDTCMD_SET_OWNER:
             {
                 __Wdt_RemovefQueue(wdt);
-                wdt->taskownerid = oppara;
+                wdt->WdtOnwer = oppara;
                 if(wdt->deadtime != CN_WDT_YIP_NEVER)
                 {
                     wdt->deadtime = wdt->cycle + ostime;
@@ -381,7 +400,7 @@ static void __Wdt_DealMsg(tagWdtMsg *msg)
                 __Wdt_Add2Queque(wdt);
                 break;
             }
-            case EN_WDTCMD_SETCYCLE:
+            case EN_WDTCMD_SET_CYCLE:
             {
                 __Wdt_RemovefQueue(wdt);
                 wdt->cycle = oppara;
@@ -392,7 +411,7 @@ static void __Wdt_DealMsg(tagWdtMsg *msg)
                 __Wdt_Add2Queque(wdt);
                 break;
             }
-            case EN_WDTCMD_SETYIPACTION:
+            case EN_WDTCMD_SET_YIP_ACTION:
             {
                 __Wdt_RemovefQueue(wdt);
                 wdt->action = oppara;
@@ -403,7 +422,7 @@ static void __Wdt_DealMsg(tagWdtMsg *msg)
                 __Wdt_Add2Queque(wdt);
                 break;
             }
-            case EN_WDTCMD_SETYIPHOOK:
+            case EN_WDTCMD_SET_HOOK:
             {
                 __Wdt_RemovefQueue(wdt);
                 wdt->fnhook = (fnYipHook)oppara;
@@ -414,10 +433,10 @@ static void __Wdt_DealMsg(tagWdtMsg *msg)
                 __Wdt_Add2Queque(wdt);
                 break;
             }
-            case EN_WDTCMD_SETCONSUMEDTIMELEVEL:
+            case EN_WDTCMD_SET_CONSUME_LEVEL:
             {
                 __Wdt_RemovefQueue(wdt);
-                wdt->runtimelevel = oppara;
+                wdt->ExhaustLevelSet = oppara;
                 if(wdt->deadtime != CN_WDT_YIP_NEVER)
                 {
                     wdt->deadtime = wdt->cycle + ostime;
@@ -425,10 +444,10 @@ static void __Wdt_DealMsg(tagWdtMsg *msg)
                 __Wdt_Add2Queque(wdt);
                 break;
             }
-            case EN_WDTCMD_SETSCHLEVEL:
+            case EN_WDTCMD_SET_SCHED_LEVEL:
             {
                 __Wdt_RemovefQueue(wdt);
-                wdt->sheduletimeslevel = oppara;
+                wdt->ExhaustLimit = oppara;
                 if(wdt->deadtime != CN_WDT_YIP_NEVER)
                 {
                     wdt->deadtime = wdt->cycle + ostime;
@@ -451,7 +470,7 @@ static void __Wdt_DealMsg(tagWdtMsg *msg)
 // 返回值  ：
 // 说明    ：只有需要记录或者重启的动作才会真正的抛出异常
 // =============================================================================
-static void __Wdt_DealWdtYipResult(u32 result, tagWdt *wdt)
+static void __Wdt_DealWdtYipResult(enum EN_ExpAction result, tagWdt *wdt)
 {
     //befor we do the wdt exception, we'd better feed the hard wdt to avoid
     //reseting during the dealing
@@ -480,12 +499,12 @@ static void __Wdt_DealWdtYipResult(u32 result, tagWdt *wdt)
 static void __Wdt_AnalyzeYipReason(tagWdt *wdt)
 {
     u32    Tm_TimeRun;
-    struct tagEventInfo wdt_event_info;
+    struct EventInfo wdt_event_info;
 
-    if( Djy_GetEventInfo((u16)wdt->taskownerid, &wdt_event_info))
+    if( Djy_GetEventInfo((u16)wdt->WdtOnwer, &wdt_event_info))
     {
         Tm_TimeRun = (u32)(wdt_event_info.consumed_time - wdt->runtime);
-        if(Tm_TimeRun < wdt->runtimelevel) //运行时间不够
+        if(Tm_TimeRun < wdt->ExhaustLevelSet) //运行时间不够
         {
             wdt->timeoutreason = EN_WDT_YIPFORSHEDULE;
             wdt->shyiptimes++;
@@ -513,16 +532,17 @@ static void __Wdt_AnalyzeYipReason(tagWdt *wdt)
 static void __Wdt_ScanWdtQueque(void)
 {
     s64             timenow;
-    u32             result;
+    enum EN_ExpAction result;
     tagWdt          *wdt;
 
     wdt = ptWdtHead;
     while(NULL != wdt)//处理所有在叫的狗
     {
-        timenow = DjyGetTime();//实时更新时间
+        timenow = DjyGetSysTime();//实时更新时间
 
         if((timenow + CN_WDT_YIP_PRECISION)>= wdt->deadtime) // the wdt has been timeout
         {
+//            printf("看门狗狗叫：%s\n\r",wdt->pname);
             __Wdt_AnalyzeYipReason(wdt);
             if(NULL !=  wdt->fnhook)
             {
@@ -536,11 +556,8 @@ static void __Wdt_ScanWdtQueque(void)
             {
                 result = wdt->action;
             }
-            if(wdt->shyiptimes >= wdt->sheduletimeslevel)
-            {
-                result = result;
-            }
-            else//在忍耐限度以内
+            if((wdt->timeoutreason == EN_WDT_YIPFORSHEDULE) 
+                            && (wdt->shyiptimes < wdt->ExhaustLimit)) //在忍耐限度以内
             {
                 result = EN_EXP_DEAL_RECORD;
             }
@@ -577,7 +594,7 @@ static ptu32_t Wdt_Service(void)
     //将硬件狗从裸狗中接管过来
     WdtHal_BootEnd();
     // deal all the msg cached in the msgbox
-    timenow = DjyGetTime();
+    timenow = DjyGetSysTime();
     while(MsgQ_Receive(ptWdtMsgBox,(u8 *)&wdtmsg,sizeof(tagWdtMsg),0))
     {
         __Wdt_DealMsg(&wdtmsg); //all the wdt will be queued in the wdt queue
@@ -594,7 +611,7 @@ static ptu32_t Wdt_Service(void)
         }
         else
         {
-            timenow = DjyGetTime();
+            timenow = DjyGetSysTime();
             waittime = (u32)(wdt->deadtime - timenow);
         }
         //ok, now we wait the msg box during the expect time
@@ -625,13 +642,15 @@ static ptu32_t Wdt_Service(void)
 // =============================================================================
 ptu32_t ModuleInstall_Wdt(ptu32_t para)
 {
+    static struct ExpInfoDecoder WdtDecoder;
     bool_t  result_bool;
     u16     evttid;
+    void   *wdtpoolbuf;
 
-    g_ptWdtPool = M_Malloc(gc_u32CfgWdtLimit * sizeof(tagWdt),0);
-    if(g_ptWdtPool == NULL)
+    wdtpoolbuf = M_Malloc(gc_u32CfgWdtLimit * sizeof(tagWdt),0);
+    if(wdtpoolbuf == NULL)
         return 0;
-    ptWdtPool = Mb_CreatePool(g_ptWdtPool,gc_u32CfgWdtLimit,sizeof(tagWdt),0,0,"wdt pool");
+    ptWdtPool = Mb_CreatePool(wdtpoolbuf,gc_u32CfgWdtLimit,sizeof(tagWdt),0,0,"wdt pool");
     //init the queue
     ptWdtHead = NULL;
     ptWdtTail = NULL;
@@ -642,18 +661,18 @@ ptu32_t ModuleInstall_Wdt(ptu32_t para)
 
     //create the main service
     evttid = Djy_EvttRegist(EN_CORRELATIVE,CN_PRIO_WDT,0,0,Wdt_Service,
-                                NULL,0x1000,"wdt service");
+                                NULL,0x400,"wdt service");
     if(evttid == CN_EVTT_ID_INVALID)
         return 0;
     if( Djy_EventPop(evttid,NULL,0,0,0,0) == CN_EVENT_ID_INVALID)
     {
-        printk("WDT MODULE:POP SERVICE FAILED!\n\r");
+        printf("WDT MODULE:POP SERVICE FAILED!\n\r");
         Djy_EvttUnregist(evttid);
         return 0;
     }
 
     //create the soft wdt match the hard wdt
-    struct tagWdtHalChipInfo hardpara;
+    struct WdtHalChipInfo hardpara;
     result_bool = WdtHal_GetChipPara(&hardpara);
     if(true == result_bool)//存在硬件看门狗，则创建硬件看门狗
     {
@@ -661,17 +680,17 @@ ptu32_t ModuleInstall_Wdt(ptu32_t para)
         ptWdtHard = Wdt_Create(hardpara.wdtchip_name,\
                                hardpara.wdtchip_cycle,\
                                __Wdt_HardWdtYipHook,\
-                               EN_EXP_DEAL_IGNORE, NULL);
-    }
-//todo:此处有警告
-    extern bool_t Exp_RegisterThrowinfoDecoder(fnExp_ThrowinfoDecoderModule decoder,const char *name);
-    if(false ==Exp_RegisterThrowinfoDecoder(__Wdt_WdtExpInfoDecoder,\
-                                            CN_WDT_EXPDECODERNAME))
-    {
-        printk("WDT MODULE: Register Wdt Exp Decoder Failed!\n\r");
+                               EN_EXP_DEAL_IGNORE, 0,0);
     }
 
-    printk("WDT MODULE:Init end ...\n\r");
+    WdtDecoder.MyDecoder = __Wdt_WdtExpInfoDecoder;
+    WdtDecoder.DecoderName = CN_WDT_EXPDECODERNAME;
+    if(false ==Exp_RegisterThrowInfoDecoder(&WdtDecoder))
+    {
+        printf("WDT MODULE: Register Wdt Exp Decoder Failed!\n\r");
+    }
+
+    printf("WDT MODULE:Init end ...\n\r");
     return 1;
 }
 
@@ -689,7 +708,8 @@ ptu32_t ModuleInstall_Wdt(ptu32_t para)
 //          yip_cylce,狗叫周期，单位为微秒
 //          yiphook,狗叫善后函数指针
 //          yip_action,狗叫动作，当yiphook为空或者返回default时采用此值
-//          levepara,看门狗超时的原因以及超时容忍次数等限制参数
+//          ExhaustLevelSet，参看 tagWdt 中ExhaustLevelSet的说明
+//          ExhaustLimit，参看 tagWdt 中ExhaustLimit的说明
 // 输出参数：
 // 返回值  ：创建的虚拟看门狗，NULL表示失败
 // 说明    ：务必保证看门狗善后函数返回值的定义符合标准，见enum _EN_EXP_DEAL_TYPE
@@ -697,7 +717,10 @@ ptu32_t ModuleInstall_Wdt(ptu32_t para)
 //           创建的看门狗若成功，则下次狗叫时间为当前时间+yip_cycle=time
 // =============================================================================
 tagWdt *Wdt_Create(char *dogname,u32 yip_cycle,\
-        fnYipHook yiphook,ptu32_t yip_action, tagWdtTolerate *levelpara)
+                   fnYipHook yiphook,
+                   enum EN_ExpAction yip_action, 
+                   u32 ExhaustLevelSet,
+                   u32 ExhaustLimit)
 {
     tagWdt  *result;
     tagWdt  *wdt;
@@ -706,7 +729,8 @@ tagWdt *Wdt_Create(char *dogname,u32 yip_cycle,\
     wdt = Mb_Malloc(ptWdtPool,0);
     if(NULL != wdt)
     {
-        result = Wdt_Create_s(wdt,dogname,yip_cycle,yiphook,yip_action, levelpara);
+        result = Wdt_Create_s(wdt,dogname,yip_cycle,yiphook,yip_action, 
+                              ExhaustLevelSet,ExhaustLimit);
         if(NULL == result)
         {
             Mb_Free(ptWdtPool,wdt);
@@ -722,15 +746,19 @@ tagWdt *Wdt_Create(char *dogname,u32 yip_cycle,\
 //          yip_cylce,狗叫周期，单位为微秒
 //          yiphook,狗叫善后函数指针
 //          yip_action,狗叫动作，当yiphook为空或者返回default时采用此值
-//          levepara,看门狗超时的原因以及超时容忍次数等限制参数
+//          ExhaustLevelSet，参看 tagWdt 中ExhaustLevelSet的说明
+//          ExhaustLimit，参看 tagWdt 中ExhaustLimit的说明
 // 输出参数：
 // 返回值  ：创建的虚拟看门狗，NULL表示失败
 // 说明    ：务必保证看门狗善后函数返回值的定义符合标准，见enum _EN_EXP_DEAL_TYPE
 //           的声明（exp_api.h文件）
 //           创建的看门狗若成功，则下次狗叫时间为当前时间+yip_cycle
 // =============================================================================
-tagWdt *Wdt_Create_s(tagWdt *wdt, char *dogname,u32 yip_cycle,\
-        fnYipHook yiphook,ptu32_t yip_action, tagWdtTolerate *levelpara)
+tagWdt *Wdt_Create_s(tagWdt *wdt, char *dogname,u32 yip_cycle,
+                     fnYipHook yiphook,
+                     enum EN_ExpAction yip_action, 
+                     u32 ExhaustLevelSet,
+                     u32 ExhaustLimit)
 {
 
     tagWdt     *result;
@@ -744,12 +772,9 @@ tagWdt *Wdt_Create_s(tagWdt *wdt, char *dogname,u32 yip_cycle,\
         wdt->cycle = yip_cycle;
         wdt->fnhook = yiphook;
         wdt->action = yip_action;
-        if(NULL != levelpara)
-        {
-            wdt->runtimelevel = levelpara->runtimelevel;
-            wdt->sheduletimeslevel = levelpara->shtimeoutlevel;
-        }
-        wdt->taskownerid = CN_EVENT_ID_INVALID;
+        wdt->ExhaustLevelSet = ExhaustLevelSet;
+        wdt->ExhaustLimit = ExhaustLimit;
+        wdt->WdtOnwer = Djy_MyEventId( );
 
         //snd the msg to the service task
         wdtmsg.pwdt = wdt;
@@ -834,9 +859,10 @@ bool_t Wdt_Clean(tagWdt *wdt)
         if(ptWdtHead != wdt)
         {
             //可以直接修改wdtqueue
-            ostime = DjyGetTime();
+            ostime = DjyGetSysTime();
             __Wdt_RemovefQueue(wdt);
             wdt->deadtime = wdt->cycle + ostime;
+            wdt->shyiptimes = 0;
             __Wdt_Add2Queque(wdt);
             Int_LowAtomEnd(atom);
         }

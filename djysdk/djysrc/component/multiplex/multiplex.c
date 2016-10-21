@@ -57,7 +57,7 @@
 #include "stdint.h"
 #include "stddef.h"
 #include "systime.h"
-#include "rsc.h"
+#include "object.h"
 #include "pool.h"
 #include "lock.h"
 #include "multiplex.h"
@@ -65,14 +65,14 @@
 //为CN_MULTIPLEX_OBJECT_AND有效，在OR模式
 //下，用ActiveQ判断即可
 
-static struct tagMemCellPool *g_ptMultiplexSetsPool;
-static struct tagMemCellPool *g_ptMultiplexObjectPool;
-static struct tagMutexLCB MultiplexMutex;
+static struct MemCellPool *g_ptMultiplexSetsPool;
+static struct MemCellPool *g_ptMultiplexObjectPool;
+static struct MutexLCB MultiplexMutex;
 
 //把Object从*SrcList队列取出，放到*TarList队列头上去
-static void __ChangeList(struct tagMultiplexObjectCB **SrcList,
-    struct tagMultiplexObjectCB **TarList,
-    struct tagMultiplexObjectCB *Object)
+static void __ChangeList(struct MultiplexObjectCB **SrcList,
+    struct MultiplexObjectCB **TarList,
+    struct MultiplexObjectCB *Object)
 {
     Object->NextObject->PreObject = Object->PreObject;
     Object->PreObject->NextObject = Object->NextObject;
@@ -106,31 +106,15 @@ bool_t __ObjectIsActived(u32 Pending, u32 Sensing, u32 Mode)
             return true;
         else
             return false;
-    } else {
+    }
+    else
+    {
         if ((Pending & Sensing) == Sensing)
             return true;
         else
             return false;
     }
 }
-
-//MultiplexSets中已经有Object的条件下，判断其是否触发
-bool_t __SetsIsActived(struct tagMultiplexSetsCB *Sets)
-{
-    if (Sets->SetsActived == true) {
-        if (Sets->ActiveQ != NULL)
-            return true;
-        else
-            return false;
-    } else {
-        if ((Sets->Actived >= Sets->ActiveLevel)
-            || (Sets->Actived >= Sets->ObjectSum)) {
-            return true;
-        } else
-            return false;
-    }
-}
-
 
 //----模块初始化---------------------------------------------------------------
 //功能: 初始化Multiplex模块。创建互斥量，初始化内存池。
@@ -141,12 +125,12 @@ ptu32_t ModuleInstall_Multiplex(ptu32_t para)
 {
     Lock_MutexCreate_s(&MultiplexMutex, "Multiplex control block");
     //创建MultiplexSets控制块内存池，内存池的初始状态是空的。
-    g_ptMultiplexSetsPool = Mb_CreatePool(NULL, 0, sizeof(struct tagMultiplexSetsCB),
+    g_ptMultiplexSetsPool = Mb_CreatePool(NULL, 0, sizeof(struct MultiplexSetsCB),
         5, CN_MULTIPLEX_MAX_SETS, "Multiplex control block");
     if (g_ptMultiplexSetsPool == NULL)
         return -1;
     //创建Multiplex对象控制块内存池，内存池的初始状态是空的。
-    g_ptMultiplexObjectPool = Mb_CreatePool(NULL, 0, sizeof(struct tagMultiplexObjectCB),
+    g_ptMultiplexObjectPool = Mb_CreatePool(NULL, 0, sizeof(struct MultiplexObjectCB),
         5, CN_MULTIPLEX_MAX_OBJECTS, "Multiplex control block");
     if (g_ptMultiplexObjectPool == NULL) {
         Mb_DeletePool(g_ptMultiplexObjectPool);
@@ -160,10 +144,12 @@ ptu32_t ModuleInstall_Multiplex(ptu32_t para)
 //参数：ActiveLevel, 触发水平,该集合被触发的对象达到此数后,触发集合.
 //返回：新创建的MultiplexSets指针
 //----------------------------------------------------------------------------
-struct tagMultiplexSetsCB* Multiplex_Creat(u32 ActiveLevel)
+struct MultiplexSetsCB* Multiplex_Creat(u32 ActiveLevel)
 {
-    struct tagMultiplexSetsCB *SetsQ;
-    SetsQ = (struct tagMultiplexSetsCB *)Mb_Malloc(g_ptMultiplexSetsPool,
+    struct MultiplexSetsCB *SetsQ;
+    if (ActiveLevel == 0)       //触发水平必须大于0
+        return NULL;
+    SetsQ = (struct MultiplexSetsCB *)Mb_Malloc(g_ptMultiplexSetsPool,
         CN_TIMEOUT_FOREVER);
     if (SetsQ != NULL) {
         SetsQ->ObjectQ = NULL;
@@ -183,36 +169,28 @@ struct tagMultiplexSetsCB* Multiplex_Creat(u32 ActiveLevel)
 //      ActiveQ队列，否则加入ObjectQ队列。
 //参数: Sets，被操作的MultiplexSets指针
 //      ObjectHead，被操作的Object队列头指针的指针，*ObjectHead=NULL表示该对象尚
-//          未加入任何MultiplexSets，因此，*ObjectHead初始化值应该是NULL。Object
-//          允许加入多个MultiplexSets，每加入一个MultiplexSets，将增加一个
-//          struct tagMultiplexObjectCB *类型的结点，所有结点的NextSets指针连接
+//          未加入任何MultiplexSets，因此，第一次调用Multiplex_AddObject前,
+//          *ObjectHead初始化值必须是NULL。允许多次调用Multiplex_AddObject把一个
+//          Object 允许加入多个MultiplexSets.每加入一个MultiplexSets，将增加一个
+//          struct MultiplexObjectCB *类型的结点，所有结点的NextSets指针连接
 //          成一个单向链表，*ObjectHead指向该链表头。*ObjectHead再也不允许在外部
 //          修改，否则结果不可预料。
 //      ObjectStatus，加入时的状态，31bit的位元组,bit31无效
-//      ObjectID，被Multiplex的对象的ID。
+//      ObjectID，被Multiplex的对象的ID,由使用者自己解析,Multiplex模块不处理。
 //      SensingBit，对象敏感位标志，31个bit，设为1表示本对象对这个bit标志敏感
 //          bit31表示敏感类型，CN_SENSINGBIT_AND，或者CN_SENSINGBIT_OR
 //返回: true=成功，false=失败。
 //-----------------------------------------------------------------------------
-bool_t Multiplex_AddObject(struct tagMultiplexSetsCB *Sets,
-    struct tagMultiplexObjectCB **ObjectHead,
-    u32 ObjectStatus, ptu32_t ObjectID, u32 SensingBit)
+bool_t Multiplex_AddObject(struct MultiplexSetsCB *Sets,
+                            struct MultiplexObjectCB **ObjectHead,
+                            u32 ObjectStatus, ptu32_t ObjectID, u32 SensingBit)
 {
-    struct tagMultiplexObjectCB *temp;
-    struct tagMultiplexObjectCB **TargetQ;
+    struct MultiplexObjectCB *temp;
+    struct MultiplexObjectCB **TargetQ;
     bool_t repeat = false;
     u32 ActivedInc = 0;
     if (Sets == NULL)
         return false;
-    ObjectStatus &= ~0x80000000;
-    //下面检查新加入的Object是否已经触发，以决定加入到MultiplexSets的哪个队列中
-    if (__ObjectIsActived(ObjectStatus,
-            SensingBit & ~0x80000000,
-            SensingBit & 0x80000000)) {
-        TargetQ = &Sets->ActiveQ;
-        ActivedInc = 1;
-    } else
-        TargetQ = &Sets->ObjectQ;
     Lock_MutexPend(&MultiplexMutex, CN_TIMEOUT_FOREVER);
     temp = *ObjectHead;
     //循环检查一个Object是否重复加入同一个MultiplexSets
@@ -228,6 +206,17 @@ bool_t Multiplex_AddObject(struct tagMultiplexSetsCB *Sets,
     Lock_MutexPost(&MultiplexMutex);
 
     if (repeat == false) {
+        ObjectStatus &= ~CN_MULTIPLEX_SENSINGBIT_MODE;      //清除模式位
+        //下面检查新加入的Object是否已经触发，以决定加入到MultiplexSets的哪个队列中
+        if (__ObjectIsActived(ObjectStatus,
+                SensingBit & ~CN_MULTIPLEX_SENSINGBIT_MODE,
+                SensingBit & CN_MULTIPLEX_SENSINGBIT_MODE))
+        {
+            TargetQ = &Sets->ActiveQ;
+            ActivedInc = 1;
+        } else
+            TargetQ = &Sets->ObjectQ;
+
         temp = Mb_Malloc(g_ptMultiplexObjectPool, CN_TIMEOUT_FOREVER);
         if (temp != NULL) {
             Sets->ObjectSum++;
@@ -279,10 +268,10 @@ bool_t Multiplex_AddObject(struct tagMultiplexSetsCB *Sets,
 //      ObjectHead，被操作的Object队列头指针的指针
 //返回: true=成功，false=失败。
 //-----------------------------------------------------------------------------
-bool_t Multiplex_DelObject(struct tagMultiplexSetsCB *Sets,
-    struct tagMultiplexObjectCB **ObjectHead)
+bool_t Multiplex_DelObject(struct MultiplexSetsCB *Sets,
+                           struct MultiplexObjectCB **ObjectHead)
 {
-    struct tagMultiplexObjectCB *Object,*following = NULL;
+    struct MultiplexObjectCB *Object,*following = NULL;
     if ((Sets == NULL) || (ObjectHead == NULL))
         return false;
     Lock_MutexPend(&MultiplexMutex, CN_TIMEOUT_FOREVER);
@@ -298,8 +287,8 @@ bool_t Multiplex_DelObject(struct tagMultiplexSetsCB *Sets,
     if (Object != NULL) {
         //下面检查被删除的Object是否已经触发，
         if (__ObjectIsActived(Object->PendingBit,
-                Object->SensingBit & ~0x80000000,
-                Object->SensingBit & 0x80000000)) {
+                Object->SensingBit & ~CN_MULTIPLEX_SENSINGBIT_MODE,
+                Object->SensingBit & CN_MULTIPLEX_SENSINGBIT_MODE)) {
             if (Sets->Actived != 0) {
                 Sets->Actived--;
                 if (Sets->Actived == 0)
@@ -343,10 +332,10 @@ bool_t Multiplex_DelObject(struct tagMultiplexSetsCB *Sets,
 //      Status，Object的当前状态
 //返回: true=成功，false=失败。
 //-----------------------------------------------------------------------------
-bool_t Multiplex_Set(struct tagMultiplexObjectCB *ObjectHead, u32 Status)
+bool_t Multiplex_Set(struct MultiplexObjectCB *ObjectHead, u32 Status)
 {
-    struct tagMultiplexObjectCB *Object;
-    struct tagMultiplexSetsCB *Sets;
+    struct MultiplexObjectCB *Object;
+    struct MultiplexSetsCB *Sets;
     u32 Sensing, Type;
     u32 OldPend;
     if (ObjectHead == NULL)
@@ -356,8 +345,8 @@ bool_t Multiplex_Set(struct tagMultiplexObjectCB *ObjectHead, u32 Status)
     while (Object != NULL) {
         OldPend = Object->PendingBit;
         Sets = Object->MySets;
-        Sensing = Object->SensingBit & ~0x80000000;
-        Type = Object->SensingBit & 0x80000000;
+        Sensing = Object->SensingBit & ~CN_MULTIPLEX_SENSINGBIT_MODE;
+        Type = Object->SensingBit & CN_MULTIPLEX_SENSINGBIT_MODE;
         Object->PendingBit = Status & Sensing;          //更新PendingBit
         if (__ObjectIsActived(OldPend, Sensing, Type)) {    //调用前，Object已触发
             if (!__ObjectIsActived(Object->PendingBit, Sensing, Type)) {
@@ -401,18 +390,31 @@ bool_t Multiplex_Set(struct tagMultiplexObjectCB *ObjectHead, u32 Status)
 //      Timeout，阻塞等待的最长时间，uS。
 //返回：如果MultiplexSets被触发，则返回MultiplexSets中一个被触发对象的ObjectID，
 //      否则返回-1.
+//注意: 调用本函数后,Sets的触发状态并没有改变,只有Multiplex_Set会修改Sets的触发
+//      状态,Multiplex的运行过程是:
+//      1.应用程序调用Multiplex_Wait,取得ObjectID返回
+//      2.根据ObjectID访问相应的对象.
+//      3.被访问的对象内部,如果本次访问导致了Sending Bit 变化,调用Multiplex_Set
+//          "告知"Multiplex组件.
+//      4.Multiplex_Set函数修改Sets的状态.
+//      5.反复1~4步,直到全部活动的对象访问完,然后调用 Multiplex_Wait 会进入阻塞状态.
+//      后,如果不对被select的对象做读写
 //-----------------------------------------------------------------------------
-ptu32_t Multiplex_Wait(struct tagMultiplexSetsCB *Sets, u32 *Status, u32 Timeout)
+ptu32_t Multiplex_Wait(struct MultiplexSetsCB *Sets, u32 *Status, u32 Timeout)
 {
-    struct tagMultiplexObjectCB *Object;
+    struct MultiplexObjectCB *Object;
     ptu32_t result;
     if (Sets == NULL)
         return -1;
-    if ((Sets->ActiveQ == NULL) && (Sets->ObjectQ == NULL))
-        return -1;
+//    if ((Sets->ActiveQ == NULL) && (Sets->ObjectQ == NULL))
+//        return -1;
+//     上述语句必须注释掉，原因如下：
+//     1,当我们创建sets的时候，可能有些任务已经调用了等待，然而此时并没有任何的等待对象加入
+//     2,当等待对象从1变为0时，容易在次数死循环（使用sets wait的程序一般使用while(1)）
+//判断或等待直到MultiplexSets被触发。
 
     //判断或等待直到MultiplexSets被触发。
-    if (!__SetsIsActived(Sets)) {
+    if (!Sets->SetsActived) {
         Lock_SempPend(&Sets->Lock, Timeout);
     }
 

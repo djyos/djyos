@@ -83,12 +83,11 @@
 #include "phy_88e1512.h"
 #include "string.h"
 #include "cpu_peri_tsec.h"
-#include "netdev.h"
-#include "rout.h"
-#include "tcpip_cdef.h"
+#include <tcpip/netdev.h>
+#include <tcpip/tcpip_cdef.h>
 
 #pragma pack(1)
-typedef struct __tagTsecFcb
+typedef struct TsecFcb
 {
     u16  status;
     u8   l4os;
@@ -107,9 +106,9 @@ typedef struct __tagTsecFcb
 #define CN_FCB_NPH (1<<8)
 #define CN_FCB_PTP (1<<0)
 
-typedef struct _tagTsecSndPkgBuf
+typedef struct TsecSndPkgBuf
 {
-    struct _tagTsecSndPkgBuf *nxt;
+    struct TsecSndPkgBuf *nxt;
     tagNetPkg *plst;
     u8 pkgnum;
     u16 bdno;
@@ -142,12 +141,12 @@ struct tsec_info_struct
 #define CN_RCVPKG_MAXSIZE        1518
 #define CN_RCVPKG_ALIGNSIZE      1536
 
-#define CN_RXBD_NUM              512   //20 bd for snd
-#define CN_TXBD_NUM              512   //20 bd for rcv
+#define CN_RXBD_NUM              0x200   //512 bd for rcv
+#define CN_TXBD_NUM              0x200   //512 bd for snd
 
 #define CN_CRCPOLY_LE            0xedb88320
 
-typedef struct _tagTsecBdTab
+typedef struct TsecBdTab
 {
     txbd8_t txbd[CN_TXBD_NUM];
     rxbd8_t rxbd[CN_RXBD_NUM];
@@ -614,26 +613,8 @@ u8 sgMacAddr[CN_TSEC_NUM][6]=
     {0x00,0x01,0x02,0x03,0x04,0x03},
     {0x00,0x01,0x02,0x03,0x04,0x03},
 };
-tagHostIpv4Addr sgIpv4Addr[CN_TSEC_NUM]=
-{
-    {
-        .ip  =  0xC0A80101,
-        .ipmsk = 0xFFFFFF00,
-        .gateway = 0xC0A80101,
-    },
-    {
-        .ip  =  0xC0A80102,
-        .ipmsk = 0xFFFFFF00,
-        .gateway = 0xC0A80101,
-    },
-    {
-        .ip  =  0xC0A80103,
-        .ipmsk = 0xFFFFFF00,
-        .gateway = 0xC0A80101,
-    },
-};
+
 static tagNetDev *pgTsecNetDev[CN_TSEC_NUM]= {NULL,NULL,NULL};
-static tagRoutTab * sgTsecNoMapRout[CN_TSEC_NUM] = {NULL,NULL,NULL};
 static ufast_t sgTsecIrqNo[CN_TSEC_NUM][2] = {
         {cn_int_line_etsec1_g0_receive,cn_int_line_etsec1_g0_transmit},
         {cn_int_line_etsec2_g0_receive,cn_int_line_etsec2_g0_transmit},
@@ -687,33 +668,7 @@ bool_t __TsecDataInitialize(u8  devno)
     /* Try to initialize PHY here, and return */
     return __TsecInitPhy(tsec_info);
 }
-// =============================================================================
-// 函数功能: __TsecFreeBD()
-// 输入参数：
-// 输出参数：
-// 返回值  ：
-// 说明    ：when we snd some new data, we should check any data that BD has been
-//        snt, if any snt, we just free it
-// =============================================================================
-//void __TsecFreeUsedPkg(tagTsecBdTab *txbdtab)
-//{
-//  u32 curbd;
-//  curbd = txbdtab->usedtxbd;
-//  while(curbd != txbdtab->nxttxbd)
-//  {
-//      if(txbdtab->txbd[curbd].status &TXBD_READY)
-//      {
-//          break;
-//      }
-//      else
-//      {
-//          Pkg_PartFlagFree(txbdtab->txpkg[curbd]);
-//          txbdtab->txpkg[curbd]= NULL;
-//          curbd =(curbd+1)%CN_TXBD_NUM;
-//      }
-//  }
-//  txbdtab->usedtxbd = curbd;
-//}
+
 // =============================================================================
 // 函数功能: __TsecCheckSndBdValid()
 //          net dev snd function
@@ -740,7 +695,7 @@ bool_t __TsecCheckSndBdValid(tagTsecBdTab *txbdtab, u32 referednum)
         }
         else
         {
-            Pkg_PartFlagFree(txbdtab->txpkg[curbd]);
+            PkgTryFreePart(txbdtab->txpkg[curbd]);
             txbdtab->txpkg[curbd]= NULL;
             curbd =(curbd+1)%CN_TXBD_NUM;
             checktimes++;
@@ -784,7 +739,8 @@ bool_t __TsecSnd(tagNetDev *netdev,tagNetPkg * plst, u32 netdevtask)
     u32 cursndbd;
     u16 status;
     u32 fbdno;
-    tagNetPkg * volatile pkg;
+    tagNetPkg *pkg;
+    tagNetPkg *pkgnxt;
     u32 bufaddr;
     u16 datalen;
 
@@ -814,10 +770,15 @@ bool_t __TsecSnd(tagNetDev *netdev,tagNetPkg * plst, u32 netdevtask)
         while(NULL != pkg)
         {
             status = TXBD_READY;
-            if(NULL == pkg->partnext)
+            if(PKG_ISLISTEND(pkg))
             {
                 //this is the last one
                 status |= TXBD_LAST ;
+                pkgnxt = NULL;
+            }
+            else
+            {
+                pkgnxt = pkg->partnext;
             }
             if(CN_TXBD_NUM == (cursndbd+1))
             {
@@ -832,8 +793,9 @@ bool_t __TsecSnd(tagNetDev *netdev,tagNetPkg * plst, u32 netdevtask)
             txbdtab->txbd[cursndbd].status = status;
             //free the old pkg and set it to the new pkg for the bdtab
             txbdtab->txpkg[cursndbd] = pkg;
+            PkgCachedPart(pkg); 
+            pkg = pkgnxt;
             cursndbd = (cursndbd +1)%CN_TXBD_NUM;
-            pkg = pkg->partnext;
         }
         txbdtab->nxttxbd = cursndbd;
         //the first bd was used to pkg the fcb
@@ -855,10 +817,15 @@ bool_t __TsecSnd(tagNetDev *netdev,tagNetPkg * plst, u32 netdevtask)
         while(NULL != pkg)
         {
             status = TXBD_READY;
-            if(NULL == pkg->partnext)
+            if(PKG_ISLISTEND(pkg))
             {
                 //this is the last one
                 status |= TXBD_LAST ;
+                pkgnxt = NULL;
+            }
+            else
+            {
+                pkgnxt = pkg->partnext;
             }
             if(CN_TXBD_NUM == (cursndbd+1))
             {
@@ -877,8 +844,9 @@ bool_t __TsecSnd(tagNetDev *netdev,tagNetPkg * plst, u32 netdevtask)
             txbdtab->txbd[cursndbd].status = status;
             //free the old pkg and set it to the new pkg for the bdtab
             txbdtab->txpkg[cursndbd] = pkg;
+            PkgCachedPart(pkg); 
+            pkg = pkgnxt;
             cursndbd = (cursndbd +1)%CN_TXBD_NUM;
-            pkg = pkg->partnext;
         }
         txbdtab->nxttxbd = cursndbd;
         //the first bd was used to pkg the fcb
@@ -901,10 +869,15 @@ bool_t __TsecSnd(tagNetDev *netdev,tagNetPkg * plst, u32 netdevtask)
         status = TXBD_CRC| TXBD_READY;
         while(NULL != pkg)
         {
-            if(NULL == pkg->partnext)
+            if(PKG_ISLISTEND(pkg))
             {
                 //this is the last one
                 status |= TXBD_LAST ;
+                pkgnxt = NULL;
+            }
+            else
+            {
+                pkgnxt = pkg->partnext;
             }
             if(CN_TXBD_NUM == (cursndbd+1))
             {
@@ -923,8 +896,9 @@ bool_t __TsecSnd(tagNetDev *netdev,tagNetPkg * plst, u32 netdevtask)
             txbdtab->txbd[cursndbd].status = status;
             //free the old pkg and set it to the new pkg for the bdtab
             txbdtab->txpkg[cursndbd] = pkg;
+            PkgCachedPart(pkg); 
+            pkg = pkgnxt;
             cursndbd = (cursndbd +1)%CN_TXBD_NUM;
-            pkg = pkg->partnext;
             status = TXBD_READY;
         }
         txbdtab->nxttxbd = cursndbd;
@@ -945,7 +919,7 @@ bool_t __TsecSnd(tagNetDev *netdev,tagNetPkg * plst, u32 netdevtask)
 // 返回值  ：
 // 说明    ：
 // =============================================================================
-u32 __TsecSndIsr(ufast_t irqno)
+u32 __TsecSndIsr(ptu32_t irqno)
 {
     u8  devno;
     u32 value;
@@ -1011,7 +985,7 @@ tagNetPkg *__TsecRcv(u8 devno)
         if (!(rcvbd->status & RXBD_STATS))
         {
             //got the normal data, we could mmove it and alloc an new pkg to this buf
-            result = Pkg_Alloc(rcvbd->length,CN_PKGFLAG_FREE);
+            result = PkgMalloc(rcvbd->length,CN_PKLGLST_END);
             if(NULL == result)
             {
                 printk("No mem for the etsec to replace!\n\r");
@@ -1049,12 +1023,12 @@ tagNetPkg *__TsecRcv(u8 devno)
 // 返回值  ：
 // 说明    ：
 // =============================================================================
-u32 __TsecRcvIsr(ufast_t irqno)
+u32 __TsecRcvIsr(ptu32_t irqno)
 {
     u8  devno;
     tsec_t *regs;
     u32 value;
-    tagNetPkg  *pkglst;
+    tagNetPkg  *pkg;
 
     switch(irqno)
     {
@@ -1074,12 +1048,10 @@ u32 __TsecRcvIsr(ufast_t irqno)
 
     if(devno != CN_TSEC_NUM)
     {
-        while ((pkglst=__TsecRcv(devno)) != NULL)
+        while ((pkg=__TsecRcv(devno)) != NULL)
         {
-            if(false == NetDev_PostPkg(pgTsecNetDev[devno],pkglst))
-            {
-                Pkg_LstFlagFree(pkglst);
-            }
+            NetDev_PostPkg(pgTsecNetDev[devno],pkg);
+            PkgTryFreePart(pkg);
         }
 
         //anyway, we must clear the interrupt msk
@@ -1111,11 +1083,11 @@ bool_t ModuleInstall_Tsec(ptu32_t para)
 {
     bool_t result;
     u8  devno;
-    tagNetDevPara  devpara;
-
+    tagNetDevPara   devpara;
+    
     result = false;
     devno = para;
-
+   
     sgTsecTcpIpFcb.status = CN_FCB_IP|CN_FCB_TUP|CN_FCB_CIP|CN_FCB_CTU;
     sgTsecTcpIpFcb.l3os = 14;
     sgTsecTcpIpFcb.l4os = 20;
@@ -1138,11 +1110,13 @@ bool_t ModuleInstall_Tsec(ptu32_t para)
             {
                 //communicate the driver isr with interrupt
                 //rcv interrupt
+                Int_Register(sgTsecIrqNo[devno][0]); 
                 Int_IsrConnect(sgTsecIrqNo[devno][0],__TsecRcvIsr);
                 Int_SettoAsynSignal(sgTsecIrqNo[devno][0]);
                 Int_SetLineTrigerType(sgTsecIrqNo[devno][0],EN_INT_TRIGER_HIGHLEVEL);
                 Int_ContactLine(sgTsecIrqNo[devno][0]);
                 //snd interrupt
+                Int_Register(sgTsecIrqNo[devno][1]); 
                 Int_IsrConnect(sgTsecIrqNo[devno][1],__TsecSndIsr);
                 Int_SettoAsynSignal(sgTsecIrqNo[devno][1]);
                 Int_SetLineTrigerType(sgTsecIrqNo[devno][1],EN_INT_TRIGER_HIGHLEVEL);
@@ -1154,22 +1128,15 @@ bool_t ModuleInstall_Tsec(ptu32_t para)
                 devpara.linklen = 14;
                 devpara.pkglen = 1500;
                 devpara.devfunc = CN_IPDEV_TCPOCHKSUM|CN_IPDEV_IPOCHKSUM;
-
                 devpara.iftype = EN_LINK_INTERFACE_ETHERNET;
-                //TCP 收发校验和 IP收发校验和
                 memcpy(devpara.mac, sgMacAddr[devno],6);
                 devpara.name = "TsecDriver";
                 devpara.private = devno;
 
-                pgTsecNetDev[devno] = NetDev_AddDev(&devpara);
+                pgTsecNetDev[devno] = NetDev_InstallDev(&devpara);
                 if(pgTsecNetDev[devno]!= NULL)
                 {
-                    sgTsecNoMapRout[devno] = Rout_AddRout(pgTsecNetDev[devno], \
-                                             &sgIpv4Addr[devno]);
-                    if(NULL != sgTsecNoMapRout[devno])
-                    {
-                        result = true;
-                    }
+                    result = true;
                 }
             }
         }

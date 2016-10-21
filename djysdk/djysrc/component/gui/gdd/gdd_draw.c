@@ -59,13 +59,12 @@
 //   新版本号：V1.0.0
 //   修改说明: 原始版本
 //------------------------------------------------------
-#include    "gdd.h"
-#include    "./include/gdd_private.h"
+
+#include    <gui/gdd/gdd_private.h>
+
 /*============================================================================*/
 
-
-
-static  BOOL    BeginDraw(HDC hdc)
+static  bool_t    BeginDraw(HDC hdc)
 {
     return TRUE;
 }
@@ -76,34 +75,35 @@ static  void    EndDraw(HDC hdc)
 }
 
 
-static  void    _LPtoDP(HDC hdc,POINT *pt,int count)
+static  void    __LPtoDP(HDC hdc,POINT *pt,s32 count)
 {
-
+    RECT rc;
     switch(hdc->DCType)
     {
         case    DC_TYPE_PAINT:
         case    DC_TYPE_CLIENT:
-                while(count--)
-                {
-                    pt->x +=(hdc->hwnd->CliRect.left - hdc->hwnd->WinRect.left);
-                    pt->y +=(hdc->hwnd->CliRect.top - hdc->hwnd->WinRect.top);
-                    pt++;
-                }
-                break;
-                ////
+            GK_ApiGetArea(hdc->pGkWin, &rc);
+            while(count--)
+            {
+                pt->x +=(hdc->hwnd->CliRect.left - rc.left);
+                pt->y +=(hdc->hwnd->CliRect.top - rc.top);
+                pt++;
+            }
+            break;
+            ////
 
         case    DC_TYPE_WINDOW:
-                while(count--)
-                {
-                    //pt->x +=(hdc->hwnd->CliRect.left - hdc->hwnd->WinRect.left);
-                    //pt->y +=(hdc->hwnd->CliRect.top - hdc->hwnd->WinRect.top);
-                    //pt++;
-                }
-                break;
+            while(count--)
+            {
+                //pt->x +=(hdc->hwnd->CliRect.left - hdc->hwnd->WinRect.left);
+                //pt->y +=(hdc->hwnd->CliRect.top - hdc->hwnd->WinRect.top);
+                //pt++;
+            }
+            break;
 
         default:
-                break;
-                ////
+            break;
+            ////
     }
 }
 /*============================================================================*/
@@ -131,15 +131,15 @@ u32 AlphaBlendColor(u32 bk_c,u32 fr_c,u8 alpha)
 }
 /*============================================================================*/
 
-void    UpdateDisplay(void)
+void    UpdateDisplay(u32 timeout)
 {
-    GK_ApiSyncShow(1000*mS);
+    GK_ApiSyncShow(timeout);
 }
 
 /*============================================================================*/
 /*============================================================================*/
 
-void    _InitDC(DC *pdc,struct tagGkWinRsc *gk_win,HWND hwnd,int dc_type)
+void    __InitDC(DC *pdc,struct GkWinRsc *gk_win,HWND hwnd,s32 dc_type)
 {
 
     pdc->pGkWin     =gk_win;
@@ -147,15 +147,15 @@ void    _InitDC(DC *pdc,struct tagGkWinRsc *gk_win,HWND hwnd,int dc_type)
     pdc->DCType     =dc_type;
     pdc->pFontDef   =Font_GetCurFont();
     pdc->pFont      =pdc->pFontDef;
-    pdc->pCharset	=Charset_NlsGetCurCharset();
+    pdc->pCharset   =Charset_NlsGetCurCharset();
 
     pdc->CurX       =0;
     pdc->CurY       =0;
-    pdc->DrawColor  =RGB(255,255,255);
-    pdc->FillColor  =RGB(1,1,1);
-    pdc->TextColor  =RGB(255,255,255);
+    pdc->DrawColor  =hwnd->DrawColor;
+    pdc->FillColor  =hwnd->FillColor;
+    pdc->TextColor  =hwnd->TextColor;
     pdc->SyncTime   =100*mS;
-    pdc->RopCode    =CN_R2_COPYPEN;
+    pdc->RopCode    =(struct RopGroup){ 0, 0, 0, CN_R2_COPYPEN, 0, 0, 0  };
 
 }
 
@@ -174,16 +174,16 @@ bool_t  DeleteDC(HDC hdc)
 //----设置当前光栅码-------------------------------------------------------------
 //描述: 略.
 //参数：hdc: 绘图上下文句柄.
-//     rop_code: 新的光栅码.
+//     RopCode: 新的光栅码.
 //返回：旧的光栅码.
 //------------------------------------------------------------------------------
-u32 SetRopCode(HDC hdc,u32 rop_code)
+struct RopGroup SetRopCode(HDC hdc,struct RopGroup RopCode)
 {
-    u32 old=0;
+    struct RopGroup old=(struct RopGroup){ 0, 0, 0, CN_R2_COPYPEN, 0, 0, 0  };
     if(hdc!=NULL)
     {
         old =hdc->RopCode;
-        hdc->RopCode =rop_code;
+        hdc->RopCode =RopCode;
     }
     return old;
 }
@@ -193,9 +193,9 @@ u32 SetRopCode(HDC hdc,u32 rop_code)
 //参数：hdc: 绘图上下文句柄.
 //返回：当前光栅码.
 //------------------------------------------------------------------------------
-u32 GetRopCode(HDC hdc)
+struct RopGroup GetRopCode(HDC hdc)
 {
-    u32 old=0;
+    struct RopGroup old=(struct RopGroup){ 0, 0, 0, CN_R2_COPYPEN, 0, 0, 0  };
     if(hdc!=NULL)
     {
         old =hdc->RopCode;
@@ -211,7 +211,7 @@ u32 GetRopCode(HDC hdc)
 //     old_pt: 输出旧的坐标位置,如果该参数为NULL,刚不输出旧的坐标位置.
 //返回：无.
 //------------------------------------------------------------------------------
-static  void    _MoveTo(HDC hdc,int x,int y,POINT *old_pt)
+static  void    __MoveTo(HDC hdc,s32 x,s32 y,POINT *old_pt)
 {
 
     if(old_pt!=NULL)
@@ -231,11 +231,11 @@ static  void    _MoveTo(HDC hdc,int x,int y,POINT *old_pt)
 //     old_pt: 输出旧的坐标位置,如果该参数为NULL,刚不输出旧的坐标位置.
 //返回：无.
 //------------------------------------------------------------------------------
-void    MoveTo(HDC hdc,int x,int y,POINT *old_pt)
+void    MoveTo(HDC hdc,s32 x,s32 y,POINT *old_pt)
 {
     if(hdc!=NULL)
     {
-        _MoveTo(hdc,x,y,old_pt);
+        __MoveTo(hdc,x,y,old_pt);
     }
 }
 
@@ -458,15 +458,15 @@ HFONT   GetFont(HDC hdc)
 //      color:颜色值.
 //返回：无.
 //------------------------------------------------------------------------------
-void SetPixel(HDC hdc,int x,int y,u32 color)
+void SetPixel(HDC hdc,s32 x,s32 y,u32 color)
 {
     POINT pt;
     if(BeginDraw(hdc))
     {
         pt.x =x;
         pt.y =y;
-        _LPtoDP(hdc,&pt,1);
-        GK_ApiSetPixel(hdc->pGkWin,pt.x,pt.y,color,hdc->RopCode,hdc->SyncTime);
+        __LPtoDP(hdc,&pt,1);
+        GK_ApiSetPixel(hdc->pGkWin,pt.x,pt.y,color,hdc->RopCode.Rop2Mode,hdc->SyncTime);
         EndDraw(hdc);
     }
 }
@@ -478,7 +478,7 @@ void SetPixel(HDC hdc,int x,int y,u32 color)
 //      x1,y1: 结束坐标.
 //返回：无.
 //------------------------------------------------------------------------------
-void    DrawLine(HDC hdc,int x0,int y0,int x1,int y1)
+void    DrawLine(HDC hdc,s32 x0,s32 y0,s32 x1,s32 y1)
 {
     POINT pt[2];
 
@@ -488,10 +488,100 @@ void    DrawLine(HDC hdc,int x0,int y0,int x1,int y1)
         pt[0].y =y0;
         pt[1].x =x1;
         pt[1].y =y1;
-        _LPtoDP(hdc,pt,2);
+        __LPtoDP(hdc,pt,2);
 
         GK_ApiLinetoIe(hdc->pGkWin,pt[0].x,pt[0].y,pt[1].x,pt[1].y,
-                hdc->DrawColor,hdc->RopCode,hdc->SyncTime);
+                hdc->DrawColor,hdc->RopCode.Rop2Mode,hdc->SyncTime);
+    }
+}
+
+void    DrawDottedLine(HDC hdc,s32 x0,s32 y0,s32 x1,s32 y1)
+{
+    POINT pt[2];
+    u32 i,num,dot;
+    s8 temp=1;
+    if(BeginDraw(hdc))
+    {
+        if(x0==x1)
+        {
+            dot=y1-y0;
+            if(dot==0)
+                return;
+            else if(dot<0)
+            {
+                dot=-dot;
+                temp=-1;
+            }
+            else
+            {
+            }
+            if(dot%2!=0)
+                dot=dot+1;
+            num=dot/2;
+            for(i=1;i<=num;i++)
+            {
+                 pt[0].x =x0;
+                 pt[0].y =y0+2*temp*(i-1);
+                 pt[1].x =x1;
+                 pt[1].y =y0+2*temp*(i);
+                 __LPtoDP(hdc,pt,2);
+                GK_ApiLinetoIe(hdc->pGkWin,pt[0].x,pt[0].y,pt[1].x,pt[1].y,
+                        hdc->DrawColor,hdc->RopCode.Rop2Mode,hdc->SyncTime);
+            }
+        }
+        else if(y0==y1)
+        {
+          dot=x1-x0;
+          if(dot==0)
+              return;
+          else if(dot<0)
+          {
+              dot=-dot;
+              temp=-1;
+          }
+          else
+          {
+          }
+          if(dot%2!=0)
+                dot=dot+1;
+          num=dot/2;
+          for(i=1;i<=num;i++)
+          {
+             pt[0].x =x0+2*temp*(i-1);
+             pt[0].y =y0;
+             pt[1].x =x0+2*temp*(i);
+             pt[1].y =y1;
+             __LPtoDP(hdc,pt,2);
+            GK_ApiLinetoIe(hdc->pGkWin,pt[0].x,pt[0].y,pt[1].x,pt[1].y,
+                    hdc->DrawColor,hdc->RopCode.Rop2Mode,hdc->SyncTime);
+          }
+        }
+        else
+        {
+        }
+    }
+}
+//----画线----------------------------------------------------------------------
+//描述: 使用指定颜色绘制单个像素宽的任意直线.
+//参数：hdc: 绘图上下文句柄.
+//      x0,y0: 起始坐标.
+//      x1,y1: 结束坐标.
+//返回：无.
+//------------------------------------------------------------------------------
+void    DrawLineEx(HDC hdc,s32 x0,s32 y0,s32 x1,s32 y1,u32 color)
+{
+    POINT pt[2];
+
+    if(BeginDraw(hdc))
+    {
+        pt[0].x =x0;
+        pt[0].y =y0;
+        pt[1].x =x1;
+        pt[1].y =y1;
+        __LPtoDP(hdc,pt,2);
+
+        GK_ApiLinetoIe(hdc->pGkWin,pt[0].x,pt[0].y,pt[1].x,pt[1].y,
+                color,hdc->RopCode.Rop2Mode,hdc->SyncTime);
     }
 }
 
@@ -502,7 +592,7 @@ void    DrawLine(HDC hdc,int x0,int y0,int x1,int y1)
 //      x,y: 结束坐标.
 //返回：无.
 //------------------------------------------------------------------------------
-void    DrawLineTo(HDC hdc,int x,int y)
+void    DrawLineTo(HDC hdc,s32 x,s32 y)
 {
     POINT pt[2];
 
@@ -513,12 +603,12 @@ void    DrawLineTo(HDC hdc,int x,int y)
         pt[1].x =x;
         pt[1].y =y;
 
-        _LPtoDP(hdc,pt,2);
+        __LPtoDP(hdc,pt,2);
 
         GK_ApiLinetoIe(hdc->pGkWin,pt[0].x,pt[0].y,pt[1].x,pt[1].y,
-                hdc->DrawColor,hdc->RopCode,hdc->SyncTime);
+                hdc->DrawColor,hdc->RopCode.Rop2Mode,hdc->SyncTime);
 
-        _MoveTo(hdc,x,y,NULL);
+        __MoveTo(hdc,x,y,NULL);
         EndDraw(hdc);
     }
 }
@@ -531,37 +621,37 @@ void    DrawLineTo(HDC hdc,int x,int y)
 //      count: 要绘制的字符数量,该参数小于0时,将绘制整个字符串.
 //返回：TRUE:成功; FALSE:失败.
 //------------------------------------------------------------------------------
-BOOL    TextOut(HDC hdc,int x,int y,const char *text,int count)
+bool_t    TextOut(HDC hdc,s32 x,s32 y,const char *text,s32 count)
 {
-	    POINT pt;
+        POINT pt;
 
-	    if(BeginDraw(hdc))
-	    {
-	        pt.x =x;
-	        pt.y =y;
-	        _LPtoDP(hdc,&pt,1);
+        if(BeginDraw(hdc))
+        {
+            pt.x =x;
+            pt.y =y;
+            __LPtoDP(hdc,&pt,1);
 
-	        x =pt.x;
-	        y =pt.y;
+            x =pt.x;
+            y =pt.y;
 
-	        if(count<0)
-	        {
-	          	count = strlen(text);
-	        }
+//            if(count<0)
+//            {
+//                count = strlen(text);
+//            }
 
-	        if(text!=NULL)
-	        {
-	           GK_ApiDrawText(hdc->pGkWin,hdc->pFont,hdc->pCharset,
-	                                  x,y,text,count,hdc->TextColor,
-	                                  hdc->RopCode,hdc->SyncTime);
+            if(text!=NULL)
+            {
+               GK_ApiDrawText(hdc->pGkWin,hdc->pFont,hdc->pCharset,
+                                      x,y,text,count,hdc->TextColor,
+                                      hdc->RopCode.Rop2Mode,hdc->SyncTime);
 
-	        }
+            }
 
-	        EndDraw(hdc);
-	        return TRUE;
-	    }
+            EndDraw(hdc);
+            return TRUE;
+        }
 
-	    return FALSE;
+        return FALSE;
 }
 
 //----计算字符串所占像素宽度-----------------------------------------------------
@@ -571,11 +661,11 @@ BOOL    TextOut(HDC hdc,int x,int y,const char *text,int count)
 //     count: 要计算的字符数量,该参数小于0时,将计算整个字符串所占像素宽度.
 //返回：字符串像素宽度.
 //------------------------------------------------------------------------------
-static  int _GetTextWidth(HDC hdc,const char *text,int count)
+static  s32 __GetTextWidth(HDC hdc,const char *text,s32 count)
 {
-    int width;
-    struct tagCharset *Set;
-    struct tagFontRsc *Font;
+    s32 width;
+    struct Charset *Set;
+    struct FontRsc *Font;
     s32 len, loop;
     u32 wc;
 
@@ -583,29 +673,27 @@ static  int _GetTextWidth(HDC hdc,const char *text,int count)
     Set = hdc->pCharset;
     if(Set!=NULL)
     {
-		Font = hdc->pFont;
-		if(Font!=NULL)
-		{
-			for(loop = 0; loop < count;)
-			{
-				len= Set->mb_to_ucs4(&wc, text, count);
-				if(len == -1)
-				{ // 无效字符
-					text++;
-					loop++;
-				}
-				else if(len == 0)
-				{
-					break;
-				}
-				else
-				{ // 有效字符
-					text += len;
-					loop += len;
-					width += Font->GetCharWidth(wc);
-				}
-			}
-		}
+        Font = hdc->pFont;
+        if(Font!=NULL)
+        {
+            for(loop = 0; (loop < count) || (count == -1);loop++)
+            {
+                len= Set->MbToUcs4(&wc, text, -1);
+                if(len == -1)
+                { // 无效字符
+                    text++;
+                }
+                else if(len == 0)
+                {
+                    break;
+                }
+                else
+                { // 有效字符
+                    text += len;
+                    width += Font->GetCharWidth(wc);
+                }
+            }
+        }
     }
     return width;
 }
@@ -619,15 +707,10 @@ static  int _GetTextWidth(HDC hdc,const char *text,int count)
 //     flag: 字符绘制标记.
 //返回：无.
 //------------------------------------------------------------------------------
-static  void _AdjustTextRect(HDC hdc,const char *text,int count, RECT *prc,u32 flag)
+void AdjustTextRect(HDC hdc,const char *text,s32 count, RECT *prc,u32 flag)
 {
     s32 Height;
     s32 i;
-
-    if(count<0)
-    {
-    	count =strlen(text);
-    }
 
     Height = Font_GetFontLineHeight(hdc->pFont);
     if(1)
@@ -655,7 +738,7 @@ static  void _AdjustTextRect(HDC hdc,const char *text,int count, RECT *prc,u32 f
         switch(flag&DT_ALIGN_H_MASK)
         {
             case    DT_CENTER:
-                    i =_GetTextWidth(hdc,text,count);
+                    i =__GetTextWidth(hdc,text,count);
                     i =(RectW(prc)-i)>>1;
                     prc->left  += i;
                     prc->right -= i;
@@ -666,7 +749,7 @@ static  void _AdjustTextRect(HDC hdc,const char *text,int count, RECT *prc,u32 f
                     break;
                     ////
             case    DT_RIGHT:
-                    i =_GetTextWidth(hdc,text,count);
+                    i =__GetTextWidth(hdc,text,count);
                     prc->left = prc->right-i-1;
                     break;
                     ////
@@ -684,50 +767,45 @@ static  void _AdjustTextRect(HDC hdc,const char *text,int count, RECT *prc,u32 f
 //参数：str: 字符串指针
 //返回：字符串行数.
 //------------------------------------------------------------------------------
-static	s32  __GetStrLineCount(const char *str)
+s32  GetStrLineCount(const char *str)
 {
-	s32 count;
-	char ch;
-
-	count=0;
-	while(1)
-	{
-		ch=*str;
-		if(ch=='\n')
-		{
-			count++;
-		}
-
-		if(ch=='\0')
-		{
-			if(*(str-1)!='\n')
-			{
-				count++;
-			}
-			break;
-		}
-
-		str++;
-
-	}
-	return count;
+    s32 count,linenum = 0;
+    char *line,*linenext;
+    count=0;
+    line = str;
+    while(1)
+    {
+        linenext = mbstrchr(line, "\n", &count);
+        if(linenext != NULL)
+        {
+            linenum++;
+            line = linenext+1;
+        }
+        else
+        {
+            if(count != 0)
+                linenum++;
+            break;
+        }
+    }
+    return linenum;
 }
 
-//----在矩形范围内绘制字符串-----------------------------------------------------
+//----在矩形范围内绘制字符串---------------------------------------------------
 //描述: 在指定矩形范围内绘制字符串,使用TextColor作为颜色值,支持回车与换行符,
 //      该函数可以指定是否绘制字符串边框和背景,以前指定对齐方式的组合.
 //参数：hdc: 绘图上下文句柄.
 //      x,y: 坐标位置.
 //      count: 要绘制的字符数量,该参数小于0时,将绘制整个字符串.
 //      prc: 要绘制的所在矩形位置和大小.
-//      flag: 绘制标志参数.
+//      flag: 绘制标志参数，DT_VCENTER 族常量
 //返回：TRUE:成功; FALSE:失败.
-//------------------------------------------------------------------------------
-BOOL    DrawText(HDC hdc,const char *text,int count,const RECT *prc,u32 flag)
+//-----------------------------------------------------------------------------
+bool_t    DrawText(HDC hdc,const char *text,s32 count,const RECT *prc,u32 flag)
 {
 
     RECT rc,rc0;
-    int line_count;
+    s32 line_count,charnum;
 
     if(NULL==prc)
     {
@@ -739,72 +817,67 @@ BOOL    DrawText(HDC hdc,const char *text,int count,const RECT *prc,u32 flag)
         return FALSE;
     }
 
-    if(count<0)
-    {
-    	count = strlen(text);
-    }
-
-    line_count =__GetStrLineCount(text);
+    line_count =GetStrLineCount(text);
 
     if(BeginDraw(hdc))
     {
-    	if(line_count<=1)
-    	{
-    		//单行
-			_CopyRect(&rc0,prc);
-			_CopyRect(&rc,prc);
-			_InflateRect(&rc,-1,-1);
-			_AdjustTextRect(hdc,text,count,&rc,flag);
+        if(line_count<=1)
+        {
+            //单行
+            CopyRect(&rc0,prc);
+            CopyRect(&rc,prc);
+            InflateRect(&rc,-1,-1);
+            AdjustTextRect(hdc,text,count,&rc,flag);
 
-			if(flag&DT_BORDER)
-			{
-				DrawRect(hdc,&rc0);
-				InflateRect(&rc0,-1,-1);
-			}
+            if(flag&DT_BORDER)
+            {
+                DrawRect(hdc,&rc0);
+                InflateRect(&rc0,-1,-1);
+            }
 
-			if(flag&DT_BKGND)
-			{
-				FillRect(hdc,&rc0);
-			}
+            if(flag&DT_BKGND)
+            {
+                FillRect(hdc,&rc0);
+            }
 
-		   TextOut(hdc,rc.left,rc.top,text,count);
+           TextOut(hdc,rc.left,rc.top,text,count);
 
-    	}
-    	else
-    	{
-    		//多行
-    		s32 x0,y0,i,line_h;
-    		char *p0,*p1;
+        }
+        else
+        {
+            //多行
+            s32 x0,y0,i,line_h;
+            char *p0,*p1;
 
-    		line_h = Font_GetFontLineHeight(hdc->pFont);
+            line_h = Font_GetFontLineHeight(hdc->pFont);
 
-			_CopyRect(&rc0,prc);
-			_CopyRect(&rc,prc);
-			_InflateRect(&rc,-1,-1);
+            CopyRect(&rc0,prc);
+            CopyRect(&rc,prc);
+            InflateRect(&rc,-1,-1);
 
-			if(flag&DT_BORDER)
-			{
-				DrawRect(hdc,&rc0);
-				InflateRect(&rc0,-1,-1);
-			}
+            if(flag&DT_BORDER)
+            {
+                DrawRect(hdc,&rc0);
+                InflateRect(&rc0,-1,-1);
+            }
 
-			if(flag&DT_BKGND)
-			{
-				FillRect(hdc,&rc0);
-			}
+            if(flag&DT_BKGND)
+            {
+                FillRect(hdc,&rc0);
+            }
 
-			y0 =rc.top;
+            y0 =rc.top;
             switch(flag&DT_ALIGN_V_MASK)
             {
-                case    DT_VCENTER:
-                		y0 += (RectH(&rc)-(line_count*line_h))>>1;
+                case    DT_VCENTER://(line_count-1)*line_h)为行间距
+                    y0 += ((RectH(&rc)-(line_count*line_h)-((line_count-1)*line_h))/2);
                         break;
                         ////
                 case    DT_TOP:
                         break;
                         ////
-                case    DT_BOTTOM:
-                        y0 += (RectH(&rc) - (line_count*line_h));
+                case    DT_BOTTOM://(line_count-1)*line_h)为行间距
+                        y0 += (RectH(&rc) - (line_count*line_h)-((line_count-1)*line_h));
                         break;
                         ////
                 default:
@@ -815,57 +888,46 @@ BOOL    DrawText(HDC hdc,const char *text,int count,const RECT *prc,u32 flag)
             p0 =(char*)text;
             while(p0!=NULL)
             {
-            	p1 =strchr(p0,'\n');
-            	if(p1!=NULL)
-            	{
-            		i =(s32)((u32)p1-(u32)p0);
-            	}
-            	else
-            	{
-            		//如果是最后一行.
-            		i =strlen(p0);
-            	}
+                p1 = mbstrchr(p0,"\n",&charnum);
 
-            	if(i<=0)
-            	{
-            		break;
-            	}
-
-            	//i += 1;
-            	x0 =rc.left;
-                switch(flag&DT_ALIGN_H_MASK)
+                if(p1 == p0)    //遇到连续换行符
                 {
-                    case    DT_CENTER:
-                            x0 =(RectW(&rc)-_GetTextWidth(hdc,p0,i))>>1;
-                            break;
-                            ////
-                    case    DT_LEFT:
-                            x0  += 1;
-                            break;
-                            ////
-                    case    DT_RIGHT:
-                            x0 =(RectW(&rc)-_GetTextWidth(hdc,p0,i));
-                            break;
-                            ////
-                    default:
-                            break;
-
+                    p0++;       //换行符肯定是1个字节的
                 }
+                else
+                {
+                    x0 =rc.left;
+                    switch(flag&DT_ALIGN_H_MASK)
+                    {
+                        case    DT_CENTER:
+                                x0 =(RectW(&rc)-__GetTextWidth(hdc,p0,charnum))>>1;
+                                break;
+                                ////
+                        case    DT_LEFT:
+                                x0  += 1;
+                                break;
+                                ////
+                        case    DT_RIGHT:
+                                x0 =(RectW(&rc)-__GetTextWidth(hdc,p0,charnum));
+                                break;
+                                ////
+                        default:
+                                break;
 
-                TextOut(hdc,x0,y0,p0,i);
+                    }
 
-                if(p1==NULL)
-                {	//最后一行显示完后,则退出
-                	break;
+                    TextOut(hdc,x0,y0,p0,charnum);
+
+                    if(p1==NULL)
+                    {   //最后一行显示完后,则退出
+                        break;
+                    }
+
+                    p0 = p1++;      //跳过换行符，肯定是1个字节
                 }
-
                 y0 += line_h;
-                p0 += i+1;
-
             }
-
-
-    	}
+        }
 
         EndDraw(hdc);
         return TRUE;
@@ -883,31 +945,30 @@ BOOL    DrawText(HDC hdc,const char *text,int count,const RECT *prc,u32 flag)
 //------------------------------------------------------------------------------
 void    DrawRect(HDC hdc,const RECT *prc)
 {
-    int x0,y0;
-    int x1,y1;
-    POINT pt;
+    s32 x0,y0;
+    s32 x1,y1;
+    RECT rc;
 
     if(prc != NULL)
     {
+        CopyRect(&rc,prc);
         if(BeginDraw(hdc))
         {
-            pt.x =prc->left;
-            pt.y =prc->top;
-            _LPtoDP(hdc,&pt,1);
+            __LPtoDP(hdc,(POINT*)&rc,2);
 
-            x0 =pt.x;
-            y0 =pt.y;
-            x1 =x0+RectW(prc)-1;
-            y1 =y0+RectH(prc)-1;
+            x0 =rc.left;
+            y0 =rc.top;
+            x1 =rc.right-1;
+            y1 =rc.bottom-1;
 
-            //瀹革拷
-            GK_ApiLinetoIe(hdc->pGkWin,x0,y0,x0,y1,hdc->DrawColor,hdc->RopCode,hdc->SyncTime);
-            //娑擄拷
-            GK_ApiLinetoIe(hdc->pGkWin,x0,y0,x1,y0,hdc->DrawColor,hdc->RopCode,hdc->SyncTime);
-            //閸欙拷
-            GK_ApiLinetoIe(hdc->pGkWin,x1,y0,x1,y1,hdc->DrawColor,hdc->RopCode,hdc->SyncTime);
-            //娑擄拷
-            GK_ApiLinetoIe(hdc->pGkWin,x0,y1,x1,y1,hdc->DrawColor,hdc->RopCode,hdc->SyncTime);
+            //Left
+            GK_ApiLinetoIe(hdc->pGkWin,x0,y0,x0,y1,hdc->DrawColor,hdc->RopCode.Rop2Mode,hdc->SyncTime);
+            //Top
+            GK_ApiLinetoIe(hdc->pGkWin,x0,y0,x1,y0,hdc->DrawColor,hdc->RopCode.Rop2Mode,hdc->SyncTime);
+            //Right
+            GK_ApiLinetoIe(hdc->pGkWin,x1,y0,x1,y1,hdc->DrawColor,hdc->RopCode.Rop2Mode,hdc->SyncTime);
+            //Bottom
+            GK_ApiLinetoIe(hdc->pGkWin,x0,y1,x1,y1,hdc->DrawColor,hdc->RopCode.Rop2Mode,hdc->SyncTime);
 
             EndDraw(hdc);
         }
@@ -923,25 +984,45 @@ void    DrawRect(HDC hdc,const RECT *prc)
 //------------------------------------------------------------------------------
 void    FillRect(HDC hdc,const RECT *prc)
 {
-    struct tagRectangle gk_rc;
-    POINT pt;
+    RECT rc;
 
     if(hdc!=NULL)
     {
         if(prc!=NULL)
         {
+            CopyRect(&rc,prc);
             if(BeginDraw(hdc))
             {
-                pt.x =prc->left;
-                pt.y =prc->top;
-                _LPtoDP(hdc,&pt,1);
+                __LPtoDP(hdc,(POINT*)&rc,2);
 
-                gk_rc.left = pt.x;
-                gk_rc.top = pt.y;
-                gk_rc.right = pt.x+RectW(prc);
-                gk_rc.bottom = pt.y+RectH(prc);
+                GK_ApiFillRect(hdc->pGkWin,&rc,hdc->FillColor,hdc->FillColor,
+                            CN_FILLRECT_MODE_N,hdc->SyncTime);
+                EndDraw(hdc);
+            }
+        }
+    }
 
-                GK_ApiFillRect(hdc->pGkWin,&gk_rc,hdc->FillColor,hdc->FillColor,
+}
+//----填充矩形------------------------------------------------------------------
+//描述: 使用指定颜色填充一个实心矩形.
+//参数：hdc: 绘图上下文句柄.
+//      prc: 矩形参数.
+//返回：无.
+//------------------------------------------------------------------------------
+void    FillRectEx(HDC hdc,const RECT *prc,u32 color)
+{
+    RECT rc;
+
+    if(hdc!=NULL)
+    {
+        if(prc!=NULL)
+        {
+            CopyRect(&rc,prc);
+            if(BeginDraw(hdc))
+            {
+                __LPtoDP(hdc,(POINT*)&rc,2);
+
+                GK_ApiFillRect(hdc->pGkWin,&rc,color,color,
                             CN_FILLRECT_MODE_N,hdc->SyncTime);
                 EndDraw(hdc);
             }
@@ -957,15 +1038,15 @@ void    FillRect(HDC hdc,const RECT *prc)
 //      Color1: 超始颜色.
 //      Color2: 结束颜色.
 //      mode: 渐变递增模式,可以是以下值:
-//            GFILL_L_R:丛左到右填充
-//            GFILL_U_D:丛上到下
-//            GFILL_LU_RD:丛左上到右下
-//            GFILL_RU_LD:丛右上到左下
+//            CN_FILLRECT_MODE_LR:丛左到右填充
+//            CN_FILLRECT_MODE_UD:丛上到下
+//            CN_FILLRECT_MODE_LU2RD:丛左上到右下
+//            CN_FILLRECT_MODE_RU2LD:丛右上到左下
 //返回：无.
 //------------------------------------------------------------------------------
 void    GradientFillRect(HDC hdc,const RECT *prc,u32 Color1,u32 Color2,u32 mode)
 {
-    struct tagRectangle gk_rc;
+    struct Rectangle gk_rc;
     RECT rc;
 
     if(hdc!=NULL)
@@ -974,9 +1055,9 @@ void    GradientFillRect(HDC hdc,const RECT *prc,u32 Color1,u32 Color2,u32 mode)
         {
             if(BeginDraw(hdc))
             {
-                _CopyRect(&rc,prc);
+                CopyRect(&rc,prc);
 
-                _LPtoDP(hdc,(POINT*)&rc,2);
+                __LPtoDP(hdc,(POINT*)&rc,2);
 
                 gk_rc.left = rc.left;
                 gk_rc.top = rc.top;
@@ -985,17 +1066,17 @@ void    GradientFillRect(HDC hdc,const RECT *prc,u32 Color1,u32 Color2,u32 mode)
 
                 switch(mode)
                 {
-                    case GFILL_L_R:
-                            mode =CN_FILLRECT_MODE_H;
+                    case CN_FILLRECT_MODE_LR:
+                            mode =CN_FILLRECT_MODE_LR;
                             break;
-                    case GFILL_U_D:
-                            mode =CN_FILLRECT_MODE_V;
+                    case CN_FILLRECT_MODE_UD:
+                            mode =CN_FILLRECT_MODE_UD;
                             break;
-                    case GFILL_LU_RD:
-                            mode =CN_FILLRECT_MODE_SP;
+                    case CN_FILLRECT_MODE_LU2RD:
+                            mode =CN_FILLRECT_MODE_LU2RD;
                             break;
-                    case GFILL_RU_LD:
-                            mode =CN_FILLRECT_MODE_SN;
+                    case CN_FILLRECT_MODE_RU2LD:
+                            mode =CN_FILLRECT_MODE_RU2LD;
                             break;
                     default:
                             mode =CN_FILLRECT_MODE_N;
@@ -1011,15 +1092,431 @@ void    GradientFillRect(HDC hdc,const RECT *prc,u32 Color1,u32 Color2,u32 mode)
 
 }
 
-/*============================================================================*/
-
-void    DrawCircle(HDC hdc,int cx,int cy,int r)
+//----填充立体效果的矩形------------------------------------------------------------------
+//描述: 使用Color1作为起始色(左,上边界),Color2作为结束色(右,下边界),填充一个立体效果的矩形.
+//参数：hdc: 绘图上下文句柄.
+//      prc: 矩形参数.
+//      Color1: 超始颜色.
+//      Color2: 结束颜色.
+//返回：无.
+//------------------------------------------------------------------------------
+void    Fill3DRect(HDC hdc,const RECT *prc,u32 Color1,u32 Color2)
 {
+    u32 c;
+    RECT rc;
+
+    if(hdc!=NULL)
+    if(prc!=NULL)
+    {
+        CopyRect(&rc,prc);
+        c=SetDrawColor(hdc,Color1);
+        DrawLine(hdc,0,0,0,RectH(&rc)-1); //L
+        DrawLine(hdc,0,0,RectW(&rc)-1,0); //U
+
+        SetDrawColor(hdc,Color2);
+        DrawLine(hdc,RectW(&rc)-1,0,RectW(&rc)-1,RectH(&rc)-1); //R
+        DrawLine(hdc,0,RectH(&rc)-1,RectW(&rc)-1,RectH(&rc)-1); //D
+        SetDrawColor(hdc,c);
+
+        c=SetFillColor(hdc,AlphaBlendColor(Color1,Color2,128));
+
+        InflateRect(&rc,-1,-1);
+        FillRect(hdc,&rc);
+        SetFillColor(hdc,c);
+    }
 
 }
 
-void    FillCircle(HDC hdc,int cx,int cy,int r)
+//----画圆------------------------------------------------------------------
+//描述: 使用DrawColor画一个空心圆.
+//参数：hdc: 绘图上下文句柄.
+//      cx,cy: 圆的中心坐标
+//      r: 圆的半径
+//返回：无.
+//------------------------------------------------------------------------------
+void    DrawCircle(HDC hdc,s32 cx,s32 cy,s32 r)
 {
+     s32 x = 0;
+     s32 y = r;
+     s32 delta = 2*(1-r);
+     s32 direction;
+     u32 color;
+     ////
+
+     if(hdc!=NULL)
+     {
+         color =GetDrawColor(hdc);
+         while (y >= 0)
+         {
+
+            SetPixel(hdc,cx+x, cy+y, color);
+            SetPixel(hdc,cx-x, cy+y, color);
+            SetPixel(hdc,cx-x, cy-y, color);
+            SetPixel(hdc,cx+x, cy-y, color);
+            ////
+
+            if (delta < 0)
+            {
+                 if ((2*(delta+y)-1) < 0)
+                 {
+                  direction = 1;
+                 }
+                 else
+                 {
+                  direction = 2;
+                 }
+             }
+             else if(delta > 0)
+             {
+                 if ((2*(delta-x)-1) <= 0)
+                 {
+                  direction = 2;
+                 }
+                 else
+                 {
+                  direction = 3;
+                 }
+             }
+             else
+             {
+                   direction=2;
+             }
+
+             ////
+
+             switch(direction)
+             {
+
+              case 1:
+                     x++;
+                      delta += (2*x+1);
+                      break;
+
+              case 2:
+                      x++;
+                      y--;
+                      delta += 2*(x-y+1);
+                       break;
+
+              case 3:
+                      y--;
+                      delta += (-2*y+1);
+                       break;
+
+             }
+
+         }
+    }
+}
+
+//----填充圆------------------------------------------------------------------
+//描述: 使用FillColor填充一个实心圆.
+//参数：hdc: 绘图上下文句柄.
+//      cx,cy: 圆的中心坐标
+//      r: 圆的半径
+//返回：无.
+//------------------------------------------------------------------------------
+void    FillCircle(HDC hdc,s32 cx,s32 cy,s32 r)
+{
+      s32 i;
+      s32 imax = ((s32)((s32)r*707))/1000+1;
+      s32 sqmax = (s32)r*(s32)r+(s32)r/2;
+      s32 x=r;
+      u32 color_bk;
+
+      color_bk =SetDrawColor(hdc,GetFillColor(hdc));
+
+      DrawLine(hdc,cx-r,cy,cx+r+1,cy);
+      for (i=1; i<= imax; i++)
+      {
+        if ((i*i+x*x) >sqmax)
+        {
+
+          if (x>imax)
+          {
+            DrawLine(hdc,cx-i+1,cy+x, cx+i,cy+x);
+               DrawLine(hdc,cx-i+1,cy-x, cx+i,cy-x);
+          }
+          x--;
+        }
+
+        DrawLine(hdc,cx-x,cy+i, cx+x+1,cy+i);
+        DrawLine(hdc,cx-x,cy-i, cx+x+1,cy-i);
+      }
+
+      SetDrawColor(hdc,color_bk);
+}
+
+//----画椭圆------------------------------------------------------------------
+//描述: 使用DrawColor画一个空心椭圆.
+//参数：hdc: 绘图上下文句柄.
+//      cx,cy: 椭圆的中心坐标
+//      rx: 椭圆的水平半径
+//      ry: 椭圆的垂直半径
+//返回：无.
+//------------------------------------------------------------------------------
+void     DrawEllipse(HDC hdc,s32 cx, s32 cy, s32 rx, s32 ry)
+{
+    s32 OutConst, Sum, SumY;
+    s32 x,y;
+    s32 xOld;
+    u32 _rx = rx;
+    u32 _ry = ry;
+
+    OutConst =   _rx*_rx*_ry*_ry
+               +(_rx*_rx*_ry>>1);
+    xOld = x = rx;
+
+     for(y=0; y<=ry; y++)
+     {
+        if(y==ry)
+        {
+          x=0;
+        }
+        else
+        {
+          SumY =((s32)(rx*rx))*((s32)(y*y));
+          while (Sum = SumY + ((s32)(ry*ry))*((s32)(x*x)),
+                 (x>0) && (Sum>OutConst)) x--;
+        }
+
+        if(y)
+        {
+          DrawLine(hdc,cx-xOld,cy-y+1,cx-x,cy-y);
+          DrawLine(hdc,cx-xOld,cy+y-1,cx-x,cy+y);
+          DrawLine(hdc,cx+xOld,cy-y+1,cx+x,cy-y);
+          DrawLine(hdc,cx+xOld,cy+y-1,cx+x,cy+y);
+        }
+        xOld = x;
+     }
+
+}
+
+//----填充椭圆------------------------------------------------------------------
+//描述: 使用FillColor填充一个实心椭圆.
+//参数：hdc: 绘图上下文句柄.
+//      cx,cy: 椭圆的中心坐标
+//      rx: 椭圆的水平半径
+//      ry: 椭圆的垂直半径
+//返回：无.
+//------------------------------------------------------------------------------
+void FillEllipse(HDC hdc,s32 cx, s32 cy, s32 rx, s32 ry)
+{
+    s32 OutConst, Sum, SumY;
+    s32 x,y;
+    u32 _rx = rx;
+    u32 _ry = ry;
+    u32 color_bk;
+
+    color_bk =SetDrawColor(hdc,GetFillColor(hdc));
+
+    OutConst = _rx*_rx*_ry*_ry
+                +(_rx*_rx*_ry>>1);
+     x = rx;
+     for (y=0; y<=ry; y++)
+     {
+          SumY =((s32)(rx*rx))*((s32)(y*y));
+
+          while (Sum = SumY + ((s32)(ry*ry))*((s32)(x*x)),
+                 (x>0) && (Sum>OutConst))
+          {
+             x--;
+          }
+          DrawLine(hdc,cx-x, cy+y, cx+x,cy+y);
+
+          if(y)
+          {
+             DrawLine(hdc,cx-x, cy-y, cx+x,cy-y);
+          }
+    }
+
+    SetDrawColor(hdc,color_bk);
+
+}
+
+//----绘制扇形------------------------------------------------------------------
+//描述: 使用DrawColor绘制扇形.
+//参数：hdc: 绘图上下文句柄.
+//      xCenter,yCenter: 扇形的中心坐标
+//      radius: 扇形半径
+//      angle1: 扇形起始点角度
+//      angle2: 扇形结束点角度
+//返回：无.
+//------------------------------------------------------------------------------
+void    DrawSector(HDC hdc, s32 xCenter, s32 yCenter, s32 radius,s32 angle1,s32 angle2)
+{
+  s32 x, y, d,c1,c2,c,step=0;
+  s32 quarter1,quarter2,quarter3,quarter4;
+  u32 color;
+
+  if(radius<=0)
+  {
+      return;
+  }
+
+  x = xCenter;
+  y = yCenter + radius;
+  d = 3 - 2 * radius;
+  c1=(s32)(angle1*radius*3.14159/180);
+  c2=(s32)(angle2*radius*3.14159/180);
+  quarter1=(s32)(radius*3.14159/2);
+  quarter2=(s32)(radius*3.14159);
+  quarter3=(s32)(radius*3.14159*3/2);
+  quarter4=(s32)(radius*3.14159*2);
+
+  color =GetDrawColor(hdc);
+  while(1)
+  {
+      c=quarter4-step;
+    if(c>=c1 && c<=c2)    SetPixel(hdc,xCenter + (y - yCenter), yCenter + (x - xCenter ),color );
+
+    if(step>=c1 && step<=c2) SetPixel(hdc,xCenter + (y - yCenter), yCenter - (x - xCenter),color );
+
+    c=quarter2+step;
+    if(c>=c1 && c<=c2) SetPixel(hdc, xCenter - (y - yCenter), yCenter + (x - xCenter ),color );
+
+    c=quarter2-step;
+    if(c>=c1 && c<=c2) SetPixel(hdc, xCenter - (y - yCenter), yCenter - (x - xCenter),color );
+
+    if (  x - xCenter  >=  y - yCenter  ) break;
+
+    c=quarter3+step;
+    if(c>=c1 && c<=c2) SetPixel(hdc, x, y,color );
+
+    c=quarter1-step;
+    if(c>=c1 && c<=c2) SetPixel(hdc,x, yCenter - (y - yCenter),color );
+
+    c=quarter3-step;
+    if(c>=c1 && c<=c2) SetPixel(hdc, xCenter - (x - xCenter), y,color );
+
+    c= quarter1+step;
+    if(c>=c1 && c<=c2) SetPixel(hdc, xCenter - (x - xCenter), yCenter - (y - yCenter),color );
+
+    if ( d < 0 )
+    { d = d + ((x - xCenter) << 2) + 6;
+    }
+    else
+    { d = d + (((x - xCenter) - (y - yCenter)) << 2 ) + 10;
+      y--;
+    }
+    x++;
+    step++;
+  }
+
+}
+
+//----填充扇形------------------------------------------------------------------
+//描述: 使用FillColor填充扇形.
+//参数：hdc: 绘图上下文句柄.
+//      xCenter,yCenter: 扇形的中心坐标
+//      radius: 扇形半径
+//      angle1: 扇形起始点角度
+//      angle2: 扇形结束点角度
+//返回：无.
+//------------------------------------------------------------------------------
+void    FillSector(HDC hdc, s32 xCenter, s32 yCenter, s32 radius,s32 angle1,s32 angle2)
+{
+  s32 x, y, d,c1,c2,c,step=0;
+  s32 quarter1,quarter2,quarter3,quarter4;
+  u32 color;
+
+  if(radius<=0)
+  {
+      return;
+  }
+
+  x = xCenter;
+  y = yCenter + radius;
+  d = 3 - 2 * radius;
+  c1=(s32)(angle1*radius*3.14159/180);
+  c2=(s32)(angle2*radius*3.14159/180);
+  quarter1=(s32)(radius*3.14159/2);
+  quarter2=(s32)(radius*3.14159);
+  quarter3=(s32)(radius*3.14159*3/2);
+  quarter4=(s32)(radius*3.14159*2);
+  color =GetFillColor(hdc);
+
+  while(1)
+  {
+      c=quarter4-step;
+    if(c>=c1 && c<=c2)    DrawLineEx(hdc,xCenter + (y - yCenter), yCenter + (x - xCenter ) ,xCenter,yCenter ,color);
+
+    if(step>=c1 && step<=c2) DrawLineEx(hdc,xCenter + (y - yCenter), yCenter - (x - xCenter),xCenter,yCenter ,color);
+
+    c=quarter2+step;
+    if(c>=c1 && c<=c2) DrawLineEx(hdc, xCenter - (y - yCenter), yCenter + (x - xCenter ),xCenter,yCenter ,color);
+
+    c=quarter2-step;
+    if(c>=c1 && c<=c2) DrawLineEx(hdc, xCenter - (y - yCenter), yCenter - (x - xCenter),xCenter,yCenter,color);
+
+    if (  x - xCenter  >=  y - yCenter  ) break;
+
+    c=quarter3+step;
+    if(c>=c1 && c<=c2) DrawLineEx(hdc, x, y,xCenter,yCenter ,color);
+
+    c=quarter1-step;
+    if(c>=c1 && c<=c2) DrawLineEx(hdc,x, yCenter - (y - yCenter),xCenter,yCenter ,color);
+
+    c=quarter3-step;
+    if(c>=c1 && c<=c2) DrawLineEx(hdc, xCenter - (x - xCenter), y ,xCenter,yCenter,color);
+
+    c= quarter1+step;
+    if(c>=c1 && c<=c2) DrawLineEx(hdc, xCenter - (x - xCenter), yCenter - (y - yCenter) ,xCenter,yCenter,color);
+
+    if ( d < 0 )
+    { d = d + ((x - xCenter) << 2) + 6;
+    }
+    else
+    { d = d + (((x - xCenter) - (y - yCenter)) << 2 ) + 10;
+      y--;
+    }
+    x++;
+    step++;
+  }
+}
+
+//----绘制3阶Bezier线------------------------------------------------------------------
+//描述: 按指定坐标点绘制连续的贝塞尔线
+//参数：hdc: 绘图上下文句柄.
+//      pt: 线段坐标点
+//      cnt: 坐标点数量
+//返回：无.
+//------------------------------------------------------------------------------
+void DrawBezier3(HDC hdc,const POINT *pt,s32 cnt)
+{
+    float t,t1,t2,xt,yt,step;
+    s32 x0,y0;
+    ////
+
+    if(cnt <= 0)
+    {
+        return;
+    }
+
+    if(pt == NULL)
+    {
+        return;
+    }
+
+    x0     =pt[0].x;
+    y0     =pt[0].y;
+    step   =1.0/cnt;
+
+    for (t=0;t<=1;t+=step)
+    {
+        yt =1-t;
+        t1 =yt*yt;
+        t2 =3*yt*t;
+
+        xt =pt[0].x*t1*yt+pt[1].x*t2*yt+pt[2].x*t2*t+pt[3].x*t*t*t;
+        yt =pt[0].y*yt*t1+pt[1].y*t2*yt+pt[2].y*t2*t+pt[3].y*t*t*t;
+
+        DrawLine(hdc,x0,y0,xt,yt);
+
+        x0 =xt;
+        y0 =yt;
+
+    }
 
 }
 
@@ -1031,9 +1528,9 @@ void    FillCircle(HDC hdc,int cx,int cy,int r)
 //      count: 坐标点数量.
 //返回：无.
 //------------------------------------------------------------------------------
-void    DrawPolyLine(HDC hdc,const POINT *pt,int count)
+void    DrawPolyLine(HDC hdc,const POINT *pt,s32 count)
 {
-    int i;
+    s32 i;
 
     if(count>1)
     {
@@ -1054,7 +1551,7 @@ void    DrawPolyLine(HDC hdc,const POINT *pt,int count)
 
 void    DrawGroupBox(HDC hdc,const RECT *prc,const char *Text)
 {
-    int i,text_w,text_h,text_offset;
+    s32 i,text_w,text_h,text_offset;
     u32 old_color;
 
     POINT pt[6];
@@ -1064,7 +1561,7 @@ void    DrawGroupBox(HDC hdc,const RECT *prc,const char *Text)
     rc.top =0;
     rc.right =0;
     rc.bottom =0;
-    _AdjustTextRect(hdc,Text,-1,&rc,DT_CENTER|DT_VCENTER);
+    AdjustTextRect(hdc,Text,-1,&rc,DT_CENTER|DT_VCENTER);
 
     text_w =RectW(&rc);
     text_h =RectH(&rc);
@@ -1113,8 +1610,27 @@ void    DrawGroupBox(HDC hdc,const RECT *prc,const char *Text)
 
 
 }
+//----绘制位图------------------------------------------------------------------
+//描述:
+//参数：hdc: 绘图上下文句柄.
+//返回：无.
+//------------------------------------------------------------------------------
+bool_t    DrawBitmap(HDC hdc,s32 x,s32 y,struct RectBitmap *bitmap,u32 HyalineColor,struct RopGroup RopCode)
+{
+    POINT pt;
+    if(BeginDraw(hdc))
+    {
+        pt.x =x;
+        pt.y =y;
+        __LPtoDP(hdc,&pt,1);
 
-/*============================================================================*/
+        GK_ApiDrawBitMap(hdc->pGkWin,bitmap,pt.x,pt.y,HyalineColor,RopCode,hdc->SyncTime);
+        EndDraw(hdc);
+        return true;
+    }
+    return false;
+}
+
 /*============================================================================*/
 /*============================================================================*/
 /*============================================================================*/

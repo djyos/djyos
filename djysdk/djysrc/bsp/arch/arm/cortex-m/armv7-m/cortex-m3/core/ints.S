@@ -95,16 +95,16 @@ __start_asyn_signal:
 .thumb_func
 __start_real:
     push    {r0,lr}				/* r0只是为了满足栈指针8字节对齐的填充物 */
-    mrs     r0,psp
-    stmfd   r0!,{r4-r11}        /* 保护寄存器,以及返回地址 */
-    msr     psp,r0
+//    mrs     r0,psp
+//    stmfd   r0!,{r4-r11}        /* 保护寄存器,以及返回地址 */
+//    msr     psp,r0
     mrs     r0,ipsr             /* 取异常号 */
     sub     r0,r0,#16
     bl      __Int_EngineReal
     pop     {r0,lr}
-    mrs     r0,psp
-    ldmfd   r0!,{r4-r11}
-    msr     psp,r0
+//    mrs     r0,psp
+//    ldmfd   r0!,{r4-r11}
+//    msr     psp,r0
     bx      lr
 
 /*

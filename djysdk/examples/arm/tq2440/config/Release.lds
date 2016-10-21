@@ -2,9 +2,8 @@ ENTRY(isr_vector)
 
 MEMORY
 {
-	ROM1(R)		    : ORIGIN  = 0x00000000, LENGTH  = 2M
-	RAM_nocache(RW)	: ORIGIN  = 0x30000000, LENGTH  = 0xFFF00
-	ENGINE(RXW)		: ORIGIN  = 0x300FFF00, LENGTH  = 256
+	ROM1(R)		    : ORIGIN  = 0x00000000, LENGTH  = 8M
+	RAM_nocache(RW)	: ORIGIN  = 0x30800000, LENGTH  = 8M
 
 	RAM1(RXW)		: ORIGIN  = 0x31000000, LENGTH  = 16M
 	RAM2(RXW)       : ORIGIN  = 0x32000000, LENGTH  = 16M
@@ -16,8 +15,6 @@ MEMORY
 /*正确的写法，可参看console中输出的命令行*/
 SECTIONS
 {
-	
-	 
 	  
 	text_startup_rROM1_lROM1 :
 	{
@@ -25,30 +22,25 @@ SECTIONS
 	    KEEP(*(.isr_vector .isr_vector.*))
 		KEEP(*liblibOS-release.a:initcpu.o (.text .text.* .rodata .rodata.*))
 		KEEP(*liblibOS-release.a:initcpuc.o (.text .text.* .rodata .rodata.*))
-		KEEP(*liblibOS-release.a:exceptions.o (.text .text.* .rodata .rodata.*))
-		KEEP(*liblibOS-release.a:exception.o (.text .text.* .rodata .rodata.*))
+		KEEP(*liblibOS-release.a:hard-exps.o (.text .text.* .rodata .rodata.*))
+		KEEP(*liblibOS-release.a:hard-exp.o (.text .text.* .rodata .rodata.*))
 		KEEP(*liblibOS-release.a:mmu.o (.text .text.* .rodata .rodata.*))
+		KEEP(*liblibOS-release.a:cache.o (.text .text.* .rodata .rodata.*))
 		KEEP(*liblibOS-release.a:pre_loader.o (.text .text.* .rodata .rodata.*))
-			
+		
+		
 	} >ROM1 
-
-	
-	zi_startup_rRAM_nocache_lRAM_nocache (NOLOAD) :
-	{
-	    . = ALIGN(0x08);
-		mmu_page_table = .;		
-	} >RAM_nocache
 
 	
 	text_preload_rROM1_lROM1 :
 	{
 	    . = ALIGN(0x08);
-		*src/user/critical/*.o (.text .text.* .rodata .rodata.*)
+	    
+		KEEP(src/user/critical/critical.o (.text .text.* .rodata .rodata.*))
 		*liblibOS-release.a:loader.o (.text .text.* .rodata .rodata.*)
 		*liblibOS-release.a:int_hard.o (.text .text.* .rodata .rodata.*)
 		*liblibOS-release.a:int.o (.text .text.* .rodata .rodata.*)
 		*liblibOS-release.a:ints.o (.text .text.* .rodata .rodata.*)
-		*liblibOS-release.a:exception.o (.text .text.* .rodata .rodata.*)
 		*liblibOS-release.a:cpu_peri_gpio.o (.text .text.* .rodata .rodata.*)
 		*liblibOS-release.a:cpu_peri.o (.text .text.* .rodata .rodata.*)
 		*liblibOS-release.a:heap-static.o (.text .text.* .rodata .rodata.*)
@@ -59,12 +51,12 @@ SECTIONS
 	    . = ALIGN(0x08);
 		KEEP(* (.table.exceptions .table.exceptions.*))
 		KEEP(* (.table.vectors .table.vectors.*))
-		*src/user/critical/*.o (.data .data.*)
+		KEEP(src/user/critical/critical.o (.data .data.*))
 		*liblibOS-release.a:loader.o (.data .data.*)
 		*liblibOS-release.a:int_hard.o (.data .data.*)
 		*liblibOS-release.a:int.o (.data .data.*)
 		*liblibOS-release.a:ints.o (.data .data.*)
-		*liblibOS-release.a:exception.o (.data .data.*)
+		*liblibOS-release.a:hard-exp.o (.data .data.*)
 		*liblibOS-release.a:cpu_peri_gpio.o (.data .data.*)
 		*liblibOS-release.a:cpu_peri.o (.data .data.*)
 		*liblibOS-release.a:heap-static.o (.data .data.*)
@@ -74,12 +66,12 @@ SECTIONS
 	zi_preload_rRAM1_lRAM1 (NOLOAD) :
 	{
 	    . = ALIGN(0x08);
-		*src/user/critical/*.o (.bss .bss.* COMMON)
+		KEEP(src/user/critical/critical.o (.bss .bss.* COMMON))
 		*liblibOS-release.a:loader.o (.bss .bss.* COMMON)
 		*liblibOS-release.a:int_hard.o (.bss .bss.* COMMON)
 		*liblibOS-release.a:int.o (.bss .bss.* COMMON)
 		*liblibOS-release.a:ints.o (.bss .bss.* COMMON)
-		*liblibOS-release.a:exception.o (.bss .bss.* COMMON)
+		*liblibOS-release.a:hard-exp.o (.bss .bss.* COMMON)
 		*liblibOS-release.a:cpu_peri_gpio.o (.bss .bss.* COMMON)
 		*liblibOS-release.a:cpu_peri.o (.bss .bss.* COMMON)
 		*liblibOS-release.a:heap-static.o (.bss .bss.* COMMON)
@@ -143,7 +135,7 @@ SECTIONS
 		
 	}>RAM1 
 	
-	
+ 	
 	preload_cp_table :
 	{
 	    . = ALIGN(0x08);
@@ -197,26 +189,31 @@ SECTIONS
 	heap_rRAM1_lRAM1 (NOLOAD) :
 	{
 	    . = ALIGN(0x08);
-		sys_heap_bottom = .;
+	    sys_heap_bottom = .;
+	    . += 8M;
+		sys_heap_top = .;
 	}>RAM1
-	sys_heap_top = 0x31000000+16M;
+	
 	
 	
 	heap_rextram_lextram (NOLOAD) :
 	{
 	    . = ALIGN(0x08);
-		extram_heap_bottom = .;
+	    extram_heap_bottom = .;
+	    . += 16M;
+	    extram_heap_top = .;
+		
 	}>RAM2 
-	extram_heap_top = 0x32000000+16M;
 	
 	heap_cp_table :
 	{
 	    . = ALIGN(0x08);
 		pHeapList = .;
 		
-/* 默认堆，必须排首位，名字必须是“sys” */
+        /* 默认堆，必须排首位，名字必须是“sys” */
         LONG(1)                     /*表示该堆由1段内存组成*/
         LONG(0)                     /*该堆上分配的内存的对齐尺寸，0表示使用系统对齐*/
+        LONG(0)                     /*0=通用堆,1=专用堆,如果系统只有唯一一个堆,则只能是通用堆*/
         LONG(sys_heap_bottom)       /*第一段基址，须符合对齐要求*/
         LONG(sys_heap_top)          /*第一段地址上限（不含），须符合对齐要求*/
         LONG(32)                    /*第一段页尺寸=32bytes*/
@@ -227,9 +224,10 @@ SECTIONS
 
         . = ALIGN(0x04);
         LONG(1)                     /*表示该堆由1段内存组成*/
-        LONG(0)                     /*该堆上分配的内存的对齐尺寸，0表示使用系统对齐*/
-        LONG(extram_heap_bottom)   /*第一段基址，须符合对齐要求*/
-        LONG(extram_heap_top)      /*第一段地址上限（不含），须符合对齐要求*/
+        LONG(32)                    /*该堆上分配的内存的对齐尺寸，0表示使用系统对齐*/
+        LONG(0)                     /*0=通用堆,1=专用堆,如果系统只有唯一一个堆,则只能是通用堆*/
+        LONG(extram_heap_bottom)    /*第一段基址，须符合对齐要求*/
+        LONG(extram_heap_top)       /*第一段地址上限（不含），须符合对齐要求*/
         LONG(128)                   /*第一段页尺寸=128bytes*/
         BYTE(0x65)                  /*'e'*/
         BYTE(0x78)                  /*'x'*/
@@ -242,8 +240,12 @@ SECTIONS
         LONG(0)                     /*结束标志*/
 	}>ROM1 
 	
-	engine_rENGINE_lENGINE (NOLOAD) :
+    zi_startup_rRAM_nocache_lRAM_nocache (NOLOAD) :
 	{
+	    . = ALIGN(0x08);
+		mmu_page_table = .;		
+		. += 0x8000;
+		
 		engine_irq = .;
 		. += 0x04;
 		engine_fiq = .;
@@ -258,6 +260,8 @@ SECTIONS
 		. += 0x04;
 		engine_reserved = .;
 		. += 0x04;
-	}>ENGINE 
+
+	} >RAM_nocache
+	
 }
 /**** The End ****/

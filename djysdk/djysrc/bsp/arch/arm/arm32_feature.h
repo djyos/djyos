@@ -75,9 +75,6 @@ extern "C" {
 #define CN_MEM_ALIGN            1    //如果目标系统没有对齐要求，改为0
 #define CN_ALIGN_SIZE           8    //arm(含cm3)要求8字节对齐
 
-//线程上下文中，用来保存寄存器所需要的栈，ARM系列CPU共15个寄存器须保存（SP单独保存）
-#define CN_REGISTER_STACK     (15*4)
-
 #if !defined(__MAVERICK__)
 /* ARM traditionally used big-endian words; and within those words the
    byte ordering was big or little endian depending upon the target.

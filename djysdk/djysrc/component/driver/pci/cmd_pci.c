@@ -34,7 +34,7 @@
 #include "shell.h"
 
 bool_t sh_cmd_pcie(char *param);
-struct tagShellCmdTab const pcie_cmd_table[] =
+struct ShellCmdTab const pcie_cmd_table[] =
 {
     {
         "pcie",
@@ -43,8 +43,8 @@ struct tagShellCmdTab const pcie_cmd_table[] =
         "命令格式: pcie bus号（bus号省略则信息全打印）"
     }
 };
-static struct tagShellCmdRsc tg_pcie_cmd_rsc
-        [sizeof(pcie_cmd_table)/sizeof(struct tagShellCmdTab)];
+static struct ShellCmdRsc tg_pcie_cmd_rsc
+        [sizeof(pcie_cmd_table)/sizeof(struct ShellCmdTab)];
 
 //----添加pcie shell 命令------------------------------------------------------
 //功能：添加pcie shell 命令
@@ -54,7 +54,7 @@ static struct tagShellCmdRsc tg_pcie_cmd_rsc
 void pcie_sh_install(void)
 {
     Sh_InstallCmd(pcie_cmd_table,tg_pcie_cmd_rsc,
-                      sizeof(pcie_cmd_table)/sizeof(struct tagShellCmdTab));
+                      sizeof(pcie_cmd_table)/sizeof(struct ShellCmdTab));
 }
 
 /*

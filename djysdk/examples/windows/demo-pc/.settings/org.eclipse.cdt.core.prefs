@@ -44,9 +44,17 @@ environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972
 environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116/DJYOS_SRC_LOCATION/value=${ProjDirPath}\\..\\..\\..\\djysrc
 environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116/append=true
 environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.192925116/appendContributed=true
+environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.2070013628/DJYOS_SRC_LOCATION/delimiter=;
+environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.2070013628/DJYOS_SRC_LOCATION/operation=replace
+environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.2070013628/DJYOS_SRC_LOCATION/value=${ProjDirPath}\\..\\..\\..\\djysrc
+environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.2070013628/append=true
+environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.2070013628/appendContributed=true
 environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346/DJYOS_SRC_LOCATION/delimiter=;
 environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346/DJYOS_SRC_LOCATION/operation=replace
 environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346/DJYOS_SRC_LOCATION/value=${ProjDirPath}\\..\\..\\..\\djysrc
+environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346/PATH/delimiter=;
+environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346/PATH/operation=replace
+environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346/PATH/value=${MINGW_HOME}\\bin;C\:/Program Files/Java/jre7/bin/client;C\:/Program Files/Java/jre7/bin;C\:/Program Files/Java/jre7/lib/i386;C\:\\Program Files\\SlickEdit Pro 20.0.2\\win\\;C\:\\Windows\\system32;C\:\\Windows;C\:\\Windows\\System32\\Wbem;C\:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C\:\\yagarto-gcc4.9\\bin;C\:\\MinGW-4.8.1\\bin;C\:\\Program Files\\TortoiseSVN\\bin;C\:\\Program Files\\IDM Computer Solutions\\UltraEdit\\;D\:\\eclipse.luna
 environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346/append=true
 environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346/appendContributed=true
 environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.release.1587287770/DJYOS_SRC_LOCATION/delimiter=;

@@ -76,19 +76,19 @@ struct uart_line_buf
 #define UART1_RTS_LOW()     GPIO_SettoLow(0,1<<27)      //clr_pin(0,27)
 
 #if(CN_CFG_UART0_USED == 1)
-static struct tagUartUCB tg_uart0_cb;
+static struct UartUCB tg_uart0_cb;
 uint8_t uart0_drv_send_buf[uart0_buf_len];
 uint8_t uart0_drv_recv_buf[uart0_buf_len];
 #endif
 
 #if(CN_CFG_UART1_USED == 1)
-static struct tagUartUCB tg_uart1_cb;
+static struct UartUCB tg_uart1_cb;
 static uint8_t uart1_drv_send_buf[uart1_buf_len];
 static uint8_t uart1_drv_recv_buf[uart1_buf_len];
 static struct uart_line_buf uart1_line_buf1,uart1_line_buf2,*pg_inuse_line_buf;
 #endif
-u32 __uart0_int(ufast_t uart_int_line);
-u32 __uart1_int(ufast_t uart_int_line);
+u32 __uart0_int(ptu32_t uart_int_line);
+u32 __uart1_int(ptu32_t uart_int_line);
 void __uart0_pause_send_int(void);
 void __uart1_pause_send_int(void);
 
@@ -158,6 +158,7 @@ ptu32_t module_init_uart0(ptu32_t para)
                 uart0_drv_recv_buf,
                 uart0_buf_len);
 
+    Int_Register(cn_int_line_uart0); 
     Int_IsrConnect(cn_int_line_uart0,__uart0_int);
     Int_SettoAsynSignal(cn_int_line_uart0);
 
@@ -292,7 +293,7 @@ void uart0_send(u8 *buf,u32 len)
 u32 uart0_read(u8 *buf,u32 len,u32 timeout)
 {
     u32 readed,completed=0,start_time,time=0;
-    start_time = DjyGetTime();
+    start_time = (u32)DjyGetSysTime();
     while(1)
     {
 
@@ -306,7 +307,7 @@ u32 uart0_read(u8 *buf,u32 len,u32 timeout)
                 break;
             }else
             {
-                time = DjyGetTime() - start_time;     //回到while处再次读串口。
+                time = (u32)DjyGetSysTime() - start_time;     //回到while处再次读串口。
             }
         }else
         {
@@ -323,8 +324,8 @@ u32 uart0_read(u8 *buf,u32 len,u32 timeout)
 
 #if(CN_CFG_UART1_USED == 1)
 
-u32 __uart1_tx(ufast_t uart_tx_line);
-u32 __uart1_rx(ufast_t uart_rx_line);
+u32 __uart1_tx(ptu32_t uart_tx_line);
+u32 __uart1_rx(ptu32_t uart_rx_line);
 
 //----设置uart0 baud--------------------------------------------------------
 //功能: 设置uart0 baud,注:本函数未处理小数baud
@@ -425,14 +426,17 @@ ptu32_t module_init_uart1(ptu32_t para)
 
     pg_inuse_line_buf = &uart1_line_buf1;
 
+    Int_Register(cn_int_line_uart1); 
     Int_IsrConnect(cn_int_line_uart1,__uart1_int);
     Int_SettoReal(cn_int_line_uart1);
 
+    Int_Register(cn_int_line_wakeup1); 
     Int_IsrConnect(cn_int_line_wakeup1,__uart1_rx);
     Int_SettoAsynSignal(cn_int_line_wakeup1);
     Int_RestoreAsynLine(cn_int_line_wakeup1);
 
 
+    Int_Register(cn_int_line_wakeup2); 
     Int_IsrConnect(cn_int_line_wakeup2,__uart1_tx);
     Int_SettoAsynSignal(cn_int_line_wakeup2);
     Int_RestoreAsynLine(cn_int_line_wakeup2);
@@ -460,7 +464,7 @@ exit_from_left_buf_semp:
 //参数: 中断函数没有参数.
 //返回: 中断函数没有返回值.
 //-----------------------------------------------------------------------------
-u32 __uart1_int(ufast_t uart_int_line)
+u32 __uart1_int(ptu32_t uart_int_line)
 {
     u32 recv_trans,num;
     u32 IIR;
@@ -593,7 +597,7 @@ void uart1_send(u8 *buf,u32 len)
 u32 uart1_read(u8 *buf,u32 len,u32 timeout)
 {
     u32 readed,completed=0,start_time,time=0;
-    start_time = DjyGetTime();
+    start_time = (u32)DjyGetSysTime();
 
     while(1)
     {
@@ -610,7 +614,7 @@ u32 uart1_read(u8 *buf,u32 len,u32 timeout)
                 break;
             }else
             {
-                time = DjyGetTime() - start_time;     //回到while处再次读串口。
+                time = (u32)DjyGetSysTime() - start_time;     //回到while处再次读串口。
             }
         }else
         {

@@ -192,7 +192,7 @@ void Exp_Recordscan_nor(void)
 // 输出参数：
 // 返回值  ：true,合法参数，false，不合法参数
 // =============================================================================
-bool_t  __exp_checkrecordpara_nor(struct tagExpRecordPara *recordpara)
+bool_t  __exp_checkrecordpara_nor(struct ExpRecordPara *recordpara)
 {
     bool_t result;
 
@@ -233,7 +233,7 @@ bool_t  __exp_checkrecordpara_nor(struct tagExpRecordPara *recordpara)
 // 输出参数：
 // 返回值  ：见en_sysExp_Record_result定义
 // =============================================================================
-u32 Exp_Record_nor(struct tagExpRecordPara *recordpara)
+u32 Exp_Record_nor(struct ExpRecordPara *recordpara)
 {
     u32 infolen = 0;
     u32 itemlen = 0;
@@ -246,7 +246,7 @@ u32 Exp_Record_nor(struct tagExpRecordPara *recordpara)
     if(false == __exp_checkrecordpara_nor(recordpara))
     {
         printk("exp_norrecord:invalid recordpara\n\r");
-        result =EN_EXP_DEAL_RECORD_PARAERR;
+        result =EN_EXP_RESULT_RECORD_PARAERR;
     }
     else
     {
@@ -255,11 +255,11 @@ u32 Exp_Record_nor(struct tagExpRecordPara *recordpara)
         itemlen = sizeof(itemhead) + infolen;
         if(itemlen > s_u32ExpRecordValidLenNor)
         {
-            result = EN_EXP_DEAL_RECORD_NOSPACE;
+            result = EN_EXP_RESULT_RECORD_NOSPACE;
         }
         else
         {
-            result = EN_EXP_DEAL_RECORD_SUCCESS;
+            result = EN_EXP_RESULT_SUCCESS;
 
             infobuf = (u8*)&itemhead;
             recordaddr = s_u32ExpRecordValidAddrNor;
@@ -282,7 +282,7 @@ u32 Exp_Record_nor(struct tagExpRecordPara *recordpara)
             haswrite = Flash_WriteData(recordaddr, infobuf, recordlen);
             if(haswrite != recordlen)
             {
-                result = EN_EXP_DEAL_RECORD_HARDERR;
+                result = EN_EXP_RESULT_RECORD_HARDERR;
             }
             recordaddr = recordaddr + recordlen;
 
@@ -297,7 +297,7 @@ u32 Exp_Record_nor(struct tagExpRecordPara *recordpara)
             haswrite = Flash_WriteData(recordaddr, infobuf, recordlen);
             if(haswrite != recordlen)
             {
-                result = EN_EXP_DEAL_RECORD_HARDERR;
+                result = EN_EXP_RESULT_RECORD_HARDERR;
             }
             recordaddr = recordaddr + recordlen;
             //记录OSSTATEINFO
@@ -306,7 +306,7 @@ u32 Exp_Record_nor(struct tagExpRecordPara *recordpara)
             haswrite = Flash_WriteData(recordaddr, infobuf, recordlen);
             if(haswrite != recordlen)
             {
-                result = EN_EXP_DEAL_RECORD_HARDERR;
+                result = EN_EXP_RESULT_RECORD_HARDERR;
             }
             recordaddr = recordaddr + recordlen;
 
@@ -316,7 +316,7 @@ u32 Exp_Record_nor(struct tagExpRecordPara *recordpara)
             haswrite = Flash_WriteData(recordaddr, infobuf, recordlen);
             if(haswrite != recordlen)
             {
-                result = EN_EXP_DEAL_RECORD_HARDERR;
+                result = EN_EXP_RESULT_RECORD_HARDERR;
             }
             recordaddr = recordaddr + recordlen;
             //记录THROWINFO
@@ -327,7 +327,7 @@ u32 Exp_Record_nor(struct tagExpRecordPara *recordpara)
             Flash_OpetionIsOK();
             if(haswrite != recordlen)
             {
-                result = EN_EXP_DEAL_RECORD_HARDERR;
+                result = EN_EXP_RESULT_RECORD_HARDERR;
             }
             recordaddr = recordaddr + recordlen;
 
@@ -471,7 +471,7 @@ bool_t Exp_RecordCheckLen_nor(u32 assignedno, u32 *recordlen)
 // 返回值     ：true成功 false失败
 // =============================================================================
 bool_t Exp_RecordGet_nor(u32 assignedno, u32 buflenlimit, u8 *buf, \
-                         struct tagExpRecordPara *recordpara)
+                         struct ExpRecordPara *recordpara)
 {
     bool_t result_bool = false;
     bool_t continuescan;
@@ -581,7 +581,7 @@ bool_t Exp_RecordGet_nor(u32 assignedno, u32 buflenlimit, u8 *buf, \
 }
 
 //norflash异常操作
-struct tagExpRecordOperate sgexprecordopt_norflash = {
+struct ExpRecordOperate sgexprecordopt_norflash = {
     .fnexprecord = Exp_Record_nor,
     .fnexprecordchecklen = Exp_RecordCheckLen_nor,
     .fnexprecordchecknum = Exp_RecordCheckNum_nor,

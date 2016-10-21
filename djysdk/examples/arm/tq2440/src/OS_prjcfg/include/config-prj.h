@@ -73,7 +73,9 @@ extern const u32 gc_u32CfgMainStackLen;
 extern const u32 gc_u32CfgOpenedfileLimit;
 extern const u32 gc_u32CfgTimerLimit;
 
-extern const char *gc_pCfgStddevName;  //标准输入输出设备
+extern const char *gc_pCfgStdinName;        //标准输入设备
+extern const char *gc_pCfgStdoutName;       //标准输出设备
+extern const char *gc_pCfgStderrName;       //标准错误输出设备
 extern const char *gc_pCfgWorkPath;   //工作路径设置
 
 #ifdef __cplusplus

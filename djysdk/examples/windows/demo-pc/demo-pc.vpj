@@ -1,167 +1,187 @@
 <!DOCTYPE Project SYSTEM "http://www.slickedit.com/dtd/vse/10.0/vpj.dtd">
 <Project
-	Version="10.0"
-	VendorName="SlickEdit"
-	TemplateName="Other C/C++"
-	WorkingDir=".">
-	<Config
-		Name="Debug"
-		Type="cpp"
-		DebugCallbackName="gdb"
-		OutputFile="%bddemo-pc"
-		CompilerConfigName="Latest Version">
-		<Menu>
-			<Target
-				Name="Compile"
-				MenuCaption="&amp;Compile"
-				CaptureOutputWith="ProcessBuffer"
-				OutputExts="*.o"
-				SaveOption="SaveCurrent"
-				RunFromDir="%rw">
-				<Exec CmdLine='cc -c -g %i %defd -o "%bd%n.o" "%f"'/>
-			</Target>
-			<Target
-				Name="Link"
-				MenuCaption="&amp;Link">
-				<Exec CmdLine='cc -g -o "%o" %f %libs'/>
-			</Target>
-			<Target
-				Name="Build"
-				MenuCaption="&amp;Build"
-				CaptureOutputWith="ProcessBuffer"
-				SaveOption="SaveWorkspaceFiles"
-				RunFromDir="%rw">
-				<Exec CmdLine='"%(VSLICKBIN1)vsbuild" build "%w" "%r"'/>
-			</Target>
-			<Target
-				Name="Rebuild"
-				MenuCaption="&amp;Rebuild"
-				CaptureOutputWith="ProcessBuffer"
-				SaveOption="SaveWorkspaceFiles"
-				RunFromDir="%rw">
-				<Exec CmdLine='"%(VSLICKBIN1)vsbuild" rebuild "%w" "%r"'/>
-			</Target>
-			<Target
-				Name="Debug"
-				MenuCaption="&amp;Debug"
-				SaveOption="SaveNone"
-				BuildFirst="1"
-				CaptureOutputWith="ProcessBuffer"
-				RunFromDir="%rw">
-				<Exec CmdLine='vsdebugio -prog "%o"'/>
-			</Target>
-			<Target
-				Name="Execute"
-				MenuCaption="E&amp;xecute"
-				SaveOption="SaveNone"
-				BuildFirst="1"
-				CaptureOutputWith="ProcessBuffer"
-				RunFromDir="%rw">
-				<Exec CmdLine='"%o"'/>
-			</Target>
-		</Menu>
-	</Config>
-	<Config
-		Name="Release"
-		Type="cpp"
-		DebugCallbackName="gdb"
-		OutputFile="%bddemo-pc"
-		CompilerConfigName="Latest Version">
-		<Menu>
-			<Target
-				Name="Compile"
-				MenuCaption="&amp;Compile"
-				CaptureOutputWith="ProcessBuffer"
-				SaveOption="SaveCurrent"
-				OutputExts="*.o"
-				RunFromDir="%rw">
-				<Exec CmdLine='cc -c -O %i %defd -o "%bd%n.o" "%f"'/>
-			</Target>
-			<Target
-				Name="Link"
-				MenuCaption="&amp;Link">
-				<Exec CmdLine='cc -O -o "%o" %f %libs'/>
-			</Target>
-			<Target
-				Name="Build"
-				MenuCaption="&amp;Build"
-				CaptureOutputWith="ProcessBuffer"
-				SaveOption="SaveWorkspaceFiles"
-				RunFromDir="%rw">
-				<Exec CmdLine='"%(VSLICKBIN1)vsbuild" build "%w" "%r"'/>
-			</Target>
-			<Target
-				Name="Rebuild"
-				MenuCaption="&amp;Rebuild"
-				CaptureOutputWith="ProcessBuffer"
-				SaveOption="SaveWorkspaceFiles"
-				RunFromDir="%rw">
-				<Exec CmdLine='"%(VSLICKBIN1)vsbuild" rebuild "%w" "%r"'/>
-			</Target>
-			<Target
-				Name="Debug"
-				MenuCaption="&amp;Debug"
-				SaveOption="SaveNone"
-				BuildFirst="1"
-				CaptureOutputWith="ProcessBuffer"
-				RunFromDir="%rw">
-				<Exec CmdLine='vsdebugio -prog "%o"'/>
-			</Target>
-			<Target
-				Name="Execute"
-				MenuCaption="E&amp;xecute"
-				SaveOption="SaveNone"
-				BuildFirst="1"
-				CaptureOutputWith="ProcessBuffer"
-				RunFromDir="%rw">
-				<Exec CmdLine='"%o"'/>
-			</Target>
-		</Menu>
-	</Config>
-	<Rules Name="Compile">
-		<Rule
-			InputExts="*.s"
-			OutputExts="*.o"
-			LinkObject="1">
-			<Exec CmdLine='as -o "%bd%n.o" "%f"'/>
-		</Rule>
-	</Rules>
-	<CustomFolders>
-		<Folder
-			Name="Source Files"
-			Filters="*.c;*.C;*.cc;*.cpp;*.cp;*.cxx;*.c++;*.prg;*.pas;*.dpr;*.asm;*.s;*.bas;*.java;*.cs;*.sc;*.e;*.cob;*.html;*.rc;*.tcl;*.py;*.pl;*.d;*.m;*.mm;*.go"></Folder>
-		<Folder
-			Name="Header Files"
-			Filters="*.h;*.H;*.hh;*.hpp;*.hxx;*.inc;*.sh;*.cpy;*.if"></Folder>
-		<Folder
-			Name="Resource Files"
-			Filters="*.ico;*.cur;*.dlg"/>
-		<Folder
-			Name="Bitmaps"
-			Filters="*.bmp"/>
-		<Folder
-			Name="Other Files"
-			Filters=""/>
-	</CustomFolders>
-	<Files AutoFolders="DirectoryView">
-		<Folder Name="src">
-			<Folder Name="OS_prjcfg">
-				<Folder Name="config">
-					<F N="src/OS_prjcfg/config/int_config.c"/>
-				</Folder>
-				<Folder Name="include">
-					<F N="src/OS_prjcfg/include/config-prj.h"/>
-					<F N="src/OS_prjcfg/include/font_songti_16x16.h"/>
-				</Folder>
-			</Folder>
-			<Folder Name="user">
-				<Folder Name="critical">
-					<F N="src/user/critical/critical.c"/>
-				</Folder>
-				<F N="src/user/bmps_ltp.h"/>
-				<F N="src/user/main.c"/>
-				<F N="src/user/module_trim.c"/>
-			</Folder>
-		</Folder>
-	</Files>
+    Version="10.0"
+    VendorName="SlickEdit"
+    TemplateName="Other C/C++"
+    WorkingDir=".">
+    <Config
+        Name="Debug"
+        Type="cpp"
+        DebugCallbackName="gdb"
+        OutputFile="%bddemo-pc"
+        CompilerConfigName="Latest Version">
+        <Menu>
+            <Target
+                Name="Compile"
+                MenuCaption="&amp;Compile"
+                CaptureOutputWith="ProcessBuffer"
+                OutputExts="*.o"
+                SaveOption="SaveCurrent"
+                RunFromDir="%rw">
+                <Exec CmdLine='cc -c -g %i %defd -o "%bd%n.o" "%f"'/>
+            </Target>
+            <Target
+                Name="Link"
+                MenuCaption="&amp;Link">
+                <Exec CmdLine='cc -g -o "%o" %f %libs'/>
+            </Target>
+            <Target
+                Name="Build"
+                MenuCaption="&amp;Build"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveWorkspaceFiles"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%(VSLICKBIN1)vsbuild" build "%w" "%r"'/>
+            </Target>
+            <Target
+                Name="Rebuild"
+                MenuCaption="&amp;Rebuild"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveWorkspaceFiles"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%(VSLICKBIN1)vsbuild" rebuild "%w" "%r"'/>
+            </Target>
+            <Target
+                Name="Debug"
+                MenuCaption="&amp;Debug"
+                SaveOption="SaveNone"
+                BuildFirst="1"
+                CaptureOutputWith="ProcessBuffer"
+                RunFromDir="%rw">
+                <Exec CmdLine='vsdebugio -prog "%o"'/>
+            </Target>
+            <Target
+                Name="Execute"
+                MenuCaption="E&amp;xecute"
+                SaveOption="SaveNone"
+                BuildFirst="1"
+                CaptureOutputWith="ProcessBuffer"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%o"'/>
+            </Target>
+        </Menu>
+    </Config>
+    <Config
+        Name="Release"
+        Type="cpp"
+        DebugCallbackName="gdb"
+        OutputFile="%bddemo-pc"
+        CompilerConfigName="Latest Version">
+        <Menu>
+            <Target
+                Name="Compile"
+                MenuCaption="&amp;Compile"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveCurrent"
+                OutputExts="*.o"
+                RunFromDir="%rw">
+                <Exec CmdLine='cc -c -O %i %defd -o "%bd%n.o" "%f"'/>
+            </Target>
+            <Target
+                Name="Link"
+                MenuCaption="&amp;Link">
+                <Exec CmdLine='cc -O -o "%o" %f %libs'/>
+            </Target>
+            <Target
+                Name="Build"
+                MenuCaption="&amp;Build"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveWorkspaceFiles"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%(VSLICKBIN1)vsbuild" build "%w" "%r"'/>
+            </Target>
+            <Target
+                Name="Rebuild"
+                MenuCaption="&amp;Rebuild"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveWorkspaceFiles"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%(VSLICKBIN1)vsbuild" rebuild "%w" "%r"'/>
+            </Target>
+            <Target
+                Name="Debug"
+                MenuCaption="&amp;Debug"
+                SaveOption="SaveNone"
+                BuildFirst="1"
+                CaptureOutputWith="ProcessBuffer"
+                RunFromDir="%rw">
+                <Exec CmdLine='vsdebugio -prog "%o"'/>
+            </Target>
+            <Target
+                Name="Execute"
+                MenuCaption="E&amp;xecute"
+                SaveOption="SaveNone"
+                BuildFirst="1"
+                CaptureOutputWith="ProcessBuffer"
+                RunFromDir="%rw">
+                <Exec CmdLine='"%o"'/>
+            </Target>
+        </Menu>
+    </Config>
+    <Rules Name="Compile">
+        <Rule
+            InputExts="*.s"
+            OutputExts="*.o"
+            LinkObject="1">
+            <Exec CmdLine='as -o "%bd%n.o" "%f"'/>
+        </Rule>
+    </Rules>
+    <CustomFolders>
+        <Folder
+            Name="Source Files"
+            Filters="*.c;*.C;*.cc;*.cpp;*.cp;*.cxx;*.c++;*.prg;*.pas;*.dpr;*.asm;*.s;*.bas;*.java;*.cs;*.sc;*.e;*.cob;*.html;*.rc;*.tcl;*.py;*.pl;*.d;*.m;*.mm;*.go"></Folder>
+        <Folder
+            Name="Header Files"
+            Filters="*.h;*.H;*.hh;*.hpp;*.hxx;*.inc;*.sh;*.cpy;*.if"></Folder>
+        <Folder
+            Name="Resource Files"
+            Filters="*.ico;*.cur;*.dlg"/>
+        <Folder
+            Name="Bitmaps"
+            Filters="*.bmp"/>
+        <Folder
+            Name="Other Files"
+            Filters=""/>
+    </CustomFolders>
+    <Files AutoFolders="DirectoryView">
+        <Folder
+            Name="src"
+            GUID="{55E7A51F-C347-494E-938D-1CACD3B5A48B}">
+            <Folder
+                Name="OS_prjcfg"
+                GUID="{AEBFD2BC-9913-4C5B-B66B-F7503584C496}">
+                <Folder
+                    Name="include"
+                    GUID="{FC8C7C6E-18EF-4F2A-CCC3-0010BE3C329A}">
+                    <F N="src/OS_prjcfg/include/Lcd_Touch_Key.h"/>
+                </Folder>
+                <Folder
+                    Name="net"
+                    GUID="{2264B469-5B52-44E0-ACCB-661F58D01D82}">
+                    <F N="src/OS_prjcfg/net/boardnetcfg.c"/>
+                    <F N="src/OS_prjcfg/net/tcpipconfig.c"/>
+                </Folder>
+                <F N="src/OS_prjcfg/core_config.c"/>
+                <F N="src/OS_prjcfg/gui_config.c"/>
+                <F N="src/OS_prjcfg/IO_config.c"/>
+                <F N="src/OS_prjcfg/local_config.c"/>
+                <F N="src/OS_prjcfg/misc_config.c"/>
+                <F N="src/OS_prjcfg/prio_config.c"/>
+                <F N="src/OS_prjcfg/Iboot_config.c"/>
+                <F N="src/OS_prjcfg/ymodemcfg.c"/>
+            </Folder>
+            <Folder
+                Name="user"
+                GUID="{AEFDCF14-FFA6-45C1-671F-F11728AA91AA}">
+                <Folder
+                    Name="critical"
+                    GUID="{C62F6E5B-A359-4C5F-7EA5-D8B7F5F621BB}">
+                    <F N="src/user/critical/critical.c"/>
+                </Folder>
+                <F N="src/user/bmps_ltp.h"/>
+                <F N="src/user/main.c"/>
+                <F N="src/user/module-trim.c"/>
+            </Folder>
+        </Folder>
+    </Files>
 </Project>

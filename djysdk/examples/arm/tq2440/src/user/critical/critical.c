@@ -58,48 +58,6 @@
 #include "int.h"
 #include "cpu_peri.h"
 
-//此表配置工程中用到的中断源,每多使用一个中断源,内核需要多占一个struct tagIntLine
-//结构(32字节)的内存.对于内存丰厚的系统,建议在把cpu_peri_int_line.h文件中列
-//出的中断源全部copy到这里,内存匮乏的系统则只把用到的中断源列出即可
-const ufast_t tg_IntUsed[] =
-{
-	cn_int_line_eint0,
-	cn_int_line_eint1,
-	cn_int_line_eint2,
-	cn_int_line_eint3,
-	cn_int_line_eint4_7,
-	cn_int_line_eint8_23,
-	cn_int_line_resv6,
-	cn_int_line_bat_flt,
-	cn_int_line_tick,
-	cn_int_line_wdt,
-	cn_int_line_timer0,
-	cn_int_line_timer1,
-	cn_int_line_timer2,
-	cn_int_line_timer3,
-	cn_int_line_timer4,
-	cn_int_line_uart2,
-	cn_int_line_lcd,
-	cn_int_line_dma0,
-	cn_int_line_dma1,
-	cn_int_line_dma2,
-	cn_int_line_dma3,
-	cn_int_line_sdi,
-	cn_int_line_spi0,
-	cn_int_line_uart1,
-	cn_int_line_resv24,
-	cn_int_line_usbd,
-	cn_int_line_usbh,
-	cn_int_line_iic,
-	cn_int_line_uart0,
-	cn_int_line_spi1,
-	cn_int_line_rtc,
-	cn_int_line_adc,
-
-};
-
-const ufast_t tg_IntUsedNum = sizeof(tg_IntUsed)/sizeof(ufast_t);
-
 //----配置全部IO口--------------------------------------------------------------
 //功能：除必须的外，全部配置成初始态，各功能口由相应的功能模块自行定义。
 //参数：无
@@ -109,13 +67,13 @@ void gpio_init(void)
 {
 }
 
-extern void Timer_ModuleInit(void);
+extern void ModuleInstall_Timer(void);
 extern bool_t WWDG_STM32Init(u32 setcycle);
 bool_t WdtHal_BootStart(u32 bootfeedtimes);
 void critical(void)
 {
     //如果需要在启动过程中喂狗,则必须在初始化看门狗之前,初始化定时器硬件
-//    Timer_ModuleInit();     //todo:函数名不合适
+//    ModuleInstall_Timer();     //todo:函数名不合适
     //初始化硬件看门狗,需要启动过程中喂狗的话,必须在此初始化.
 //    WWDG_STM32Init(1000);
     // 启动实施中断+定时器喂狗机制,调用了这个函数后,Sys_ModuleInit函数中调用

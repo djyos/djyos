@@ -59,33 +59,33 @@
 #define CN_IIC_REGISTER_BADDR1        0x4001C000
 
 //中断中使用的数据类型结构体
-struct tagIIC_IntParamSet
+struct IIC_IntParamSet
 {
-	struct tagSemaphoreLCB *pDrvPostSemp;	//信号量
-	u32 TransCount;						//传输数据量计数器
-	u32 TransTotalLen;
+    struct SemaphoreLCB *pDrvPostSemp;   //信号量
+    u32 TransCount;                     //传输数据量计数器
+    u32 TransTotalLen;
 };
 
 //定义IIC的GPIO引脚数组
 static const Pin IIC_GPIO_PIN[]={
-		{PIO_PA3A_TWD0,PIOA,ID_PIOA,PIO_PERIPH_A,PIO_DEFAULT},
-		{PIO_PA4A_TWCK0,PIOA,ID_PIOA,PIO_PERIPH_A,PIO_DEFAULT}
+        {PIO_PA3A_TWD0,PIOA,ID_PIOA,PIO_PERIPH_A,PIO_DEFAULT},
+        {PIO_PA4A_TWCK0,PIOA,ID_PIOA,PIO_PERIPH_A,PIO_DEFAULT}
 };
 
 //定义静态变量
-static struct tagIIC_CB s_tIIC0_CB;
-#define IIC0_BUF_LEN  		128
-#define IIC0_DMA_BUF_LEN 	64
+static struct IIC_CB s_tIIC0_CB;
+#define IIC0_BUF_LEN        128
+#define IIC0_DMA_BUF_LEN    64
 static u8 s_IIC0Buf[IIC0_BUF_LEN];
 static u8 s_IIC0DmaBuf[IIC0_DMA_BUF_LEN];
-static struct tagIIC_IntParamSet IntParamset0;
+static struct IIC_IntParamSet IntParamset0;
 
-static struct tagIIC_CB s_tIIC1_CB;
-#define IIC1_BUF_LEN  		128
-#define IIC1_DMA_BUF_LEN 	64
+static struct IIC_CB s_tIIC1_CB;
+#define IIC1_BUF_LEN        128
+#define IIC1_DMA_BUF_LEN    64
 static u8 s_IIC1DmaBuf[IIC1_DMA_BUF_LEN];
 static u8 s_IIC1Buf[IIC1_BUF_LEN];
-static struct tagIIC_IntParamSet IntParamset1;
+static struct IIC_IntParamSet IntParamset1;
 
 //静态变量，是否使用DMA方式发送接收，默认为否
 static volatile bool_t s_IIC_DmaUsed[2] = {false,false};
@@ -129,7 +129,7 @@ static void __IIC_IntEnable(volatile tagI2CReg *reg,u32 IntSrc)
 // =============================================================================
 static void __IIC_GenerateStop(volatile tagI2CReg *reg)
 {
-	reg->TWI_CR = TWI_CR_STOP;
+    reg->TWI_CR = TWI_CR_STOP;
 }
 
 // =============================================================================
@@ -170,30 +170,30 @@ static void __IIC_SetClk(volatile tagI2CReg *reg,u32 iicclk)
 // =============================================================================
 static void __IIC_DMA_Config(volatile tagI2CReg* Reg,u32 cmd)
 {
-	u8 Port;
-	if((u32)Reg == CN_IIC_REGISTER_BADDR0)
-		Port = CN_IIC0;
-	else
-		Port = CN_IIC1;
+    u8 Port;
+    if((u32)Reg == CN_IIC_REGISTER_BADDR0)
+        Port = CN_IIC0;
+    else
+        Port = CN_IIC1;
 
-	if(cmd == CN_IIC_DMA_USED)				//配置使用DMA方式发送和接收
-	{
-		s_IIC_DmaUsed[Port] = true;			//标记使用DMA
-		//关闭不使用DMA时的中断
-		__IIC_IntDisable(Reg,TWI_IDR_RXRDY|TWI_IDR_TXRDY);
-		Reg->TWI_PTCR = TWI_PTCR_RXTEN | TWI_PTCR_TXTEN;
-	}
-	else									//配置使用非DMA方式发送和接收
-	{
-		s_IIC_DmaUsed[Port] = false;
-		__IIC_IntDisable(Reg,TWI_IDR_ENDTX|TWI_IDR_ENDRX);
-		Reg->TWI_PTCR = TWI_PTCR_RXTDIS | TWI_PTCR_TXTDIS;
-	}
-	//配置DMA参数
-	Reg->TWI_TCR   = 0;
-	Reg->TWI_TNCR  = 0;
+    if(cmd == CN_IIC_DMA_USED)              //配置使用DMA方式发送和接收
+    {
+        s_IIC_DmaUsed[Port] = true;         //标记使用DMA
+        //关闭不使用DMA时的中断
+        __IIC_IntDisable(Reg,TWI_IDR_RXRDY|TWI_IDR_TXRDY);
+        Reg->TWI_PTCR = TWI_PTCR_RXTEN | TWI_PTCR_TXTEN;
+    }
+    else                                    //配置使用非DMA方式发送和接收
+    {
+        s_IIC_DmaUsed[Port] = false;
+        __IIC_IntDisable(Reg,TWI_IDR_ENDTX|TWI_IDR_ENDRX);
+        Reg->TWI_PTCR = TWI_PTCR_RXTDIS | TWI_PTCR_TXTDIS;
+    }
+    //配置DMA参数
+    Reg->TWI_TCR   = 0;
+    Reg->TWI_TNCR  = 0;
     Reg->TWI_RCR   = 0;
-	Reg->TWI_RNCR  = 0;
+    Reg->TWI_RNCR  = 0;
 }
 
 // =============================================================================
@@ -206,7 +206,7 @@ static void __IIC_GpioInit(u32 iic_no)
     if(iic_no == CN_IIC0)
     {
 //        GPIO_CfgPinFunc(IIC_GPIO_PIN,PIO_LISTSIZE(IIC_GPIO_PIN));
-    	PIO_Configure(IIC_GPIO_PIN,PIO_LISTSIZE(IIC_GPIO_PIN));
+        PIO_Configure(IIC_GPIO_PIN,PIO_LISTSIZE(IIC_GPIO_PIN));
     }
     else if(iic_no == CN_IIC1)
     {
@@ -221,8 +221,8 @@ static void __IIC_GpioInit(u32 iic_no)
 // =============================================================================
 static void __IIC_HardConfig(ptu32_t RegBaseAddr,u8 iicno)
 {
-	volatile tagI2CReg *reg;
-	reg = (volatile tagI2CReg *)RegBaseAddr;
+    volatile tagI2CReg *reg;
+    reg = (volatile tagI2CReg *)RegBaseAddr;
 
     __IIC_GpioInit(iicno);
 
@@ -246,9 +246,10 @@ static void __IIC_HardConfig(ptu32_t RegBaseAddr,u8 iicno)
 //       ISR,中断服务函数指针
 // 返回: 无
 // =============================================================================
-static void __IIC_IntConfig(u32 IntLine,u32 (*ISR)(ufast_t))
+static void __IIC_IntConfig(u32 IntLine,u32 (*ISR)(ptu32_t))
 {
     //中断线的初始化
+    Int_Register(IntLine);
     Int_IsrConnect(IntLine,ISR);
     Int_SettoAsynSignal(IntLine);
     Int_ClearLine(IntLine);     //清掉初始化产生的发送fifo空的中断
@@ -273,36 +274,36 @@ static void __IIC_IntConfig(u32 IntLine,u32 (*ISR)(ufast_t))
 // 返回: TRUE，启动读时序成功，FALSE失败
 // =============================================================================
 static bool_t __IIC_GenerateWriteStart(volatile tagI2CReg *Reg,
-									   u8 dev_addr,
-									   u32 mem_addr,
-									   u8 maddr_len,
-									   u32 length,
-									   struct tagSemaphoreLCB *iic_semp)
+                                       u8 dev_addr,
+                                       u32 mem_addr,
+                                       u8 maddr_len,
+                                       u32 length,
+                                       struct SemaphoreLCB *iic_semp)
 {
-    struct tagIIC_CB *IIC;
-    struct tagIIC_IntParamSet *IntParam;
+    struct IIC_CB *IIC;
+    struct IIC_IntParamSet *IntParam;
     u8 ch,*pDmaBuf,Port,DmaBufLen;
 
     //通过specific_flag区分是哪条总线
     if((u32)Reg == CN_IIC_REGISTER_BADDR0)
     {
-    	IntParam = &IntParamset0;
-    	IIC = &s_tIIC0_CB;
-    	pDmaBuf = s_IIC0DmaBuf;
-    	Port = CN_IIC0;
-    	DmaBufLen = IIC0_DMA_BUF_LEN;
+        IntParam = &IntParamset0;
+        IIC = &s_tIIC0_CB;
+        pDmaBuf = s_IIC0DmaBuf;
+        Port = CN_IIC0;
+        DmaBufLen = IIC0_DMA_BUF_LEN;
     }
     else if((u32)Reg == CN_IIC_REGISTER_BADDR1)
     {
-    	IntParam = &IntParamset1;
-    	IIC = &s_tIIC1_CB;
-    	pDmaBuf = s_IIC1DmaBuf;
-    	Port = CN_IIC1;
-    	DmaBufLen = IIC1_DMA_BUF_LEN;
+        IntParam = &IntParamset1;
+        IIC = &s_tIIC1_CB;
+        pDmaBuf = s_IIC1DmaBuf;
+        Port = CN_IIC1;
+        DmaBufLen = IIC1_DMA_BUF_LEN;
     }
     else
     {
-    	return false;
+        return false;
     }
     IntParam->TransTotalLen = length;
     IntParam->TransCount = 0;
@@ -314,23 +315,23 @@ static bool_t __IIC_GenerateWriteStart(volatile tagI2CReg *Reg,
     Reg->TWI_IADR = TWI_IADR_IADR(mem_addr);
     Reg->TWI_CR = TWI_CR_START;
 
-    if(s_IIC_DmaUsed[Port] == false)		//使用非DMA方式 发送
+    if(s_IIC_DmaUsed[Port] == false)        //使用非DMA方式 发送
     {
-		//发送一个字节的数据
-		while(!(Reg->TWI_SR & TWI_SR_TXRDY));
-		IIC_PortRead(IIC,&ch,1);
+        //发送一个字节的数据
+        while(!(Reg->TWI_SR & TWI_SR_TXRDY));
+        IIC_PortRead(IIC,&ch,1);
 
-		Reg->TWI_THR = ch;
-		IntParam->TransCount++;
-	    __IIC_IntEnable(Reg,TWI_IER_TXRDY);
+        Reg->TWI_THR = ch;
+        IntParam->TransCount++;
+        __IIC_IntEnable(Reg,TWI_IER_TXRDY);
     }
-    else									//配置DMA发送时的参数
+    else                                    //配置DMA发送时的参数
     {
-    	while(!(Reg->TWI_SR & TWI_SR_TXRDY));
-    	ch = IIC_PortRead(IIC,pDmaBuf,DmaBufLen);
-		Reg->TWI_TPR  = (u32)pDmaBuf;
-		Reg->TWI_TCR  = ch;
-		Reg->TWI_PTCR = TWI_PTCR_TXTEN;
+        while(!(Reg->TWI_SR & TWI_SR_TXRDY));
+        ch = IIC_PortRead(IIC,pDmaBuf,DmaBufLen);
+        Reg->TWI_TPR  = (u32)pDmaBuf;
+        Reg->TWI_TCR  = ch;
+        Reg->TWI_PTCR = TWI_PTCR_TXTEN;
         __IIC_IntEnable(Reg,TWI_IER_ENDTX);
     }
 
@@ -354,35 +355,35 @@ static bool_t __IIC_GenerateWriteStart(volatile tagI2CReg *Reg,
 // 返回: TRUE，启动读时序成功，FALSE失败
 // =============================================================================
 static bool_t __IIC_GenerateReadStart( volatile tagI2CReg *Reg,
-									   u8 dev_addr,
-									   u32 mem_addr,
-									   u8 maddr_len,
-									   u32 length,
-									   struct tagSemaphoreLCB *iic_semp)
+                                       u8 dev_addr,
+                                       u32 mem_addr,
+                                       u8 maddr_len,
+                                       u32 length,
+                                       struct SemaphoreLCB *iic_semp)
 {
     u8 DmaRcvLen,*pDmaBuf,Port,DmaBufLen;
 
     if((u32)Reg == CN_IIC_REGISTER_BADDR0)
     {
-    	IntParamset0.TransTotalLen = length;
-    	IntParamset0.TransCount = 0;
-    	IntParamset0.pDrvPostSemp = iic_semp;				//iic_buf_semp
-    	pDmaBuf = s_IIC0DmaBuf;
-    	Port = CN_IIC0;
-    	DmaBufLen = IIC0_DMA_BUF_LEN;
+        IntParamset0.TransTotalLen = length;
+        IntParamset0.TransCount = 0;
+        IntParamset0.pDrvPostSemp = iic_semp;               //iic_buf_semp
+        pDmaBuf = s_IIC0DmaBuf;
+        Port = CN_IIC0;
+        DmaBufLen = IIC0_DMA_BUF_LEN;
     }
     else if((u32)Reg == CN_IIC_REGISTER_BADDR1)
     {
-    	IntParamset1.TransTotalLen = length;
-    	IntParamset1.TransCount = 0;
-    	IntParamset1.pDrvPostSemp = iic_semp;
-    	pDmaBuf = s_IIC1DmaBuf;
-    	Port = CN_IIC1;
-    	DmaBufLen = IIC1_DMA_BUF_LEN;
+        IntParamset1.TransTotalLen = length;
+        IntParamset1.TransCount = 0;
+        IntParamset1.pDrvPostSemp = iic_semp;
+        pDmaBuf = s_IIC1DmaBuf;
+        Port = CN_IIC1;
+        DmaBufLen = IIC1_DMA_BUF_LEN;
     }
     else
     {
-    	return false;
+        return false;
     }
     Reg->TWI_RHR;
 
@@ -394,13 +395,13 @@ static bool_t __IIC_GenerateReadStart( volatile tagI2CReg *Reg,
     Reg->TWI_CR = TWI_CR_START;
 
     if(s_IIC_DmaUsed[Port] == false)
-    	__IIC_IntEnable(Reg,TWI_IER_RXRDY|TWI_IER_TXRDY);
+        __IIC_IntEnable(Reg,TWI_IER_RXRDY|TWI_IER_TXRDY);
     else
     {
-    	DmaRcvLen = length>DmaBufLen ? DmaBufLen:length;
-		Reg->TWI_RPR  = (uint32_t)pDmaBuf;
-		Reg->TWI_RCR  = DmaRcvLen;
-		Reg->TWI_PTCR = TWI_PTCR_RXTEN;
+        DmaRcvLen = length>DmaBufLen ? DmaBufLen:length;
+        Reg->TWI_RPR  = (uint32_t)pDmaBuf;
+        Reg->TWI_RCR  = DmaRcvLen;
+        Reg->TWI_PTCR = TWI_PTCR_RXTEN;
         __IIC_IntEnable(Reg,TWI_IER_ENDRX);
     }
 
@@ -415,13 +416,13 @@ static bool_t __IIC_GenerateReadStart( volatile tagI2CReg *Reg,
 // =============================================================================
 static void __IIC_GenerateEnd(volatile tagI2CReg *Reg)
 {
-	if(((u32)Reg != CN_IIC_REGISTER_BADDR0) &&
-			(u32)Reg == CN_IIC_REGISTER_BADDR1)
-		return;
+    if(((u32)Reg != CN_IIC_REGISTER_BADDR0) &&
+            (u32)Reg == CN_IIC_REGISTER_BADDR1)
+        return;
 
 //    __IIC_IntDisable(Reg, TWI_IDR_TXRDY|TWI_IDR_RXRDY|TWI_IDR_TXCOMP);
-	__IIC_IntDisable(Reg, TWI_IDR_TXRDY|TWI_IDR_RXRDY|
-			TWI_IDR_ENDRX|TWI_IDR_ENDTX|TWI_IDR_TXCOMP);
+    __IIC_IntDisable(Reg, TWI_IDR_TXRDY|TWI_IDR_RXRDY|
+            TWI_IDR_ENDRX|TWI_IDR_ENDTX|TWI_IDR_TXCOMP);
     Djy_EventDelay(100);
     __IIC_GenerateStop(Reg);
 
@@ -437,23 +438,23 @@ static void __IIC_GenerateEnd(volatile tagI2CReg *Reg)
 // =============================================================================
 static s32 __IIC_BusCtrl(volatile tagI2CReg *Reg,u32 cmd,u32 data1,u32 data2)
 {
-	if(((u32)Reg != CN_IIC_REGISTER_BADDR0) &&
-			(u32)Reg != CN_IIC_REGISTER_BADDR1)
-		return 0;
+    if(((u32)Reg != CN_IIC_REGISTER_BADDR0) &&
+            (u32)Reg != CN_IIC_REGISTER_BADDR1)
+        return 0;
 
-	switch(cmd)
-	{
-	case CN_IIC_SET_CLK:
-		__IIC_SetClk(Reg,data1);
-		break;
-	case CN_IIC_DMA_USED:
-	case CN_IIC_DMA_UNUSED:
-		__IIC_DMA_Config(Reg,cmd);
-		break;
-	default:
-		break;
-	}
-	return 1;
+    switch(cmd)
+    {
+    case CN_IIC_SET_CLK:
+        __IIC_SetClk(Reg,data1);
+        break;
+    case CN_IIC_DMA_USED:
+    case CN_IIC_DMA_UNUSED:
+        __IIC_DMA_Config(Reg,cmd);
+        break;
+    default:
+        break;
+    }
+    return 1;
 }
 
 // =============================================================================
@@ -469,8 +470,8 @@ static s32 __IIC_BusCtrl(volatile tagI2CReg *Reg,u32 cmd,u32 data1,u32 data2)
 // =============================================================================
 static u32 __IIC_ISR(ufast_t IntLine)
 {
-    static struct tagIIC_CB *ICB;
-    static struct tagIIC_IntParamSet *IntParam;
+    static struct IIC_CB *ICB;
+    static struct IIC_IntParamSet *IntParam;
     tagI2CReg *reg;
 
     u8 ch,Port,*PDmaBuf;
@@ -502,107 +503,107 @@ static u32 __IIC_ISR(ufast_t IntLine)
     twi_sr = reg->TWI_SR;
     twi_imr = reg->TWI_IMR;
 
-    if(s_IIC_DmaUsed[Port] == false)		//使用非DMA发送和接收
+    if(s_IIC_DmaUsed[Port] == false)        //使用非DMA发送和接收
     {
-		if((twi_sr & TWI_SR_RXRDY) && (twi_imr & TWI_IMR_RXRDY))//接收中断
-		{
-			ch = reg->TWI_RHR;
-			if(IIC_PortWrite(ICB,&ch,1))
-				IntParam->TransCount ++;
-			if(IntParam->TransCount == IntParam->TransTotalLen - 1)
-			{
-				__IIC_GenerateStop(reg);   //倒数第一个时写stop
-			}
-			else if(IntParam->TransCount == IntParam->TransTotalLen)
-			{
-				__IIC_GenerateStop(reg); 
-				__IIC_IntDisable(reg,TWI_IDR_RXRDY);
-				__IIC_IntEnable(reg,TWI_IER_TXCOMP);
-			}
-		}
-		else if((twi_sr & TWI_SR_TXRDY) && (twi_imr & TWI_IMR_TXRDY))//发送
-		{
-			if(IIC_PortRead(ICB,&ch,1))
-			{
-				reg->TWI_THR = ch;
-				IntParam->TransCount ++;
-			}
-			else if(IntParam->TransCount == IntParam->TransTotalLen)
-			{
-				__IIC_IntDisable(reg,TWI_IDR_TXRDY);
-				__IIC_IntEnable(reg,TWI_IER_TXCOMP);
-				__IIC_GenerateStop(reg);
-			}
-		}
-		else if((twi_sr & TWI_SR_TXCOMP) && (twi_imr & TWI_IMR_TXCOMP))
-		{
-			__IIC_IntDisable(reg,TWI_IDR_TXCOMP);
-			Lock_SempPost(IntParam->pDrvPostSemp);
-		}
+        if((twi_sr & TWI_SR_RXRDY) && (twi_imr & TWI_IMR_RXRDY))//接收中断
+        {
+            ch = reg->TWI_RHR;
+            if(IIC_PortWrite(ICB,&ch,1))
+                IntParam->TransCount ++;
+            if(IntParam->TransCount == IntParam->TransTotalLen - 1)
+            {
+                __IIC_GenerateStop(reg);   //倒数第一个时写stop
+            }
+            else if(IntParam->TransCount == IntParam->TransTotalLen)
+            {
+                __IIC_GenerateStop(reg); 
+                __IIC_IntDisable(reg,TWI_IDR_RXRDY);
+                __IIC_IntEnable(reg,TWI_IER_TXCOMP);
+            }
+        }
+        else if((twi_sr & TWI_SR_TXRDY) && (twi_imr & TWI_IMR_TXRDY))//发送
+        {
+            if(IIC_PortRead(ICB,&ch,1))
+            {
+                reg->TWI_THR = ch;
+                IntParam->TransCount ++;
+            }
+            else if(IntParam->TransCount == IntParam->TransTotalLen)
+            {
+                __IIC_IntDisable(reg,TWI_IDR_TXRDY);
+                __IIC_IntEnable(reg,TWI_IER_TXCOMP);
+                __IIC_GenerateStop(reg);
+            }
+        }
+        else if((twi_sr & TWI_SR_TXCOMP) && (twi_imr & TWI_IMR_TXCOMP))
+        {
+            __IIC_IntDisable(reg,TWI_IDR_TXCOMP);
+            Lock_SempPost(IntParam->pDrvPostSemp);
+        }
     }
-    else			//使用DMA方式发送和接收数据
+    else            //使用DMA方式发送和接收数据
     {
-    	if((twi_sr & TWI_SR_ENDRX) && (twi_imr & TWI_IMR_ENDRX))//接收中断
-    	{
-    		reg->TWI_PTCR = TWI_PTCR_RXTDIS;
-    		//计算本次缓冲区中有多少数据
-    		if(IntParam->TransTotalLen - IntParam->TransCount > DmaBufLen)
-    		{
-    			temp = DmaBufLen;
-    			IIC_PortWrite(ICB,PDmaBuf,temp);
-    			IntParam->TransCount += temp;
-    			//计算下次DMA接收的数据大小
-    			if(IntParam->TransTotalLen - IntParam->TransCount > DmaBufLen)
-    				temp = DmaBufLen;
-    			else
-    				temp = IntParam->TransTotalLen - IntParam->TransCount;
-    			//配置下次DMA接收
-    			reg->TWI_RPR = (u32)PDmaBuf;
-    			reg->TWI_RCR = temp;
-    			reg->TWI_PTCR = TWI_PTCR_RXTEN;
-    		}
-    		else					//表明接收到了全部的数据
-    		{
-    			temp = IntParam->TransTotalLen - IntParam->TransCount;
-    			IIC_PortWrite(ICB,PDmaBuf,temp);
-    			__IIC_GenerateStop(reg);
+        if((twi_sr & TWI_SR_ENDRX) && (twi_imr & TWI_IMR_ENDRX))//接收中断
+        {
+            reg->TWI_PTCR = TWI_PTCR_RXTDIS;
+            //计算本次缓冲区中有多少数据
+            if(IntParam->TransTotalLen - IntParam->TransCount > DmaBufLen)
+            {
+                temp = DmaBufLen;
+                IIC_PortWrite(ICB,PDmaBuf,temp);
+                IntParam->TransCount += temp;
+                //计算下次DMA接收的数据大小
+                if(IntParam->TransTotalLen - IntParam->TransCount > DmaBufLen)
+                    temp = DmaBufLen;
+                else
+                    temp = IntParam->TransTotalLen - IntParam->TransCount;
+                //配置下次DMA接收
+                reg->TWI_RPR = (u32)PDmaBuf;
+                reg->TWI_RCR = temp;
+                reg->TWI_PTCR = TWI_PTCR_RXTEN;
+            }
+            else                    //表明接收到了全部的数据
+            {
+                temp = IntParam->TransTotalLen - IntParam->TransCount;
+                IIC_PortWrite(ICB,PDmaBuf,temp);
+                __IIC_GenerateStop(reg);
 
-				__IIC_IntDisable(reg,TWI_IDR_ENDRX);
-				__IIC_IntEnable(reg,TWI_IER_TXCOMP);
-    		}
-    	}
-    	else if((twi_sr & TWI_SR_ENDTX) && (twi_imr & TWI_IMR_ENDTX))//发送
-    	{
-    		reg->TWI_PTCR = TWI_PTCR_TXTDIS;
-    		//计算发生本次中断，DMA发送的字节数
-    		if(IntParam->TransTotalLen - IntParam->TransCount > DmaBufLen)
-    		{
-    			IntParam->TransCount += DmaBufLen;
-    			//计算本次需发送多少数据
-				if(IntParam->TransTotalLen - IntParam->TransCount > DmaBufLen)
-					temp = DmaBufLen;
-				else
-					temp = IntParam->TransTotalLen - IntParam->TransCount;
-				IIC_PortRead(ICB,PDmaBuf,temp);
-				//配置DMA发送
-				reg->TWI_TPR = (u32)PDmaBuf;
-				reg->TWI_TCR = temp;
-    			reg->TWI_PTCR = TWI_PTCR_TXTEN;
-    		}
-    		else					//表明DMA已经传输结束
-    		{
-    			IntParam->TransCount = IntParam->TransTotalLen;
-				__IIC_IntDisable(reg,TWI_IDR_ENDTX);
-				__IIC_IntEnable(reg,TWI_IER_TXCOMP);
-				__IIC_GenerateStop(reg);
-    		}
+                __IIC_IntDisable(reg,TWI_IDR_ENDRX);
+                __IIC_IntEnable(reg,TWI_IER_TXCOMP);
+            }
+        }
+        else if((twi_sr & TWI_SR_ENDTX) && (twi_imr & TWI_IMR_ENDTX))//发送
+        {
+            reg->TWI_PTCR = TWI_PTCR_TXTDIS;
+            //计算发生本次中断，DMA发送的字节数
+            if(IntParam->TransTotalLen - IntParam->TransCount > DmaBufLen)
+            {
+                IntParam->TransCount += DmaBufLen;
+                //计算本次需发送多少数据
+                if(IntParam->TransTotalLen - IntParam->TransCount > DmaBufLen)
+                    temp = DmaBufLen;
+                else
+                    temp = IntParam->TransTotalLen - IntParam->TransCount;
+                IIC_PortRead(ICB,PDmaBuf,temp);
+                //配置DMA发送
+                reg->TWI_TPR = (u32)PDmaBuf;
+                reg->TWI_TCR = temp;
+                reg->TWI_PTCR = TWI_PTCR_TXTEN;
+            }
+            else                    //表明DMA已经传输结束
+            {
+                IntParam->TransCount = IntParam->TransTotalLen;
+                __IIC_IntDisable(reg,TWI_IDR_ENDTX);
+                __IIC_IntEnable(reg,TWI_IER_TXCOMP);
+                __IIC_GenerateStop(reg);
+            }
 
-    	}
-		else if((twi_sr & TWI_SR_TXCOMP) && (twi_imr & TWI_SR_TXCOMP))
-		{
-			__IIC_IntDisable(reg,TWI_IDR_TXCOMP);
-			Lock_SempPost(IntParam->pDrvPostSemp);
-		}
+        }
+        else if((twi_sr & TWI_SR_TXCOMP) && (twi_imr & TWI_SR_TXCOMP))
+        {
+            __IIC_IntDisable(reg,TWI_IDR_TXCOMP);
+            Lock_SempPost(IntParam->pDrvPostSemp);
+        }
     }
 
     return 0;
@@ -619,25 +620,25 @@ static u32 __IIC_ISR(ufast_t IntLine)
 // =============================================================================
 bool_t IIC0_Init(void)
 {
-	struct tagIIC_Param IIC0_Config;
+    struct IIC_Param IIC0_Config;
 
-	IIC0_Config.BusName 		   = "IIC0";
-	IIC0_Config.IICBuf 		       = (u8*)&s_IIC0Buf;
-	IIC0_Config.IICBufLen   	   = IIC0_BUF_LEN;
-	IIC0_Config.SpecificFlag 	   = CN_IIC_REGISTER_BADDR0;
-	IIC0_Config.pGenerateWriteStart = (WriteStartFunc)__IIC_GenerateWriteStart;
-	IIC0_Config.pGenerateReadStart  = (ReadStartFunc)__IIC_GenerateReadStart;
-	IIC0_Config.pGenerateEnd        = (GenerateEndFunc)__IIC_GenerateEnd;
-	IIC0_Config.pBusCtrl            = (IICBusCtrlFunc)__IIC_BusCtrl;
+    IIC0_Config.BusName            = "IIC0";
+    IIC0_Config.IICBuf             = (u8*)&s_IIC0Buf;
+    IIC0_Config.IICBufLen          = IIC0_BUF_LEN;
+    IIC0_Config.SpecificFlag       = CN_IIC_REGISTER_BADDR0;
+    IIC0_Config.pGenerateWriteStart = (WriteStartFunc)__IIC_GenerateWriteStart;
+    IIC0_Config.pGenerateReadStart  = (ReadStartFunc)__IIC_GenerateReadStart;
+    IIC0_Config.pGenerateEnd        = (GenerateEndFunc)__IIC_GenerateEnd;
+    IIC0_Config.pBusCtrl            = (IICBusCtrlFunc)__IIC_BusCtrl;
 
-	__IIC_HardConfig(CN_IIC_REGISTER_BADDR0,0);
-	__IIC_IntConfig(CN_INT_LINE_TWI0,__IIC_ISR);
+    __IIC_HardConfig(CN_IIC_REGISTER_BADDR0,0);
+    __IIC_IntConfig(CN_INT_LINE_TWI0,__IIC_ISR);
 
     PMC_EnablePeripheral(CN_INT_LINE_TWI0);
 
-	if(NULL == IIC_BusAdd_r(&IIC0_Config,&s_tIIC0_CB))
-		return 0;
-	return 1;
+    if(NULL == IIC_BusAdd_s(&s_tIIC0_CB,&IIC0_Config))
+        return 0;
+    return 1;
 }
 
 // =============================================================================
@@ -651,24 +652,24 @@ bool_t IIC0_Init(void)
 // =============================================================================
 bool_t IIC1_Init(void)
 {
-	struct tagIIC_Param IIC1_Config;
+    struct IIC_Param IIC1_Config;
 
-	IIC1_Config.BusName 		   = "IIC1";
-	IIC1_Config.IICBuf 		       = (u8*)&s_IIC1Buf;
-	IIC1_Config.IICBufLen   	   = IIC1_BUF_LEN;
-	IIC1_Config.SpecificFlag 	   = CN_IIC_REGISTER_BADDR1;
-	IIC1_Config.pGenerateWriteStart = (WriteStartFunc)__IIC_GenerateWriteStart;
-	IIC1_Config.pGenerateReadStart  = (ReadStartFunc)__IIC_GenerateReadStart;
-	IIC1_Config.pGenerateEnd        = (GenerateEndFunc)__IIC_GenerateEnd;
-	IIC1_Config.pBusCtrl            = (IICBusCtrlFunc)__IIC_BusCtrl;
+    IIC1_Config.BusName            = "IIC1";
+    IIC1_Config.IICBuf             = (u8*)&s_IIC1Buf;
+    IIC1_Config.IICBufLen          = IIC1_BUF_LEN;
+    IIC1_Config.SpecificFlag       = CN_IIC_REGISTER_BADDR1;
+    IIC1_Config.pGenerateWriteStart = (WriteStartFunc)__IIC_GenerateWriteStart;
+    IIC1_Config.pGenerateReadStart  = (ReadStartFunc)__IIC_GenerateReadStart;
+    IIC1_Config.pGenerateEnd        = (GenerateEndFunc)__IIC_GenerateEnd;
+    IIC1_Config.pBusCtrl            = (IICBusCtrlFunc)__IIC_BusCtrl;
 
-	__IIC_HardConfig(CN_IIC_REGISTER_BADDR1,0);
-	__IIC_IntConfig(CN_INT_LINE_TWI1,__IIC_ISR);
+    __IIC_HardConfig(CN_IIC_REGISTER_BADDR1,0);
+    __IIC_IntConfig(CN_INT_LINE_TWI1,__IIC_ISR);
 
     PMC_EnablePeripheral(CN_INT_LINE_TWI1);
 
-	if(NULL == IIC_BusAdd_r(&IIC1_Config,&s_tIIC1_CB))
-		return 0;
-	return 1;
+    if(NULL == IIC_BusAdd_r(&IIC1_Config,&s_tIIC1_CB))
+        return 0;
+    return 1;
 }
 

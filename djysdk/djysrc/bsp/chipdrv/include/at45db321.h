@@ -57,11 +57,13 @@
 #ifndef _AT45DB321_H_
 #define _AT45DB321_H_
 
-ptu32_t module_init_at45db321(void);
-u32 SPI_FLASH_Read(u32 Address,u8 *data,u32 data_len);
-u32 SPI_FLASH_Write(u32 Address,u8 *data,u32 data_len);
-bool_t at45db321_Check_Busy(void);
-bool_t at45db321_Wait_Ready(u32 Time_Out);
+bool_t module_init_at45db321(void);
+u32 AT45_FLASH_Read(u32 Address,u8 *data,u32 data_len);
+u32 AT45_FLASH_Write(u32 Address,u8 *data,u32 data_len);
+bool_t AT45_Page_Erase(u32 Address);
+bool_t AT45_Block_Erase(u32 Address);
+bool_t AT45_Chip_Erase(void);
+bool_t AT45_FLASH_Ready(void);
 
 #endif
 

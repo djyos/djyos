@@ -13,35 +13,37 @@
 //   新版本号: V1.0.0
 //   修改说明: 原始版本
 //------------------------------------------------------
+#include <windows.h>
 #include "stdint.h"
 #include "driver.h"
 #include "ring.h"
 #include "cpu_peri.h"
-#include "windows.h"
 #include "stdio.h"
 #include "djyos.h"
 #include "int.h"
 
 #define cmd_buf_len  1024
 
-static struct tagMultiplexObjectCB * pMultiplexCmd;      //多路复用目标对象头指针
+static struct MultiplexObjectCB * pMultiplexCmd;      //多路复用目标对象头指针
 static u32 MplCmdStatus;
 HANDLE win32_scanf;
 
 char cmd_ptcl_recv_buf[cmd_buf_len];
-//static tagDevHandle pg_cmd_hdl;
-struct tagRingBuf recv_ring_buf;           //环形接收缓冲区.
+//static struct DjyDevice * pg_cmd_hdl;
+static struct RingBuf s_tRecvRingBuf;           //环形接收缓冲区.
+static struct SemaphoreLCB *s_ptRecvRingBufSemp;
 char scanf_buf[cmd_buf_len-2];
 HANDLE hStdOut, hNewScreenBuffer,hStdIn;
 
 u16 u16g_evtt_right_write;      //设备右手被写后弹出的事件类型
 
-u32 cmd_int(ufast_t uart_int_line)
+u32 cmd_int(ptu32_t uart_int_line)
 {
     u32 len;
     len = strlen(scanf_buf);
     //copy整个硬件缓冲区到协议缓冲区
-    Ring_Write(&recv_ring_buf, (u8*)scanf_buf,len);
+    Ring_Write(&s_tRecvRingBuf, (u8*)scanf_buf,len);
+    Lock_SempPost(s_ptRecvRingBufSemp);
     MplCmdStatus |= CN_MULTIPLEX_SENSINGBIT_READ;
     Multiplex_Set(pMultiplexCmd,MplCmdStatus);
     return 0;
@@ -89,27 +91,28 @@ u32 WINAPI win32_scanf_pro( LPVOID lpParameter )
 ptu32_t ModuleInstall_Cmd(ptu32_t para)
 {
 
-    tagDevHandle cmd_dev;
+    struct DjyDevice * cmd_dev;
 
 
     pMultiplexCmd = NULL;
     MplCmdStatus = CN_MULTIPLEX_SENSINGBIT_WRITE;//初始时可写不可读
-    Ring_Init(  &recv_ring_buf,
+    Ring_Init(  &s_tRecvRingBuf,
                 (u8 *)cmd_ptcl_recv_buf,
                 cmd_buf_len);
-
+    s_ptRecvRingBufSemp = Lock_SempCreate(1,0,CN_SEMP_BLOCK_FIFO,NULL);
     //以下建立windows 终端输入设备
     cmd_dev = Driver_DeviceCreate( NULL,"windows_cmd",
                                 NULL,NULL,
-                               (devWriteFunc) cmd_DriverWrite,
-                               (devReadFunc ) cmd_DriverRead,
-                               (devCtrlFunc ) cmd_DriverCtrl,
+                               (fntDevWrite) cmd_DriverWrite,
+                               (fntDevRead ) cmd_DriverRead,
+                               (fntDevCtrl ) cmd_DriverCtrl,
                                cmd_MultiplexAdd,
                                0
                                );
-    if(cmd_dev == NULL)
+    if((cmd_dev == NULL) || (s_ptRecvRingBufSemp == NULL))
         goto exit_from_add_device;
 //    pg_cmd_hdl = Driver_OpenDevice("windows_cmd",O_RDWR,0);      //打开右手句柄
+    Int_Register(cn_int_line_cmd);
     Int_IsrConnect(cn_int_line_cmd,cmd_int);
     Int_SettoAsynSignal(cn_int_line_cmd);
     Int_RestoreAsynLine(cn_int_line_cmd);
@@ -130,11 +133,13 @@ ptu32_t ModuleInstall_Cmd(ptu32_t para)
     return 1;
 
 exit_from_add_device:
+    Lock_SempDelete(s_ptRecvRingBufSemp);
+    Driver_DeleteDevice(cmd_dev);
     return 0;
 }
 
 bool_t cmd_MultiplexAdd (ptu32_t PrivateTag,
-                         struct tagMultiplexSetsCB *MultiplexSets,
+                         struct MultiplexSetsCB *MultiplexSets,
                          u32 DevAlias,
                          u32 SensingBit)
 {
@@ -182,17 +187,50 @@ ptu32_t cmd_DriverWrite(ptu32_t PrivateTag,u8 *buf,
 //      len,读入长度,
 //返回: 实际读出长度
 //----------------------------------------------------------------------------
-ptu32_t cmd_DriverRead(ptu32_t PrivateTag,u8 *buf,
-                                     u32 len,u32 offset,u32 timeout)
+ptu32_t cmd_DriverRead(ptu32_t PrivateTag,u8 *dst_buf,u32 len,u32 offset,u32 timeout)
 {
-    u32 result;
-    if(buf == NULL)
+    uint32_t completed = 0;
+    uint32_t ReadLen;
+    u32 base_time,rel_timeout=timeout;
+
+    if((len==0) || ((u8*)dst_buf == NULL) )
         return 0;
-//    Lock_SempPend(&tg_cmd_buf_semp,timeout);
-    result = Ring_Read(&recv_ring_buf,(u8*)buf,len);
-    MplCmdStatus &= (~CN_MULTIPLEX_SENSINGBIT_READ);
-    Multiplex_Set(pMultiplexCmd,MplCmdStatus);
-    return result;
+
+    base_time = (u32)DjyGetSysTime();
+    completed = Ring_Read(&s_tRecvRingBuf,(uint8_t*)dst_buf,len);
+    if(completed < len)    //缓冲区中数据不够，则等待接收
+    {
+        ReadLen = len - completed;
+        while(1)
+        {
+            Lock_SempPend(s_ptRecvRingBufSemp,rel_timeout);
+            completed += Ring_Read(&s_tRecvRingBuf,
+                               ((u8*)dst_buf) + completed,
+                               ReadLen);
+            if(completed < len)
+            {
+                //每次pend的时间要递减
+                rel_timeout = (u32)DjyGetSysTime() - base_time;
+                if(rel_timeout > timeout)
+                    break;
+                else
+                {
+                    rel_timeout = timeout - rel_timeout;
+                    ReadLen = len - completed;
+                }
+            }
+            else
+                break;
+        }
+    }
+    //若缓冲区中不再有数据，清掉多路复用触发状态。
+    if(Ring_Check(&s_tRecvRingBuf) == 0)
+    {
+        MplCmdStatus &= (~CN_MULTIPLEX_SENSINGBIT_READ);
+        Multiplex_Set(pMultiplexCmd,MplCmdStatus);
+    }
+
+    return completed;
 }
 
 //----串口设备控制函数---------------------------------------------------------
@@ -216,10 +254,6 @@ ptu32_t cmd_DriverCtrl(ptu32_t PrivateTag,u32 cmd,
             break;
         default: break;
     }
-    return 0;
-}
-u32 Uart_SendServiceDirectly(char *str)
-{
     return 0;
 }
 

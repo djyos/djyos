@@ -56,16 +56,16 @@
 #include "cpu_peri.h"
 
 // =============================================================================
-#define CN_AT24_CHIP_SIZE       (256)			//芯片大小256 Bytes
-#define CN_AT24_PAGE_SIZE       (8)				//芯片页大小8 Bytes
-#define CN_AT24_PAGE_SUM    	(CN_AT24_CHIP_SIZE/CN_AT24_PAGE_SIZE)
+#define CN_AT24_CHIP_SIZE       (256)           //芯片大小256 Bytes
+#define CN_AT24_PAGE_SIZE       (8)             //芯片页大小8 Bytes
+#define CN_AT24_PAGE_SUM        (CN_AT24_CHIP_SIZE/CN_AT24_PAGE_SIZE)
 
-#define AT24C_ADDRESS			0x50			//设备地址
-#define AT24C_CLK_FRE			(100*1000)		//总线速度，单位Hz
+#define AT24C_ADDRESS           0x50            //设备地址
+#define AT24C_CLK_FRE           (100*1000)      //总线速度，单位Hz
 
 
 //定义IICBUS架构下的IIC设备结构
-static struct tagIIC_Device *ps_AT24_Dev = NULL;
+static struct IIC_Device *ps_AT24_Dev = NULL;
 static u32 s_AT24_Timeout = CN_TIMEOUT_FOREVER;
 
 // =============================================================================
@@ -75,7 +75,7 @@ static u32 s_AT24_Timeout = CN_TIMEOUT_FOREVER;
 // =============================================================================
 void __AT24_GpioInit(void)
 {
-	//AT24C的WP引脚配置为低，允许写
+    //AT24C的WP引脚配置为低，允许写
 }
 
 // =============================================================================
@@ -87,15 +87,15 @@ void __AT24_GpioInit(void)
 // =============================================================================
 u16 __AT24_PageProgram(u16 wAddr, u8 *pbyBuf, u16 wBytesNum)
 {
-	if(((wAddr%CN_AT24_PAGE_SIZE) + wBytesNum) > CN_AT24_PAGE_SIZE)
-		return 0;
+    if(((wAddr%CN_AT24_PAGE_SIZE) + wBytesNum) > CN_AT24_PAGE_SIZE)
+        return 0;
 
-	IIC_Write(ps_AT24_Dev,wAddr,pbyBuf,wBytesNum,true,s_AT24_Timeout);
+    IIC_Write(ps_AT24_Dev,wAddr,pbyBuf,wBytesNum,true,s_AT24_Timeout);
 
-	//AT24内部写时间，最大为10mS
-	Djy_EventDelay(10*mS);
+    //AT24内部写时间，最大为10mS
+    Djy_EventDelay(10*mS);
 
-	return wBytesNum;
+    return wBytesNum;
 }
 
 // =============================================================================
@@ -107,15 +107,15 @@ u16 __AT24_PageProgram(u16 wAddr, u8 *pbyBuf, u16 wBytesNum)
 // =============================================================================
 u32 __AT24_PageRead(u16 wAddr, u8 *pbyBuf, u16 wBytesNum)
 {
-	if(((wAddr%CN_AT24_PAGE_SIZE) + wBytesNum) > CN_AT24_PAGE_SIZE)
-		return 0;
+    if(((wAddr%CN_AT24_PAGE_SIZE) + wBytesNum) > CN_AT24_PAGE_SIZE)
+        return 0;
 
-	IIC_Read(ps_AT24_Dev,wAddr,pbyBuf,wBytesNum,s_AT24_Timeout);
+    IIC_Read(ps_AT24_Dev,wAddr,pbyBuf,wBytesNum,s_AT24_Timeout);
 
-	//AT24内部写时间，最大为10mS
-	Djy_EventDelay(10*mS);
+    //AT24内部写时间，最大为10mS
+    Djy_EventDelay(10*mS);
 
-	return wBytesNum;
+    return wBytesNum;
 }
 
 // =============================================================================
@@ -127,25 +127,25 @@ u32 __AT24_PageRead(u16 wAddr, u8 *pbyBuf, u16 wBytesNum)
 // =============================================================================
 u32 AT24_WriteBytes(u16 wAddr, u8 *pbyBuf, u16 wBytesNum)
 {
-	u32 offset = 0,wSize = 0;
+    u32 offset = 0,wSize = 0;
 
-	//判断是否超出芯片地址范围
-	if((wAddr + wBytesNum) >= CN_AT24_CHIP_SIZE)
-		return false;
+    //判断是否超出芯片地址范围
+    if((wAddr + wBytesNum) >= CN_AT24_CHIP_SIZE)
+        return false;
 
-	//分页操作
-	while(wBytesNum)
-	{
-		offset = wAddr % CN_AT24_PAGE_SIZE;				//本页偏移字节数
-		wSize = (wBytesNum > CN_AT24_PAGE_SIZE - offset)?
-				(CN_AT24_PAGE_SIZE - offset): wBytesNum;//本页写字节数
-		__AT24_PageProgram(wAddr,pbyBuf,wSize);			//写本页
-		wAddr += wSize;									//写地址增加
-		pbyBuf += wSize;								//缓冲区增加
-		wBytesNum -= wSize;								//写长度递减
-	}
+    //分页操作
+    while(wBytesNum)
+    {
+        offset = wAddr % CN_AT24_PAGE_SIZE;             //本页偏移字节数
+        wSize = (wBytesNum > CN_AT24_PAGE_SIZE - offset)?
+                (CN_AT24_PAGE_SIZE - offset): wBytesNum;//本页写字节数
+        __AT24_PageProgram(wAddr,pbyBuf,wSize);         //写本页
+        wAddr += wSize;                                 //写地址增加
+        pbyBuf += wSize;                                //缓冲区增加
+        wBytesNum -= wSize;                             //写长度递减
+    }
 
-	return true;
+    return true;
 }
 
 // =============================================================================
@@ -157,42 +157,42 @@ u32 AT24_WriteBytes(u16 wAddr, u8 *pbyBuf, u16 wBytesNum)
 // =============================================================================
 u16 AT24_ReadBytes(u16 wAddr, u8 *pbyBuf, u16 wBytesNum)
 {
-	u16 offset = 0,rSize = 0;
+    u16 offset = 0,rSize = 0;
 
-	//判断是否超出芯片地址范围
-	if((wAddr + wBytesNum) >= CN_AT24_CHIP_SIZE)
-		return false;
+    //判断是否超出芯片地址范围
+    if((wAddr + wBytesNum) >= CN_AT24_CHIP_SIZE)
+        return false;
 
-	//分页操作
-	while(wBytesNum)
-	{
-		offset = wAddr % CN_AT24_PAGE_SIZE;				//本页偏移字节数
-		rSize = (wBytesNum > CN_AT24_PAGE_SIZE - offset)?
-				(CN_AT24_PAGE_SIZE - offset): wBytesNum;//本页读字节数
-		__AT24_PageRead(wAddr,pbyBuf,rSize);			//读本页
-		wAddr += rSize;									//读地址增加
-		pbyBuf += rSize;								//缓冲区增加
-		wBytesNum -= rSize;								//读长度递减
-	}
+    //分页操作
+    while(wBytesNum)
+    {
+        offset = wAddr % CN_AT24_PAGE_SIZE;             //本页偏移字节数
+        rSize = (wBytesNum > CN_AT24_PAGE_SIZE - offset)?
+                (CN_AT24_PAGE_SIZE - offset): wBytesNum;//本页读字节数
+        __AT24_PageRead(wAddr,pbyBuf,rSize);            //读本页
+        wAddr += rSize;                                 //读地址增加
+        pbyBuf += rSize;                                //缓冲区增加
+        wBytesNum -= rSize;                             //读长度递减
+    }
 
-	return true;
+    return true;
 }
 
 // =============================================================================
 // 功能：写字到指定地址
 // 参数：wAddr,地址
-// 		 wValue,数值，16比特数值
+//       wValue,数值，16比特数值
 // 返回：true,成功;false,失败
 // =============================================================================
 u16 AT24_WriteWord(u16 wAddr,u16 wValue)
 {
-	u8 pbyBuf[2];
-	pbyBuf[0]=wValue;
-	pbyBuf[1]=wValue>>8;
-	if(true == AT24_WriteBytes(wAddr,pbyBuf,2))
-		return true;
-	else
-		return false;
+    u8 pbyBuf[2];
+    pbyBuf[0]=wValue;
+    pbyBuf[1]=wValue>>8;
+    if(true == AT24_WriteBytes(wAddr,pbyBuf,2))
+        return true;
+    else
+        return false;
 }
 
 // =============================================================================
@@ -202,16 +202,16 @@ u16 AT24_WriteWord(u16 wAddr,u16 wValue)
 // =============================================================================
 s16 AT24_ReadWord(u16 wAddr)
 {
-	u8 pbyBuf[2];
-	u16 wValue;
+    u8 pbyBuf[2];
+    u16 wValue;
 
-	if(true == AT24_ReadBytes(wAddr, pbyBuf,2))
-	{
-		wValue=pbyBuf[0]+(pbyBuf[1]<<8);
-		return wValue;
-	}
-	else
-		return -1;
+    if(true == AT24_ReadBytes(wAddr, pbyBuf,2))
+    {
+        wValue=pbyBuf[0]+(pbyBuf[1]<<8);
+        return wValue;
+    }
+    else
+        return -1;
 }
 
 // =============================================================================
@@ -221,26 +221,26 @@ s16 AT24_ReadWord(u16 wAddr)
 // =============================================================================
 bool_t AT24_ModuleInit(void)
 {
-	bool_t result = false;
-	static struct tagIIC_Device s_AT24_Dev;
-	//GPIO初始化，SDA、SCL已经在IIC中初始化了，此处只需初始化WP即可
-	__AT24_GpioInit();
+    bool_t result = false;
+    static struct IIC_Device s_AT24_Dev;
+    //GPIO初始化，SDA、SCL已经在IIC中初始化了，此处只需初始化WP即可
+    __AT24_GpioInit();
 
-	//初始化IIC设备结构体
-	s_AT24_Dev.DevAddr 					= AT24C_ADDRESS;
-	s_AT24_Dev.BitOfMemAddr 			= 8;
-	s_AT24_Dev.BitOfMemAddrInDevAddr 	= 0;
+    //初始化IIC设备结构体
+    s_AT24_Dev.DevAddr                  = AT24C_ADDRESS;
+    s_AT24_Dev.BitOfMemAddr             = 8;
+    s_AT24_Dev.BitOfMemAddrInDevAddr    = 0;
 
-	//添加AT24到IIC0总线
-	if(NULL != IIC_DevAdd_r("IIC0","IIC_Dev_AT24",&s_AT24_Dev))
-	{
-		ps_AT24_Dev = &s_AT24_Dev;
-		IIC_BusCtrl(ps_AT24_Dev,CN_IIC_SET_CLK,AT24C_CLK_FRE,0);
-		IIC_BusCtrl(ps_AT24_Dev,CN_IIC_DMA_USED,0,0);
-		result = true;
-	}
+    //添加AT24到IIC0总线
+    if(NULL != IIC_DevAdd_r("IIC0","IIC_Dev_AT24",&s_AT24_Dev))
+    {
+        ps_AT24_Dev = &s_AT24_Dev;
+        IIC_BusCtrl(ps_AT24_Dev,CN_IIC_SET_CLK,AT24C_CLK_FRE,0);
+        IIC_BusCtrl(ps_AT24_Dev,CN_IIC_DMA_USED,0,0);
+        result = true;
+    }
 
-	return result;
+    return result;
 }
 
 

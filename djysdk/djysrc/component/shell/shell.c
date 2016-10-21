@@ -65,14 +65,13 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
-#include "rsc.h"
+#include "object.h"
 #include "djyos.h"
-#include "stddev.h"
+#include "hmi-input.h"
 #include "shell.h"
 #include "version.h"
 #include "time.h"
 #include "systime.h"
-#include "char_term.h"
 
 bool_t  Sh_ResetCpu();
 bool_t  Sh_ResetCpuHot();
@@ -82,8 +81,8 @@ bool_t Sh_ShowForCycle(char *param);
 bool_t Sh_ListRscSon(char *param);
 bool_t Sh_ListRscTree(char *param);
 void Sh_ListRscAll(void);
-void __Sh_ShowSon(struct tagRscNode *branche);
-void __Sh_ShowBranche(struct tagRscNode *branche);
+void __Sh_ShowSon(struct Object *branche);
+void __Sh_ShowBranche(struct Object *branche);
 bool_t Sh_ShowMemory(char *param);
 bool_t Sh_FillMemory(char *param);
 bool_t Sh_CmdParser(const char *buf,const char *keyword,char **param);
@@ -103,7 +102,7 @@ bool_t (*fng_pCD_PTT)(const char *PTT_Name) = NULL;
 
 extern bool_t Sh_PrintWorkPath(void);
 //内置命令表,包含系统自带的命令
-struct tagShellCmdTab const shell_cmd_table[] =
+struct ShellCmdTab const shell_cmd_table[] =
 {
     {
         "rsc-tree",
@@ -168,9 +167,9 @@ struct tagShellCmdTab const shell_cmd_table[] =
     },
 };
 
-static struct tagShellCmdRsc tg_shell_cmd_rsc
-                        [sizeof(shell_cmd_table)/sizeof(struct tagShellCmdTab)];
-static struct tagRscNode cmd_list_node;
+static struct ShellCmdRsc tg_shell_cmd_rsc
+                        [sizeof(shell_cmd_table)/sizeof(struct ShellCmdTab)];
+static struct Object cmd_list_node;
 
 //----当前工作路函数指针赋值-----------------------------------------------------
 //功能: 函数指针赋值，该指针指向获取当前工作路径的函数
@@ -209,9 +208,9 @@ ptu32_t ModuleInstall_Sh(ptu32_t para)
     {
         Djy_EvttUnregist(shell_evtt);
     }
-    Rsc_AddTree(&cmd_list_node,sizeof(struct tagRscNode),RSC_RSCNODE,"shell cmd list");
+    OBJ_AddTree(&cmd_list_node,sizeof(struct Object),RSC_RSCNODE,"shell cmd list");
     for(loop = 0;
-            loop<sizeof(shell_cmd_table)/sizeof(struct tagShellCmdTab);loop++)
+            loop<sizeof(shell_cmd_table)/sizeof(struct ShellCmdTab);loop++)
     {
         tg_shell_cmd_rsc[loop].shell_cmd_func
                                     = shell_cmd_table[loop].shell_cmd_func;
@@ -219,8 +218,8 @@ ptu32_t ModuleInstall_Sh(ptu32_t para)
                                     = shell_cmd_table[loop].help_hint;
         tg_shell_cmd_rsc[loop].help_detailed
                                     = shell_cmd_table[loop].help_detailed;
-        Rsc_AddSon(&cmd_list_node,&(tg_shell_cmd_rsc[loop].cmd_node),
-                    sizeof(struct tagShellCmdRsc),RSC_SHELL_CMD,shell_cmd_table[loop].cmd);
+        OBJ_AddChild(&cmd_list_node,&(tg_shell_cmd_rsc[loop].cmd_node),
+                    sizeof(struct ShellCmdRsc),RSC_SHELL_CMD,(const char*)(shell_cmd_table[loop].cmd));
     }
     return 1;
 }
@@ -236,8 +235,8 @@ ptu32_t ModuleInstall_Sh(ptu32_t para)
 //      false= 失败，可能是参数错误，也可能是命令表中包含重名或与现有命令重名的
 //          命令，如果是重名，则不重名的命令仍然正常加入命令表
 //-----------------------------------------------------------------------------
-bool_t Sh_InstallCmd(struct tagShellCmdTab const *cmd_tab,
-                      struct tagShellCmdRsc *cmd_rsc,u32 cmd_num)
+bool_t Sh_InstallCmd(struct ShellCmdTab const *cmd_tab,
+                      struct ShellCmdRsc *cmd_rsc,u32 cmd_num)
 {
     u32 loop;
     bool_t result = true;
@@ -246,13 +245,13 @@ bool_t Sh_InstallCmd(struct tagShellCmdTab const *cmd_tab,
 
     for(loop = 0; loop < cmd_num;loop++)
     {
-        if(Rsc_SearchSon(&cmd_list_node,cmd_tab[loop].cmd) == NULL)
+        if(OBJ_SearchChild(&cmd_list_node,(const char*)(cmd_tab[loop].cmd)) == NULL)
         {
             cmd_rsc[loop].shell_cmd_func = cmd_tab[loop].shell_cmd_func;
             cmd_rsc[loop].help_hint = cmd_tab[loop].help_hint;
             cmd_rsc[loop].help_detailed = cmd_tab[loop].help_detailed;
-            Rsc_AddSon(&cmd_list_node,&(cmd_rsc[loop].cmd_node),
-                        sizeof(struct tagShellCmdRsc),RSC_SHELL_CMD,cmd_tab[loop].cmd);
+            OBJ_AddChild(&cmd_list_node,&(cmd_rsc[loop].cmd_node),
+                        sizeof(struct ShellCmdRsc),RSC_SHELL_CMD,(const char*)(cmd_tab[loop].cmd));
         }
         else
         {
@@ -266,20 +265,20 @@ bool_t Sh_InstallCmd(struct tagShellCmdTab const *cmd_tab,
 //参数: cmd_tab，命令表指针，可参照shell_cmd_table的方式定义,cmd_num，表的大小
 //返回: 成功卸载的个数
 //-----------------------------------------------------------------------------
-u32 sh_uninstall_cmd_bytab(struct tagShellCmdTab const *cmd_tab,u32 cmd_num)
+u32 sh_uninstall_cmd_bytab(struct ShellCmdTab const *cmd_tab,u32 cmd_num)
 {
     u32 loop;
     u32 result = 0;
-    struct tagRscNode *tagShellCmdRsc;
+    struct Object *tagShellCmdRsc;
     if( (cmd_tab == NULL) || (cmd_num == 0))
         return result;
 
     for(loop = 0; loop < cmd_num;loop++)
     {
-        tagShellCmdRsc = Rsc_SearchSon(&cmd_list_node,cmd_tab[loop].cmd);
+        tagShellCmdRsc = OBJ_SearchChild(&cmd_list_node,(const char*)(cmd_tab[loop].cmd));
         if(NULL != tagShellCmdRsc)
         {
-            Rsc_DelNode(tagShellCmdRsc);
+            OBJ_Del(tagShellCmdRsc);
             result ++;
         }
 
@@ -289,21 +288,16 @@ u32 sh_uninstall_cmd_bytab(struct tagShellCmdTab const *cmd_tab,u32 cmd_num)
 bool_t Sh_UninstallCmdByName(char *param)
 {
     bool_t result = 0;
-    char *cmdname;
-    struct tagRscNode *tagShellCmdRsc;
-    char *next_param;
+    struct Object *tagShellCmdRsc;
     if(NULL == param)
     {
         return false;
     }
-    cmdname = Sh_GetWord(param,&next_param);
-    if( cmdname == NULL)
-        return result;
 
-    tagShellCmdRsc = Rsc_SearchSon(&cmd_list_node,cmdname);
+    tagShellCmdRsc = OBJ_SearchChild(&cmd_list_node,(const char *)param);
     if(NULL != tagShellCmdRsc)
     {
-        Rsc_DelNode(tagShellCmdRsc);
+        OBJ_Del(tagShellCmdRsc);
         result = true;
     }
     else
@@ -312,45 +306,6 @@ bool_t Sh_UninstallCmdByName(char *param)
     }
     return result;
 }
-
-//----提取目录---------------------------------------------------------------
-//功能: 从buf中提取一个由'\\'或行结束符隔开的单词，next用于返回下一个单词首地址，
-//      如果没有下一个单词，则next=NULL。
-//参数: buf，待分析的字符串
-//      next，返回下一个单词指针
-//返回: 提取的单词指针，已将单词后面的分隔符换成串结束符'\0'
-//-----------------------------------------------------------------------------
-char *Sh_GetItem(char *buf,char **next)
-{
-    uint32_t i=0;
-    *next = NULL;
-    while(1)
-    {
-        if((buf[i] == '\\') || (buf[i] == 0))
-        {
-            if(buf[i] == 0)
-                return buf;
-            else
-            {
-                buf[i] = '\0';
-                break;
-            }
-        }
-        i++;
-    }
-    i++;
-    while(buf[i] != 0)
-    {
-        if((buf[i]!='\\') && (buf[i] != '\n') && (buf[i] != '\r'))
-        {
-            *next = &buf[i];
-            break;
-        }
-        i++;
-    }
-    return buf;
-}
-
 
 //----提取单词---------------------------------------------------------------
 //功能: 从buf中提取一个由空格或行结束符隔开的单词，next用于返回下一个单词首地址，
@@ -417,12 +372,12 @@ bool_t Sh_ShowForCycle(char *para)
 //-----------------------------------------------------------------------------
 bool_t Sh_ListRscSon(char *param)
 {
-    struct tagRscNode *rsc_tree;
+    struct Object *rsc_tree;
     if(param == NULL)
-        rsc_tree = Rsc_GetRoot();
+        rsc_tree = OBJ_SysRoot();
     else
     {
-        rsc_tree = Rsc_Search(Rsc_GetRoot(),param);
+        rsc_tree = OBJ_Search(OBJ_SysRoot(),(const char*)param);
         if(rsc_tree == NULL)
         {
             printf("没找到 %s 资源\r\n",param);
@@ -440,12 +395,12 @@ bool_t Sh_ListRscSon(char *param)
 //-----------------------------------------------------------------------------
 bool_t Sh_ListRscTree(char *param)
 {
-    struct tagRscNode *rsc_tree;
+    struct Object *rsc_tree;
     if(param == NULL)
-        rsc_tree = Rsc_GetRoot();
+        rsc_tree = OBJ_SysRoot();
     else
     {
-        rsc_tree = Rsc_Search(Rsc_GetRoot(),param);
+        rsc_tree = OBJ_Search(OBJ_SysRoot(),(const char*)param);
         if(rsc_tree == NULL)
         {
             printf("没找到 %s 资源树\r\n",param);
@@ -460,21 +415,25 @@ bool_t Sh_ListRscTree(char *param)
 //参数: 无
 //返回: 无
 //-----------------------------------------------------------------------------
-void __Sh_ShowSon(struct tagRscNode *branche)
+void __Sh_ShowSon(struct Object *branche)
 {
-    struct tagRscNode *current_node = branche;
+    struct Object *current_node = branche;
+    char *Name;
     while(1)
     {
-        current_node = Rsc_TraveSon(branche,current_node);
+        current_node = OBJ_TraveChild(branche,current_node);
         if(current_node == NULL)
         {
             printf("\r\n");
             break;
         }
-        if(current_node->name != NULL)
+
+        Name = OBJ_Name(current_node);
+        if(Name)
         {
-            printf("  %s\r\n", current_node->name);
-        }else
+            printf("  %s\r\n", Name);
+        }
+        else
         {
             printf("  无名资源\r\n");
         }
@@ -486,28 +445,30 @@ void __Sh_ShowSon(struct tagRscNode *branche)
 //参数: 无
 //返回: 无
 //-----------------------------------------------------------------------------
-void __Sh_ShowBranche(struct tagRscNode *branche)
+void __Sh_ShowBranche(struct Object *branche)
 {
-    struct tagRscNode *current_node = branche;
+    struct Object *current_node = branche;
     ucpu_t len;
     char neg[20];
+    char *Name;
     for(len = 0; len<20; len++)
         neg[len] = '-';
     while(1)
     {
-        current_node = Rsc_TraveScion(branche,current_node);
+        current_node = OBJ_TraveScion(branche,current_node);
         if(current_node == NULL)
         {
             printf("\r\n");
             break;
         }
-        len = Rsc_GetClass(current_node);
+        len = OBJ_GetLevel(current_node);
         neg[len] = '\0';
         printf("%s", neg);
         neg[len] = '-';
-        if(current_node->name != NULL)
+        Name = OBJ_Name(current_node);
+        if(Name != NULL)
         {
-            printf("%s\r\n", current_node->name);
+            printf("%s\r\n", Name);
         }else
         {
             printf("无名资源\r\n");
@@ -540,7 +501,7 @@ bool_t Sh_ShowMemory(char *param)
         printf("\r\n格式错误，正确格式是：\r\n>d 地址 单元数 每单元字节数\r\n");
         return false;
     }
-    addr = strtol(word_addr, (char **)NULL, 0);
+    addr = strtoul(word_addr, (char **)NULL, 0);
     unit_num = strtol(word_un, (char **)NULL, 0);
     unit_bytes = strtol(word_ub, (char **)NULL, 0);
 #if (CN_BYTE_BITS == 8)  //字节位宽=8，最常见的情况
@@ -667,7 +628,7 @@ bool_t Sh_ShowMemory(char *param)
                 printf("%08x ", *(uint32_t*)addr);
                 addr +=2;
                 printf("%08x ", *(uint32_t*)addr);
-                Djy_PutChar(' ');
+                putchar(' ');
                 addr +=2;
                 if(addr %16 == 0)
                 {
@@ -714,7 +675,7 @@ bool_t Sh_ShowMemory(char *param)
                 printf("%08x ", *(uint32_t*)addr);
                 addr +=2;
                 printf("%08x ", *(uint32_t*)addr);
-                Djy_PutChar(' ');
+                putchar(' ');
                 addr +=2;
                 if(addr %16 == 0)
                 {
@@ -753,13 +714,13 @@ bool_t Sh_FillMemory(char *param)
     char *word,*next_param;
 
     word = Sh_GetWord(param,&next_param);
-    addr = strtol(word, (char **)NULL, 0);
+    addr = strtoul(word, (char **)NULL, 0);
     word = Sh_GetWord(next_param,&next_param);
     unit_num = strtol(word, (char **)NULL, 0);
     word = Sh_GetWord(next_param,&next_param);
     unit_bytes = strtol(word, (char **)NULL, 0);
     word = Sh_GetWord(next_param,&next_param);
-    data = strtol(word, (char **)NULL, 0);
+    data = strtoul(word, (char **)NULL, 0);
 #if (CN_BYTE_BITS == 8)  //字节位宽=8，最常见的情况
     switch(unit_bytes)
     {
@@ -844,53 +805,6 @@ bool_t Sh_FillMemory(char *param)
     return true;
 }
 
-//----命令串分析---------------------------------------------------------------
-//功能: 分析buf包含的字符串第一个单词是否keyword命令。并且在param中返回keyword
-//      后第一个非零且非回车换行的字符的指针，该指针实际包含第一个命令行参数的
-//      地址。如果没有参数，则param=NULL。
-//参数: buf，待分析的字符串
-//      keyword，待匹配的命令
-//      param，返回命令行参数指针
-//返回: true = 命令匹配，false=命令不匹配
-//-----------------------------------------------------------------------------
-bool_t Sh_CmdParser(const char *buf,const char *keyword,char **param)
-{
-    uint32_t i=0;
-    char buf2[255];
-    bool_t result;
-
-    if(buf == NULL)
-        return false;
-    *param = NULL;
-    //获取不带参数的命令的串结束符或者命令后面空格的下标号i
-    for(i=0;i<255;i++)
-    {
-        if((buf[i]==' ')||(buf[i] == '\0'))
-            break;
-    }
-    memcpy(buf2,buf,i);
-    buf2[i] = '\0';
-    //比较没有带参数的命令
-    if(strcmp(buf2,keyword)!=0)
-        result = false;
-    else
-        result = true;
-
-    while(buf[i] != 0)
-    {
-        if(buf[i]!=' ')
-        {
-            if((buf[i] == '\n') || (buf[i] == '\r'))
-                *param = NULL;
-            else
-                *param = (char*)&buf[i];
-            break;
-        }
-        i++;
-    }
-    return result;
-}
-
 //----显示帮助-----------------------------------------------------------------
 //功能: 显示帮助信息
 //参数: 无
@@ -898,29 +812,31 @@ bool_t Sh_CmdParser(const char *buf,const char *keyword,char **param)
 //-----------------------------------------------------------------------------
 void Sh_CmdHelp(void)
 {
-    struct tagShellCmdRsc *current_cmd;
+    struct ShellCmdRsc *current_cmd;
     printf("\r\n有关具体命令的详细信息，请输入help [命令名]\r\n");
     printf("\r\n");
-    current_cmd = (struct tagShellCmdRsc *)&cmd_list_node;
+    current_cmd = (struct ShellCmdRsc *)&cmd_list_node;
+    char *Name;
     while(1)
     {
-        current_cmd = (struct tagShellCmdRsc *)
-                    Rsc_TraveScion(&cmd_list_node,(struct tagRscNode *)current_cmd);
+        current_cmd = (struct ShellCmdRsc *)
+                    OBJ_TraveScion(&cmd_list_node,(struct Object *)current_cmd);
         if(current_cmd == NULL)
         {
             break;
         }
         else
         {
+            Name = OBJ_Name(&current_cmd->cmd_node);
             if(current_cmd->help_hint != NULL)
             {
                 //todo: 前福查下，第一个%s应该是%-32s才对，下6行同
-                printf("%-24s%s",
-                            current_cmd->cmd_node.name,current_cmd->help_hint);
+                printf("%-24s%s", Name, current_cmd->help_hint);
+
             }
             else
             {
-                printf("%-24s没有提供简要帮助信息",current_cmd->cmd_node.name);
+                printf("%-24s没有提供简要帮助信息", Name);
             }
         }
         printf("\r\n");
@@ -937,7 +853,7 @@ bool_t Sh_ListCmdHelp(char *param)
 {
     char *cmd,*next_param;
     bool_t result;
-    struct tagShellCmdRsc *help_cmd;
+    struct ShellCmdRsc *help_cmd;
 
     if(param == NULL)
     {
@@ -947,7 +863,7 @@ bool_t Sh_ListCmdHelp(char *param)
     else
     {
         cmd = Sh_GetWord(param,&next_param);
-        help_cmd = (struct tagShellCmdRsc *)Rsc_SearchSon(&cmd_list_node,cmd);
+        help_cmd = (struct ShellCmdRsc *)OBJ_SearchChild(&cmd_list_node,(const char*)cmd);
         if(help_cmd != NULL)
         {
             if(help_cmd->help_detailed != NULL)
@@ -962,7 +878,7 @@ bool_t Sh_ListCmdHelp(char *param)
             result = false;
         }
     }
-    return result;;
+    return result;
 }
 bool_t Sh_Ver(char *param)
 {
@@ -975,47 +891,36 @@ bool_t Sh_Date(char *param)
 {
     s64 nowtime;
     struct tm dtm;
-    char command[256];
-    char buf[8];
-    int cmdlen;
+    char command[20];
+    char buf[12];
     int res;
 
-    nowtime = TM_Time(NULL);
+    nowtime = Tm_Time(NULL);
     Tm_LocalTime_r(&nowtime,&dtm);
+    Tm_AscTime(&dtm,command);
 
-    printf("\r\n当前日期：%d/%02d/%02d %s",
-            dtm.tm_year, dtm.tm_mon, dtm.tm_mday, g_cTmWdays[dtm.tm_wday]);
+    printf("\r\n当前时间：%s %s",command, g_cTmWdays[dtm.tm_wday]);
     printf("\r\n输入新日期：");
 
-    cmdlen = EasyScanf(NULL, command);
-    if ((8<=cmdlen) && (cmdlen<=10))
+//    cmdlen = EasyScanf(NULL, command);
+    do
+        fgets(buf,11,stdin);
+    while(strlen(buf) == 0);
+    memcpy(command,buf,10);
+    res = Tm_SetDateTimeStr(command);
+    switch (res)
     {
-        //日期为“2012/02/12”形式，在它背后加入时间
-        strcat(command, ",");    // 逗号用于分开日期和时间
-        itoa(dtm.tm_hour, buf, 10);
-        strcat(command, buf);
-        strcat(command, ":");
-        itoa(dtm.tm_min, buf, 10);
-        strcat(command, buf);
-        strcat(command, ":");
-        itoa(dtm.tm_sec, buf, 10);
-        strcat(command, buf);
-
-        res = Tm_SetDateTimeStr(command);
-        switch (res)
-        {
-        case EN_CLOCK_YEAR_ERROR:
-            printf("年份错误。");
-            break;
-        case EN_CLOCK_MON_ERROR:
-            printf("月份错误。");
-            break;
-        case EN_CLOCK_DAY_ERROR:
-            printf("日期错误。");
-            break;
-        default:
-            break;
-        }
+    case EN_CLOCK_YEAR_ERROR:
+        printf("年份错误。");
+        break;
+    case EN_CLOCK_MON_ERROR:
+        printf("月份错误。");
+        break;
+    case EN_CLOCK_DAY_ERROR:
+        printf("日期错误。");
+        break;
+    default:
+        break;
     }
 
     printf("\r\n");
@@ -1026,79 +931,40 @@ bool_t Sh_Time(char *param)
 {
     s64 nowtime;
     struct tm dtm;
-    char command[256];
-    char time[16];
-    char buf[8];
-    int cmdlen;
+    char command[20];
     int res;
 
-    nowtime = TM_Time(NULL);
+    nowtime = Tm_Time(NULL);
     Tm_LocalTime_r(&nowtime,&dtm);
+    Tm_AscTime(&dtm,command);
 
-    printf("\r\n当前时间：%02d:%02d:%02d", dtm.tm_hour, dtm.tm_min, dtm.tm_sec);
+    printf("\r\n当前时间：%s %s",command, g_cTmWdays[dtm.tm_wday]);
     printf("\r\n输入新时间：");
 
-    cmdlen = EasyScanf(NULL, command);
-    if ((5<=cmdlen) && (cmdlen<=8))
+    do
+        fgets(command+11,9,stdin);
+    while(strlen(command+11) == 0);
+    res = Tm_SetDateTimeStr(command);
+    switch (res)
     {
-        time[0] = '\0';
-        strcpy(time, command);    // 将获得的时间字符串复制到buf中
-        //时间为“03:32:1”形式，在它前面加日期
-        command[0] = '\0';
-        itoa(dtm.tm_year, buf, 10);
-        strcat(command, buf);
-        strcat(command, "/");
-        itoa(dtm.tm_mon, buf, 10);
-        strcat(command, buf);
-        strcat(command, "/");
-        itoa(dtm.tm_mday, buf, 10);
-        strcat(command, buf);
-        strcat(command, ",");    // 逗号用于分开日期和时间
-        strcat(command, time);
-
-        res = Tm_SetDateTimeStr(command);
-        switch (res)
-        {
-        case EN_CLOCK_HOUR_ERROR:
-            printf("小时错误。");
-            break;
-        case EN_CLOCK_MIN_ERROR:
-            printf("分钟错误。");
-            break;
-        case EN_CLOCK_SEC_ERROR:
-            printf("秒钟错误。");
-            break;
-        default:
-            break;
-        }
+    case EN_CLOCK_HOUR_ERROR:
+        printf("小时错误。");
+        break;
+    case EN_CLOCK_MIN_ERROR:
+        printf("分钟错误。");
+        break;
+    case EN_CLOCK_SEC_ERROR:
+        printf("秒钟错误。");
+        break;
+    case EN_CLOCK_FMT_ERROR:
+        printf("格式错误。");
+        break;
+    default:
+        break;
     }
-
     printf("\r\n");
     return true;
 }
-
-//----转换输入命令的大写字母为小写----------------------------------------------
-//功能: 转换shell下输入的命令"buf"中空格前的大写字母为小写。
-//参数: cmd，shell下输入的命令命令"buf"(cmd)
-//返回: 0
-//-----------------------------------------------------------------------------
-#if 0
-void capital_convert_lowercase(char *cmd)
-{
-
-    while(*cmd!='\0')
-    {
-           if(*cmd>='A'&&*cmd<='Z')
-            *cmd=*cmd+('a'-'A');
-            cmd++; //下一个字符
-         //遇到空格
-         if(*cmd==' ')
-             break;
-    }
-    return ;
-}
-#endif
-
 
 //----判断':'后面是否有数据-----------------------------------------------------
 //功能: 从一个可能包含多级路径名和文件名的字符串中判断第一次遇到':'之后是否还有
@@ -1141,7 +1007,7 @@ bool_t Sh_ExecCommand(char *buf)
 {
     bool_t result = false;
     char *cmd,*next_param;
-    struct tagShellCmdRsc *exec_cmd;
+    struct ShellCmdRsc *exec_cmd;
     //串口限制读取255字符，在这里提示超长就行。
     if(strnlen(buf, CN_SHELL_CMD_LIMIT+1) > CN_SHELL_CMD_LIMIT)
     {
@@ -1156,7 +1022,7 @@ bool_t Sh_ExecCommand(char *buf)
         {
             if( ! fng_pCD_PTT(buf))
             {
-                printf("分区 s% 不存在",buf);
+                printf("分区 %s 不存在",buf);
             }
         }
         else
@@ -1167,10 +1033,20 @@ bool_t Sh_ExecCommand(char *buf)
     }
     cmd = Sh_GetWord(buf,&next_param);
     strlwr(cmd);
-    exec_cmd = (struct tagShellCmdRsc *)Rsc_SearchSon(&cmd_list_node,cmd);
+    exec_cmd = (struct ShellCmdRsc *)OBJ_SearchChild(&cmd_list_node,(const char*)cmd);
     if(exec_cmd != NULL)
     {
         result = exec_cmd->shell_cmd_func(next_param);
+        if(result == false)
+        {
+            if(exec_cmd->help_detailed)
+            {
+                printf("命令格式错误，正确格式是：");
+                printf("%s",exec_cmd->help_detailed);
+            }
+            else
+                printf("命令格式错误，未提供详细帮助信息");
+        }
     }else
     {
         printf("\r\n无此命令\r\n");
@@ -1187,9 +1063,14 @@ bool_t Sh_ExecCommand(char *buf)
 ptu32_t Sh_Service(void)
 {
     char command[CN_SHELL_CMD_LIMIT+1];
+    printf("\n\r");
+    if ((fng_pPrintWorkPath != NULL))
+        fng_pPrintWorkPath( );
+    printf(">");
     while(1)
     {
-        EasyScanf(NULL,command);
+        //不能用不安全的gets
+        fgets(command,CN_SHELL_CMD_LIMIT+1,stdin);
         if(strlen(command) != 0)
             Sh_ExecCommand(command);  //执行命令
         if ((fng_pPrintWorkPath != NULL))
@@ -1197,4 +1078,5 @@ ptu32_t Sh_Service(void)
         printf(">");
     }
 }
+
 

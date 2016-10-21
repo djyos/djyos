@@ -63,19 +63,22 @@ extern "C" {
 
 #define CN_BREAK_CODE       0xf0    //键盘断码
 
- struct tagKeyBoardPrivate
+struct KeyBoardPrivate
 {
+    //这是用户的硬件驱动须提供的函数，返回值是0~4个按下的按键值，u32数据中，
+    //每8bit存放一个按下的按键。
+    //硬件驱动程序不需要考虑防抖。
     u32 (*read_keyboard)(void);
     u32 key_bak;
     u32 key_now;
     u32 vtime_limit;        //防抖时间，ms数，0则不防抖,防抖由系统执行，驱动程序
                             //不用考虑，只要告诉系统防抖时间就可以了。
-    u32 vtime_count;        //防抖计数器
+    u32 vtime_count;        //防抖计数器，由系统的keyboard使用，驱动程序可以不管
 };
 
 //函数定义
 ptu32_t ModuleInstall_KeyBoard(ptu32_t para);
-s32 Keyboard_InstallDevice(char *keyboard_name,struct tagKeyBoardPrivate *keyboard_pr);
+s32 Keyboard_InstallDevice(char *keyboard_name,struct KeyBoardPrivate *keyboard_pr);
 
 #ifdef __cplusplus
 }

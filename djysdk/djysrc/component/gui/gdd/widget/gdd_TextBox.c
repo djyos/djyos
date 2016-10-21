@@ -1,0 +1,477 @@
+//----------------------------------------------------
+// Copyright (c) 2014, SHENZHEN PENGRUI SOFT CO LTD. All rights reserved.
+
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+
+// 1. Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
+//    and/or other materials provided with the distribution.
+// 3. As a constituent part of djyos,do not transplant it to other software
+//    without specific prior written permission.
+
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//-----------------------------------------------------------------------------
+// Copyright (c) 2014 著作权由深圳鹏瑞软件有限公司所有。著作权人保留一切权利。
+//
+// 这份授权条款，在使用者符合以下三条件的情形下，授予使用者使用及再散播本
+// 软件包装原始码及二进位可执行形式的权利，无论此包装是否经改作皆然：
+//
+// 1. 对于本软件源代码的再散播，必须保留上述的版权宣告、本条件列表，以
+//    及下述的免责声明。
+// 2. 对于本套件二进位可执行形式的再散播，必须连带以文件以及／或者其他附
+//    于散播包装中的媒介方式，重制上述之版权宣告、本条件列表，以及下述
+//    的免责声明。
+// 3. 本软件作为都江堰操作系统的组成部分，未获事前取得的书面许可，不允许移植到非
+//    都江堰操作系统环境下运行。
+
+// 免责声明：本软件是本软件版权持有人以及贡献者以现状（"as is"）提供，
+// 本软件包装不负任何明示或默示之担保责任，包括但不限于就适售性以及特定目
+// 的的适用性为默示性担保。版权持有人及本软件之贡献者，无论任何条件、
+// 无论成因或任何责任主义、无论此责任为因合约关系、无过失责任主义或因非违
+// 约之侵权（包括过失或其他原因等）而起，对于任何因使用本软件包装所产生的
+// 任何直接性、间接性、偶发性、特殊性、惩罚性或任何结果的损害（包括但不限
+// 于替代商品或劳务之购用、使用损失、资料损失、利益损失、业务中断等等），
+// 不负任何责任，即在该种使用已获事前告知可能会造成此类损害的情形下亦然。
+//-----------------------------------------------------------------------------
+
+//所属模块: GDD
+//作者:  zhb.
+//版本：V1.0.0
+//文件描述: 按钮控件实现
+//其他说明:
+//修订历史:
+//2. ...
+//1. 日期: 2016-6-14
+//   作者:  zhb.
+//   新版本号：V1.0.0
+//   修改说明: 原始版本
+//---------------------------------
+
+#if 0
+#include    "gdd.h"
+#include  <gui/gdd/gdd_private.h>
+#include "font.h"
+#include    <widget.h>
+
+#define CN_CHAR_NUM_LIMIT   128
+#define CN_BYTE_NUM_LIMIT   256
+#define CN_HEIGHT_MIN  10
+//#define TXT_BOX_FIX_SIZE      (0<<0)
+//#define TXT_BOX_ADJUST_SIZE   (1<<0)
+
+
+typedef struct
+{
+   u16 height;             //高像素
+   u16 width;              //宽像素
+   u8 len;               //TextBox中所有字符串字节数
+   char *str;            //TextBox中所有的字符组成的字符串
+   u8 chnum;           //字符数
+   WINDOW *hwnd;         //控件句柄
+}TextBox;
+
+
+
+
+/*============================================================================*/
+// =============================================================================
+// 函数功能: 获取字符串有效字符数,TextBox只能显示单行信息，首先检查字符串,如果遇到
+//           \n(换行符)，则只显示第一行字符
+// 输入参数: char *str:字符串
+// 输出参数: 无。
+// 返回值  :第一行字符串长度
+// =============================================================================
+u8 __GetValidTextCount(char *str)
+{
+    u8 linecount=0;
+    u8 count=0;
+    char ch;
+    u8 src_len=0;
+    s32 len;
+    struct FontRsc* cur_font;
+    struct Charset* cur_enc;
+    u32 wc;
+    linecount=GetStrLineCount(str);
+    if(linecount>1)
+    {
+        while(1)
+        {
+            ch=*str;
+            if(ch!='\n')
+            {
+                src_len++;
+                str++;
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+    else
+    {
+        src_len=strlen(str);
+    }
+
+    //计算字符串中字符数
+    cur_font = Font_GetCurFont();
+    cur_enc = Charset_NlsGetCurCharset();
+    for(; src_len > 0;)
+    {
+        len= cur_enc->MbToUcs4(&wc, str, src_len);
+        if(len == -1)
+        { // 无效字符
+            src_len--;
+            str++;
+        }
+        else if(len == 0)
+        {
+            break;
+        }
+        else
+        { // 有效字符
+            str += len;
+            src_len -= len;
+            count++;
+            continue;
+        }
+     }
+
+    return count;
+}
+
+// =============================================================================
+// 函数功能: 获取字符串中指定字符的地址
+// 输入参数: char *str:字符串
+// 输出参数: 无。
+// 返回值  :第一行字符串长度
+// =============================================================================
+char * __GetCharAddr(char *str,u8 index)
+{
+    char *ch;
+    struct FontRsc* cur_font;
+    struct Charset* cur_enc;
+    u32 wc;
+    u8 src_len=0;
+    s32 len;
+    u8 count=0;
+    src_len=strlen(str);
+
+    if(index==1)
+        return str;
+
+    for(; src_len > 0;)
+    {
+        len= cur_enc->MbToUcs4(&wc, str, src_len);
+        if(len == -1)
+        { // 无效字符
+            src_len--;
+            str++;
+        }
+        else if(len == 0)
+        {
+            break;
+        }
+        else
+        { // 有效字符
+            str += len;
+            src_len -= len;
+            count++;
+            if(count==index-1)
+            {
+                return str;
+            }
+            continue;
+        }
+     }
+}
+// =============================================================================
+// 函数功能: label控件绘制函数
+// 输入参数: pMsg,窗体消息结构体指针
+// 输出参数: 无。
+// 返回值  :无。
+// =============================================================================
+static  void TextBox_paint(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    HDC hdc;
+    RECT rc,rc0;
+    hwnd=pMsg->hwnd;
+    u8 linecount;
+    char *str;
+    u8 count;
+    u32 flag;
+    hdc =BeginPaint(hwnd);
+    if(NULL!=hdc)
+    {
+        //由于TextBox只能显示单行信息,因此先判断一下字符串是否包含多行,若为多行,则
+        //只显示第一行信息,其他行信息直接忽略.
+       str=hwnd->Text;
+       count=__GetValidTextCount(str);
+       GetClientRect(hwnd,&rc);
+       SetFillColor(hdc,RGB(255,255,255));
+       FillRect(hdc,&rc);
+       if(hwnd->Style&WS_BORDER)
+       {
+             if(hwnd->Style&BORDER_FIXED3D)
+             {
+                 SetDrawColor(hdc,RGB(173,173,173));
+                 DrawLine(hdc,0,0,0,RectH(&rc)-1); //L
+                 SetDrawColor(hdc,RGB(234,234,234));
+                 DrawLine(hdc,0,0,RectW(&rc)-1,0);   //U
+                 DrawLine(hdc,RectW(&rc)-1,0,RectW(&rc)-1,RectH(&rc)-1); //R
+                 DrawLine(hdc,0,RectH(&rc)-1,RectW(&rc)-1,RectH(&rc)-1); //D
+             }
+             else
+             {
+                 SetDrawColor(hdc,RGB(169,169,169));
+                 DrawLine(hdc,0,0,0,RectH(&rc)-1); //L
+                 DrawLine(hdc,0,0,RectW(&rc)-1,0);   //U
+                 DrawLine(hdc,RectW(&rc)-1,0,RectW(&rc)-1,RectH(&rc)-1); //R
+                 DrawLine(hdc,0,RectH(&rc)-1,RectW(&rc)-1,RectH(&rc)-1); //D
+             }
+        }
+        SetTextColor(hdc,RGB(255,255,0));
+        DrawText(hdc,str,count,&rc,DT_VCENTER|DT_CENTER);
+        EndPaint(hwnd,hdc);
+      }
+}
+// =============================================================================
+// 函数功能:对TextBox的Text属性赋值
+// 输入参数: TextBox * pTxtBox
+// 输出参数: 无。
+// 返回值  :无。
+// 说明：在当前
+// =============================================================================
+static void TextBox_SetText(TextBox * pTxtBox,char *str)
+{
+    WINDOW *hwnd;
+    hwnd=pTxtBox->hwnd;
+    u8 len,i;
+    len=strlen(str);
+    if(len>256)
+    {
+        len=256;
+    }
+    for(i=0;i<len;i++)
+    {
+        hwnd->Text[i]=*(str+i);
+    }
+    PostMessage(hwnd,MSG_PAINT,0,0);
+}
+
+// =============================================================================
+// 函数功能:在TextBox中添加字符串
+// 输入参数: pMsg,窗体消息结构体指针
+// 输出参数: 无。
+// 返回值  :无。
+// 说明：在当前
+// =============================================================================
+static void TextBox_AddText(TextBox * pTxtBox,char *str,u8 len)
+{
+     WINDOW *hwnd;
+     char *text;
+     u8 Len,i;
+     char ch;
+     u8 str_len=0;
+     text=hwnd->Text;
+     for(i=0;i<len;i++)
+     {
+         ch=*str;
+         if(ch!='\n')
+         {
+             str_len++;
+             str++;
+         }
+         else
+         {
+             break;
+         }
+     }
+     //获取原字符串长度
+     Len=pTxtBox->len;
+     //将字符串加在原来字符串后面
+     for(i=0;i<str_len;i++)
+     {
+        *(text+Len+i)=*(str+i);
+     }
+     PostMessage(hwnd,MSG_PAINT,0,0);
+}
+
+// =============================================================================
+// 函数功能:在TextBox指定位置开始删除字符串
+// 输入参数: pTxtBox,TextBox结构体指针；
+//          index,字符编号，从1开始；
+//          count,字符数.
+// 输出参数: 无。
+// 返回值  :无。
+// 说明：
+// =============================================================================
+static void TextBox_DeleteChar(TextBox * pTxtBox,u8 index,u8 count)
+{
+     WINDOW *hwnd;
+     char *str;
+     char *temp_str;
+     u8 str_len=0;
+     u8 i;
+     u8 f_len,last_len;
+     str=hwnd->Text;
+     char *start_ch;
+     char *end_ch;
+     char *text;
+     str_len=strlen(str);   //字符串原有的字节数
+     //获取到指定编号的字符的起始地址
+     start_ch=__GetCharAddr(str,index);
+     f_len=start_ch-str;
+     for(i=0;i<f_len;i++)
+     {
+         *(text+i)=*(str+i);
+     }
+     end_ch=__GetCharAddr(str,index+count);
+     last_len=str+str_len-end_ch;
+     for(i=0;i<last_len;i++)
+     {
+         *(text+f_len+i)=*(end_ch+i);
+     }
+     *(text+f_len+last_len)='\0';
+     PostMessage(hwnd,MSG_PAINT,0,0);
+}
+
+// =============================================================================
+// 函数功能:在TextBox指定位置开始插入字符串
+// 输入参数: pMsg,窗体消息结构体指针
+// 输出参数: 无。
+// 返回值  :无。
+// 说明：在当前
+// =============================================================================
+static bool_t TextBox_InsertChar(TextBox *pRxtBox,u8 index,char *pText,u8 count)
+{
+     WINDOW *hwnd;
+     char temp_str[256];
+     char *str;
+     u8 str_len=0;
+     u8 i,ch_num;
+     u8 ch_count;
+     u8 f_len,last_len;
+     str=hwnd->Text;
+     char *start_ch;
+     char *end_ch;
+     char *text;
+     struct FontRsc* cur_font;
+     struct Charset* cur_enc;
+     str_len=strlen(str);   //字符串原有的字节数
+     ch_num=pRxtBox->chnum;
+
+     if(ch_num+count>CN_CHAR_NUM_LIMIT)
+     {
+         //获取到指定编号的字符的起始地址
+         start_ch=__GetCharAddr(str,index);
+
+     }
+
+//   last_len=str+str_len-start_ch;
+//   temp_str=(char *)malloc(last_len);
+//   if(temp_str!=NULL)
+//   {
+//       for(i=0;i<last_len;i++)
+//       {
+//           *(temp_str+i)=*(start_ch+i);
+//       }
+//   }
+//
+//   //从指定位置将字符串插入
+//   for(i=0;i<len;i++)
+//   {
+//       *(start_ch+i)=*(pText+i);
+//   }
+//   //将原有被插入的字符串后移
+//   for(i=0;i<last_len;i++)
+//   {
+//       *(start_ch+len+i)=*(temp_str+i);
+//   }
+
+
+}
+
+// =============================================================================
+// 函数功能: label控件消息响应函数
+// 输入参数: pMsg,窗体消息结构体指针
+// 输出参数: 无。
+// 返回值  :无。
+// =============================================================================
+u32 TextBox_proc(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    RECT rc;
+    HDC hdc;
+    hwnd =pMsg->hwnd;
+    GetWindowRect(hwnd,&rc);
+    hdc =BeginPaint(hwnd);
+    switch(pMsg->Code)
+    {
+        case    MSG_CREATE:
+                printf("textbox[%04XH]: MSG_CREATE.\r\n",hwnd->WinId);
+                return 1;
+                ////
+        case    MSG_LBUTTON_DOWN:
+                {
+                     SetDrawColor(hdc,RGB(220,220,220));
+                     DrawDottedLine(hdc,0,0,0,RectH(&rc)); //L
+                     DrawDottedLine(hdc,0,0,RectW(&rc),0);   //U
+                     DrawDottedLine(hdc,RectW(&rc),0,RectW(&rc),RectH(&rc)); //R
+                     DrawDottedLine(hdc,0,RectH(&rc),RectW(&rc),RectH(&rc)); //D
+                     InvalidateWindow(hwnd,FALSE);
+                }
+                break;
+                ////
+        case    MSG_LBUTTON_UP:
+                {
+//                    switch(_get_button_type(hwnd))
+//                    {
+//                        case    BS_NORMAL:
+//                                hwnd->Style &= ~BS_PUSHED;
+//                                PostMessage(Gdd_GetWindowParent(hwnd),MSG_NOTIFY,(BTN_UP<<16)|(hwnd->WinId),(ptu32_t)hwnd);
+//                                break;
+//                                ////
+//                        case    BS_HOLD:
+//                                break;
+//                                ////
+//                    }
+                    InvalidateWindow(hwnd,TRUE);
+                }
+                break;
+                ////
+        case    MSG_PAINT:
+                TextBox_paint(pMsg);
+                return 1;
+                ////
+
+        case    MSG_DESTROY:
+                printf("textbox[%04XH]: MSG_DESTROY.\r\n",hwnd->WinId);
+                return 1;
+                ////
+
+        default:
+                return DefWindowProc(pMsg);
+
+    }
+    return 0;
+
+}
+#endif
+
+
+

@@ -12,17 +12,18 @@
 //   新版本号: V1.0.0
 //   修改说明: 原始版本
 //------------------------------------------------------
+#include <windows.h>
+#include <tchar.h>
+#include <string.h>
+//#include <process.h>
+#include <winGDI.h>
 #include "stdint.h"
+#include "Lcd_Touch_Key.h"
 #include "gkernel.h"
-#include "stddev.h"
+#include "hmi-input.h"
 #include "cpu_peri.h"
 #include "cpu.h"
-#include "gk_display.h"
-#include <string.h>
-#include <process.h>
-#include <Windows.h>
-#include <winGDI.h>
-#include <tchar.h>
+#include <gui/gkernel/gk_display.h>
 #include "touch.h"
 
 //坐标系说明,描述了显存偏移地址与屏上像素点的坐标映射关系,注意单色和灰度显示器
@@ -46,7 +47,7 @@ TCHAR szLcdDriver[]       =_TEXT("都江堰操作系统");    // 标题栏文本
 
 LRESULT CALLBACK    WndProc_lcd(HWND, UINT, WPARAM, LPARAM);
 
-struct tagDisplayRsc tg_lcd_display;
+struct DisplayRsc tg_lcd_display;
 
 bool_t touched = false;
 s32 touch_x=0,touch_y=0,touch_z=0;
@@ -63,13 +64,13 @@ u16* getframebuff()
 
 }
 
-bool_t __lcd_line_bm_ie(struct tagRectBitmap *bitmap,struct tagRectangle *limit,
+bool_t __lcd_line_bm_ie(struct RectBitmap *bitmap,struct Rectangle *limit,
                         s32 x1,s32 y1,s32 x2,s32 y2,u32 color,u32 r2_code);
-bool_t __lcd_blt_bm_to_bm( struct tagRectBitmap *dst_bitmap,
-                            struct tagRectangle *DstRect,
-                            struct tagRectBitmap *src_bitmap,
-                            struct tagRectangle *SrcRect,
-                            u32 RopCode, u32 KeyColor);
+bool_t __lcd_blt_bm_to_bm( struct RectBitmap *dst_bitmap,
+                            struct Rectangle *DstRect,
+                            struct RectBitmap *src_bitmap,
+                            struct Rectangle *SrcRect,
+                            struct RopGroup RopCode, u32 HyalineColor);
 //----初始化lcd硬件------------------------------------------------------------
 //功能: 如名
 //参数: 无
@@ -82,30 +83,96 @@ void __lcd_hard_init(void)
     HWND lcd_wnd;
 //    HBITMAP hbmi;
 
-    lcdbmi = malloc(sizeof(BITMAPINFO)+8);
+    lcdbmi = malloc(sizeof(BITMAPINFO)+64);
     lcdbmi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    lcdbmi->bmiHeader.biWidth = LCD_XSIZE;
-    lcdbmi->bmiHeader.biHeight = LCD_YSIZE;
+    lcdbmi->bmiHeader.biWidth = CN_LCD_XSIZE;
+    lcdbmi->bmiHeader.biHeight = CN_LCD_YSIZE;
     lcdbmi->bmiHeader.biPlanes = 1;
     lcdbmi->bmiHeader.biBitCount = 16;
-    lcdbmi->bmiHeader.biCompression = BI_BITFIELDS;
+//    lcdbmi->bmiHeader.biBitCount = 4;
+//  lcdbmi->bmiHeader.biCompression = BI_BITFIELDS;
+    lcdbmi->bmiHeader.biCompression = BI_RGB;
     lcdbmi->bmiHeader.biSizeImage = 0;
     lcdbmi->bmiHeader.biXPelsPerMeter = 1;
     lcdbmi->bmiHeader.biYPelsPerMeter = 1;
     lcdbmi->bmiHeader.biClrUsed = 0;
     lcdbmi->bmiHeader.biClrImportant = 0;
-    lcdbmi->bmiColors[0].rgbBlue = 0;
-    lcdbmi->bmiColors[0].rgbGreen = 0xf8;
-    lcdbmi->bmiColors[0].rgbRed = 0;
+    lcdbmi->bmiColors[0].rgbBlue  = 0;
+    lcdbmi->bmiColors[0].rgbGreen = 0;
+    lcdbmi->bmiColors[0].rgbRed   = 0;
     lcdbmi->bmiColors[0].rgbReserved = 0;
-    lcdbmi->bmiColors[1].rgbBlue = 0xe0;
-    lcdbmi->bmiColors[1].rgbGreen = 0x07;
-    lcdbmi->bmiColors[1].rgbRed = 0;
+    lcdbmi->bmiColors[1].rgbBlue  = 0x10;
+    lcdbmi->bmiColors[1].rgbGreen = 0x10;
+    lcdbmi->bmiColors[1].rgbRed   = 0x10;
     lcdbmi->bmiColors[1].rgbReserved = 0;
-    lcdbmi->bmiColors[2].rgbBlue = 0x1f;
-    lcdbmi->bmiColors[2].rgbGreen = 0;
-    lcdbmi->bmiColors[2].rgbRed = 0;
+    lcdbmi->bmiColors[2].rgbBlue  = 0x20;
+    lcdbmi->bmiColors[2].rgbGreen = 0x20;
+    lcdbmi->bmiColors[2].rgbRed   = 0x20;
     lcdbmi->bmiColors[2].rgbReserved = 0;
+    lcdbmi->bmiColors[3].rgbBlue  = 0x30;
+    lcdbmi->bmiColors[3].rgbGreen = 0x30;
+    lcdbmi->bmiColors[3].rgbRed   = 0x30;
+    lcdbmi->bmiColors[3].rgbReserved = 0;
+    lcdbmi->bmiColors[4].rgbBlue  = 0x40;
+    lcdbmi->bmiColors[4].rgbGreen = 0x40;
+    lcdbmi->bmiColors[4].rgbRed   = 0x40;
+    lcdbmi->bmiColors[4].rgbReserved = 0;
+    lcdbmi->bmiColors[5].rgbBlue  = 0x50;
+    lcdbmi->bmiColors[5].rgbGreen = 0x50;
+    lcdbmi->bmiColors[5].rgbRed   = 0x50;
+    lcdbmi->bmiColors[5].rgbReserved = 0;
+    lcdbmi->bmiColors[6].rgbBlue  = 0x60;
+    lcdbmi->bmiColors[6].rgbGreen = 0x60;
+    lcdbmi->bmiColors[6].rgbRed   = 0x60;
+    lcdbmi->bmiColors[6].rgbReserved = 0;
+    lcdbmi->bmiColors[7].rgbBlue  = 0x70;
+    lcdbmi->bmiColors[7].rgbGreen = 0x70;
+    lcdbmi->bmiColors[7].rgbRed   = 0x70;
+    lcdbmi->bmiColors[7].rgbReserved = 0;
+    lcdbmi->bmiColors[8].rgbBlue  = 0x80;
+    lcdbmi->bmiColors[8].rgbGreen = 0x80;
+    lcdbmi->bmiColors[8].rgbRed   = 0x80;
+    lcdbmi->bmiColors[8].rgbReserved = 0;
+    lcdbmi->bmiColors[9].rgbBlue  = 0x90;
+    lcdbmi->bmiColors[9].rgbGreen = 0x90;
+    lcdbmi->bmiColors[9].rgbRed   = 0x90;
+    lcdbmi->bmiColors[9].rgbReserved = 0;
+    lcdbmi->bmiColors[10].rgbBlue  = 0xa0;
+    lcdbmi->bmiColors[10].rgbGreen = 0xa0;
+    lcdbmi->bmiColors[10].rgbRed   = 0xa0;
+    lcdbmi->bmiColors[10].rgbReserved = 0;
+    lcdbmi->bmiColors[11].rgbBlue  = 0xb0;
+    lcdbmi->bmiColors[11].rgbGreen = 0xb0;
+    lcdbmi->bmiColors[11].rgbRed   = 0xb0;
+    lcdbmi->bmiColors[11].rgbReserved = 0;
+    lcdbmi->bmiColors[12].rgbBlue  = 0xc0;
+    lcdbmi->bmiColors[12].rgbGreen = 0xc0;
+    lcdbmi->bmiColors[12].rgbRed   = 0xc0;
+    lcdbmi->bmiColors[12].rgbReserved = 0;
+    lcdbmi->bmiColors[13].rgbBlue  = 0xd0;
+    lcdbmi->bmiColors[13].rgbGreen = 0xd0;
+    lcdbmi->bmiColors[13].rgbRed   = 0xd0;
+    lcdbmi->bmiColors[13].rgbReserved = 0;
+    lcdbmi->bmiColors[14].rgbBlue  = 0xe0;
+    lcdbmi->bmiColors[14].rgbGreen = 0xe0;
+    lcdbmi->bmiColors[14].rgbRed   = 0xe0;
+    lcdbmi->bmiColors[14].rgbReserved = 0;
+    lcdbmi->bmiColors[15].rgbBlue  = 0xf0;
+    lcdbmi->bmiColors[15].rgbGreen = 0xf0;
+    lcdbmi->bmiColors[15].rgbRed   = 0xf0;
+    lcdbmi->bmiColors[15].rgbReserved = 0;
+//  lcdbmi->bmiColors[0].rgbBlue = 0;
+//  lcdbmi->bmiColors[0].rgbGreen = 0xf8;
+//  lcdbmi->bmiColors[0].rgbRed = 0;
+//  lcdbmi->bmiColors[0].rgbReserved = 0;
+//  lcdbmi->bmiColors[1].rgbBlue = 0xe0;
+//  lcdbmi->bmiColors[1].rgbGreen = 0x07;
+//  lcdbmi->bmiColors[1].rgbRed = 0;
+//  lcdbmi->bmiColors[1].rgbReserved = 0;
+//  lcdbmi->bmiColors[2].rgbBlue = 0x1f;
+//  lcdbmi->bmiColors[2].rgbGreen = 0;
+//  lcdbmi->bmiColors[2].rgbRed = 0;
+//  lcdbmi->bmiColors[2].rgbReserved = 0;
     CreateDIBSection(0,lcdbmi,DIB_RGB_COLORS,(void**)&pg_frame_buffer,NULL,0);
 
 
@@ -144,38 +211,38 @@ LRESULT CALLBACK WndProc_lcd(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
     {
         case WM_PAINT:
             BeginPaint (hWnd, &ps) ;
-            StretchDIBits (lcd_hdc,    0, 0,cn_lcd_window_xsize, cn_lcd_window_ysize,
-                       0, LCD_YSIZE, LCD_XSIZE,-LCD_YSIZE,pg_frame_buffer,lcdbmi,DIB_RGB_COLORS,SRCCOPY) ;
+//            StretchDIBits (lcd_hdc,    0, 0,cn_lcd_window_xsize, cn_lcd_window_ysize,
+//                       0, CN_LCD_YSIZE, CN_LCD_XSIZE,-CN_LCD_YSIZE,pg_frame_buffer,lcdbmi,DIB_RGB_COLORS,SRCCOPY) ;
             EndPaint (hWnd, &ps) ;
             break;
         case WM_MOVE:
-            StretchDIBits (lcd_hdc,    0, 0,cn_lcd_window_xsize, cn_lcd_window_ysize,
-               0, LCD_YSIZE, LCD_XSIZE,-LCD_YSIZE,pg_frame_buffer,lcdbmi,DIB_RGB_COLORS,SRCCOPY) ;
+//            StretchDIBits (lcd_hdc,    0, 0,cn_lcd_window_xsize, cn_lcd_window_ysize,
+//               0, CN_LCD_YSIZE, CN_LCD_XSIZE,-CN_LCD_YSIZE,pg_frame_buffer,lcdbmi,DIB_RGB_COLORS,SRCCOPY) ;
             GetWindowRect(hWnd, &tg_WindowRect);
             MoveWindow(tg_keyboard_wnd, tg_WindowRect.left+s32g_window_width + 5,
                        tg_WindowRect.top, s32g_window_width, s32g_window_height,
                        true);
             break ;
         case WM_ACTIVATE:
-            StretchDIBits (lcd_hdc,    0, 0,cn_lcd_window_xsize, cn_lcd_window_ysize,
-               0, LCD_YSIZE, LCD_XSIZE,-LCD_YSIZE,pg_frame_buffer,lcdbmi,DIB_RGB_COLORS,SRCCOPY) ;
+//            StretchDIBits (lcd_hdc,    0, 0,cn_lcd_window_xsize, cn_lcd_window_ysize,
+//               0, CN_LCD_YSIZE, CN_LCD_XSIZE,-CN_LCD_YSIZE,pg_frame_buffer,lcdbmi,DIB_RGB_COLORS,SRCCOPY) ;
 
             break ;
         case WM_LBUTTONDOWN:
-            touch_x = LOWORD(lParam);
-            touch_y = HIWORD(lParam);
+            touch_x = LOWORD(lParam)/CN_LCD_X_SCALE;
+            touch_y = HIWORD(lParam)/CN_LCD_Y_SCALE;
             touch_z = 1;
             touched = true;
             break;
         case WM_LBUTTONUP:
-            touch_x = LOWORD(lParam);
-            touch_y = HIWORD(lParam);
+            touch_x = LOWORD(lParam)/CN_LCD_X_SCALE;
+            touch_y = HIWORD(lParam)/CN_LCD_Y_SCALE;
             touch_z = 0;
             touched = false;
             break;
         case WM_MOUSEMOVE:
-            touch_x = LOWORD(lParam);
-            touch_y = HIWORD(lParam);
+            touch_x = LOWORD(lParam)/CN_LCD_X_SCALE;
+            touch_y = HIWORD(lParam)/CN_LCD_Y_SCALE;
             break;
         default:
             return DefWindowProc(hWnd, message, wParam, lParam);
@@ -210,7 +277,7 @@ void __lcd_power_enable(int invpwren,int pwren)
 //参数: disp，显示器指针
 //返回: true=成功，false=失败
 //-----------------------------------------------------------------------------
-bool_t __lcd_disp_ctrl(struct tagDisplayRsc *disp)
+bool_t __lcd_disp_ctrl(struct DisplayRsc *disp)
 {
     return true;
 }
@@ -226,7 +293,7 @@ bool_t __lcd_disp_ctrl(struct tagDisplayRsc *disp)
 //      r2_code，二元光栅操作码
 //返回: 无
 //-----------------------------------------------------------------------------
-bool_t __lcd_set_pixel_bm(struct tagRectBitmap *bitmap,
+bool_t __lcd_set_pixel_bm(struct RectBitmap *bitmap,
                      s32 x,s32 y,u32 color,u32 r2_code)
 {
     return false;
@@ -240,7 +307,7 @@ bool_t __lcd_set_pixel_bm(struct tagRectBitmap *bitmap,
 //      r2_code，二元光栅操作码
 //返回: true=成功绘制，false=失败，无硬件加速或不支持按r2_code画线。
 //-----------------------------------------------------------------------------
-bool_t __lcd_line_bm(struct tagRectBitmap *bitmap,struct tagRectangle *limit,
+bool_t __lcd_line_bm(struct RectBitmap *bitmap,struct Rectangle *limit,
                         s32 x1,s32 y1,s32 x2,s32 y2,u32 color,u32 r2_code)
 {
     return false;
@@ -254,7 +321,7 @@ bool_t __lcd_line_bm(struct tagRectBitmap *bitmap,struct tagRectangle *limit,
 //      r2_code，二元光栅操作码
 //返回: true=成功绘制，false=失败，无硬件加速或不支持按r2_code画线。
 //-----------------------------------------------------------------------------
-bool_t __lcd_line_bm_ie(struct tagRectBitmap *bitmap,struct tagRectangle *limit,
+bool_t __lcd_line_bm_ie(struct RectBitmap *bitmap,struct Rectangle *limit,
                         s32 x1,s32 y1,s32 x2,s32 y2,u32 color,u32 r2_code)
 {
     return false;
@@ -266,9 +333,9 @@ bool_t __lcd_line_bm_ie(struct tagRectBitmap *bitmap,struct tagRectangle *limit,
 //      color，填充颜色
 //返回:  true=成功绘制，false=失败
 //-----------------------------------------------------------------------------
-bool_t __lcd_fill_rect_bm(struct tagRectBitmap *dst_bitmap,
-                          struct tagRectangle *Target,
-                          struct tagRectangle *Focus,
+bool_t __lcd_fill_rect_bm(struct RectBitmap *dst_bitmap,
+                          struct Rectangle *Target,
+                          struct Rectangle *Focus,
                           u32 Color0,u32 Color1,u32 Mode)
 {
     return false;
@@ -286,11 +353,11 @@ bool_t __lcd_fill_rect_bm(struct tagRectBitmap *dst_bitmap,
 //      transparentcolor，关键颜色
 //返回: true=成功,false=失败
 //-----------------------------------------------------------------------------
-bool_t __lcd_blt_bm_to_bm( struct tagRectBitmap *dst_bitmap,
-                            struct tagRectangle *DstRect,
-                            struct tagRectBitmap *src_bitmap,
-                            struct tagRectangle *SrcRect,
-                            u32 RopCode, u32 KeyColor)
+bool_t __lcd_blt_bm_to_bm( struct RectBitmap *dst_bitmap,
+                            struct Rectangle *DstRect,
+                            struct RectBitmap *src_bitmap,
+                            struct Rectangle *SrcRect,
+                            struct RopGroup RopCode, u32 HyalineColor)
 {
     return false;
 }
@@ -301,19 +368,7 @@ bool_t __lcd_blt_bm_to_bm( struct tagRectBitmap *dst_bitmap,
 //      x，y，坐标
 //返回:  true=成功读取，false=失败
 //-----------------------------------------------------------------------------
-bool_t __lcd_get_pixel_bm(struct tagRectBitmap *bitmap,s32 x,s32 y)
-{
-    return false;
-}
-//----读取bitmap中矩形块-------------------------------------------------------
-//功能: 把一个位图中的矩形读取到另一个位图中
-//参数: src，源位图
-//      rect，欲读取的矩形。
-//      dest，保存矩形的位图，其长宽必须与rect相同。
-//返回: true=成功读取，false=失败，原因可能是提供了不支持的像素格式。
-//-----------------------------------------------------------------------------
-bool_t __lcd_get_rect_bm(struct tagRectBitmap *src,struct tagRectangle *rect,
-                     struct tagRectBitmap *dest)
+bool_t __lcd_get_pixel_bm(struct RectBitmap *bitmap,s32 x,s32 y)
 {
     return false;
 }
@@ -337,7 +392,7 @@ bool_t __lcd_set_pixel_screen(s32 x,s32 y,u32 color,u32 r2_code)
 //      r2_code，二元光栅操作码
 //返回: true=成功绘制，false=失败，无硬件加速或不支持按r2_code画线。
 //-----------------------------------------------------------------------------
-bool_t __lcd_line_screen(struct tagRectangle *limit,
+bool_t __lcd_line_screen(struct Rectangle *limit,
                     s32 x1,s32 y1,s32 x2,s32 y2,u32 color,u32 r2_code)
 {
     return false;
@@ -350,7 +405,7 @@ bool_t __lcd_line_screen(struct tagRectangle *limit,
 //      r2_code，二元光栅操作码
 //返回: true=成功绘制，false=失败，无硬件加速或不支持按r2_code画线。
 //-----------------------------------------------------------------------------
-bool_t __lcd_line_screen_ie(struct tagRectangle *limit,
+bool_t __lcd_line_screen_ie(struct Rectangle *limit,
                         s32 x1,s32 y1,s32 x2,s32 y2,u32 color,u32 r2_code)
 {
     return false;
@@ -361,8 +416,8 @@ bool_t __lcd_line_screen_ie(struct tagRectangle *limit,
 //      color，填充颜色
 //返回:  true=成功绘制，false=失败
 //-----------------------------------------------------------------------------
-bool_t __lcd_fill_rect_screen(struct tagRectangle *Target,
-                              struct tagRectangle *Focus,
+bool_t __lcd_fill_rect_screen(struct Rectangle *Target,
+                              struct Rectangle *Focus,
                               u32 Color0,u32 Color1,u32 Mode)
 {
     return false;
@@ -376,13 +431,13 @@ bool_t __lcd_fill_rect_screen(struct tagRectangle *Target,
 //      xsrc,ysrc，源位图中被传送的区域左上角坐标
 //返回: true=成功,false=失败
 //-----------------------------------------------------------------------------
-bool_t __lcd_bm_to_screen(struct tagRectangle *dst_rect,
-                struct tagRectBitmap *src_bitmap,s32 xsrc,s32 ysrc)
+bool_t __lcd_bm_to_screen(struct Rectangle *dst_rect,
+                struct RectBitmap *src_bitmap,s32 xsrc,s32 ysrc)
 {
 #if 1
-    StretchDIBits (lcd_hdc,   dst_rect->left*X_SCALE, dst_rect->top*Y_SCALE,
-                            (dst_rect->right - dst_rect->left)*X_SCALE,
-                            (dst_rect->bottom - dst_rect->top)*Y_SCALE,
+    StretchDIBits (lcd_hdc,   dst_rect->left*CN_LCD_X_SCALE, dst_rect->top*CN_LCD_Y_SCALE,
+                            (dst_rect->right - dst_rect->left)*CN_LCD_X_SCALE,
+                            (dst_rect->bottom - dst_rect->top)*CN_LCD_Y_SCALE,
                             xsrc,ysrc + dst_rect->bottom - dst_rect->top,
                             dst_rect->right - dst_rect->left,
                             -(dst_rect->bottom - dst_rect->top),
@@ -410,7 +465,7 @@ u32 __lcd_get_pixel_screen(s32 x,s32 y)
 //      dest，保存矩形的位图，其长宽必须与rect相同。
 //返回: true=成功读取，false=失败，原因可能是提供了不支持的像素格式。
 //-----------------------------------------------------------------------------
-bool_t __lcd_get_rect_screen(struct tagRectangle *rect,struct tagRectBitmap *dest)
+bool_t __lcd_get_rect_screen(struct Rectangle *rect,struct RectBitmap *dest)
 {
     return false;
  }
@@ -419,53 +474,54 @@ bool_t __lcd_get_rect_screen(struct tagRectangle *rect,struct tagRectBitmap *des
 //参数: 无
 //返回: 显示器资源指针
 //-----------------------------------------------------------------------------
-ptu32_t ModuleInstall_Lcd(ptu32_t para)
+ptu32_t ModuleInstall_Lcd(char *DisplayName,char *HeapName)
 {
-    static struct tagGkWinRsc frame_win;
-    static struct tagRectBitmap FrameBitmap;
+    static struct GkWinRsc frame_win;
+    static struct RectBitmap FrameBitmap;
     __lcd_hard_init();
 //  __lcd_power_enable(0,1);
 //  __lcd_envid_of(1);
 
     FrameBitmap.bm_bits = (u8*)pg_frame_buffer;
-    FrameBitmap.width = LCD_XSIZE;
-    FrameBitmap.height = LCD_YSIZE;
-    FrameBitmap.PixelFormat = cn_lcd_pf;
+    FrameBitmap.width = CN_LCD_XSIZE;
+    FrameBitmap.height = CN_LCD_YSIZE;
+    FrameBitmap.PixelFormat = CN_LCD_PIXEL_FORMAT;
+//    FrameBitmap.PixelFormat = CN_SYS_PF_GRAY4;
     FrameBitmap.linebytes = cn_lcd_line_size;
-    FrameBitmap.ExColor = 0;
+//  FrameBitmap.linebytes = 160;
+    FrameBitmap.ExColor = 0xffffff;
     frame_win.wm_bitmap = &FrameBitmap;
     tg_lcd_display.frame_buffer = &frame_win;
 
 
     tg_lcd_display.xmm = 0;
     tg_lcd_display.ymm = 0;
-    tg_lcd_display.width = LCD_XSIZE;
-    tg_lcd_display.height = LCD_YSIZE;
-    tg_lcd_display.pixel_format = CN_SYS_PF_RGB565;
+    tg_lcd_display.width = CN_LCD_XSIZE;
+    tg_lcd_display.height = CN_LCD_YSIZE;
+//  tg_lcd_display.pixel_format = CN_SYS_PF_RGB565;
+    tg_lcd_display.pixel_format = CN_LCD_PIXEL_FORMAT;
     tg_lcd_display.reset_clip = false;
     tg_lcd_display.framebuf_direct = false;
     //无须初始化frame_buffer和desktop，z_topmost三个成员
 
-    tg_lcd_display.draw.set_pixel_bm = __lcd_set_pixel_bm;
-    tg_lcd_display.draw.fill_rect_bm = __lcd_fill_rect_bm;
-    tg_lcd_display.draw.get_pixel_bm = NULL;
-    tg_lcd_display.draw.line_bm = __lcd_line_bm;
-    tg_lcd_display.draw.line_bm_ie = __lcd_line_bm_ie;
-    tg_lcd_display.draw.blt_bm_to_bm = __lcd_blt_bm_to_bm;
-    tg_lcd_display.draw.get_rect_bm = __lcd_get_rect_bm;
+    tg_lcd_display.draw.SetPixelToBitmap = __lcd_set_pixel_bm;
+    tg_lcd_display.draw.FillRectToBitmap = __lcd_fill_rect_bm;
+    tg_lcd_display.draw.LineToBitmap = __lcd_line_bm;
+    tg_lcd_display.draw.LineToBitmapIe = __lcd_line_bm_ie;
+    tg_lcd_display.draw.BltBitmapToBitmap = __lcd_blt_bm_to_bm;
 //    tg_lcd_display.draw.check_raster = __lcd_check_raster;
-    tg_lcd_display.draw.set_pixel_screen = __lcd_set_pixel_screen;
-    tg_lcd_display.draw.line_screen = __lcd_line_screen;
-    tg_lcd_display.draw.line_screen_ie = __lcd_line_screen_ie;
-    tg_lcd_display.draw.fill_rect_screen = __lcd_fill_rect_screen;
-    tg_lcd_display.draw.bm_to_screen = __lcd_bm_to_screen;
-    tg_lcd_display.draw.get_pixel_screen = __lcd_get_pixel_screen;
-    tg_lcd_display.draw.get_rect_screen = __lcd_get_rect_screen;
+    tg_lcd_display.draw.SetPixelToScreen = __lcd_set_pixel_screen;
+    tg_lcd_display.draw.LineToScreen = __lcd_line_screen;
+    tg_lcd_display.draw.LineToScreenIe = __lcd_line_screen_ie;
+    tg_lcd_display.draw.FillRectToScreen = __lcd_fill_rect_screen;
+    tg_lcd_display.draw.CopyBitmapToScreen = __lcd_bm_to_screen;
+    tg_lcd_display.draw.GetPixelFromScreen = __lcd_get_pixel_screen;
+    tg_lcd_display.draw.GetRectFromScreen = __lcd_get_rect_screen;
 
-//    tg_lcd_display.bmmalloc = lcd_bmmalloc;     //hjj,2416
+    tg_lcd_display.DisplayHeap = M_FindHeap(HeapName);
     tg_lcd_display.disp_ctrl = __lcd_disp_ctrl;
 
-    if(GK_InstallDisplay(&tg_lcd_display,(char*)para))
+    if(GK_InstallDisplay(&tg_lcd_display,DisplayName))
         return (ptu32_t)&tg_lcd_display;
     else
         return 0;
@@ -479,19 +535,19 @@ ptu32_t ModuleInstall_Lcd(ptu32_t para)
 //参数: touch_data，采集到的坐标
 //返回: 1=触摸笔按下，0=触摸笔提起，
 //-----------------------------------------------------------------------------
-ufast_t read_touch_windows(struct tagSingleTouchMsg *touch_data)
+ufast_t read_touch_windows(struct SingleTouchMsg *touch_data)
 {
+    touch_data->display = NULL;
+    touch_data->z = touch_z;
     if(touched == true)
     {
         touch_data->x = touch_x;
         touch_data->y = touch_y;
-        touch_data->z = touch_z;
-        return true;
+        return 1;
     }
     else
     {
-        touch_data->z = touch_z;
-        return false;
+        return 0;
     }
 }
 
@@ -500,11 +556,12 @@ ufast_t read_touch_windows(struct tagSingleTouchMsg *touch_data)
 //参数: display_name,本触摸屏对应的显示器名(资源名)
 //返回: 无
 //-----------------------------------------------------------------------------
-ptu32_t ModuleInstall_TouchWindows(ptu32_t para)
+ptu32_t ModuleInstall_TouchWindows(char * TouchName)
 {
-    static struct tagSingleTouchPrivate windows_touch;
+    static struct SingleTouchPrivate windows_touch;
     windows_touch.read_touch = read_touch_windows;
-    Touch_InstallDevice((char*)para,&windows_touch);
+    windows_touch.touch_loc.display = NULL;
+    Touch_InstallDevice(TouchName,&windows_touch);
     return 1;
 }
 

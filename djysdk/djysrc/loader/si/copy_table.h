@@ -57,7 +57,7 @@
 extern "C" {
 #endif
 
-struct tagCopyRecord{
+struct CopyRecord{
     u32 load_start_address;
     u32 run_start_address;
     u32 size;
@@ -67,7 +67,7 @@ struct tagCopyRecord{
 struct copy_table{
     u32 record_size;
     u32 record_cnt;
-    struct tagCopyRecord record[1];
+    struct CopyRecord record[1];
 };
 
 #ifdef __cplusplus

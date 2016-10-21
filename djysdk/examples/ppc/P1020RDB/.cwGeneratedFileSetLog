@@ -47,3 +47,6 @@ p1020flash_target.rse.xml
 p1020target.rse.xml
 p1020test_core0_RAM_P1020_Download.rse.xml
 p1020test_core0_RAM_P1020_Download_Target.rse.xml
+p1020test_core0_RAM_P1020_Download_Target.rse.xml
+programdownload_core0_RAM_P1020_Download_Target.rse.xml
+programdownload_core0_RAM_P1020_Download.rse.xml

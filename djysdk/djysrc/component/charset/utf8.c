@@ -93,10 +93,10 @@ Rule
 #include "ascii.h"
 #include "utf8.h"
 
-s32 __Charset_Utf8MbToUcs4(u32* pwc, const char* s, s32 n);
-s32 __Charset_Utf8MbsToUcs4s(u32* pwcs, const char* mbs, s32 n);
-s32 __Charset_Utf8Ucs4ToMb(char* s, s32 wc);
-s32 __Charset_Utf8Ucs4sToMbs(char* mbs, const u32* pwcs, s32 n);
+s32 Utf8MbToUcs4(u32* pwc, const char* s, s32 n);
+s32 Utf8MbsToUcs4s(u32* pwcs, const char* mbs, s32 n);
+s32 Utf8Ucs4ToMb(char* s, s32 wc);
+s32 Utf8Ucs4sToMbs(char* mbs, const u32* pwcs, s32 n);
 
 //计算给定首字节的UTF-8编码字符字节数
 #define utf8_len(c)\
@@ -121,7 +121,7 @@ s32 __Charset_Utf8Ucs4sToMbs(char* mbs, const u32* pwcs, s32 n);
 //返回: 0, 非法UTF-8字符
 //      合法字符返回第一个UTF-8字符的字节数
 //-----------------------------------------------------------------
-static u8 __Charset_Utf8IsLegal(const char* src, s32 len)
+static u8 Utf8IsLegal(const char* src, s32 len)
 {
     u8 a;
     const char *trail;
@@ -172,13 +172,33 @@ __illegal:
     return 0;
 }
 
-// 注释参照 encoding.h-> tagCharset -> mb_to_ucs4
-s32 __Charset_Utf8MbToUcs4(u32* pwc, const char* mbs, s32 n)
+// 注释参照 charset.h-> struct Charset -> GetOneMb
+s32 Utf8GetOneMb(const char* mbs,s32 n)
 {
     s32 count, len;
     u32 wc;
 
-    if(!(count = __Charset_Utf8IsLegal(mbs, n)))
+    if(mbs == NULL)
+        return -1;
+    if(*mbs == 0)
+        return 1;       //串结束符也是合法字符
+    count = Utf8IsLegal(mbs, n);
+    if(count == 0)
+        return -1;
+    else
+        return count;
+
+}
+
+// 注释参照 charset.h-> struct Charset -> MbToUcs4
+s32 Utf8MbToUcs4(u32* pwc, const char* mbs, s32 n)
+{
+    s32 count, len;
+    u32 wc;
+
+    if(mbs == NULL)
+        return -1;
+    if(!(count = Utf8IsLegal(mbs, n)))
         goto __illegal;
 
     if(count == 1)
@@ -198,7 +218,8 @@ s32 __Charset_Utf8MbToUcs4(u32* pwc, const char* mbs, s32 n)
         // FIXME 是否需要做UCS-4合法性判断?
     }
 
-    *pwc = wc;
+    if(pwc != NULL)
+        *pwc = wc;
 
     return count;
 
@@ -206,14 +227,14 @@ __illegal:
     return -1;
 }
 
-// 注释参照 encoding.h-> tagCharset -> mbs_to_uc4s
-s32 __Charset_Utf8MbsToUcs4s(u32* pwcs, const char* mbs, s32 n)
+// 注释参照 charset.h-> struct Charset -> MbsToUcs4s
+s32 Utf8MbsToUcs4s(u32* pwcs, const char* mbs, s32 n)
 {
     return 0;
 }
 
-// 注释参照 encoding.h-> tagCharset -> ucs4_to_mb
-s32 __Charset_Utf8Ucs4ToMb(char* mbs, s32 wc)
+// 注释参照 charset.h-> struct Charset -> Ucs4ToMb
+s32 Utf8Ucs4ToMb(char* mbs, s32 wc)
 {
     s32 count;
 
@@ -248,8 +269,8 @@ __illegal:
         return -1;
 }
 
-// 注释参照 encoding.h-> tagCharset -> ucs4s_to_mbs
-s32 __Charset_Utf8Ucs4sToMbs(char* mbs, const u32* pwcs, s32 n)
+// 注释参照 charset.h-> struct Charset -> Ucs4sToMbs
+s32 Utf8Ucs4sToMbs(char* mbs, const u32* pwcs, s32 n)
 {
     return 0;
 }
@@ -261,13 +282,15 @@ s32 __Charset_Utf8Ucs4sToMbs(char* mbs, const u32* pwcs, s32 n)
 //-----------------------------------------------------------------------------
 ptu32_t ModuleInstall_CharsetUtf8(ptu32_t para)
 {
-    static struct tagCharset encoding;
+    static struct Charset encoding;
 
     encoding.max_len = 6;
-    encoding.mb_to_ucs4 = __Charset_Utf8MbToUcs4;
-    encoding.ucs4_to_mb = __Charset_Utf8Ucs4ToMb;
-    encoding.mbs_to_ucs4s = __Charset_Utf8MbsToUcs4s;
-    encoding.ucs4s_to_mbs = __Charset_Utf8Ucs4sToMbs;
+    encoding.EOC_Size = 1;
+    encoding.GetOneMb = Utf8GetOneMb;
+    encoding.MbToUcs4 = Utf8MbToUcs4;
+    encoding.Ucs4ToMb = Utf8Ucs4ToMb;
+    encoding.MbsToUcs4s = Utf8MbsToUcs4s;
+    encoding.Ucs4sToMbs = Utf8Ucs4sToMbs;
     if( Charset_NlsInstallCharset(&encoding, CN_NLS_CHARSET_UTF8))
     {
         printf("utf8 encoding install sucess\n\r");

@@ -49,10 +49,8 @@
 // 创建时间: 18/09.2014
 // =============================================================================
 
-#include "config-prj.h"
-
 #include "stdint.h"
-#include "netdev.h"
+#include <tcpip/netdev.h>
 #include "rout.h"
 #include "dm9000.h"
 #include "cpu_peri.h"
@@ -68,7 +66,7 @@
 #define CN_PHY_INTIT_TIMEOUT   (3000*mS)
 // =============================================================================
 #define CN_HARD_BOARD            0x02
-static u8  sgNetHardMac[6] = {0x00,0x01, 0x02, 0x03, 0x04, CN_HARD_BOARD};
+static u8  sgNetHardMac[6] = {0x3C,0x97, 0x0E, 0x44, 0x07, 0XBD};
 static u32  sgNetHardIpAddrMain = 0xC0A80100;
 static u32  sgNetHardIpMsk = 0xFFFFFF00 ; //255.255.255.0
 static u32  sgNetHardGateWay = 0xC0A80101; //192.168.1.1
@@ -267,6 +265,7 @@ bool_t DM9000_HardInit(void)
 // 参数：无
 // 返回值  ：
 // =============================================================================
+u32 DM9000_ISR_Handler(ptu32_t IntLine);
 void DM9000_IntInit(void)
 {
     //配置外部引脚EINT7/GPF7
@@ -277,8 +276,8 @@ void DM9000_IntInit(void)
     pg_gpio_reg->EINTPEND |= (1<<7);
     pg_gpio_reg->EINTMASK &= (~(01<<7));
 
-    u32 DM9000_ISR_Handler(ufast_t IntLine);
     //DM9000的中断引脚输出中断信号到CPU的EINT7
+    Int_Register(cn_int_line_eint4_7);
     Int_IsrConnect(cn_int_line_eint4_7,DM9000_ISR_Handler);
     Int_SettoAsynSignal(cn_int_line_eint4_7);
     Int_ClearLine(cn_int_line_eint4_7);
@@ -319,6 +318,10 @@ void DM9000_TxPacket(unsigned char *datas, int length)
     dm_reg_write(DM9000_NSR, 0x2c);                 //清除TX状态
     dm_reg_write(DM9000_IMR, 0x81);                 //打开DM9000接收数据中断
 }
+
+//static s64   timedriverstart;
+//static s64   timedriverend;
+//static u32   timedriverused;
 // =============================================================================
 // 函数功能：NetHard_Send
 //          网卡发送数据包
@@ -329,44 +332,6 @@ void DM9000_TxPacket(unsigned char *datas, int length)
 // 返回值  ：true发送成功  false发送失败。
 // 说明    ：采用拷贝的方式发送，后续考虑使用链表发送
 // =============================================================================
-//bool_t DM9000_Send(int devindex,tagNetPkg *pkg,u32 netdevtask)
-//{
-//  bool_t  result;
-//  tagNetPkg *tmp;
-//  u8 *src;
-//  u8 *dst;
-//  u32 sndlen;
-//
-//  result = false;
-//  if((ptNetDev == devindex)&&(NULL != pkg))
-//  {
-//      sndlen = 0;
-//      tmp = pkg;
-//      //拷贝完毕之后记得释放
-//      while(NULL != tmp)
-//      {
-//          src = (u8 *)(tmp->buf + tmp->offset);
-//          dst = (u8 *)(sgSndBuf + sndlen);
-//          memcpy(dst, src, tmp->datalen);
-//          sndlen += tmp->datalen;
-//          tmp = tmp->partnext;
-//      }
-//      Pkg_GeneralFreeLst(pkg);
-//      if(sndlen < 60)//小于60的包，记得填充
-//      {
-//          dst = (u8 *)(sgSndBuf + sndlen);
-//          memset(dst,0 ,60-sndlen);
-//          sndlen = 60;
-//      }
-//      if(Lock_SempPend(MacSemp,CN_MAC_SEMP_TIMEOUT))
-//      {
-//          DM9000_TxPacket(sgSndBuf,sndlen);
-//          Lock_SempPost(MacSemp);
-//          result = true;
-//      }
-//  }
-//  return result;
-//}
 bool_t DM9000_Send(tagNetDev *dev,tagNetPkg *pkg,u32 netdevtask)
 {
     bool_t  result;
@@ -381,19 +346,24 @@ bool_t DM9000_Send(tagNetDev *dev,tagNetPkg *pkg,u32 netdevtask)
     {
         sndlen = 0;
         tmp = pkg;
-
         //cout the len
         tmp = pkg;
         sndlen = 0;
-
         while(NULL != tmp)
         {
             sndlen +=tmp->datalen;
-            tmp = tmp->partnext;
+
+            if(tmp->pkgflag&CN_PKLGLST_END)
+            {
+                tmp = NULL;
+            }
+            else
+            {
+                tmp = tmp->partnext;
+            }
         }
         atom = Int_LowAtomStart();
-
-
+//        timedriverstart = DjyGetSysTime();
         //snd all the pkg
         tmp = pkg;
         //init the dm9000
@@ -414,23 +384,27 @@ bool_t DM9000_Send(tagNetDev *dev,tagNetPkg *pkg,u32 netdevtask)
             {
                 DM_DATA_PORT = *mysrc++;  //8位数据转换为16位数据输出
             }
-            tmp = tmp->partnext;
+            if(PKG_ISLISTEND(tmp))
+            {
+                tmp = NULL;
+            }
+            else
+            {
+                tmp = tmp->partnext;
+            }
         }
-
-
         //ok now start transfer;
         dm_reg_write(DM9000_TCR, 0x01);                 //把数据发送到以太网上
 
         while((dm_reg_read(DM9000_NSR) & 0x0c) == 0)
         ;                                               //等待数据发送完成
-
-
         dm_reg_write(DM9000_NSR, 0x2c);                 //清除TX状态
         dm_reg_write(DM9000_IMR, 0x81);                 //打开DM9000接收数据中断
 
+//        timedriverend = DjyGetSysTime();
         Int_LowAtomEnd(atom);
-        //free the pkg lst
-        Pkg_LstFlagFree(pkg);
+//        timedriverused = (u32)(timedriverend- timedriverstart);
+//        printk("%s:TimeUsed = %d\n\r",__FUNCTION__, timedriverused);
         result = true;
     }
 
@@ -452,7 +426,8 @@ tagNetPkg *DM9000_RcvPacket(tagNetDev *netdev)
     tagNetPkg *pkg=NULL;
 
     u16 *dst;
-
+    atom_low_t atom;
+    atom = Int_LowAtomStart();
 
     rx_ready = dm_reg_read(DM9000_MRCMDX);      //先读取一个无效的数据
     rx_ready = (unsigned char)DM_DATA_PORT;     //真正读取到的数据包首字节
@@ -466,7 +441,7 @@ tagNetPkg *DM9000_RcvPacket(tagNetDev *netdev)
 
         if((rx_length > 0) && (rx_length <= CN_PKG_MAX_LEN))
         {
-            pkg =Pkg_Alloc(rx_length,CN_PKGFLAG_FREE);
+            pkg =PkgMalloc(rx_length,0);
             pkg->partnext = NULL;
         }
         if(pkg != NULL)
@@ -483,19 +458,26 @@ tagNetPkg *DM9000_RcvPacket(tagNetDev *netdev)
             pkg->partnext= NULL;
         }
     }
+    Int_LowAtomEnd(atom);
 
     return pkg;
 }
+
+
+static u16 sgDm9000RcvTaskID = CN_EVTT_ID_INVALID;
+static struct MutexLCB *pDm9000RcvSync;
 // =============================================================================
 // 功能：DM9000中断服务函数，接收中断时，调用NetDev_PostDataRcvSignal，表示网卡接收
 //       到数据信息
 // 参数：中断线号
 // 返回 ：
 // =============================================================================
-u32 DM9000_ISR_Handler(ufast_t IntLine)
+u32 DM9000_ISR_Handler(ptu32_t IntLine)
 {
     u8 IntStatus;
-    tagNetPkg *pkg;
+
+    dm_reg_write(DM9000_IMR, 0x80);                 //首先禁止网卡中断，CPU端OS已经做了
+
     if(pg_gpio_reg->EINTPEND & (1<<7))              //DM9000外部中断标志
     {
         pg_gpio_reg->EINTPEND |= (1<<7);            //清外部中断标志
@@ -503,23 +485,56 @@ u32 DM9000_ISR_Handler(ufast_t IntLine)
         IntStatus = dm_reg_read(DM9000_ISR);        //读取ISR
         if(IntStatus & ISR_PRS)                     //接收中断
         {
-            dm_reg_write(DM9000_ISR, ISR_PRS);      //清DM9000中断
-            while((pkg = DM9000_RcvPacket(ptNetDev))!= NULL)
-            {
-            	NetDev_PostPkg(ptNetDev,pkg);
-            }
+            Lock_SempPost(pDm9000RcvSync);
         }
-        if(IntStatus & ISR_PTS)                     //发送中断
+        dm_reg_write(DM9000_ISR, IntStatus);       //清中断
+    }
+
+    dm_reg_write(DM9000_IMR, 0x81);                 //恢复网卡中断，CPU端OS已经做了
+
+    return 0;
+}
+
+
+ptu32_t Dm9000Rcv(void)
+{
+    tagNetPkg *pkg;
+
+    while(1)
+    {
+        Lock_SempPend(pDm9000RcvSync,CN_TIMEOUT_FOREVER);
+        while((pkg = DM9000_RcvPacket(ptNetDev))!= NULL)
         {
-            dm_reg_write(DM9000_ISR, ISR_PTS);      //清发送中断
-        }
-        if(IntStatus & ISR_ROS)                     //接收溢出中断
-        {
-            dm_reg_write(DM9000_ISR, ISR_ROS);      //清溢出中断
-            //need to Reset
+            NetDev_PostPkg(ptNetDev,pkg);
+            PkgTryFreePart(pkg);
         }
     }
     return 0;
+}
+
+
+bool_t Dm9000RcvTask()
+{
+    bool_t result = false;
+    u16 evttID;
+    u16 eventID;
+    evttID = Djy_EvttRegist(EN_CORRELATIVE, CN_PRIO_CRITICAL, 0, 1,
+        (ptu32_t (*)(void))Dm9000Rcv,NULL, 0x1000, "Dm900RcvTask");
+    if (evttID != CN_EVTT_ID_INVALID)
+    {
+        eventID=Djy_EventPop(evttID, NULL, 0, 0, 0, 0);
+        if(eventID != CN_EVENT_ID_INVALID)
+        {
+            result = true;
+            sgDm9000RcvTaskID = evttID;
+            pDm9000RcvSync = Lock_SempCreate(1,0,CN_SEMP_BLOCK_FIFO,NULL);
+        }
+        else
+        {
+            Djy_EvttUnregist(evttID);
+        }
+    }
+    return result;
 }
 
 // =============================================================================
@@ -546,16 +561,25 @@ bool_t DM9000_AddNetDev(void)
     devpara.linklen = 14;
     devpara.pkglen = 1500;
 
+    if(false == Dm9000RcvTask())
+    {
+        printk("%s:Create Rcv Task Failed\n\r",__FUNCTION__);
+    }
+
     result = false;
     ptNetDev = NetDev_AddDev(&devpara);
     if(ptNetDev != NULL)
     {
-        devaddr.ip = sgNetHardIpAddrMain|CN_HARD_BOARD;
-        devaddr.gateway = sgNetHardGateWay;
-        devaddr.ipmsk = sgNetHardIpMsk;
+//        devaddr.ip = sgNetHardIpAddrMain|CN_HARD_BOARD;
+//        devaddr.gateway = sgNetHardGateWay;
+//        devaddr.ipmsk = sgNetHardIpMsk;
+        devaddr.ip = 0;
+        devaddr.gateway = 0;
+        devaddr.ipmsk = 0;
         ptNetRout = Rout_AddRout(ptNetDev, &devaddr);
         if(NULL != ptNetRout)
         {
+            Dhcp_AddTask(ptNetRout);
             result = true;
         }
     }

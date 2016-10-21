@@ -286,4 +286,14 @@ __asm_reset_cpu_hot:
     mov     r0,#0
     mov     pc,r0
 
+.text
+.align 2
+.global __LP_BSP_AsmSaveReg
+
+.thumb
+.thumb_func
+__LP_BSP_AsmSaveReg:
+	nop
+	bx	lr
+
 .end

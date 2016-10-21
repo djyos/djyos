@@ -60,22 +60,22 @@
 //       修改说明:初始版本
 //------------------------------------------------------
 #include "stdint.h"
-#include "config-prj.h"
 #include "stdio.h"
 #include "gkernel.h"
 #include "charset.h"
 #include "nls.h"
 #include "locale.h"
 #include "string.h"
+#include <cfg/local_config.h>
 
 //----获取区域字符编码---------------------------------------------------------
 //功能: 根据区域名称获取字符编码，"C"是默认编码的代号。
 //参数: 区域名称编码
 //返回: 匹配的字符编码，若未有匹配编码，使用默认的ASCII编码
 //-----------------------------------------------------------------------------
-struct tagCharset* Charset_NlsGetLocCharset(const char* loc)
+struct Charset* Charset_NlsGetLocCharset(const char* loc)
 {
-    struct tagCharset* encoding;
+    struct Charset* encoding;
 
     if(strcmp(loc, "C") == 0)
     {
@@ -94,7 +94,7 @@ struct tagCharset* Charset_NlsGetLocCharset(const char* loc)
 //-----------------------------------------------------------------------------
 ptu32_t ModuleInstall_CharsetNls(const char * para)
 {
-    struct tagCharset* encoding;
+    struct Charset* encoding;
 
     // 获取默认locale
     //loc = setlocale(LC_ALL, NULL);

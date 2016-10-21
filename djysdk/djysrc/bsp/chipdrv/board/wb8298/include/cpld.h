@@ -18,10 +18,10 @@
 #define __CPLD_H__
 
 //读取FPGA版本信息的版本时间
-struct tagCpldVer
+struct CpldVer
 {
-	uint8_t dwCpldYearHi;               //CPLD版本时间年H
-	uint8_t dwCpldYearLo;               //CPLD版本时间年L
+    uint8_t dwCpldYearHi;               //CPLD版本时间年H
+    uint8_t dwCpldYearLo;               //CPLD版本时间年L
     uint8_t dwCpldMonth;                //CPLD版本时间月
     uint8_t dwCpldDay;                  //CPLD版本时间日
     uint8_t dwBoardTypeHi;              //板件类型高
@@ -32,7 +32,7 @@ struct tagCpldVer
 
 
 uint8_t Hard_BoardNo_Read( void );
-void CpldVer_GetInfo(struct tagCpldVer *tgfpgaver);
+void CpldVer_GetInfo(struct CpldVer *tgfpgaver);
 
 
 

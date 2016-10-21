@@ -19,16 +19,16 @@ void run_module_init(void);
 
 #if (CN_CFG_GUI_KERNEL == 1)
 // 在显示器主体上显示内容
-void dis_wnd_body_text(struct tagGkWinRsc *parent, s32 area)
+void dis_wnd_body_text(struct GkWinRsc *parent, s32 area)
 {
-    struct tagInputDeviceMsg *input_msg;
+    struct InputDeviceMsg *input_msg;
     s32 touch_x=0, touch_y=0;
 
     switch (area)
     {
     case 1:
-        input_msg = (struct tagInputDeviceMsg *)Djy_GetEventPara(NULL);
-        if(input_msg->input_type == EN_STDIN_SINGLE_TOUCH)
+        input_msg = (struct InputDeviceMsg *)Djy_GetEventPara(NULL);
+        if(input_msg->input_type == EN_HMIIN_SINGLE_TOUCH)
         {
             touch_x = input_msg->input_data.tagSingleTouchMsg.x;
             touch_y = input_msg->input_data.tagSingleTouchMsg.y;
@@ -46,13 +46,13 @@ void dis_wnd_body_text(struct tagGkWinRsc *parent, s32 area)
 }
 
 // 在显示器底端显示时间
-void dis_wnd_bottom_text(struct tagGkWinRsc *parent)
+void dis_wnd_bottom_text(struct GkWinRsc *parent)
 {
     static char text_time[]="2012年07月06日  23:59:59";
     static s64 last_nowtime = 0;
-    struct tagRectangle rect;
+    struct Rectangle rect;
     char text_buf[32];
-    struct tagDjyTm dtm;
+    struct DjyTm dtm;
     s64 nowtime;
 
     rect.left = 0;
@@ -61,7 +61,7 @@ void dis_wnd_bottom_text(struct tagGkWinRsc *parent)
     rect.bottom = 16+5;
 
     // 更新时间
-    nowtime = TM_Time(NULL);
+    nowtime = Tm_Time(NULL);
     if ((nowtime - last_nowtime) > 0)
     {
         Tm_LocalTime_r(&nowtime,&dtm);
@@ -192,18 +192,18 @@ void led_init(void)
 #if (0)
 extern u8 pat_white[128];
 extern u8 pat_black[128];
-struct tagGkWinRsc wnd_body, wnd_gray8, wnd_body_selector;
-struct tagGkWinRsc wnd_gray4, wnd_bottom,wnd_banner;
-struct tagGkWinRsc wnd_gray2, wnd_gray1;
-struct tagGkWinRsc *desktop;
+struct GkWinRsc wnd_body, wnd_gray8, wnd_body_selector;
+struct GkWinRsc wnd_gray4, wnd_bottom,wnd_banner;
+struct GkWinRsc wnd_gray2, wnd_gray1;
+struct GkWinRsc *desktop;
 void djy_main(void)
 {
 //    djyfs_file *fp;
     static char *banner_text = "---- DJYOS ----";
     u8 flip_inc1 = -2,flip_inc2 = 2,flip_inc4 = -2,flip_inc8 = 2;
-    struct tagInputDeviceMsg *input_msg;
-    struct tagRectBitmap bitmap;
-    struct tagRectangle Grad;
+    struct InputDeviceMsg *input_msg;
+    struct RectBitmap bitmap;
+    struct Rectangle Grad;
     u32 r=0;
     s32 touch_x=0, touch_y=0;
     u8 alpha = 0x80;
@@ -364,9 +364,9 @@ void test_timer_isr0(void)
 void Timer_Test(void)
 {
     timerhl = TimerSoft_Create("testtimer",2000*mS,test_timer_isr);
-    TimerSoft_Ctrl(timerhl,EN_TIMER_STARTCOUNT,0);
+    TimerSoft_Ctrl(timerhl,EN_TIMER_SOFT_START,0);
     timerhl = TimerSoft_Create("testtimer0",3000*mS,test_timer_isr0);
-    TimerSoft_Ctrl(timerhl,EN_TIMER_STARTCOUNT,0);
+    TimerSoft_Ctrl(timerhl,EN_TIMER_SOFT_START,0);
 }
 void djy_main(void)
 {

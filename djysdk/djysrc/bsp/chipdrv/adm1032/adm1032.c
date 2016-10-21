@@ -22,10 +22,10 @@
 #include <sysreg.h>
 
 
-struct tagMutexLCB *  ptSemID_adm1032;       // IIC操作互斥标志
+struct MutexLCB *  ptSemID_adm1032;       // IIC操作互斥标志
 
 static djy_handle_t pg_adm1032_lhdl;
-static struct tagIIC_Param pg_adm1032_param;
+static struct IIC_Param pg_adm1032_param;
 
 static u32 timeout = 10000;
 

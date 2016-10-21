@@ -62,11 +62,11 @@
 #include "stdint.h"
 #include "cpu_peri.h"
 
-struct tagGPIO_StReg volatile * const pg_gpio_reg [4] = {
-                               (struct tagGPIO_StReg *)0x50000000,
-                               (struct tagGPIO_StReg *)0x50010000,
-                               (struct tagGPIO_StReg *)0x50020000,
-                               (struct tagGPIO_StReg *)0x50030000,
+struct GPIO_StReg volatile * const pg_gpio_reg [4] = {
+                               (struct GPIO_StReg *)0x50000000,
+                               (struct GPIO_StReg *)0x50010000,
+                               (struct GPIO_StReg *)0x50020000,
+                               (struct GPIO_StReg *)0x50030000,
                                };
 struct st_sysctrl_reg volatile * const pg_sysctrl_reg  =
                                (struct st_sysctrl_reg *)0x40048000;

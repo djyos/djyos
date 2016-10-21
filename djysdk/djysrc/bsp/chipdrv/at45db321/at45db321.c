@@ -53,10 +53,13 @@
 //   新版本号：V0.1.0
 //   修改说明：原始版本
 //------------------------------------------------------
+
 #include "stdint.h"
+#include "string.h"
 #include "cpu_peri.h"
 #include "at45db321.h"
-#include "board_config.h"
+#include "spibus.h"
+#include "board-config.h"
 
 /*------------------------Time Symbol--------------------------------
 Symbol	Parameter								Typ 	Max 	Units
@@ -88,8 +91,8 @@ tBE 	Block Erase Time						45 		100 	ms
 #define AT45_Buff2_to_MainMem_Page_Prog_vsErase 	0x86	//Buffer 2 to Main Memory Page Program with Built-in Erase
 #define AT45_Buff1_to_MainMem_Page_Prog_noErase 	0x88	//Buffer 1 to Main Memory Page Program without Built-in Erase
 #define AT45_Buff2_to_MainMem_Page_Prog_noErase 	0x89	//Buffer 2 to Main Memory Page Program without Built-in Erase
-#define AT45_Page_Erase 				0x81
-#define AT45_Block_Erase 				0x50
+#define AT45_Page_Erase_Cmd 			0x81
+#define AT45_Block_Erase_Cmd			0x50
 #define AT45_Sector_Erase 				0x7C
 #define AT45_Chip_Erase1 				0xC7
 #define AT45_Chip_Erase2 				0x94
@@ -128,7 +131,10 @@ tBE 	Block Erase Time						45 		100 	ms
 #define vs_Erase	1
 #define no_Erase	2
 
-tagSpiConfig *flash_spi_Config;
+static struct SPI_Device s_AT45_Dev;
+static u32 s_AT45_Timeout = CN_TIMEOUT_FOREVER;
+#define AT45_SPI_SPEED   	(10*1000*1000)
+static bool_t sAT45Inited = false;
 
 //Command指令缓存区
 u8 _at45db321_Command[10]={0};
@@ -137,12 +143,40 @@ u8 _at45db321_buff[AT45_Page_Size] = {0};
 //当前可用于写数据的Buff,代表另一Buff有可能正处于向FLASH写数据的阶段
 u8 _at45db321_Ready_Buff = AT45_Buff1;
 
+static struct SemaphoreLCB AT45_Semp;	//芯片互斥访问保护
+
+bool_t at45db321_Wait_Ready(u32 Time_Out);
 /*---------------------test use only----------------------
 #define test_buff_size	10240
 section("seg_int_data") u32 Data_write[test_buff_size]={0};
 section("seg_int_data") u32 Data_read[test_buff_size]={0};
 u32 buff1_cnt=0,buff2_cnt=0;
 ---------------------test use only----------------------*/
+void _at45db321_cs_active(void)
+{
+	SPI_CsActive(&s_AT45_Dev,s_AT45_Timeout);
+}
+void _at45db321_cs_inactive(void)
+{
+	SPI_CsInactive(&s_AT45_Dev);
+	Djy_DelayUs(20);
+}
+u32 _at45db321_TxRx(u8* sdata,u32 slen,u8* rdata, u32 rlen)
+{
+	struct SPI_DataFrame data;
+	s32 result;
+
+	data.RecvBuf = rdata;
+	data.RecvLen = rlen;
+	data.RecvOff = slen;
+	data.SendBuf = sdata;
+	data.SendLen = slen;
+
+	result = SPI_Transfer(&s_AT45_Dev,&data,true,s_AT45_Timeout);
+	if(result != CN_SPI_EXIT_NOERR)
+		return 0;
+	return 1;
+}
 
 //note:	应用程序中的Address实际为虚拟地址，需要经过转换才能成为AT45中的实际地址
 //		AT45用地址线A0-A9代表Page内的偏移地址，A10-A23代表Page地址，而因为AT45的Page大小是528bytes
@@ -214,10 +248,6 @@ u32 _at45db321_Written_Caculate(u32 byte_offset_addr,u32 data_len)
 //-----------------------------------------------------------------------------
 u32 _at45db321_Continuous_Array_Read(u32 page_addr,u32 byte_offset_addr,u8 *data,u32 data_len)
 {
-	u32 i;
-			
-	Spi_ActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-	
 	//array_addr
 	_at45db321_Command[0] = AT45_Continous_Array_Read_HF;
 #if AT45_Page_Size==512
@@ -230,10 +260,12 @@ u32 _at45db321_Continuous_Array_Read(u32 page_addr,u32 byte_offset_addr,u8 *data
 	_at45db321_Command[3] = byte_offset_addr & 0xFF;
 	_at45db321_Command[4] = 0xFF;
 	
-	Spi_TxRx(CFG_FLASH_SPI_BUS,_at45db321_Command,5,data,data_len,5);
-	
-	Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-	
+	_at45db321_cs_active();
+
+	_at45db321_TxRx(_at45db321_Command,5,data,data_len);
+
+	_at45db321_cs_inactive();
+
 	return data_len;
 }
 
@@ -247,27 +279,25 @@ u32 _at45db321_Continuous_Array_Read(u32 page_addr,u32 byte_offset_addr,u8 *data
 //-----------------------------------------------------------------------------
 u32 _at45db321_Buff_Write(u32 buff_num,u32 buff_addr,u8 *data,u32 data_len)
 {
-	Spi_ActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-	
 	if(buff_num == AT45_Buff1)
 		_at45db321_Command[0] = AT45_Buff1_Write;
 	else if(buff_num == AT45_Buff2)
 		_at45db321_Command[0] = AT45_Buff2_Write;
 	else
 	{
-		Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
 		return 0;
 	}
 	//buff_addr
 	_at45db321_Command[1] = 0xFF;
 	_at45db321_Command[2] = (buff_addr>>8)&0xFF;
 	_at45db321_Command[3] = (buff_addr)&0xFF;
-	
-	Spi_TxRx(CFG_FLASH_SPI_BUS,_at45db321_Command,4,NULL,0,0);
-	//data
-	Spi_TxRx(CFG_FLASH_SPI_BUS,data,data_len,NULL,0,0);
-	
-	Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
+
+	_at45db321_cs_active();
+
+	_at45db321_TxRx(_at45db321_Command,4,NULL,0);
+	_at45db321_TxRx(data,data_len,NULL,0);
+
+	_at45db321_cs_inactive();
 	
 	return data_len;
 }
@@ -281,16 +311,13 @@ u32 _at45db321_Buff_Write(u32 buff_num,u32 buff_addr,u8 *data,u32 data_len)
 //返回：实际读取的数据长度
 //-----------------------------------------------------------------------------
 u32 _at45db321_Buff_Read(u32 buff_num,u32 buff_addr,u8 *data,u32 data_len)
-{	
-	Spi_ActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-	
+{
 	if(buff_num == AT45_Buff1)
-		_at45db321_Command[0] = AT45_Buff1_Read_LF;
+		_at45db321_Command[0] = AT45_Buff1_Read;
 	else if(buff_num == AT45_Buff2)
-		_at45db321_Command[0] = AT45_Buff2_Read_LF;
+		_at45db321_Command[0] = AT45_Buff2_Read;
 	else
 	{
-		Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
 		return 0;
 	}
 	//buff_addr
@@ -299,9 +326,11 @@ u32 _at45db321_Buff_Read(u32 buff_num,u32 buff_addr,u8 *data,u32 data_len)
 	_at45db321_Command[3] = (buff_addr)&0xFF;
 	_at45db321_Command[4] = 0xFF;
 	
-	Spi_TxRx(CFG_FLASH_SPI_BUS,_at45db321_Command,5,data,data_len,5);
-	
-	Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
+	_at45db321_cs_active();
+
+	_at45db321_TxRx(_at45db321_Command,5,data,data_len);
+
+	_at45db321_cs_inactive();
 	
 	return data_len;
 }
@@ -315,15 +344,12 @@ u32 _at45db321_Buff_Read(u32 buff_num,u32 buff_addr,u8 *data,u32 data_len)
 //-----------------------------------------------------------------------------
 bool_t _at45db321_Page_to_Buff(u32 buff_num,u32 page_addr)
 {
-	Spi_ActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-	
 	if(buff_num == AT45_Buff1)
 		_at45db321_Command[0] = AT45_MainMem_Page_to_Buff1_Transfer;
 	else if(buff_num == AT45_Buff2)
 		_at45db321_Command[0] = AT45_MainMem_Page_to_Buff2_Transfer;
 	else
 	{
-		Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
 		return 0;
 	}
 #if AT45_Page_Size==512
@@ -335,9 +361,11 @@ bool_t _at45db321_Page_to_Buff(u32 buff_num,u32 page_addr)
 #endif
 	_at45db321_Command[3] = 0xFF;
 	
-	Spi_TxRx(CFG_FLASH_SPI_BUS,_at45db321_Command,4,NULL,0,0);
-	
-	Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
+	_at45db321_cs_active();
+
+	_at45db321_TxRx(_at45db321_Command,4,NULL,0);
+
+	_at45db321_cs_inactive();
 	
 	return true;
 }
@@ -352,8 +380,6 @@ bool_t _at45db321_Page_to_Buff(u32 buff_num,u32 page_addr)
 //-----------------------------------------------------------------------------
 bool_t _at45db321_Buff_to_Page(u32 buff_num,u32 page_addr,u32 With_Erase)
 {
-	Spi_ActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-	
 	if(buff_num == AT45_Buff1)
 	{
 		if(With_Erase == no_Erase)
@@ -362,7 +388,6 @@ bool_t _at45db321_Buff_to_Page(u32 buff_num,u32 page_addr,u32 With_Erase)
 			_at45db321_Command[0] = AT45_Buff1_to_MainMem_Page_Prog_vsErase;
 		else
 		{
-			Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
 			return 0;
 		}
 	}
@@ -374,13 +399,11 @@ bool_t _at45db321_Buff_to_Page(u32 buff_num,u32 page_addr,u32 With_Erase)
 			_at45db321_Command[0] = AT45_Buff2_to_MainMem_Page_Prog_vsErase;
 		else
 		{
-			Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
 			return 0;
 		}
 	}
 	else
 	{
-		Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
 		return 0;
 	}
 	
@@ -393,9 +416,11 @@ bool_t _at45db321_Buff_to_Page(u32 buff_num,u32 page_addr,u32 With_Erase)
 #endif
 	_at45db321_Command[3] = 0xFF;
 	
-	Spi_TxRx(CFG_FLASH_SPI_BUS,_at45db321_Command,4,NULL,0,0);
-	
-	Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
+	_at45db321_cs_active();
+
+	_at45db321_TxRx(_at45db321_Command,4,NULL,0);
+
+	_at45db321_cs_inactive();
 	
 	return true;
 }
@@ -414,8 +439,7 @@ bool_t _at45db321_Need_Erase_orNot(u8 *data,u32 data_len)
 		
 	for(i=0;i<data_len;i++)
 	{
-		if((_at45db321_buff[i] & data[i]) != data[i]
-			|| ((data == NULL)&&(_at45db321_buff[i] != 0xFF)) )
+		if(_at45db321_buff[i] != 0xFF)
 			return false;
 	}
 	
@@ -427,11 +451,21 @@ bool_t _at45db321_Need_Erase_orNot(u8 *data,u32 data_len)
 //参数：无
 //返回：无
 //-----------------------------------------------------------------------------
-void _at45db321_Page_Erase(u32 page_addr)
-{	
-	Spi_ActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-	
-	_at45db321_Command[0] = AT45_Page_Erase;
+bool_t AT45_Page_Erase(u32 Address)
+{
+	u32 page_addr;
+
+	if(false == Lock_SempPend(&AT45_Semp,50*mS))
+	{
+		return false;
+	}
+
+	if(false == at45db321_Wait_Ready(500000))		//查忙，若超时则返回false
+		return false;//超时，退出
+
+	page_addr = _at45db321_Page_Caculate(Address);
+
+	_at45db321_Command[0] = AT45_Page_Erase_Cmd;
 #if AT45_Page_Size==512
 	_at45db321_Command[1] = (page_addr>>7)&0xFF;
 	_at45db321_Command[2] = (page_addr<<1)&0xFF;
@@ -440,10 +474,15 @@ void _at45db321_Page_Erase(u32 page_addr)
 	_at45db321_Command[2] = (page_addr<<2)&0xFF;
 #endif
 	_at45db321_Command[3] = 0xFF;
-	
-	Spi_TxRx(CFG_FLASH_SPI_BUS,_at45db321_Command,4,NULL,0,0);
-	
-	Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
+
+	_at45db321_cs_active();
+
+	_at45db321_TxRx(_at45db321_Command,4,NULL,0);
+
+	_at45db321_cs_inactive();
+
+	Lock_SempPost(&AT45_Semp);
+	return true;
 }
 
 //----SPI FLASH Block擦除------------------------------------------------------
@@ -451,20 +490,34 @@ void _at45db321_Page_Erase(u32 page_addr)
 //参数：无
 //返回：无
 //-----------------------------------------------------------------------------
-void _at45db321_Block_Erase(u32 block_addr)
+bool_t AT45_Block_Erase(u32 Address)
 {
-/*
-	Spi_ActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-	
-	_at45db321_Command[0] = AT45_Block_Erase;
+	u32 block_addr;
+	if(false == Lock_SempPend(&AT45_Semp,100*mS))
+	{
+		return false;
+	}
+
+	if(false == at45db321_Wait_Ready(500000))		//查忙，若超时则返回false
+		return false;//超时，退出
+
+	block_addr = _at45db321_Page_Caculate(Address);
+	block_addr = _at45db321_Block_Caculate(block_addr);
+
+	_at45db321_Command[0] = AT45_Block_Erase_Cmd;
 	_at45db321_Command[1] = (block_addr>>4)&0xFF;
 	_at45db321_Command[2] = (block_addr<<4)&0xFF;
 	_at45db321_Command[3] = 0xFF;
-	
-	Spi_TxRx(CFG_FLASH_SPI_BUS,_at45db321_Command,4,NULL,0,0);
-	
-	Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-*/
+
+	_at45db321_cs_active();
+
+	_at45db321_TxRx(_at45db321_Command,4,NULL,0);
+
+	_at45db321_cs_inactive();
+
+	Lock_SempPost(&AT45_Semp);
+
+	return true;
 }
 
 //----SPI FLASH全片擦除--------------------------------------------------------
@@ -472,20 +525,30 @@ void _at45db321_Block_Erase(u32 block_addr)
 //参数：无
 //返回：无
 //-----------------------------------------------------------------------------
-void _at45db321_Chip_Erase(void)
+bool_t AT45_Chip_Erase(void)
 {
-/*
-	Spi_ActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-	
+	if(false == Lock_SempPend(&AT45_Semp,200*mS))
+	{
+		return false;
+	}
+
 	_at45db321_Command[0] = AT45_Chip_Erase1;
 	_at45db321_Command[1] = AT45_Chip_Erase2;
 	_at45db321_Command[2] = AT45_Chip_Erase3;
 	_at45db321_Command[3] = AT45_Chip_Erase4;
 	
-	Spi_TxRx(CFG_FLASH_SPI_BUS,_at45db321_Command,4,NULL,0,0);
-	
-	Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-*/
+	if(false == at45db321_Wait_Ready(500000))		//查忙，若超时则返回false
+		return false;//超时，退出
+
+	_at45db321_cs_active();
+
+	_at45db321_TxRx(_at45db321_Command,4,NULL,0);
+
+	_at45db321_cs_inactive();
+
+	Lock_SempPost(&AT45_Semp);
+
+	return true;
 }
 
 //----SPI FLASH Page Size设置--------------------------------------------------
@@ -496,20 +559,18 @@ void _at45db321_Chip_Erase(void)
 //-----------------------------------------------------------------------------
 void _at45db321_Binary_Page_Size_512(void)
 {
-/*
-	Spi_ActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-	
 	_at45db321_Command[0] = 0x3D;
 	_at45db321_Command[1] = 0x2A;
 	_at45db321_Command[2] = 0x80;
 	_at45db321_Command[3] = 0xA6;
 	
-	Spi_TxRx(CFG_FLASH_SPI_BUS,_at45db321_Command,4,NULL,0,0);
+	_at45db321_cs_active();
+
+	_at45db321_TxRx(_at45db321_Command,4,NULL,0);
+
+	_at45db321_cs_inactive();
 	
-	Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-	
-	while(1);
-*/
+//	while(1);
 }
 
 //----SPI FLASH读取Status Register---------------------------------------------
@@ -521,14 +582,109 @@ u32 _at45db321_Read_Status(void)
 {
 	u8 Data;
 	
-	Spi_ActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-	
 	_at45db321_Command[0] = AT45_Status_Register_Read;	
-	Spi_TxRx(CFG_FLASH_SPI_BUS,_at45db321_Command,1,&Data,1,1);
 	
-	Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
+	_at45db321_cs_active();
+
+	_at45db321_TxRx(_at45db321_Command,1,&Data,1);
+
+	_at45db321_cs_inactive();
 	
 	return Data;
+}
+
+void _at45db321_Check_SP(void)
+{
+	u8 Data[64],i;
+
+	if(false == at45db321_Wait_Ready(500000))		//查忙，若超时则返回false
+		return ;//超时，退出
+
+	_at45db321_Command[0] = 0x32;
+	_at45db321_Command[1] = 0xFF;
+	_at45db321_Command[2] = 0xFF;
+	_at45db321_Command[3] = 0xFF;
+
+
+	_at45db321_cs_active();
+	_at45db321_TxRx(_at45db321_Command,4,Data,64);
+	_at45db321_cs_inactive();
+
+	for(i = 0; i < 64; i ++)
+	{
+		if(Data[i] != 0)
+			break;
+	}
+
+	if(i != 64)
+	{
+
+		if(false == at45db321_Wait_Ready(500000))		//查忙，若超时则返回false
+			return ;//超时，退出
+
+		//erase sector protect
+		_at45db321_Command[0] = 0x3D;
+		_at45db321_Command[1] = 0x2A;
+		_at45db321_Command[2] = 0x7F;
+		_at45db321_Command[3] = 0xCF;
+
+
+
+		_at45db321_cs_active();
+		_at45db321_TxRx(_at45db321_Command,4,NULL,0);
+		_at45db321_cs_inactive();
+
+		//programe sector protect
+		memset(Data,0x00,64);
+		if(false == at45db321_Wait_Ready(500000))		//查忙，若超时则返回false
+			return ;//超时，退出
+		_at45db321_Command[0] = 0x3D;
+		_at45db321_Command[1] = 0x2A;
+		_at45db321_Command[2] = 0x7F;
+		_at45db321_Command[3] = 0xFC;
+
+		_at45db321_cs_active();
+		_at45db321_TxRx(_at45db321_Command,4,NULL,0);
+		_at45db321_TxRx(Data,64,NULL,0);
+		_at45db321_cs_inactive();
+
+		if(false == at45db321_Wait_Ready(500000))		//查忙，若超时则返回false
+			return ;//超时，退出
+		//check it
+		_at45db321_Command[0] = 0x32;
+		_at45db321_Command[1] = 0xFF;
+		_at45db321_Command[2] = 0xFF;
+		_at45db321_Command[3] = 0xFF;
+
+		_at45db321_cs_active();
+		_at45db321_TxRx(_at45db321_Command,4,Data,64);
+		_at45db321_cs_inactive();
+	}
+
+}
+
+void _at45db321_Check_Lock(void)
+{
+	u8 Data[64];
+
+	_at45db321_Command[0] = AT45_Status_Register_Read;
+	_at45db321_cs_active();
+	_at45db321_TxRx(_at45db321_Command,1,Data,2);
+	_at45db321_cs_inactive();
+
+	if(Data[1] & (0x08))//means locked down
+	{
+		//then read it
+		_at45db321_Command[0] = 0x35;
+		_at45db321_Command[1] = 0xFF;
+		_at45db321_Command[2] = 0xFF;
+		_at45db321_Command[3] = 0xFF;
+
+
+		_at45db321_cs_active();
+		_at45db321_TxRx(_at45db321_Command,4,Data,64);
+		_at45db321_cs_inactive();
+	}
 }
 //----SPI FLASH校验芯片ID------------------------------------------------------
 //功能：SPI FLASH校验芯片ID
@@ -537,39 +693,24 @@ u32 _at45db321_Read_Status(void)
 //-----------------------------------------------------------------------------
 bool_t _at45db321_Check_ID(void)
 {
-	u8 Data;
+	u8 Data[5];
 	
 	_at45db321_Command[0] = AT45_Command_ID;
-	
-	Spi_ActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-	
-	Spi_TxRx(CFG_FLASH_SPI_BUS,_at45db321_Command,1,&Data,1,1);
 
-	if(Data != 0x1f)//Manufacturer_ID
-	{
-		Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-		return false;
-	}
-	Spi_TxRx(CFG_FLASH_SPI_BUS,NULL,0,&Data,1,0);
-	if(Data != 0x27)//Device_ID1
-	{
-		Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-		return false;
-	}
-	Spi_TxRx(CFG_FLASH_SPI_BUS,NULL,0,&Data,1,0);
-	if(Data != 0x01)//Device_ID2
-	{
-		Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-		return false;
-	}
-	Spi_TxRx(CFG_FLASH_SPI_BUS,NULL,0,&Data,1,0);
-	if(Data != 0x00)//Extended_Info
-	{
-		Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-		return false;
-	}
+	_at45db321_cs_active();
 
-	Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
+	_at45db321_TxRx(_at45db321_Command,1,Data,5);
+
+	_at45db321_cs_inactive();
+
+	if( (Data[0] != 0x1F) ||			//Manufacturer_ID
+		(Data[1] != 0x27) ||			//Device_ID1
+		(Data[2] != 0x01) ||			//Device_ID2
+		(Data[3] != 0x01) ||
+		(Data[4] != 0x00))				//Extended_Info
+	{
+		return false;
+	}
 	
 	return true;	//Match SPI Flash ID successful
 }
@@ -599,28 +740,27 @@ bool_t at45db321_Check_Busy(void)
 //-----------------------------------------------------------------------------
 bool_t at45db321_Wait_Ready(u32 Time_Out)
 {
-	u8 Data;
-	//u32 Time_Out=500000;//查忙超时等待时间,以一个SPI读取周期为单位,以Chip Erase时间为标准:500000@1MHz
+	u8 Data[2],result = true;
 	
-	Spi_ActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
 	
-	_at45db321_Command[0] = AT45_Status_Register_Read;	
-	Spi_TxRx(CFG_FLASH_SPI_BUS,_at45db321_Command,1,&Data,1,1);
+	_at45db321_Command[0] = AT45_Status_Register_Read;
 	
-	while( AT45_Status_Reg_Bit_BUSY != (AT45_Status_Reg_Bit_BUSY & Data) )
+	do
 	{
-		Time_Out--;
-		if(Time_Out==0)
+		_at45db321_cs_active();
+		_at45db321_TxRx(_at45db321_Command,1,Data,2);
+		_at45db321_cs_inactive();
+
+		Time_Out -= 2;
+		Djy_DelayUs(2);
+		if(Time_Out == 0)
 		{
-			Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-			return false;
+			result = false;
+			break;
 		}
-		Spi_TxRx(CFG_FLASH_SPI_BUS,NULL,0,&Data,1,0);
-	}
+	}while( AT45_Status_Reg_Bit_BUSY != (AT45_Status_Reg_Bit_BUSY & Data[0]) );
 	
-	Spi_InActiveCS(CFG_FLASH_SPI_BUS,CFG_FLASH_SPI_CS);
-	
-	return true;
+	return result;
 }
 
 //----SPI FLASH模块读函数------------------------------------------------------
@@ -631,20 +771,21 @@ bool_t at45db321_Wait_Ready(u32 Time_Out)
 //		data_len	读取数据长度
 //返回：data_len = 实际读取的数据长度，false = 读取失败
 //-----------------------------------------------------------------------------
-u32 SPI_FLASH_Read(u32 Address,u8 *data,u32 data_len)
+u32 AT45_FLASH_Read(u32 Address,u8 *data,u32 data_len)
 {	
 	u32 page_addr,byte_offset_addr;
 	
 	////判断是否需要初始化SPI，以防module_init_at45db321未被调用	
-	if(!flash_spi_Config)
+	if(!sAT45Inited)
 	{
-		flash_spi_Config = &pg_spi_Config;
-	
-		flash_spi_Config->freq=CFG_FLASH_SPI_SPEED;
-	
-		Spi_Init(CFG_FLASH_SPI_BUS,flash_spi_Config);
+		return 0;
 	}
 	
+	if(false == Lock_SempPend(&AT45_Semp,25*mS))
+	{
+		return 0;
+	}
+
 	page_addr=_at45db321_Page_Caculate(Address);
 	byte_offset_addr=_at45db321_Offset_Caculate(Address);
 	
@@ -653,6 +794,8 @@ u32 SPI_FLASH_Read(u32 Address,u8 *data,u32 data_len)
 		
 	_at45db321_Continuous_Array_Read(page_addr,byte_offset_addr,data,data_len);
 	
+	Lock_SempPost(&AT45_Semp);
+
 	return data_len;
 }
 
@@ -667,20 +810,10 @@ u32 SPI_FLASH_Read(u32 Address,u8 *data,u32 data_len)
 //		data_len	写入数据长度
 //返回：written_data_len = 实际写入的数据长度，false = 写入失败
 //-----------------------------------------------------------------------------
-u32 SPI_FLASH_Write(u32 Address,u8 *data,u32 data_len)
+u32 _at45_flash_write(u32 Address,u8 *data,u32 data_len)
 {
 	u32 written_data_len=0,Erase_orNot=vs_Erase;
 	u32 page_addr,byte_offset_addr;
-	
-	////判断是否需要初始化SPI，以防module_init_at45db321未被调用	
-	if(!flash_spi_Config)
-	{
-		flash_spi_Config = &pg_spi_Config;
-	
-		flash_spi_Config->freq=CFG_FLASH_SPI_SPEED;
-	
-		Spi_Init(CFG_FLASH_SPI_BUS,flash_spi_Config);
-	}
 	
 	//计算Page地址及数据在Page中的偏移地址
 	page_addr = _at45db321_Page_Caculate(Address);
@@ -714,38 +847,99 @@ u32 SPI_FLASH_Write(u32 Address,u8 *data,u32 data_len)
 	}
 	
 	//3.最后，完成写入操作
-	if((( byte_offset_addr != 0 )||( written_data_len != AT45_Page_Size ))&&(Erase_orNot == vs_Erase))
+	//写入时，必须将flash中的数据读入到片内RAM，否则，将会将RAM中未确定的数据刷入到FLASH
+//	if((( byte_offset_addr != 0 )||( written_data_len != AT45_Page_Size ))&&(Erase_orNot == vs_Erase))
 	{//非整个Page的写入，擦除前需要保存
 		_at45db321_Page_to_Buff(_at45db321_Ready_Buff,page_addr);
 		if(false == at45db321_Wait_Ready(500000))		//查忙，若超时则返回false
 			return false;//超时，退出
 		_at45db321_Buff_Write(_at45db321_Ready_Buff,byte_offset_addr,data,written_data_len);
 	}
+
 	_at45db321_Buff_to_Page(_at45db321_Ready_Buff,page_addr,Erase_orNot);
 	//此处，不需要等待完成。在进行下一轮FLASH操作时再判断
 	
 	return written_data_len;
 }
 
+// =============================================================================
+// 功能：写flash，分 页写,将data_len的数据写入到Address的起始地址
+// 参数：Address，起始地址
+// 		data，数据指针
+//      data_len，数据长度，字节数
+// 返回：实际写入的数据长度
+// =============================================================================
+u32 AT45_FLASH_Write(u32 Address,u8 *data,u32 data_len)
+{
+	u32 wsize,temp;
+	////判断是否需要初始化SPI，以防module_init_at45db321未被调用
+	if(!sAT45Inited)
+	{
+		return false;
+	}
+	if(false == Lock_SempPend(&AT45_Semp,25*mS))
+	{
+		return false;
+	}
+	temp = data_len;
+    while(temp)
+    {
+    	wsize = _at45_flash_write(Address,data,temp);
+    	if(!wsize)
+    		break;
+    	Address += wsize;
+    	data 	+= wsize;
+    	temp -= wsize;
+    }
+    Lock_SempPost(&AT45_Semp);
+	return data_len - temp;
+}
 
+// =============================================================================
+// 功能：返回AT45DB321是否已经初始化
+// 参数：无
+// 返回：初始化状态
+// =============================================================================
+bool_t AT45_FLASH_Ready(void)
+{
+	return sAT45Inited;
+}
 //----初始化SPI FLASH模块------------------------------------------------------
 //功能：初始化SPI FLASH模块，校验芯片ID是否正确
 //参数：模块初始化函数没有参数
 //返回：true = 成功初始化，false = 初始化失败
 //-----------------------------------------------------------------------------
-ptu32_t module_init_at45db321(void)
+//#define test_buff_size  2048
+//u8 Data_write[test_buff_size];
+//u8 Data_read[test_buff_size];
+bool_t ModuleInstall_at45db321(void)
 {
-    u32 i,j,k,result,temp;
+    if(NULL == Lock_SempCreate_s(&AT45_Semp,1,1,CN_SEMP_BLOCK_FIFO,"AT45 semp"))
+    	return false;
 
 	/* setup baud rate */
-	flash_spi_Config = &pg_spi_Config;
+    s_AT45_Dev.AutoCs = false;
+    s_AT45_Dev.CharLen = 8;
+    s_AT45_Dev.Cs = 0;
+    s_AT45_Dev.Freq = AT45_SPI_SPEED;
+    s_AT45_Dev.Mode = SPI_MODE_0;
+    s_AT45_Dev.ShiftDir = SPI_SHIFT_MSB;
 	
-	flash_spi_Config->freq=CFG_FLASH_SPI_SPEED;
-	
-	Spi_Init(CFG_FLASH_SPI_BUS,flash_spi_Config);
+    if(NULL != SPI_DevAdd_s(&s_AT45_Dev,"QSPI","AT45DB321E"))
+    {
+    	SPI_BusCtrl(&s_AT45_Dev,CN_SPI_SET_POLL,0,0);
+    }
 	
 	if(false == _at45db321_Check_ID())	//校验芯片ID
 		return false;
+
+	if( !(_at45db321_Read_Status() & AT45_Status_Reg_Bit_PGSZ) )//转换成512字节
+	{
+		_at45db321_Binary_Page_Size_512();//不可逆，且需重启
+	}
+
+	sAT45Inited = true;
+	return sAT45Inited;
 	
 /*---------------------test use only----------------------
 	for(i=0;i<test_buff_size;i++) Data_write[i]=i&0xff;
@@ -767,9 +961,12 @@ ptu32_t module_init_at45db321(void)
 	{
 		if(Data_write[i]!=Data_read[i])
 		{
-			asm("nop;");
+			printk("at45 test error!\r\n");
+			break;
 		}
 	}
----------------------test use only----------------------*/
-    return true;
+	printk("at45 test finished!\r\n");
+	return true;
+/---------------------test use only----------------------*/
 }
+

@@ -60,6 +60,7 @@
 #define CN_SSP0_BASE        LPC_SSP0_BASE
 #define CN_SSP1_BASE        LPC_SSP1_BASE
 #define tagSpiReg           LPC_SSP_TypeDef
+#define CN_FIFO_LEN         8
 
 //定义中断中需使用的静态量结构体
 struct SPI_IntParamSet
@@ -79,7 +80,7 @@ struct SPI_IntParamSet IntParamset0;
 #define CN_SSP1_BUF_LEN      32
 struct SPI_IntParamSet IntParamset1;
 
-static struct tagSPI_CB *sp_SSP_CB[CN_SSP_NUM];
+static struct SPI_CB *sp_SSP_CB[CN_SSP_NUM];
 // =============================================================================
 // 功能: 中断使能和失能函数
 // 参数: tpSPI,被操作的寄存器组指针
@@ -102,7 +103,7 @@ static void __SSP_RxIntDisable(volatile tagSpiReg *Reg)
     Reg->IMSC &= ~((1<<1) | (1<<2));
 }
 // =============================================================================
-// 功能：SPI时钟配置函数，时钟来源为50M，经SCR和CPSR分频得到时钟，时钟计算公式为：
+// 功能：SPI时钟配置函数，时钟来源为25M，经SCR和CPSR分频得到时钟，时钟计算公式为：
 //       SCK =  PCLK / (CPSDVSR *[SCR+1])
 // 参数：spi_dev，设备句柄
 //      spiclk，欲配置的时钟速度，单位为Hz
@@ -133,7 +134,11 @@ static void __SSP_GpioInit(u32 spi_no)
     if(spi_no == CN_SSP0)
     {
         LPC_SC->PCONP |= (1<<21);
+
         // MISO,MOSI,SCK,SSEL配置
+        LPC_PINCON->PINSEL0  |= (2 << 30);  //sck0
+        LPC_SC->PCLKSEL1 &= ~(3<<10);
+        LPC_SC->PCLKSEL1 |= (00<<10);   //cclk/2 = 25M
         LPC_PINCON->PINSEL1  |= (2 << 0) | (2 << 2) | (2 << 4);
         LPC_PINCON->PINMODE1 &= ~0x000000FF;
     }
@@ -141,6 +146,8 @@ static void __SSP_GpioInit(u32 spi_no)
     {
         // Enable clock for SSP1, clock = CCLK / 2
         LPC_SC->PCONP    |= (1<<10);
+        LPC_SC->PCLKSEL0 &= ~(3<<20);
+        LPC_SC->PCLKSEL0 |= (00<<20);   //cclk/4 = 25M
         /* Connect MOSI, MISO, and SCK to SSP peripheral*/
         LPC_PINCON->PINSEL0  |= (2 << 18) | (2 << 16) | (2 << 14);
         LPC_PINCON->PINMODE0 &= ~0x000FF000;
@@ -201,32 +208,9 @@ static void __SSP_HardDefaultSet(u8 port)
     //配置SPI使用GPIO引脚
     __SSP_GpioInit(port);
 
-    Reg->CR0        = 0x01C7;       //SCR = 1;CPOL=1, CPHA=1,8bits
-    Reg->CPSR       = 0x02;         //CLK = 50M/(0x02 * (1+SCR)) = 12.5M
+    Reg->CR0        = 0x00C7;       //SCR = 0;CPOL=1, CPHA=1,8bits
+    Reg->CPSR       = 0x02;         //CLK = 50M/(0x02 * (1+SCR)) = 25M
     Reg->CR1        = 0x02;         //ENABLE SSP
-}
-
-// =============================================================================
-// 功能: SPI中断配置函数
-// 参数: IntLine,中断线
-// 返回: 无
-// =============================================================================
-static void __SSP_IntConfig(u8 port)
-{
-    u8 IntLine;
-    if(port == CN_SSP0)
-        IntLine = CN_INT_LINE_SSP0;
-    else if(port == CN_SSP1)
-        IntLine = CN_INT_LINE_SSP1;
-    else
-        return;
-    //中断线的初始化
-    u32 SSP_ISR(ufast_t IntLine);
-    Int_SetClearType(IntLine,CN_INT_CLEAR_PRE);
-    Int_IsrConnect(IntLine,SSP_ISR);
-    Int_SettoAsynSignal(IntLine);
-    Int_ClearLine(IntLine);
-    Int_RestoreAsynLine(IntLine);
 }
 
 // =============================================================================
@@ -285,7 +269,7 @@ static s32 __SSP_BusCtrl(tagSpiReg *Reg,u32 cmd,ptu32_t data1,ptu32_t data2)
         __SSP_SetClk(Reg,data1);
         break;
     case CN_SPI_CS_CONFIG:
-        __SSP_Config(Reg,(tagSpiConfig *)data2);
+        __SSP_Config(Reg,(tagSpiConfig *)data1);
         break;
     case CN_SPI_SET_AUTO_CS_EN:
         // 硬件上如果有自动产生CS的配置
@@ -296,19 +280,6 @@ static s32 __SSP_BusCtrl(tagSpiReg *Reg,u32 cmd,ptu32_t data1,ptu32_t data2)
         break;
     }
     return result;
-}
-
-// =============================================================================
-// 功能：轮询方式SSP读写一个字节
-// 参数：Reg,个性标记，本模块内即IIC寄存器基址
-//       Byte,发送的字节
-// 返回：读到的字节
-// =============================================================================
-static u8 __SSP_TxRxByte (tagSpiReg *Reg,u8 byte)
-{
-    Reg->DR = byte;
-    while (!(Reg->SR & 0x04));        //RNE, Wait for send to finish
-    return (Reg->DR);
 }
 
 // =============================================================================
@@ -324,21 +295,56 @@ static u8 __SSP_TxRxByte (tagSpiReg *Reg,u8 byte)
 // 返回：true,成功;false,失败
 // =============================================================================
 static bool_t __SSP_TxRxPoll(tagSpiReg *Reg,u8* srcaddr,u32 sendlen,
-                            u8* destaddr,u32 recvlen,u32 recvoff)
+                            u8* destaddr,u32 recvlen,u32 recvoff,u8 cs)
 {
-    u32 i;
+    u32 i,j,len;
     u8 ch =0xaa;
     __SSP_TxIntDisable(Reg);
     __SSP_RxIntDisable(Reg);
 
-    //此处简化处理，发送后再接收数据
-    for(i = 0; i < sendlen; i++)            //发送数据
+    while(Reg->SR & (1<<2))     //SSP_SR_RNE
     {
-        __SSP_TxRxByte(Reg,srcaddr[i]);
+        i = Reg->DR;            //读空FIFO
     }
-    for(i = 0; i < recvlen; i ++)           //读取数据，须发送无效数据，维持CLK
+
+    //此处简化处理，发送后再接收数据
+    for(i = 0; i < sendlen/CN_FIFO_LEN; i++)            //发送数据
     {
-        destaddr[i] = __SSP_TxRxByte(Reg,ch);
+        if(i == sendlen/CN_FIFO_LEN - 1)
+        {
+            len = sendlen%CN_FIFO_LEN;
+        }
+        else
+        {
+            len = CN_FIFO_LEN;
+        }
+        for(j = 0;j < len; j++)
+        {
+            Reg->DR = srcaddr[i*CN_FIFO_LEN + j];
+        }
+        while (!(Reg->SR & 0x04));
+    }
+
+    //如果需要接收数据
+    for(i = 0; i < recvlen/CN_FIFO_LEN; i++)            //发送数据
+    {
+        if(i == sendlen/CN_FIFO_LEN - 1)
+        {
+            len = sendlen % CN_FIFO_LEN;
+        }
+        else
+        {
+            len = CN_FIFO_LEN;
+        }
+        for(j = 0;j < len; j++)
+        {
+            Reg->DR = 0xFF;
+        }
+        while (!(Reg->SR & 0x04));
+        for(j = 0; j < len; j ++)
+        {
+            destaddr[i*8+j]=Reg->DR;
+        }
     }
 
     return true;
@@ -390,28 +396,28 @@ static bool_t __SSP_TransferTxRx(tagSpiReg *Reg,u32 sendlen,u32 recvlen,
 // 参数：spi_int_line,中断号，本函数没用到
 // 返回：无意义
 // =============================================================================
-u32 SSP_ISR(ufast_t IntLine)
+u32 SSP_ISR(ptu32_t IntLine)
 {
-    struct tagSPI_CB *SCB=NULL;
+    struct SPI_CB *SPI_SCB=NULL;
     struct SPI_IntParamSet *param;
     tagSpiReg *Reg;
     u8 ch[8],num=0,trans;
 
     if(IntLine == CN_INT_LINE_SSP0)
     {
-        SCB = sp_SSP_CB[CN_SSP0];
-        Reg = (tagSpiReg *)SCB->SpecificFlag;
+        SPI_SCB = sp_SSP_CB[CN_SSP0];
+        Reg = (tagSpiReg *)SPI_SCB->SpecificFlag;
         param = &IntParamset0;
     }
 
     if(IntLine == CN_INT_LINE_SSP1)
     {
-        SCB = sp_SSP_CB[CN_SSP1];
-        Reg = (tagSpiReg *)SCB->SpecificFlag;
+        SPI_SCB = sp_SSP_CB[CN_SSP1];
+        Reg = (tagSpiReg *)SPI_SCB->SpecificFlag;
         param = &IntParamset1;
     }
 
-    if(SCB == NULL)
+    if(SPI_SCB == NULL)
         return 0;
 
     //发送中断
@@ -419,7 +425,7 @@ u32 SSP_ISR(ufast_t IntLine)
     {
         if(Reg->SR & (1<<0))        //TNF
         {
-            trans = SPI_PortRead(SCB,ch,4);
+            trans = SPI_PortRead(SPI_SCB,ch,4);
             if(trans >0)
             {
                 for(num = 0; num < trans; num++)
@@ -452,7 +458,7 @@ u32 SSP_ISR(ufast_t IntLine)
                 {
                     if(param->RecvDataLen > 0)
                     {
-                        SPI_PortWrite(SCB,ch,1);
+                        SPI_PortWrite(SPI_SCB,ch,1);
                         param->RecvDataLen--;
                     }
                     else
@@ -482,6 +488,29 @@ u32 SSP_ISR(ufast_t IntLine)
 }
 
 // =============================================================================
+// 功能: SPI中断配置函数
+// 参数: IntLine,中断线
+// 返回: 无
+// =============================================================================
+static void __SSP_IntConfig(u8 port)
+{
+    u8 IntLine;
+    if(port == CN_SSP0)
+        IntLine = CN_INT_LINE_SSP0;
+    else if(port == CN_SSP1)
+        IntLine = CN_INT_LINE_SSP1;
+    else
+        return;
+    //中断线的初始化
+    Int_Register(IntLine);
+    Int_SetClearType(IntLine,CN_INT_CLEAR_AUTO);
+    Int_IsrConnect(IntLine,SSP_ISR);
+    Int_SettoAsynSignal(IntLine);
+    Int_ClearLine(IntLine);
+    Int_RestoreAsynLine(IntLine);
+}
+
+// =============================================================================
 // 功能：SPI底层驱动的初始化，完成整个SPI总线的初始化，其主要工作如下：
 //       1.初始化总线控制块SPI_CB，回调函数和缓冲区的初始化赋值；
 //       2.默认的硬件初始化，如GPIO或SPI寄存器等；
@@ -492,9 +521,9 @@ u32 SSP_ISR(ufast_t IntLine)
 // =============================================================================
 bool_t SSP0_Init(void)
 {
-    struct tagSPI_Param SSP_Config;
-    struct tagSPI_CB *SCB;
-    static struct tagSPI_CB s_SSP0_CB;
+    struct SPI_Param SSP_Config;
+    struct SPI_CB *SPI_SCB;
+    static struct SPI_CB s_SSP0_CB;
     static u8 s_SSP0_Buf[CN_SSP0_BUF_LEN];
 
     SSP_Config.BusName          = "SSP0";
@@ -507,21 +536,21 @@ bool_t SSP0_Init(void)
     SSP_Config.pCsInActive      = (CsInActiveFunc)__SSP_BusCsInActive;
     SSP_Config.pBusCtrl         = (SPIBusCtrlFunc)__SSP_BusCtrl;
     SSP_Config.pTransferPoll    = (TransferPoll)__SSP_TxRxPoll;
-    SCB = &s_SSP0_CB;
-    sp_SSP_CB[CN_SSP0] = SCB;
+    SPI_SCB = &s_SSP0_CB;
+    sp_SSP_CB[CN_SSP0] = SPI_SCB;
 
     __SSP_HardDefaultSet(CN_SSP0);
     __SSP_IntConfig(CN_SSP0);
 
-    if(NULL == SPI_BusAdd_s(&SSP_Config,SCB))
+    if(NULL == SPI_BusAdd_s(SPI_SCB,&SSP_Config))
         return 0;
     return 1;
 }
 bool_t SSP1_Init(void)
 {
-    struct tagSPI_Param SSP_Config;
-    struct tagSPI_CB *SCB;
-    static struct tagSPI_CB s_SSP1_CB;
+    struct SPI_Param SSP_Config;
+    struct SPI_CB *SPI_SCB;
+    static struct SPI_CB s_SSP1_CB;
     static u8 s_SSP1_Buf[CN_SSP1_BUF_LEN];
 
     SSP_Config.BusName          = "SSP1";
@@ -534,13 +563,13 @@ bool_t SSP1_Init(void)
     SSP_Config.pCsInActive      = (CsInActiveFunc)__SSP_BusCsInActive;
     SSP_Config.pBusCtrl         = (SPIBusCtrlFunc)__SSP_BusCtrl;
     SSP_Config.pTransferPoll    = (TransferPoll)__SSP_TxRxPoll;
-    SCB = &s_SSP1_CB;
-    sp_SSP_CB[CN_SSP1] = SCB;
+    SPI_SCB = &s_SSP1_CB;
+    sp_SSP_CB[CN_SSP1] = SPI_SCB;
 
     __SSP_HardDefaultSet(CN_SSP1);
     __SSP_IntConfig(CN_SSP1);
 
-    if(NULL == SPI_BusAdd_s(&SSP_Config,SCB))
+    if(NULL == SPI_BusAdd_s(SPI_SCB,&SSP_Config))
         return 0;
     return 1;
 }

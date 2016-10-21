@@ -116,11 +116,6 @@
 			<type>2</type>
 			<locationURI>DJYOS_SRC_LOCATION/bsp/chipdrv/88E1512</locationURI>
 		</link>
-		<link>
-			<name>src/OS_code/bsp/chipdriv/s29glxxx</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/chipdrv/s29glxxx</locationURI>
-		</link>
 	</linkedResources>
 	<variableList>
 		<variable>

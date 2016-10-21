@@ -147,7 +147,7 @@ bool_t WDT_WdtFeed(void)
 // 输出参数:无
 // 返回值  :
 // =============================================================================
-u32 WDT_ISR(ufast_t IntLine)
+u32 WDT_ISR(ptu32_t IntLine)
 {
     WDT_Unlock();
 
@@ -164,10 +164,14 @@ u32 WDT_ISR(ufast_t IntLine)
 void WDT_IntInit(void)
 {
     u8 IntLine = CN_INT_LINE_WDT;
-    Int_IsrConnect(IntLine,WDT_ISR);
-    Int_SettoReal(IntLine);
-    Int_ClearLine(IntLine);
-    Int_RestoreRealLine(IntLine);
+    if(true == Int_Register(IntLine))
+    {
+    	Int_Register(IntLine);
+		Int_IsrConnect(IntLine,WDT_ISR);
+		Int_SettoReal(IntLine);
+		Int_ClearLine(IntLine);
+		Int_RestoreRealLine(IntLine);
+    }
 }
 
 // =============================================================================

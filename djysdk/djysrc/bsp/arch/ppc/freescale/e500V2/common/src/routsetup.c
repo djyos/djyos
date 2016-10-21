@@ -1,5 +1,5 @@
 #include "stdint.h"
-#include "DDR.h"
+#include "DDRC.h"
 #include "LAW.h"
 #include "TLB.h"
 
@@ -42,6 +42,11 @@ void RoutSetUp()
 	DdrcInit();
 	//TLB SETUP
 	TlbSetUp();
+	
+	//SET THE L2CACHE AS THE SRAM
+	extern void Cache_InitL2(void);
+	Cache_InitL2();
+	
 	return;
 }
 

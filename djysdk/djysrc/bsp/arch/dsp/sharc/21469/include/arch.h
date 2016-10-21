@@ -117,24 +117,9 @@ extern "C" {
 #define CN_EMPTY_UP_STACK   3   //向上生长的空栈
 #define CN_STACK_TYPE       CN_FULL_DOWN_STACK
 
-//代理内核栈的深度计算方法:栈需求最深的那个系统服务
-#define CN_KERNEL_STACK     0x1000   //代理内核栈，线程需要为系统服务额外增加的栈
-                                    //目前最大api函数dev_add_root_device 需256bytes
-                                    //----2009-10-11
-
 //定义一些与对齐相关的宏
 #define MEM_ALIGN           1           //如果目标系统没有对齐要求，改为0
 #define ALIGN_SIZE          2           //ADSP21469要求2字节对齐
-
-#define align_down(bound,x) ((x)&(~((bound)-1)))    //把x按bound边界向下对齐
-#define align_up(bound,x)   (((x)+((bound)-1))&(~((bound)-1)))  //向上对齐,
-
-//以下声明本系统的数据对齐方式，移植敏感
-#define align_down_sys(x)   align_down(ALIGN_SIZE,x)   //ppc要求16字节对齐
-#define align_up_sys(x)     align_up(ALIGN_SIZE,x)     //ppc要求8字节对齐
-
-#define define_align_buf(name,size)     \
-                align_type name[align_up_sys(size)/sizeof(ALIGN_SIZE)]
 
 #ifdef __cplusplus
 }

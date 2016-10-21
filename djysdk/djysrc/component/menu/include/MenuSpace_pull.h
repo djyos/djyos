@@ -60,7 +60,7 @@
 
 
 struct menu_displaypara *createmenudisparabypre_pull(struct menu_displaypara *pre,struct menu_item *menuitem,\
-                                                     struct tagGkWinRsc  *Appwin);//创建下拉菜单显示参数
+                                                     struct GkWinRsc  *Appwin);//创建下拉菜单显示参数
 
 void adjustvisualmenuitem_pull(struct menu_displaypara  *dispara);//调整下拉菜单的可视菜单项
 

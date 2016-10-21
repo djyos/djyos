@@ -53,7 +53,7 @@
 // 备注:所有异常的统一入口
 // 该文件为异常的抛出处理，在抛出异常之前，务必保证针对该异常的特殊处理已经做了
 // 该文件只是更好的管理异常信息及其架构，而非统辖整个异常处理
-#include "config-prj.h"
+
 
 #include "stdint.h"
 #include "stdio.h"
@@ -62,29 +62,56 @@
 #include "arch_feature.h"
 #include "exp.h"
 #include "endian.h"
-#include "exp_api.h"
 #include "exp_decoder.h"
 #include "exp_hook.h"
 #include "exp_osstate.h"
 #include "Exp_Record.h"
 
+const char *gExpActionName[EN_EXP_DEAL_LENTH] = {
+    "IGNORE",
+    "DEFAULT",
+    "RECORD",
+    "RESET",
+    "REBOOT",
+    "RESTART",
+    "WAIT",
+    "DELERR",
+};
+
+const char *ExpActionName(enum EN_ExpAction action)
+{
+    if(action < EN_EXP_DEAL_LENTH)
+    {
+        return gExpActionName[action];
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
 //全部相同，那么不涉及到大小端的问题
 #define CN_EXP_HEADINFO_MAGICNUMBER    ((u32)(0x77777777))
 #define CN_EXP_PARTIALINFO_VALID       ((u32)(0x12345678))
-struct tagExpHeadInfo       //todo: 各成员加上注释
+
+extern bool_t HardExp_InfoDecoderInit(void);
+
+struct ExpHeadInfo
 {
-    u32   recordendian;
-    u32   magicnumber;
-    u32   osstatevalid;
-    u32   osstateinfolen;
-    u32   hookvalid;
-    u32   hookinfolen;
-    u32   hookresult;
-    u32   throwinfovalid;
-    u32   throwinfolen;
-    u32   throwresult;
-    u32   dealresult;
-    char  decodername[CN_EXP_NAMELEN_LIMIT];
+    u32   recordendian;     //异常记录是大端还是小端,利于离线分析异常记录
+    u32   magicnumber;      //用于检查信息是否有效
+    u32   ExpType;          //异常类型
+    u32   osstatevalid;     //CN_EXP_PARTIALINFO_VALID=操作系统运行状态信息有效
+    u32   osstateinfolen;   //操作系统运行状态信息长度
+    u32   hookvalid;        //CN_EXP_PARTIALINFO_VALID=hook收集的信息有效
+    u32   hookinfolen;      //hook收集的信息长度
+    u32   HookAction;       //hook要求的异常处理动作,由enum EN_ExpAction定义
+    u32   throwinfovalid;   //抛出的信息存储区是否有效
+    u32   throwinfolen;     //抛出的信息长度
+    u32   ThrowAction;      //抛出时要求的处理动作,由enum EN_ExpAction定义
+    u32   ExpAction;        //最终采取的动作.,由enum EN_ExpAction定义
+    char  decodername[CN_EXP_NAMELEN_LIMIT];  //异常解码器名字,长度不得超过15
+                            //如果是个NULL指针,则表示无解码器
 };//可以考虑使用bit位来省存储空间，但是考虑下来，根本省不了几个字节，改动意义不大
 
 static bool_t s_bExpMoDuleInitState = false;
@@ -97,10 +124,10 @@ static bool_t s_bExpMoDuleInitState = false;
 // 返回值  :_SYSEXP_RESULT_TYPE,异常的处理结果
 // 说明    :内部调用函数
 // =============================================================================
-static enum _EN_EXP_DEAL_TYPE_  __Exp_ResultMerge(enum _EN_EXP_DEAL_TYPE_ Result_Throw,\
-                                             enum _EN_EXP_DEAL_TYPE_ Result_Hook)
+static enum EN_ExpAction  __Exp_ResultMerge(enum EN_ExpAction Result_Throw,\
+                                             enum EN_ExpAction Result_Hook)
 {
-    enum _EN_EXP_DEAL_TYPE_ result;
+    enum EN_ExpAction result;
 
     if(EN_EXP_DEAL_DEFAULT == Result_Hook)
     {
@@ -116,106 +143,89 @@ extern void reset(void);
 extern void reboot(void);
 extern void restart_system(void);
 // =============================================================================
-// 函数功能:__Exp_ResultDeal
-//          处理异常的最终结果
+// 函数功能: 处理异常的最终结果
 // 输入参数:expdealresult,异常结果
 //          expinfo,搜集的异常信息
 // 输出参数:无
 // 返回值  :异常的最终处理结果(见enum _EN_EXP_DEAL_REASULT声明)
 // 说明    :内部调用函数,如果异常结果中有需要重启服务，那么就不会返回的。
 // =============================================================================
-static u32  __Exp_ResultDeal(u32 expdealresult,\
-                            struct tagExpRecordPara *expinfo)
+static enum EN_ExpDealResult  __Exp_ExecAction(u32 FinalAction,\
+                                    struct ExpRecordPara *expinfo)
 {
-    u32 result;
-    if(expdealresult < EN_EXP_DEAL_RECORD)
+    enum EN_ExpDealResult result;
+    result = Exp_Record(expinfo);
+    if(result != EN_EXP_RESULT_SUCCESS)
     {
-        result = EN_EXP_DEALT_IGNORE;
+    	printk("expresultdealer:RECORD FAILED!\n\r");
     }
-    else
+    switch (FinalAction)
     {
-        result = Exp_Record(expinfo);
-        if(result != EN_EXP_DEAL_RECORD_SUCCESS)
-        {
-            printk("expresultdealer:RECORD FAILED!\n\r");
-            result = EN_EXP_DEALT_RECORDFAILED;
-#ifdef DEBUG                 //调试时候挂起
-            while(1)
-            {
-
-            }
-#endif
-        }
-        else
-        {
-            result = EN_EXP_DEALT_SUCCESS;
-        }
-        switch (expdealresult)
-        {
-            //重启是不会返回的，不然必然是出错了
-            case EN_EXP_DEAL_RESET:
-                reset();
-                break;
-            case EN_EXP_DEAL_REBOOT:
-                reboot();
-                break;
-            case EN_EXP_DEAL_RESTART:
-                restart_system();
-                break;
-            default:
-                break;
-        }
+        //重启是不会返回的，不然必然是出错了
+        case EN_EXP_DEAL_RESET:
+            reset();
+            break;
+        case EN_EXP_DEAL_REBOOT:
+            reboot();
+            break;
+        case EN_EXP_DEAL_RESTART:
+            restart_system();
+            break;
+        case EN_EXP_DEAL_WAIT:
+            while(1);
+            break;
+        default:
+            break;
     }
     return result;
 }
 // =============================================================================
-// 函数功能:Exp_Throw
-//          处理所有异常的入口
+// 函数功能: 抛出异常信息
 // 输入参数:throwpara,抛出的异常信息参数
-// 输出参数:dealresult,该异常的最终处理结果
-// 返回值  :true，成功， false，失败(参数或者存储等未知原因)
-// 说明    :异常抛出的唯一入口;如果要重启，则该函数不返回
+// 返回值  :异常处理需采取的行动，如果有hook，可能会被hook的返回值替代
+// 说明    :本函数很可能不返回，直接复位
 // =============================================================================
-bool_t  Exp_Throw(struct tagExpThrowPara *throwpara, u32 *dealresult)
+enum EN_ExpDealResult  Exp_Throw(struct ExpThrowPara *throwpara)
 {
     bool_t result;
-    u32   result_hook;
-    u32   result_throw;
-    u32   result_deal;
+    enum EN_ExpAction   HookAction;
+    enum EN_ExpAction   ThrowAction;
+    enum EN_ExpAction   FinalAction;
+    enum EN_ExpDealResult Result;
     ptu32_t infoaddr;
     u32 infolen;
-    struct tagExpHeadInfo  headinfo;
-    struct tagExpRecordPara recordpara;
-    if(s_bExpMoDuleInitState == false)  //组件未初始化，证明很多系统调用都不能使用
+    struct ExpHeadInfo  headinfo;
+    struct ExpRecordPara recordpara;
+    if(s_bExpMoDuleInitState == false)  //组件未初始化，很多系统调用都不能使用
     {
-        return false;
+        return EN_EXP_RESULT_PARAERR;
     }
-    Int_SaveAsynSignal();
-    if((NULL != throwpara) &&( true == throwpara->validflag))//抛出有效
+    if(NULL != throwpara)   //抛出有效
     {
         //抛出信息处理
-        if(NULL != throwpara->name)
+        if(NULL != throwpara->DecoderName)
         {
-            strncpy(&headinfo.decodername[0], throwpara->name, CN_EXP_NAMELEN_LIMIT);
+            strncpy(headinfo.decodername, throwpara->DecoderName, CN_EXP_NAMELEN_LIMIT);
         }
         else
         {
             headinfo.decodername[0] = '\0';
         }
-        headinfo.throwinfolen = throwpara->para_len;
-        headinfo.throwresult = throwpara->dealresult;
+        headinfo.throwinfolen = throwpara->ExpInfoLen;
+        headinfo.ThrowAction = (u32)throwpara->ExpAction;
+        headinfo.ExpType = throwpara->ExpType;
         headinfo.throwinfovalid = CN_EXP_PARTIALINFO_VALID;
-        result_throw = throwpara->dealresult;
-        recordpara.throwinfoaddr = (ptu32_t)(throwpara->para);
-        recordpara.throwinfolen = throwpara->para_len;
+        ThrowAction = throwpara->ExpAction;
+        recordpara.throwinfoaddr = (ptu32_t)(throwpara->ExpInfo);
+        recordpara.throwinfolen = throwpara->ExpInfoLen;
         recordpara.headinfoaddr = (ptu32_t)(&(headinfo));
         recordpara.headinfolen = (u32)(sizeof(headinfo));
 
         //HOOK信息的搜集（如果搜集不成功，并且抛出者无意记录，则直接返回）
-        result = Exp_HookDealer(throwpara, &infoaddr, &infolen, &result_hook);
+        result = Exp_HookDealer(throwpara, &infoaddr, &infolen, &HookAction);
         if(false == result)
         {
-            result_hook = EN_EXP_DEAL_DEFAULT;
+            HookAction = EN_EXP_DEAL_DEFAULT;
             headinfo.hookvalid = ~CN_EXP_PARTIALINFO_VALID;
             infoaddr = 0;
             infolen = 0;
@@ -224,62 +234,50 @@ bool_t  Exp_Throw(struct tagExpThrowPara *throwpara, u32 *dealresult)
         {
             headinfo.hookvalid = CN_EXP_PARTIALINFO_VALID;
         }
-        result_deal = __Exp_ResultMerge(result_throw, result_hook);
+        FinalAction = __Exp_ResultMerge(ThrowAction, HookAction);
 
-        if(result_deal < EN_EXP_DEAL_RECORD)
+        if(FinalAction < EN_EXP_DEAL_RECORD)
         {
             //连记录都无需的话，那么就直接返回吧,简直开玩笑
-            result = true;
-            *dealresult = EN_EXP_DEALT_IGNORE;
-            goto throw_logic_exit;
-        }
-        headinfo.dealresult = result_deal;
-        headinfo.hookinfolen = infolen;
-        headinfo.hookresult = result_hook;
-        recordpara.hookinfoaddr = infoaddr;
-        recordpara.hookinfolen = infolen;
-
-        //OSSTATE信息的搜集(如果搜集不成功，无关大局)
-        result = Exp_OsStateInfoGather(throwpara, &infoaddr, &infolen);
-        if(false == result)
-        {
-            infoaddr = 0;
-            infolen = 0;
-            headinfo.osstatevalid = ~CN_EXP_PARTIALINFO_VALID;
+            Result = EN_EXP_RESULT_IGNORE;
         }
         else
         {
-            headinfo.osstatevalid = CN_EXP_PARTIALINFO_VALID;
-        }
-        headinfo.osstateinfolen = infolen;
-        headinfo.recordendian = CN_CFG_BYTE_ORDER;
-        headinfo.magicnumber = CN_EXP_HEADINFO_MAGICNUMBER;
-        recordpara.osstateinfoaddr = infoaddr;
-        recordpara.osstateinfolen = infolen;
+            headinfo.ExpAction = (u32)FinalAction;
+            headinfo.hookinfolen = infolen;
+            headinfo.HookAction = HookAction;
+            recordpara.hookinfoaddr = infoaddr;
+            recordpara.hookinfolen = infolen;
 
-        //该搜集的信息都搜集完毕，那么就处理吧
-        *dealresult = __Exp_ResultDeal(result_deal, &recordpara);
-        result = true;
+            //操作系统运行状态信息的搜集(如果搜集不成功，无关大局)
+            __Exp_OsStateInfoGather(&infoaddr, &infolen);
+            headinfo.osstatevalid = CN_EXP_PARTIALINFO_VALID;
+            headinfo.osstateinfolen = infolen;
+            headinfo.recordendian = CN_CFG_BYTE_ORDER;
+            headinfo.magicnumber = CN_EXP_HEADINFO_MAGICNUMBER;
+
+            recordpara.osstateinfoaddr = infoaddr;
+            recordpara.osstateinfolen = infolen;
+
+            //该搜集的信息都搜集完毕，那么就处理吧
+            Result = __Exp_ExecAction(FinalAction, &recordpara);
+        }
     }
     else
     {
-        *dealresult = EN_EXP_DEALT_PARAERR;
-        result = true;
+        Result = EN_EXP_RESULT_IGNORE;
     }
-throw_logic_exit:
-    Int_RestoreAsynSignal();
-    return result;
+    return Result;
 }
 
 // =============================================================================
-// 函数功能:__Exp_HeadinfoSwapByEndian
-//         信息头字节序转换
+// 函数功能: 信息头字节序转换
 // 输入参数:expinfo,异常信息
 // 输出参数:无
 // 返回值  :无
 // 说明    :将expinfo中已知信息转换字节序,name以前的字节必须是4字节对齐的
 // =============================================================================
-void  __Exp_HeadinfoSwapByEndian(struct tagExpHeadInfo *headinfo)
+void  __Exp_HeadinfoSwapByEndian(struct ExpHeadInfo *headinfo)
 {
     u32 temp;
     u32 limit;
@@ -295,59 +293,61 @@ void  __Exp_HeadinfoSwapByEndian(struct tagExpHeadInfo *headinfo)
     }
 }
 // =============================================================================
-// 函数功能:__Exp_HeadinfoDecoder
-//          异常信息头解析
+// 函数功能: 异常信息头解析
 // 输入参数:headinfo,异常信息头
 // 输出参数:无
 // 返回值  :true成功 false失败
 // 说明    :内部调用
 // =============================================================================
-bool_t __Exp_HeadinfoDecoder(struct tagExpHeadInfo *headinfo)
+bool_t __Exp_HeadinfoDecoder(struct ExpHeadInfo *headinfo)
 {
-    printk("exp_headinfo:recordendian    = 0x%08x\n\r",headinfo->recordendian);
-    printk("exp_headinfo:magicnumber     = 0x%08x\n\r",headinfo->magicnumber);
-    printk("exp_headinfo:osstatevalid    = 0x%08x\n\r",headinfo->osstatevalid);
-    printk("exp_headinfo:osstateinfolen  = 0x%08x\n\r",headinfo->osstateinfolen);
-    printk("exp_headinfo:hookvalid       = 0x%08x\n\r",headinfo->hookvalid);
-    printk("exp_headinfo:hookinfolen     = 0x%08x\n\r",headinfo->hookinfolen);
-    printk("exp_headinfo:hookresult      = 0x%08x\n\r",headinfo->hookresult);
-    printk("exp_headinfo:throwinfovalid  = 0x%08x\n\r",headinfo->throwinfovalid);
-    printk("exp_headinfo:throwinfolen    = 0x%08x\n\r",headinfo->throwinfolen);
-    printk("exp_headinfo:throwresult     = 0x%08x\n\r",headinfo->throwresult);
-    printk("exp_headinfo:dealresult      = 0x%08x\n\r",headinfo->dealresult);
-    printk("exp_headinfo:expdecodername  = %s\n\r",headinfo->decodername);
+    printf("exp_headinfo:magicnumber   :0x%08x\n\r",headinfo->magicnumber);
+    printf("exp_headinfo:record endian :%s\n\r",\
+            headinfo->recordendian==CN_CFG_LITTLE_ENDIAN?"LittleEndian":"BigEndian");
+    printf("exp_headinfo:ExpType       :0x%08x\n\r",headinfo->ExpType);
+    printf("exp_headinfo:osstatevalid  :%s\n\r",\
+            headinfo->osstatevalid==CN_EXP_PARTIALINFO_VALID?"Valid":"Invalid");
+    printf("exp_headinfo:osstateinfolen:%d Bytes\n\r",headinfo->osstateinfolen);
+    printf("exp_headinfo:hookinfo stat :%s\n\r",\
+            headinfo->hookvalid==CN_EXP_PARTIALINFO_VALID?"Valid":"Invalid");
+    printf("exp_headinfo:hookinfolen   :%d Bytes\n\r",headinfo->hookinfolen);
+    printf("exp_headinfo:HookAction    :%s\n\r",ExpActionName(headinfo->HookAction));
+    printf("exp_headinfo:throwinfo stat:%s\n\r",\
+            headinfo->throwinfovalid==CN_EXP_PARTIALINFO_VALID?"Valid":"Invalid");
+    printf("exp_headinfo:throwinfolen  :%d Bytes\n\r",headinfo->throwinfolen);
+    printf("exp_headinfo:ThrowAction   :%s\n\r",ExpActionName(headinfo->ThrowAction));
+    printf("exp_headinfo:ExpAction     :%s\n\r",ExpActionName(headinfo->ExpAction));
+    printf("exp_headinfo:DecoderName   :%s\n\r",headinfo->decodername);
 
     return true;
 }
 
 // =============================================================================
-// 函数功能:Exp_InfoDecoder
-//          解析一条异常信息
-// 输入参数:info,异常信息
-//          infolen, 异常信息长度
+// 函数功能: 解析异常信息
+// 输入参数:recordpara,异常信息
 // 输出参数:无
 // 返回值  :true成功 false失败
 // 说明    :异常信息一定已经拷贝到了内存当中，或则可能会修改原信息
 // =============================================================================
-bool_t  Exp_InfoDecoder(struct tagExpRecordPara *recordpara)
+bool_t  Exp_InfoDecoder(struct ExpRecordPara *recordpara)
 {
     bool_t  result = false;
     u32  endian;
-    struct tagExpHeadInfo *headinfo;
-    struct tagExpThrowPara throwpara;
+    struct ExpHeadInfo *headinfo;
+    struct ExpThrowPara throwpara;
     if(NULL == recordpara)
     {
         result = false;
-        printk("Exp_InfoDecoder:invalid parameter!\n\r");
+        printf("Exp_InfoDecoder:invalid parameter!\n\r");
     }
-    else if(( 0 == recordpara->headinfoaddr ) || (sizeof(struct tagExpHeadInfo) != recordpara->headinfolen))
+    else if(( 0 == recordpara->headinfoaddr ) || (sizeof(struct ExpHeadInfo) != recordpara->headinfolen))
     {
         result = false;
-        printk("Exp_InfoDecoder:incomplete exception headinfo!\n\r");
+        printf("Exp_InfoDecoder:incomplete exception headinfo!\n\r");
     }
     else
     {
-        headinfo = (struct tagExpHeadInfo *)(recordpara->headinfoaddr);
+        headinfo = (struct ExpHeadInfo *)(recordpara->headinfoaddr);
 
         //用小端作为标准主要是因为小端是0，大小端都一样
         if(((headinfo->recordendian == CN_CFG_LITTLE_ENDIAN)&&(CN_CFG_BYTE_ORDER != CN_CFG_LITTLE_ENDIAN))||\
@@ -358,22 +358,22 @@ bool_t  Exp_InfoDecoder(struct tagExpRecordPara *recordpara)
         }
         if(CN_EXP_HEADINFO_MAGICNUMBER != headinfo->magicnumber)
         {
-            printk("Exp_InfoDecoder:headinfo has been destroyed!\n\r");
+            printf("Exp_InfoDecoder:headinfo has been destroyed!\n\r");
             result = false;
         }
         else
         {
             //重现抛出信息参数
             endian = headinfo->recordendian;
-            throwpara.dealresult = headinfo->throwresult;
-            throwpara.name = headinfo->decodername;
-            throwpara.para = (u8 *)(recordpara->throwinfoaddr);
-            throwpara.para_len = recordpara->throwinfolen;
-            throwpara.validflag = true;
+            throwpara.ExpAction = headinfo->ThrowAction;
+            throwpara.DecoderName = headinfo->decodername;
+            throwpara.ExpInfo = (u8 *)(recordpara->throwinfoaddr);
+            throwpara.ExpInfoLen = recordpara->throwinfolen;
+            throwpara.ExpType = headinfo->ExpType;
             //信息头解析
-            if(recordpara->headinfolen != sizeof(struct tagExpHeadInfo))
+            if(recordpara->headinfolen != sizeof(struct ExpHeadInfo))
             {
-                printk("Exp_InfoDecoder:headinfo incomplete!\n\r");
+                printf("Exp_InfoDecoder:headinfo incomplete!\n\r");
             }
             else
             {
@@ -382,26 +382,26 @@ bool_t  Exp_InfoDecoder(struct tagExpRecordPara *recordpara)
             //OS状态解析,解析器自己判断包的数据是否被修改
             if(recordpara->osstateinfolen != headinfo->osstateinfolen)
             {
-                printk("Exp_InfoDecoder:osstateinfo incomplete!\n\r");
+                printf("Exp_InfoDecoder:osstateinfo incomplete!\n\r");
             }
             else
             {
-                result = Exp_OsStateInfoDecoder(&throwpara,recordpara->osstateinfoaddr,\
+                result = __Exp_OsStateInfoDecoder(recordpara->osstateinfoaddr,\
                                              recordpara->osstateinfolen, endian);
             }
             //抛出异常解析,解析器自己判断包的长度是否完整，包的内容是否被破坏
             if(recordpara->throwinfolen != headinfo->throwinfolen)
             {
-                printk("Exp_InfoDecoder:throwinfo incomplete!\n\r");
+                printf("Exp_InfoDecoder:throwinfo incomplete!\n\r");
             }
             else
             {
-                result = Exp_Throwinfodecoder(&throwpara,endian);
+                result = Exp_ThrowInfodecode(&throwpara,endian);
             }
             //HOOK解析,解析器自己判断包的长度是否完整，包的内容是否被破坏
             if(recordpara->hookinfolen != headinfo->hookinfolen)
             {
-                printk("Exp_InfoDecoder:hookinfo incomplete!\n\r");
+                printf("Exp_InfoDecoder:hookinfo incomplete!\n\r");
             }
             else
             {
@@ -414,17 +414,23 @@ bool_t  Exp_InfoDecoder(struct tagExpRecordPara *recordpara)
 }
 
 // =============================================================================
-// 函数功能:ModuleInstall_Exp
-//         异常组件初始化
+// 函数功能: 异常组件初始化,同时安装了硬件异常的信息解析函数。
 // 输入参数:para
 // 输出参数:无
 // 返回值  :ptu32_t 暂时无定义
-// 说明    :主要是初始化存储方案
 // =============================================================================
 ptu32_t ModuleInstall_Exp(ptu32_t para)
 {
     extern bool_t Exp_ShellInit();
     Exp_ShellInit();
+    dListInit(&ExpDecoderListHead);
+
+    // 初始化硬件异常信息解析函数,这里要特别说明一下,本着谁抛出异常谁解析的原则,
+    // 例如看门狗异常,在ModuleInstall_Wdt函数中调用Exp_RegisterThrowinfoDecoder
+    // 初始化看门狗的异常解析函数.硬件异常信息解析函数,也应该由初始化硬件异常的
+    // 模块注册。但硬件异常不一样,它是在预加载时初始化的,而那时异常组件还没有准
+    // 备好,故必须在这里初始化.
+    HardExp_InfoDecoderInit( );
     s_bExpMoDuleInitState = true;
 
     return para;

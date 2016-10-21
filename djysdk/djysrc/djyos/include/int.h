@@ -59,6 +59,7 @@
 
 
 #include "arch_feature.h"
+#include "int_hard.h"
 #include "cpu_peri_int_line.h"
 
 #ifdef __cplusplus
@@ -69,19 +70,19 @@ extern "C" {
 #define  CN_REAL            (1)
 
 //清中断方式
-#define  CN_INT_CLEAR_PRE    0   //调用ISR之前由系统自动清
-#define  CN_INT_CLEAR_USER   1   //系统不清，由用户在ISR中清，默认方式
-#define  CN_INT_CLEAR_POST   2   //调用ISR返回之后、中断返回前由系统自动清
+#define  CN_INT_CLEAR_AUTO    0   //调用ISR之前由系统自动清，默认方式
+#define  CN_INT_CLEAR_USER   1   //系统不清，由用户在ISR中清
+//#define  CN_INT_CLEAR_POST   2   //调用ISR返回之后、中断返回前由系统自动清
 
 //表示各中断线状态的位图占ucpu_t类型的字数
 #define CN_INT_BITS_WORDS   ((CN_INT_LINE_LAST+CN_CPU_BITS)/CN_CPU_BITS)
 
 //中断线数据结构，每中断一个
 //移植敏感
-struct tagIntLine
+struct IntLine
 {
-    u32 (*ISR)(ufast_t line);
-    struct  tagEventECB *sync_event;       //正在等待本中断发生的事件
+    u32 (*ISR)(ptu32_t line);
+    struct EventECB *sync_event;       //正在等待本中断发生的事件
     ucpu_t en_counter;          //禁止次数计数,等于0时表示允许中断
     ufast_t int_type;           //1=实时中断,0=异步信号
     ufast_t clear_type;          //应答方式
@@ -96,10 +97,12 @@ struct tagIntLine
                                 //，在该窗口内，是允许嵌套的。例如cm3的实时中断
     uint16_t my_evtt_id;
     u32  prio;                  //优先级，含义由使用者解析
+
+    ptu32_t para;               //IF NONE, use the irqno
 };
 
 //中断总控数据结构.
-struct tagIntMasterCtrl
+struct IntMasterCtrl
 {
     //中断线属性位图，0=异步信号，1=实时中断,数组的位数刚好可以容纳中断数量,与
     //中断线数据结构的int_type成员含义相同。
@@ -137,12 +140,14 @@ bool_t Int_EnableAsynLine(ufast_t ufl_line);
 bool_t Int_EnableRealLine(ufast_t ufl_line);
 bool_t Int_CheckLine(ufast_t ufl_line);
 bool_t Int_SetClearType(ufast_t ufl_line,ufast_t clear_type);
-void Int_IsrConnect(ufast_t ufl_line, u32 (*isr)(ufast_t));
+void Int_IsrConnect(ufast_t ufl_line, u32 (*isr)(ptu32_t));
 bool_t Int_EvttConnect(ufast_t ufl_line,uint16_t my_evtt_id);
 void Int_IsrDisConnect(ufast_t ufl_line);
 void Int_EvttDisConnect(ufast_t ufl_line);
 void Int_ResetAsynSync(ufast_t ufl_line);
 bool_t Int_AsynSignalSync(ufast_t ufl_line);
+bool_t Int_Register(ufast_t ufl_line);
+bool_t Int_UnRegister(ufast_t ufl_line);
 
 //以下函数在int_hard.c中实现
 void Int_ContactAsynSignal(void);
@@ -158,6 +163,7 @@ bool_t Int_SettoAsynSignal(ufast_t ufl_line);
 bool_t Int_SettoReal(ufast_t ufl_line);
 bool_t Int_SetPrio(ufast_t ufl_line,u32 prio);
 void Int_Init(void);
+void Int_SetIsrPara(ufast_t ufl_line,ptu32_t para);
 
 
 #ifdef __cplusplus

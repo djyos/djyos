@@ -64,7 +64,7 @@
 
 #include "os.h"
 
-#include "socket.h"
+#include <tcpip/comport/sys/socket.h>
 
 #define CN_TCP_SERVERPORT  2048
 
@@ -74,296 +74,296 @@ static u32 sgSndTimes = 0;
 #define CN_RCVBUF_LEN 0x1000*20   //80KB
 bool_t tcptstserver(void)
 {
-	int sockfd;
-	int clientfd;
-	int multiid;
-	int addrlen;
-	int i =0;
-	struct sockaddr_in serveraddr;
-	struct sockaddr_in clientaddr;
-	char *sndbuf;
-	char *rcvbuf;
-	int sndlen;
-	s64 sndtotal;
-	unsigned int sndprint =0;
-	int sndopt;
-	s64 sndtimestart;
-	s64 sndtimetest;
-	int sndspeed;
-	int sndkbytes;
+    int sockfd;
+    int clientfd;
+    int multiid;
+    int addrlen;
+    int i =0;
+    struct sockaddr_in serveraddr;
+    struct sockaddr_in clientaddr;
+    char *sndbuf;
+    char *rcvbuf;
+    int sndlen;
+    s64 sndtotal;
+    unsigned int sndprint =0;
+    int sndopt;
+    u32 sndtimestart;
+    u32 sndtimetest;
+    int sndspeed;
+    int sndkbytes;
 
 
-	int rcvlen;
-	int rcvtotal;
-	int rcvtimes;
-	s64 rcvtimestart;
-	s64 rcvtimeend;
-	u32 nrcvtime;
+    int rcvlen;
+    int rcvtotal;
+    int rcvtimes;
+    s64 rcvtimestart;
+    s64 rcvtimeend;
+    u32 nrcvtime;
 
-	u32 activebits;
-	struct tagMultiplexSetsCB *writesets;
-	u32 badmultiwrite =0;
+    u32 activebits;
+    struct MultiplexSetsCB *writesets;
+    u32 badmultiwrite =0;
 
-	struct tagMultiplexSetsCB *acceptsets;
+    struct MultiplexSetsCB *acceptsets;
 
-	//创建发送集合
-	activebits = CN_SOCKET_OR | CN_SOCKET_WRITEALBE;
-	writesets = Multiplex_Creat(activebits);
-	if(NULL==writesets)
-	{
-		printk("Create WriteSets failed!\n\r");
-	}
-	else
-	{
-		printk("Create WriteSets success!\n\r");
-	}
+    //创建发送集合
+    activebits = CN_SOCKET_IOOR | CN_SOCKET_IOWRITE;
+    writesets = Multiplex_Creat(activebits);
+    if(NULL==writesets)
+    {
+        printk("Create WriteSets failed!\n\r");
+    }
+    else
+    {
+        printk("Create WriteSets success!\n\r");
+    }
 
-	//创建接收客户端集合
-	activebits = CN_SOCKET_OR | CN_SOCKET_ACCEPT;
-	acceptsets = Multiplex_Creat(activebits);
-	if(NULL==acceptsets)
-	{
-		printk("Create acceptsets failed!\n\r");
-	}
-	else
-	{
-		printk("Create acceptsets success!\n\r");
-	}
+    //创建接收客户端集合
+    activebits = CN_SOCKET_IOOR | CN_SOCKET_IOACCEPT;
+    acceptsets = Multiplex_Creat(activebits);
+    if(NULL==acceptsets)
+    {
+        printk("Create acceptsets failed!\n\r");
+    }
+    else
+    {
+        printk("Create acceptsets success!\n\r");
+    }
 
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if(-1 == sockfd)
-	{
-		printk("socket failed!\n\r");
-		return true;
-	}
-	else
-	{
-		printk("socket success!\n\r");
-	}
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if(-1 == sockfd)
+    {
+        printk("socket failed!\n\r");
+        return true;
+    }
+    else
+    {
+        printk("socket success!\n\r");
+    }
 
-	serveraddr.sin_port = htons(CN_TCP_SERVERPORT);
-	serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    serveraddr.sin_port = htons(CN_TCP_SERVERPORT);
+    serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-	if(-1==bind(sockfd, &serveraddr, sizeof(serveraddr)))
-	{
-		printk("bind failed!\n\r");
-		return true;
-	}
-	else
-	{
-		printk("bind success!\n\r");
-	}
+    if(-1==bind(sockfd, &serveraddr, sizeof(serveraddr)))
+    {
+        printk("bind failed!\n\r");
+        return true;
+    }
+    else
+    {
+        printk("bind success!\n\r");
+    }
 
-	if(-1 == listen(sockfd, 100))
-	{
-		printk("listen failed!\n\r");
-		return true;
-	}
-	else
-	{
-		printk("listen success!\n\r");
-	}
+    if(-1 == listen(sockfd, 100))
+    {
+        printk("listen failed!\n\r");
+        return true;
+    }
+    else
+    {
+        printk("listen success!\n\r");
+    }
 
-	//测试MULTIIO，不断的监视服务器端
-	//设置为非阻塞
-//	sndopt = 1;
-//	if(0 == setsockopt(sockfd,SOL_SOCKET ,SO_NOBLOCK,&sndopt,4))
-//	{
-//		printk("Server:Set server noblock success!\n\r");
-//	}
-//	else
-//	{
-//		printk("Sever:Set server noblock failed!\n\r");
-//	}
+    //测试MULTIIO，不断的监视服务器端
+    //设置为非阻塞
+//  sndopt = 1;
+//  if(0 == setsockopt(sockfd,SOL_SOCKET ,SO_NOBLOCK,&sndopt,4))
+//  {
+//      printk("Server:Set server noblock success!\n\r");
+//  }
+//  else
+//  {
+//      printk("Sever:Set server noblock failed!\n\r");
+//  }
 
-	if(Socket_MultiplexAdd(acceptsets,sockfd,CN_SOCKET_ACCEPT))
-	{
-		printk("add server to acceptsets success!\n\r");
-	}
-	else
-	{
-		printk("add server to acceptsets failed!\n\r");
-	}
-	while(1)
-	{
-		if(sockfd != Multiplex_Wait(acceptsets,NULL, CN_TIMEOUT_FOREVER))
-		{
-			printk("MultiIo activated err!\n\r");
-		}
-		else
-		{
-			printk("MultiIo activated success!\n\r");
-		}
+    if(Socket_MultiplexAdd(acceptsets,sockfd,CN_SOCKET_IOACCEPT))
+    {
+        printk("add server to acceptsets success!\n\r");
+    }
+    else
+    {
+        printk("add server to acceptsets failed!\n\r");
+    }
+    while(1)
+    {
+        if(sockfd != Multiplex_Wait(acceptsets,NULL, CN_TIMEOUT_FOREVER))
+        {
+            printk("MultiIo activated err!\n\r");
+        }
+        else
+        {
+            printk("MultiIo activated success!\n\r");
+        }
 
-    	clientfd = accept(sockfd, &clientaddr, &addrlen);
-    	if(clientfd != -1)
-    	{
-    		printk("Got an client:ip = %08x  port = %04x\n\r",\
-    				     ntohl(clientaddr.sin_addr.s_addr),ntohs(clientaddr.sin_port));
-    		//关闭NAGLE
-    		sndopt = 1;
-    		if(0 == setsockopt(clientfd, IPPROTO_TCP,TCP_NODELAY,&sndopt,4))
-    		{
-    			printk("Client:close nagle success!\n\r");
-    		}
-    		else
-    		{
-    			printk("Client:close nagle  failed!\n\r");
-    		}
+        clientfd = accept(sockfd, &clientaddr, &addrlen);
+        if(clientfd != -1)
+        {
+            printk("Got an client:ip = %08x  port = %04x\n\r",\
+                         ntohl(clientaddr.sin_addr.s_addr),ntohs(clientaddr.sin_port));
+            //关闭NAGLE
+            sndopt = 1;
+            if(0 == setsockopt(clientfd, IPPROTO_TCP,TCP_NODELAY,&sndopt,4))
+            {
+                printk("Client:close nagle success!\n\r");
+            }
+            else
+            {
+                printk("Client:close nagle  failed!\n\r");
+            }
 
-    		//设置接收缓冲区
-    		sndopt = CN_RCVBUF_LEN;
-    		if(0 == setsockopt(clientfd,SOL_SOCKET ,SO_RCVBUF,&sndopt,4))
-    		{
-    			printk("Client:set client sndbuf success!\n\r");
-    		}
-    		else
-    		{
-    			printk("Client:set client sndbuf failed!\n\r");
-    		}
-    		//TEST RCV
-//    		rcvtotal = 0;
-//    		rcvbuf = M_Malloc(CN_RCVBUF_LEN,CN_TIMEOUT_FOREVER);
-//    		rcvtimestart = DjyGetTime();
-//    		while(1)
-//    		{
-//				rcvlen = recv(clientfd,rcvbuf,CN_RCVBUF_LEN,0);
-//				if(rcvlen>0)
-//				{
-//					rcvtotal+=rcvlen;
-//					rcvtimes++;
-//				}
-//				else
-//				{
-//					printk("Rcv Failed!\n\r");
-//				}
-//				if(0==rcvtimes%1000)
-//				{
-//					rcvtimeend = DjyGetTime();
-//					nrcvtime = (u32)(rcvtimeend - rcvtimestart);
-//					printk("Rcv: Len =0x%08x MBytes,Time = 0x%08x us\n\r",\
-//							      rcvtotal/1024/1024,nrcvtime);
-//				}
-//    		}
-    		//TEST SND
-    		//设置发送缓冲区
-    		sndopt = CN_SNDBUF_LEN;
-    		if(0 == setsockopt(clientfd,SOL_SOCKET ,SO_SNDBUF,&sndopt,4))
-    		{
-    			printk("Client:set client sndbuf success!\n\r");
-    		}
-    		else
-    		{
-    			printk("Client:set client sndbuf failed!\n\r");
-    		}
-    		sndbuf = M_Malloc(CN_SNDBUF_LEN,CN_TIMEOUT_FOREVER);
-    		for(i = 0; i <CN_SNDBUF_LEN; i++)
-    		{
-    			sndbuf[i] = 'a'+i%27;
-    		}
-    		while(1)
-    		{
-				sndlen = send(clientfd,sndbuf,CN_SNDBUF_LEN,0);
-				sgSndTimes++;
+            //设置接收缓冲区
+            sndopt = CN_RCVBUF_LEN;
+            if(0 == setsockopt(clientfd,SOL_SOCKET ,SO_RCVBUF,&sndopt,4))
+            {
+                printk("Client:set client sndbuf success!\n\r");
+            }
+            else
+            {
+                printk("Client:set client sndbuf failed!\n\r");
+            }
+            //TEST RCV
+//          rcvtotal = 0;
+//          rcvbuf = M_Malloc(CN_RCVBUF_LEN,CN_TIMEOUT_FOREVER);
+//          rcvtimestart = DjyGetSysTime();
+//          while(1)
+//          {
+//              rcvlen = recv(clientfd,rcvbuf,CN_RCVBUF_LEN,0);
+//              if(rcvlen>0)
+//              {
+//                  rcvtotal+=rcvlen;
+//                  rcvtimes++;
+//              }
+//              else
+//              {
+//                  printk("Rcv Failed!\n\r");
+//              }
+//              if(0==rcvtimes%1000)
+//              {
+//                  rcvtimeend = DjyGetSysTime();
+//                  nrcvtime = (u32)(rcvtimeend - rcvtimestart);
+//                  printk("Rcv: Len =0x%08x MBytes,Time = 0x%08x us\n\r",\
+//                                rcvtotal/1024/1024,nrcvtime);
+//              }
+//          }
+            //TEST SND
+            //设置发送缓冲区
+            sndopt = CN_SNDBUF_LEN;
+            if(0 == setsockopt(clientfd,SOL_SOCKET ,SO_SNDBUF,&sndopt,4))
+            {
+                printk("Client:set client sndbuf success!\n\r");
+            }
+            else
+            {
+                printk("Client:set client sndbuf failed!\n\r");
+            }
+            sndbuf = M_Malloc(CN_SNDBUF_LEN,CN_TIMEOUT_FOREVER);
+            for(i = 0; i <CN_SNDBUF_LEN; i++)
+            {
+                sndbuf[i] = 'a'+i%27;
+            }
+            while(1)
+            {
+                sndlen = send(clientfd,sndbuf,CN_SNDBUF_LEN,0);
+                sgSndTimes++;
 
-    			Djy_EventDelay(1000*mS);
-    		}
+                Djy_EventDelay(1000*mS);
+            }
 
 
-    		//设置接收缓冲区16KB
-    		sndopt = 0x4000;
-    		if(0 == setsockopt(clientfd,SOL_SOCKET ,SO_RCVBUF,&sndopt,4))
-    		{
-    			printk("Client:set client rcvbuf success!\n\r");
-    		}
-    		else
-    		{
-    			printk("Client:set client rcvbuf  failed!\n\r");
-    		}
-    		//设置发送低水位,发送低水平为28K
-    		sndopt = 0x7000;
-    		if(0 == setsockopt(clientfd,SOL_SOCKET ,SO_SNDLOWAT,&sndopt,4))
-    		{
-    			printk("Client:set client sndbuf trig level success!\n\r");
-    		}
-    		else
-    		{
-    			printk("Client:set client sndbuf trig level  failed!\n\r");
-    		}
-    		//设置接收水位，4KB
-    		sndopt = 0x1000;
-    		if(0 == setsockopt(clientfd,SOL_SOCKET ,SO_RCVLOWAT,&sndopt,4))
-    		{
-    			printk("Client:set client rcvbuf trig level success!\n\r");
-    			printk("Client:Begin Data Snd Test!\n\r");
-    		}
-    		else
-    		{
-    			printk("Client:set client rcvbuf trig level  failed!\n\r");
-    		}
-    		//设置为非阻塞
-    		sndopt = 1;
-    		if(0 == setsockopt(clientfd,SOL_SOCKET ,SO_NOBLOCK,&sndopt,4))
-    		{
-    			printk("Client:Set noblock success!\n\r");
-    		}
-    		else
-    		{
-    			printk("Client:set noblock failed!\n\r");
-    		}
-    		//
-    		if(Socket_MultiplexAdd(writesets,clientfd,CN_SOCKET_WRITEALBE))
-    		{
-    			printk("add client to writesets success!\n\r");
-    		}
-    		else
-    		{
-    			printk("add client to writesets failed!\n\r");
-    		}
+            //设置接收缓冲区16KB
+            sndopt = 0x4000;
+            if(0 == setsockopt(clientfd,SOL_SOCKET ,SO_RCVBUF,&sndopt,4))
+            {
+                printk("Client:set client rcvbuf success!\n\r");
+            }
+            else
+            {
+                printk("Client:set client rcvbuf  failed!\n\r");
+            }
+            //设置发送低水位,发送低水平为28K
+            sndopt = 0x7000;
+            if(0 == setsockopt(clientfd,SOL_SOCKET ,SO_SNDLOWAT,&sndopt,4))
+            {
+                printk("Client:set client sndbuf trig level success!\n\r");
+            }
+            else
+            {
+                printk("Client:set client sndbuf trig level  failed!\n\r");
+            }
+            //设置接收水位，4KB
+            sndopt = 0x1000;
+            if(0 == setsockopt(clientfd,SOL_SOCKET ,SO_RCVLOWAT,&sndopt,4))
+            {
+                printk("Client:set client rcvbuf trig level success!\n\r");
+                printk("Client:Begin Data Snd Test!\n\r");
+            }
+            else
+            {
+                printk("Client:set client rcvbuf trig level  failed!\n\r");
+            }
+            //设置为非阻塞
+            sndopt = 1;
+            if(0 == setsockopt(clientfd,SOL_SOCKET ,SO_NOBLOCK,&sndopt,4))
+            {
+                printk("Client:Set noblock success!\n\r");
+            }
+            else
+            {
+                printk("Client:set noblock failed!\n\r");
+            }
+            //
+            if(Socket_MultiplexAdd(writesets,clientfd,CN_SOCKET_IOWRITE))
+            {
+                printk("add client to writesets success!\n\r");
+            }
+            else
+            {
+                printk("add client to writesets failed!\n\r");
+            }
 
-    		sndtotal = 0;
-    		sndtimestart = DjyGetTime();
-    		while(1)
-    		{
-    			multiid = Multiplex_Wait(writesets,NULL, CN_TIMEOUT_FOREVER);
-    			if(clientfd == multiid)
-    			{
-					sndlen = send(clientfd,sndbuf,CN_SNDBUF_LEN,0);
-					sndprint++;
-					if(sndlen >0)
-					{
-						sndtotal += sndlen;
-						if(0 == sndprint%10000)
-						{
-							sndkbytes = sndtotal /1024;
-							sndtimetest = DjyGetTime();
-							sndtimetest -= sndtimestart;
-							sndspeed = (sndtotal*1000)/sndtimetest;
-							printk("Send Msg:%d kbytes--speed = %d KB/S\n\r",\
-										   sndkbytes,sndspeed);
-						}
-//						Djy_EventDelay(1000*mS);
-					}
-					else
-					{
-//						printk("Client SndSet trigged but could not write!\n\r");
-					}
-    			}
-    			else
-    			{
-    				badmultiwrite++;
-    			}
-    		}
-    	}
-    	else
-    	{
-    		printk("Bad Accept!\n\r");
-    	}
-	}
+            sndtotal = 0;
+            sndtimestart = (u32)DjyGetSysTime();
+            while(1)
+            {
+                multiid = Multiplex_Wait(writesets,NULL, CN_TIMEOUT_FOREVER);
+                if(clientfd == multiid)
+                {
+                    sndlen = send(clientfd,sndbuf,CN_SNDBUF_LEN,0);
+                    sndprint++;
+                    if(sndlen >0)
+                    {
+                        sndtotal += sndlen;
+                        if(0 == sndprint%10000)
+                        {
+                            sndkbytes = sndtotal /1024;
+                            sndtimetest = (u32)DjyGetSysTime();
+                            sndtimetest -= sndtimestart;
+                            sndspeed = (sndtotal*1000)/sndtimetest;
+                            printk("Send Msg:%d kbytes--speed = %d KB/S\n\r",\
+                                           sndkbytes,sndspeed);
+                        }
+//                      Djy_EventDelay(1000*mS);
+                    }
+                    else
+                    {
+//                      printk("Client SndSet trigged but could not write!\n\r");
+                    }
+                }
+                else
+                {
+                    badmultiwrite++;
+                }
+            }
+        }
+        else
+        {
+            printk("Bad Accept!\n\r");
+        }
+    }
 
-	closesocket(sockfd);
+    closesocket(sockfd);
 
-	return true;
+    return true;
 }
 
 
@@ -371,12 +371,12 @@ bool_t TcpEffectTest(char *param)
 {
    u16   evtt_id = CN_EVTT_ID_INVALID;
    evtt_id = Djy_EvttRegist(EN_CORRELATIVE, CN_PRIO_RRS-4, 0, 1,
-   		(ptu32_t (*)(void))tcptstserver,NULL, 0x1000, "TCPEffectServer");
-	if (evtt_id != CN_EVTT_ID_INVALID)
-	{
-		Djy_EventPop(evtt_id, NULL, 0, NULL, 0, 0);
-	}
-	return true;
+        (ptu32_t (*)(void))tcptstserver,NULL, 0x1000, "TCPEffectServer");
+    if (evtt_id != CN_EVTT_ID_INVALID)
+    {
+        Djy_EventPop(evtt_id, NULL, 0, NULL, 0, 0);
+    }
+    return true;
 }
 
 

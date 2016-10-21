@@ -59,36 +59,39 @@
 //   新版本号：V1.0.0
 //   修改说明: 原始版本
 //------------------------------------------------------
-#include    "gdd.h"
-#include    "./include/gdd_private.h"
+#include    <gui/gdd/gdd_private.h>
 
-int RectW(const RECT *prc)
+s32 RectW(const RECT *prc)
 {
     return (prc->right - prc->left);
 }
 
-int RectH(const RECT *prc)
+s32 RectH(const RECT *prc)
 {
     return (prc->bottom - prc->top);
 }
 
-void    _SetRect(RECT *prc,int x,int y,int w,int h)
-{
-    prc->left   = x;
-    prc->top    = y;
-    prc->right  = x+w;
-    prc->bottom = y+h;
-
-}
-
-void    SetRect(RECT *prc,int x,int y,int w,int h)
+//----设置矩形尺寸-----------------------------------------------------------
+//描述: 略
+//参数：略
+//返回：窗口对象内存内存指针
+//------------------------------------------------------------------------------
+void    SetRect(RECT *prc,s32 x,s32 y,s32 w,s32 h)
 {
     if(prc!=NULL)
     {
-        _SetRect(prc,x,y,w,h);
+        prc->left   = x;
+        prc->top    = y;
+        prc->right  = x+w;
+        prc->bottom = y+h;
     }
 }
 
+//----清空矩形尺寸-----------------------------------------------------------
+//描述: 略
+//参数：略
+//返回：窗口对象内存内存指针
+//------------------------------------------------------------------------------
 void    SetRectEmpty(RECT *prc)
 {
     if(prc!=NULL)
@@ -100,7 +103,7 @@ void    SetRectEmpty(RECT *prc)
     }
 }
 
-BOOL    IsRectEmpty(const RECT *prc)
+bool_t    IsRectEmpty(const RECT *prc)
 {
     if(prc!=NULL)
     {
@@ -112,22 +115,15 @@ BOOL    IsRectEmpty(const RECT *prc)
     }
     return FALSE;
 }
-/*========================================================================================*/
 
-void    _CopyRect(RECT *dst,const RECT *src)
+bool_t    CopyRect(RECT *dst,const RECT *src)
 {
-    dst->left =src->left;
-    dst->top =src->top;
-    dst->right =src->right;
-    dst->bottom =src->bottom;
-}
-
-BOOL    CopyRect(RECT *dst,const RECT *src)
-{
-    if(NULL!=dst)
-    if(NULL!=src)
+    if((NULL!=dst) && (NULL!=src))
     {
-        _CopyRect(dst,src);
+        dst->left =src->left;
+        dst->top =src->top;
+        dst->right =src->right;
+        dst->bottom =src->bottom;
         return TRUE;
     }
     return FALSE;
@@ -135,7 +131,7 @@ BOOL    CopyRect(RECT *dst,const RECT *src)
 
 /*============================================================================*/
 
-void    _OffsetRect(RECT *prc,int dx,int dy)
+void    __OffsetRect(RECT *prc,s32 dx,s32 dy)
 {
     prc->left += dx;
     prc->top  += dy;
@@ -143,11 +139,24 @@ void    _OffsetRect(RECT *prc,int dx,int dy)
     prc->bottom  += dy;
 }
 
-BOOL    OffsetRect(RECT *prc,int dx,int dy)
+bool_t    OffsetRect(RECT *prc,s32 dx,s32 dy)
 {
     if(NULL!=prc)
     {
-        _OffsetRect(prc,dx,dy);
+        __OffsetRect(prc,dx,dy);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+bool_t    MoveRect(RECT *prc,s32 x,s32 y)
+{
+    if(NULL!=prc)
+    {
+        prc->right += x - prc->left;
+        prc->bottom  += y - prc->top;
+        prc->left += x;
+        prc->top  += y;
         return TRUE;
     }
     return FALSE;
@@ -155,7 +164,7 @@ BOOL    OffsetRect(RECT *prc,int dx,int dy)
 
 /*============================================================================*/
 
-void    _InflateRect(RECT *prc,int dx,int dy)
+void    __InflateRect(RECT *prc,s32 dx,s32 dy)
 {
     prc->left   -= dx;
     prc->top    -= dy;
@@ -163,11 +172,11 @@ void    _InflateRect(RECT *prc,int dx,int dy)
     prc->bottom += dy;
 }
 
-BOOL    InflateRect(RECT *prc,int dx,int dy)
+bool_t    InflateRect(RECT *prc,s32 dx,s32 dy)
 {
     if(NULL!=prc)
     {
-        _InflateRect(prc,dx,dy);
+        __InflateRect(prc,dx,dy);
         return TRUE;
     }
     return FALSE;
@@ -175,7 +184,7 @@ BOOL    InflateRect(RECT *prc,int dx,int dy)
 
 /*============================================================================*/
 
-void    _InflateRectEx(RECT *prc,int l,int t,int r,int b)
+void    __InflateRectEx(RECT *prc,s32 l,s32 t,s32 r,s32 b)
 {
     prc->left   -= l;
     prc->top    -= t;
@@ -183,11 +192,11 @@ void    _InflateRectEx(RECT *prc,int l,int t,int r,int b)
     prc->bottom += b;
 }
 
-BOOL    InflateRectEx(RECT *prc,int l,int t,int r,int b)
+bool_t InflateRectEx(RECT *prc,s32 l,s32 t,s32 r,s32 b)
 {
     if(NULL!=prc)
     {
-        _InflateRectEx(prc,l,t,r,b);
+        __InflateRectEx(prc,l,t,r,b);
         return TRUE;
     }
     return FALSE;
@@ -195,7 +204,7 @@ BOOL    InflateRectEx(RECT *prc,int l,int t,int r,int b)
 
 /*============================================================================*/
 
-BOOL    _PtInRect(const RECT *prc,const POINT *pt)
+bool_t    __PtInRect(const RECT *prc,const POINT *pt)
 {
     if(pt->x < prc->left)   return FALSE;
     if(pt->x >= prc->right) return FALSE;
@@ -206,131 +215,25 @@ BOOL    _PtInRect(const RECT *prc,const POINT *pt)
 
 }
 
-BOOL    PtInRect(const RECT *prc,const POINT *pt)
+bool_t    PtInRect(const RECT *prc,const POINT *pt)
 {
-    if(NULL!=prc)
-    if(NULL!=pt)
+    if((NULL==prc) || (NULL==pt))
+        return FALSE;
+    else
     {
-        return _PtInRect(prc,pt);
+        if(pt->x < prc->left)
+            return FALSE;
+        if(pt->x >= prc->right)
+            return FALSE;
+
+        if(pt->y < prc->top)
+            return FALSE;
+        if(pt->y >= prc->bottom)
+            return FALSE;
+        return TRUE;
     }
-    return FALSE;
 }
 
 /*============================================================================*/
 
-BOOL    MakeProgressRect(RECT *dst,const RECT *src,u32 Range,u32 Val,EN_PB_MODE mode)
-{
-    s32 a0,a1;
-
-    if(NULL == dst)
-    {
-        return FALSE;
-    }
-
-    if(NULL == src)
-    {
-        return FALSE;
-    }
-
-    //防止数据过大产生溢出
-    if(Range>0x0FFFFFFF)
-    {
-        Range >>= 16;
-        Val >>= 16;
-    }
-    else if(Range>0x00FFFFFF)
-    {
-        Range >>= 12;
-        Val >>= 12;
-    }
-    else if(Range>0x000FFFFF)
-    {
-        Range >>= 8;
-        Val >>= 8;
-    }
-
-    //防止除数为0而引发异常
-    if(Range==0)
-    {
-        Range=1;
-        Val=1;
-    }
-
-    if(Val>Range)
-    {
-        Val=Range;
-    }
-
-    switch(mode)
-    {
-        case    PBM_LEFT:
-                a0 =(Val*RectW(src))/Range;
-                a1 =RectW(src)-a0;
-
-                dst[0].left =src->left;
-                dst[0].top =src->top;
-                dst[0].right =src->left+a0;
-                dst[0].bottom =src->bottom;
-
-                dst[1].left =src->left+a0;
-                dst[1].top =src->top;
-                dst[1].right =src->right;
-                dst[1].bottom =src->bottom;
-                return TRUE;
-                ////
-        case    PBM_RIGHT:
-                a0 =(Val*RectW(src))/Range;
-                a1 =RectW(src)-a0;
-
-                dst[0].left =src->left+a1;
-                dst[0].top =src->top;
-                dst[0].right =src->right;
-                dst[0].bottom =src->bottom;
-
-                dst[1].left =src->left;
-                dst[1].top =src->top;
-                dst[1].right =src->left+a1;
-                dst[1].bottom =src->bottom;
-                return TRUE;
-                ////
-        case    PBM_TOP:
-                a0 =(Val*RectH(src))/Range;
-                a1 =RectH(src)-a0;
-
-                dst[0].left =src->left;
-                dst[0].top =src->top;
-                dst[0].right =src->right;
-                dst[0].bottom =src->top+a0;
-
-                dst[1].left =src->left;
-                dst[1].top =src->top+a0;
-                dst[1].right =src->right;
-                dst[1].bottom =src->bottom;
-                return TRUE;
-                ////
-
-        case    PBM_BOTTOM:
-                a0 =(Val*RectH(src))/Range;
-                a1 =RectH(src)-a0;
-
-                dst[0].left =src->left;
-                dst[0].top =src->top+a1;
-                dst[0].right =src->right;
-                dst[0].bottom =src->bottom;
-
-                dst[1].left =src->left;
-                dst[1].top =src->top;
-                dst[1].right =src->right;
-                dst[1].bottom =src->top+a1;
-                return TRUE;
-                ////
-        default:
-                return FALSE;
-
-
-
-    }
-}
-
-/*============================================================================*/
 

@@ -65,19 +65,19 @@ extern "C" {
 
 #define __asm_start_thread __asm_turnto_context
 
-struct  tagThreadVm *__CreateThread(struct  tagEventType *evtt,u32 *stack_size);
+struct ThreadVm *__CreateThread(struct EventType *evtt,u32 *stack_size);
 void __asm_reset_thread(void (*thread_routine)(void),
-                           struct  tagThreadVm  *vm);
+                           struct ThreadVm  *vm);
 void ___asm_reset_switch(void (*thread_routine)(void),
-                           struct  tagThreadVm *new_vm,struct  tagThreadVm *old_vm);
-void ___asm_turnto_context(struct  tagThreadVm  *new_vm);
-void ___asm_switch_context(struct  tagThreadVm *new_vm,struct  tagThreadVm *old_vm);
-void ___asm_switch_context_int(struct  tagThreadVm *new_vm,struct  tagThreadVm *old_vm);
+                           struct ThreadVm *new_vm,struct ThreadVm *old_vm);
+void ___asm_turnto_context(struct ThreadVm  *new_vm);
+void ___asm_switch_context(struct ThreadVm *new_vm,struct ThreadVm *old_vm);
+void ___asm_switch_context_int(struct ThreadVm *new_vm,struct ThreadVm *old_vm);
 void __asm_enable_l1cache(void);
 void __asm_get_tb_value(u32 *value_h32, u32 *value_l32);
 void __asm_init_Dtimer(u32 value_tick);
 //void __asm_reset_the_tb(void);
-void ___asm_start_thread(struct  tagThreadVm  *new_vm);
+void ___asm_start_thread(struct ThreadVm  *new_vm);
 void asm_delay_by_loop(u32 times) ;
 void relocate_code (u32, u32, u32);
 

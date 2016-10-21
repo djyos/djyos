@@ -56,20 +56,21 @@
 //------------------------------------------------------
 #ifndef __HEAP_IN_H__
 #define __HEAP_IN_H__
-#include "config-prj.h"
+
 #include "stdint.h"
-#include "core-cfg.h"
+#include "board-config.h"
 #include "lock.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct tagHeapCession
+struct HeapCession
 {
-    struct tagHeapCession *Next;
+    struct HeapCession *Next;
     u8   *static_bottom;  //堆底指针，从准静态分配算起
     u8   *heap_bottom;    //堆底指针，从块相联动态分配算起
     u8   *heap_top;       //堆顶指针
+    list_t   *last;       //静态分配最后一块的链表地址指针。
 #if ((CN_CFG_DYNAMIC_MEM == 1))
     u32    PageSize;
     u32    ua_pages_num;    //总页数
@@ -97,26 +98,30 @@ struct tagHeapCession
 #endif   //for #if ((CN_CFG_DYNAMIC_MEM == 1))
 };
 
-struct tagHeapCB
+struct HeapCB
 {
-    struct tagHeapCB *PreHeap;
-    struct tagHeapCB *NextHeap;
-    struct tagHeapCession *Cession;
+    struct HeapCB *PreHeap;
+    struct HeapCB *NextHeap;
+    struct HeapCession *Cession;
     u32  CessionNum;            //组成该heap的session数量。
     u32  AlignSize;             //该heap所要求的对齐尺寸，有些堆用于dma或特殊用
                                 //途，在该heap上分配的内存，有特殊的对齐尺寸。
+    u32  HeapProperty;          //0=通用堆,1=专用堆
     char *HeapName;
-    struct tagMutexLCB HeapMutex;
+    struct MutexLCB HeapMutex;
 #if ((CN_CFG_DYNAMIC_MEM == 1))
-    struct  tagEventECB *mem_sync; //等待分配内存的事件链表,双向循环链表
+    // 等待分配内存的事件链表,双向循环链表。
+    // 无论是否支持动态分配,在准静态分配期间,指针无效.
+    // 仅专用堆的指针有效,通用堆将用静态变量s_ptMemSync替代.
+    struct EventECB *mem_sync;
 #endif   //for #if ((CN_CFG_DYNAMIC_MEM == 1))
 } ;
 
 //用于把事件申请的局部内存块串起来，调用y_event_done函数时，据此回收内存。
-struct tagMemRecord
+struct MemRecord
 {
-    struct tagMemRecord   *next;
-    struct tagEventECB *owner;
+    struct MemRecord   *next;
+    struct EventECB *owner;
     u8 *address;
 };
 

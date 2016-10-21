@@ -62,11 +62,14 @@
 extern "C" {
 #endif
 
+typedef ucpu_t atom_high_t;
+typedef ucpu_t atom_low_t;
+
 #define cn_real_prio_default    0x80    //默认的实时中断优先级，用户把某中断设
                                         //为实时中断时，这是它的默认优先级，当
                                         //然，用户可调用int_set_prio函数修改。
 
-struct tagIntReg     //at 0xe000e100,
+struct IntReg     //at 0xe000e100,
 {
     vu32 setena[32];
     vu32 clrena[32];
@@ -79,7 +82,7 @@ struct tagIntReg     //at 0xe000e100,
     vu8 pri[240];
 };
 
-extern struct tagIntReg volatile * const pg_int_reg;
+extern struct IntReg volatile * const pg_int_reg;
 extern u32 u32g_vect_table[];
 
 void __Int_ClearAllLine(void);

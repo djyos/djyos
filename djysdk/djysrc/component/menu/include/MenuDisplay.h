@@ -131,12 +131,12 @@ struct menu_displaypara
   struct menu_item   *FVisualMenuitem;//当前层菜单显示的第一个菜单项
   struct menu_item   *LVisualMenuitem;//当前层菜单显示的最后一个菜单项
   //窗口
-  struct tagGkWinRsc      *AppWin;   //根据应用程序创建的窗口
-  struct tagGkWinRsc      *CurWin;   //显示本层菜单的窗口
+  struct GkWinRsc      *AppWin;   //根据应用程序创建的窗口
+  struct GkWinRsc      *CurWin;   //显示本层菜单的窗口
 
   //创建显示参数
   ptu32_t (*CreateMenuDisparaBypre)(struct menu_displaypara *pre,\
-          struct menu_item *menuitem,struct tagGkWinRsc  *Appwin);
+          struct menu_item *menuitem,struct GkWinRsc  *Appwin);
   //显示方法
   ptu32_t (*MyMenuDispalyFunction)(struct menu_displaypara *para);
   //调整可视菜单项
@@ -149,7 +149,7 @@ struct menu_displaypara
   //外设动作函数，实现的是一般的展开、切换、或者返回
   ptu32_t (*MyPeripheralGeneralAction)(struct menu_displaypara *operatingDispara,void *para);
   //初始化函数
-  ptu32_t  (*MyMenuInitFunction)(struct menu_item *FirstMenuitem,struct tagGkWinRsc *Appwin);
+  ptu32_t  (*MyMenuInitFunction)(struct menu_item *FirstMenuitem,struct GkWinRsc *Appwin);
 
   void  *myprivate;//指向每种风格自己的数据成员，用于每种显示方法特有的一些内容，指向的是一个函数指针结构体。
 };
@@ -158,7 +158,7 @@ struct menu_display_private
 {
   //创建显示参数
   ptu32_t (*CreateMenuDisparaBypre)(struct menu_displaypara *pre,\
-          struct menu_item *menuitem,struct tagGkWinRsc  *Appwin);
+          struct menu_item *menuitem,struct GkWinRsc  *Appwin);
   //显示方法
   ptu32_t (*MyMenuDispalyFunction)(struct menu_displaypara *para);
   //调整可视菜单项
@@ -188,7 +188,7 @@ struct draw_wintext_para
     s32 count;                      //缓冲区长度，字节数，不含传结束符。
     u32 colortext;                  //字体颜色
     u32 colorback;                  //背景颜色
-    struct tagGkWinRsc* gkwin;        //目标窗口
+    struct GkWinRsc* gkwin;        //目标窗口
 };
 
 #endif

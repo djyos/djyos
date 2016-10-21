@@ -64,7 +64,7 @@
 
 #include "os.h"
 
-#include "socket.h"
+#include <tcpip/comport/sys/socket.h>
 
 #define CN_TCP_SERVERPORT  2048
 static u32 sgSndTimes = 0;
@@ -73,123 +73,123 @@ static u32 sgSndTimes = 0;
 #define CN_SNDBUF_STACKLEN  CN_SNDBUF_LEN*64
 bool_t TcpServer_Snd(void)
 {
-	int sockfd;
-	int clientfd;
-	int addrlen;
-	int i =0;
-	struct sockaddr_in serveraddr;
-	struct sockaddr_in clientaddr;
-	char *sndbuf;
-	int sndlen;
-	s64 sndtotal;
-	unsigned int sndprint =0;
-	int sndopt;
-	s64 sndtimestart;
-	s64 sndtimetest;
-	int sndspeed;
-	int sndkbytes;
+    int sockfd;
+    int clientfd;
+    int addrlen;
+    int i =0;
+    struct sockaddr_in serveraddr;
+    struct sockaddr_in clientaddr;
+    char *sndbuf;
+    int sndlen;
+    s64 sndtotal;
+    unsigned int sndprint =0;
+    int sndopt;
+    s64 sndtimestart;
+    s64 sndtimetest;
+    int sndspeed;
+    int sndkbytes;
 
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if(-1 == sockfd)
-	{
-		printk("socket failed!\n\r");
-		return true;
-	}
-	else
-	{
-		printk("socket success!\n\r");
-	}
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if(-1 == sockfd)
+    {
+        printk("socket failed!\n\r");
+        return true;
+    }
+    else
+    {
+        printk("socket success!\n\r");
+    }
 
-	serveraddr.sin_port = htons(CN_TCP_SERVERPORT);
-	serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    serveraddr.sin_port = htons(CN_TCP_SERVERPORT);
+    serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-	if(-1==bind(sockfd, &serveraddr, sizeof(serveraddr)))
-	{
-		printk("bind failed!\n\r");
-		return true;
-	}
-	else
-	{
-		printk("bind success!\n\r");
-	}
+    if(-1==bind(sockfd, &serveraddr, sizeof(serveraddr)))
+    {
+        printk("bind failed!\n\r");
+        return true;
+    }
+    else
+    {
+        printk("bind success!\n\r");
+    }
 
-	if(-1 == listen(sockfd, 100))
-	{
-		printk("listen failed!\n\r");
-		return true;
-	}
-	else
-	{
-		printk("listen success!\n\r");
-	}
+    if(-1 == listen(sockfd, 100))
+    {
+        printk("listen failed!\n\r");
+        return true;
+    }
+    else
+    {
+        printk("listen success!\n\r");
+    }
 
-	while(1)
-	{
-    	clientfd = accept(sockfd, &clientaddr, &addrlen);
-    	if(clientfd != -1)
-    	{
-    		printk("Got an client:ip = %08x  port = %04x\n\r",\
-    				     ntohl(clientaddr.sin_addr.s_addr),ntohs(clientaddr.sin_port));
-    		//关闭NAGLE
-    		sndopt = 1;
-    		if(0 == setsockopt(clientfd, IPPROTO_TCP,TCP_NODELAY,&sndopt,4))
-    		{
-    			printk("Client:close nagle success!\n\r");
-    		}
-    		else
-    		{
-    			printk("Client:close nagle  failed!\n\r");
-    		}
-    		//设置发送缓冲区
-    		sndopt = CN_SNDBUF_STACKLEN;
-    		if(0 == setsockopt(clientfd,SOL_SOCKET ,SO_SNDBUF,&sndopt,4))
-    		{
-    			printk("Client:set client sndbuf success!\n\r");
-    		}
-    		else
-    		{
-    			printk("Client:set client sndbuf failed!\n\r");
-    		}
-    		//设置发送缓冲区触发水平
-//    		sndopt = CN_SNDBUF_STACKLEN/2;
-//    		if(0 == setsockopt(clientfd,SOL_SOCKET ,SO_SNDLOWAT,&sndopt,4))
-//    		{
-//    			printk("Client:set client sndbuf triggerlevel success!\n\r");
-//    		}
-//    		else
-//    		{
-//    			printk("Client:set client sndbuf trigerlevel failed!\n\r");
-//    		}
-    		
-    		sndbuf = M_Malloc(CN_SNDBUF_LEN,CN_TIMEOUT_FOREVER);
-    		for(i = 0; i <CN_SNDBUF_LEN; i++)
-    		{
-    			sndbuf[i] = 'a'+i%27;
-    		}
-    		while(1)
-    		{
-				sndlen = send(clientfd,sndbuf,CN_SNDBUF_LEN,0);
-				if(sndlen > 0)
-				{
-					sndtotal += sndlen;
-				}
-				else
-				{
-					printk("TcpServerSnd:snd failed!\n\r");
-					closesocket(clientfd);
-					break;
-				}
-				sgSndTimes++;
-    		}
-    	}
-    	else
-    	{
-    		printk("Bad Accept!\n\r");
-    	}
-	}
+    while(1)
+    {
+        clientfd = accept(sockfd, &clientaddr, &addrlen);
+        if(clientfd != -1)
+        {
+            printk("Got an client:ip = %08x  port = %04x\n\r",\
+                         ntohl(clientaddr.sin_addr.s_addr),ntohs(clientaddr.sin_port));
+            //关闭NAGLE
+            sndopt = 1;
+            if(0 == setsockopt(clientfd, IPPROTO_TCP,TCP_NODELAY,&sndopt,4))
+            {
+                printk("Client:close nagle success!\n\r");
+            }
+            else
+            {
+                printk("Client:close nagle  failed!\n\r");
+            }
+            //设置发送缓冲区
+            sndopt = CN_SNDBUF_STACKLEN;
+            if(0 == setsockopt(clientfd,SOL_SOCKET ,SO_SNDBUF,&sndopt,4))
+            {
+                printk("Client:set client sndbuf success!\n\r");
+            }
+            else
+            {
+                printk("Client:set client sndbuf failed!\n\r");
+            }
+            //设置发送缓冲区触发水平
+//          sndopt = CN_SNDBUF_STACKLEN/2;
+//          if(0 == setsockopt(clientfd,SOL_SOCKET ,SO_SNDLOWAT,&sndopt,4))
+//          {
+//              printk("Client:set client sndbuf triggerlevel success!\n\r");
+//          }
+//          else
+//          {
+//              printk("Client:set client sndbuf trigerlevel failed!\n\r");
+//          }
+            
+            sndbuf = M_Malloc(CN_SNDBUF_LEN,CN_TIMEOUT_FOREVER);
+            for(i = 0; i <CN_SNDBUF_LEN; i++)
+            {
+                sndbuf[i] = 'a'+i%27;
+            }
+            while(1)
+            {
+                sndlen = send(clientfd,sndbuf,CN_SNDBUF_LEN,0);
+                if(sndlen > 0)
+                {
+                    sndtotal += sndlen;
+                }
+                else
+                {
+                    printk("TcpServerSnd:snd failed!\n\r");
+                    closesocket(clientfd);
+                    break;
+                }
+                sgSndTimes++;
+            }
+        }
+        else
+        {
+            printk("Bad Accept!\n\r");
+        }
+    }
 
-	closesocket(sockfd);
-	return true;
+    closesocket(sockfd);
+    return true;
 }
 
 
@@ -197,12 +197,12 @@ bool_t TcpServer_SndTask(char *param)
 {
    u16   evtt_id = CN_EVTT_ID_INVALID;
    evtt_id = Djy_EvttRegist(EN_CORRELATIVE, CN_PRIO_RRS-1, 0, 1, 
-   		(ptu32_t (*)(void))TcpServer_Snd,NULL, 0x1000, "TcpServer_Snd");
-	if (evtt_id != CN_EVTT_ID_INVALID)
-	{
-		Djy_EventPop(evtt_id, NULL, 0, 0, 0, 0);
-	}
-	return true;
+        (ptu32_t (*)(void))TcpServer_Snd,NULL, 0x1000, "TcpServer_Snd");
+    if (evtt_id != CN_EVTT_ID_INVALID)
+    {
+        Djy_EventPop(evtt_id, NULL, 0, 0, 0, 0);
+    }
+    return true;
 }
 
 

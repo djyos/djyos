@@ -55,7 +55,7 @@
 #include "stddef.h"
 #include "timer_hard.h"
 #include "Pic.h"
-#include "config-prj.h"
+#include "misc_config.h"
 #include "int.h"
 #include "cpu.h"
 #include "cpu_peri_int_line.h"
@@ -73,7 +73,7 @@ enum ENUM_P1020PIC_TIMER
 };
 
 //各个定时器芯片的定时器应该有自己的句柄
-struct tagP1020PicTimerHandle
+struct P1020PicTimerHandle
 {
     u32     timerno;          //定时器号
     u32     irqline;          //中断号
@@ -83,7 +83,7 @@ struct tagP1020PicTimerHandle
 #define CN_P1020PICTIMER_NUM   (EN_P1020PICTIMER_B3 +1)
 
 
-static struct tagP1020PicTimerHandle  stgP1020TimerHandle[CN_P1020PICTIMER_NUM];
+static struct P1020PicTimerHandle  stgP1020TimerHandle[CN_P1020PICTIMER_NUM];
 
 //最高位代表timer0 依次类推
 static u32  gs_dwP1020PicTimerBitmap;  //对于定时器这种东西，一般的不会很多，32个应该足够
@@ -167,7 +167,7 @@ bool_t __P1020PicTimer_Counter2Time(u32 counter,u32 *time)
 // 返回值  :true成功 fasle失败
 // 说明    :
 // =============================================================================
-bool_t __P1020PicTimer_PauseCount(struct tagP1020PicTimerHandle  *timer)
+bool_t __P1020PicTimer_PauseCount(struct P1020PicTimerHandle  *timer)
 {
     u8 timerno;
     u32 temp;
@@ -210,7 +210,7 @@ bool_t __P1020PicTimer_PauseCount(struct tagP1020PicTimerHandle  *timer)
 // 返回值  :true成功 fasle失败
 // 说明    :
 // =============================================================================
-bool_t __P1020PicTimer_StartCount(struct tagP1020PicTimerHandle  *timer)
+bool_t __P1020PicTimer_StartCount(struct P1020PicTimerHandle  *timer)
 {
     u8 timerno;
     u32 temp;
@@ -252,20 +252,20 @@ bool_t __P1020PicTimer_StartCount(struct tagP1020PicTimerHandle  *timer)
 // 函数功能:__P1020PicTimer_SetCycle
 //          设定周期
 // 输入参数:timer，PIC定时器
-//          cycle,周期（微秒），
+//          cycle,周期（定时器时钟个数），
 // 输出参数:
 // 返回值  :true成功 fasle失败
 // 说明    :如果设置周期太大（超过最大定时器能力），则设置为定时器的最大周期
 // =============================================================================
-bool_t  __P1020PicTimer_SetCycle(struct tagP1020PicTimerHandle  *timer, u32 cycle)
+bool_t  __P1020PicTimer_SetCycle(struct P1020PicTimerHandle  *timer, u32 cycle)
 {
     u8 timerno;
     u32 temp;
     u32 counter;
     if(timer->timerstate & CN_TIMER_ENUSE)
     {
-        __P1020PicTimer_Time2Counter(cycle,&counter);
-
+//        __P1020PicTimer_Time2Counter(cycle,&counter);
+        counter = cycle;
         timerno = timer->timerno;
         if(timerno > EN_P1020PICTIMER_B3)
         {
@@ -307,7 +307,7 @@ bool_t  __P1020PicTimer_SetCycle(struct tagP1020PicTimerHandle  *timer, u32 cycl
 // 输出参数:
 // 返回值  :true成功 fasle失败
 // =============================================================================
-bool_t  __P1020PicTimer_SetAutoReload(struct tagP1020PicTimerHandle  *timer, bool_t autoreload)
+bool_t  __P1020PicTimer_SetAutoReload(struct P1020PicTimerHandle  *timer, bool_t autoreload)
 {
     bool_t result;
     u8 timerno;
@@ -367,17 +367,16 @@ bool_t  __P1020PicTimer_SetAutoReload(struct tagP1020PicTimerHandle  *timer, boo
 // =============================================================================
 // 函数功能:__P1020PicTimer_Alloc
 //          分配定时器
-// 输入参数:cycle，定时器周期
-//          timerisr,定时器的中断处理函数
+// 输入参数:timerisr,定时器的中断处理函数
 // 输出参数:
 // 返回值  :分配的定时器句柄，NULL则分配不成功
 // 说明    :
 // =============================================================================
-ptu32_t __P1020PicTimer_Alloc(u32 cycle,fnTimerIsr timerisr)
+ptu32_t __P1020PicTimer_Alloc(fntTimerIsr timerisr)
 {
     u8 timerno;
     u8 irqline;
-    struct tagP1020PicTimerHandle  *timer;
+    struct P1020PicTimerHandle  *timer;
     ptu32_t timerhandle;
     //原子操作，防止资源竞争
     atom_low_t  timeratom;
@@ -397,20 +396,21 @@ ptu32_t __P1020PicTimer_Alloc(u32 cycle,fnTimerIsr timerisr)
     }
     irqline = sgHaltimerIrq[timerno];
     timer = &stgP1020TimerHandle[timerno];
-    timer->cycle = cycle;
+    timer->cycle = 0;
     timer->timerno = timerno;
     timer->irqline = irqline;
     timer->timerstate = CN_TIMER_ENUSE;
     //好了，中断号和定时器号码都有了，该干嘛就干嘛了。
     //先设置好定时器周期
     __P1020PicTimer_PauseCount(timer);
-    __P1020PicTimer_SetCycle(timer,cycle);
+//    __P1020PicTimer_SetCycle(timer,cycle);
     //设置定时器中断,先结束掉该中断所有的关联相关内容
+    Int_Register(irqline); 
     Int_CutLine(irqline);
     Int_IsrDisConnect(irqline);
     Int_EvttDisConnect(irqline);
     Int_SettoAsynSignal(irqline);
-    Int_SetClearType(irqline,CN_INT_CLEAR_PRE);
+    Int_SetClearType(irqline,CN_INT_CLEAR_AUTO);
     Int_IsrConnect(irqline, timerisr);
     timerhandle = (ptu32_t)timer;
 
@@ -431,8 +431,8 @@ bool_t  __P1020PicTimer_Free(ptu32_t timerhandle)
     u8 timerno;
     u8 irqline;
     atom_low_t  timeratom;  //保护公用资源
-    struct tagP1020PicTimerHandle  *timer;
-    timer = (struct tagP1020PicTimerHandle  *)timerhandle;
+    struct P1020PicTimerHandle  *timer;
+    timer = (struct P1020PicTimerHandle  *)timerhandle;
 
     if(timer->timerstate & CN_TIMER_ENUSE)
     {
@@ -474,7 +474,7 @@ bool_t  __P1020PicTimer_Free(ptu32_t timerhandle)
 // 返回值  :分配的定时器，NULL则分配不成功
 // 说明    :
 // =============================================================================
-bool_t  __P1020PicTimer_SetIntPro(struct tagP1020PicTimerHandle  *timer, bool_t real_prior)
+bool_t  __P1020PicTimer_SetIntPro(struct P1020PicTimerHandle  *timer, bool_t real_prior)
 {
     if(timer->timerstate & CN_TIMER_ENUSE)
     {
@@ -504,7 +504,7 @@ bool_t  __P1020PicTimer_SetIntPro(struct tagP1020PicTimerHandle  *timer, bool_t 
 // 返回值  :true成功false失败
 // 说明    :
 // =============================================================================
-bool_t  __P1020PicTimer_EnInt(struct tagP1020PicTimerHandle  *timer)
+bool_t  __P1020PicTimer_EnInt(struct P1020PicTimerHandle  *timer)
 {
     if(timer->timerstate & CN_TIMER_ENUSE)
     {
@@ -524,7 +524,7 @@ bool_t  __P1020PicTimer_EnInt(struct tagP1020PicTimerHandle  *timer)
 // 返回值  :true成功false失败
 // 说明    :
 // =============================================================================
-bool_t  __P1020PicTimer_DisInt(struct tagP1020PicTimerHandle  *timer)
+bool_t  __P1020PicTimer_DisInt(struct P1020PicTimerHandle  *timer)
 {
     if(timer->timerstate & CN_TIMER_ENUSE)
     {
@@ -542,9 +542,9 @@ bool_t  __P1020PicTimer_DisInt(struct tagP1020PicTimerHandle  *timer)
 // 输入参数:timer，待操作的定时器
 // 输出参数:time，走时（微秒）
 // 返回值  :true成功false失败
-// 说明    :从设定的周期算起，即cycle-剩余时间,表示已经走掉的时间
+// 说明    :从设定的周期算起，即cycle-剩余时间,表示已经走掉的时间(单位：定时器主频时钟个数)
 // =============================================================================
-bool_t __P1020PicTimer_GetTime(struct tagP1020PicTimerHandle  *timer, u32 *time)
+bool_t __P1020PicTimer_GetTime(struct P1020PicTimerHandle  *timer, u32 *time)
 {
     u8 timerno;
     u32 temp;
@@ -585,7 +585,9 @@ bool_t __P1020PicTimer_GetTime(struct tagP1020PicTimerHandle  *timer, u32 *time)
                 counter = basecounter - counter;
 
             }
-            return __P1020PicTimer_Counter2Time(counter, time);
+//            return __P1020PicTimer_Counter2Time(counter, time);
+            *time = counter;
+            return true;
         }
     }
     else
@@ -601,7 +603,7 @@ bool_t __P1020PicTimer_GetTime(struct tagP1020PicTimerHandle  *timer, u32 *time)
 // 返回值  :true成功 false失败
 // 说明    :
 // =============================================================================
-bool_t __P1020PicTimer_CheckTimeout(struct tagP1020PicTimerHandle  *timer, bool_t *timeout)
+bool_t __P1020PicTimer_CheckTimeout(struct P1020PicTimerHandle  *timer, bool_t *timeout)
 {
     bool_t result;
     u8 timerno;
@@ -654,7 +656,7 @@ bool_t __P1020PicTimer_CheckTimeout(struct tagP1020PicTimerHandle  *timer, bool_
 // 返回值  ：true 成功 false失败
 // 说明    : 本层实现
 // =============================================================================
-bool_t __P1020PicTimer_GetID(struct tagP1020PicTimerHandle   *timer,u32 *timerId)
+bool_t __P1020PicTimer_GetID(struct P1020PicTimerHandle   *timer,u32 *timerId)
 {
     u16 irqno;
     u16 timerno;
@@ -676,10 +678,10 @@ bool_t __P1020PicTimer_GetID(struct tagP1020PicTimerHandle   *timer,u32 *timerId
 // 函数功能：__P1020PicTimer_GetCycle
 //          获取定时器周期
 // 输入参数：timer，待操作定时器，
-// 输出参数：cycle，定时器周期(微秒)
+// 输出参数：cycle，定时器周期(单位：定时器主频时钟个数)
 // 返回值  ：true 成功 false失败
 // =============================================================================
-bool_t __P1020PicTimer_GetCycle(struct tagP1020PicTimerHandle   *timer, u32 *cycle)
+bool_t __P1020PicTimer_GetCycle(struct P1020PicTimerHandle   *timer, u32 *cycle)
 {
     if(NULL == timer)
     {
@@ -699,7 +701,7 @@ bool_t __P1020PicTimer_GetCycle(struct tagP1020PicTimerHandle   *timer, u32 *cyc
 // 返回值  ：true 成功 false失败
 // 说明    : 本层实现
 // =============================================================================
-bool_t __P1020PicTimer_GetState(struct tagP1020PicTimerHandle   *timer, u32 *timerflag)
+bool_t __P1020PicTimer_GetState(struct P1020PicTimerHandle   *timer, u32 *timerflag)
 {
 
     if(NULL == timer)
@@ -722,12 +724,12 @@ bool_t __P1020PicTimer_GetState(struct tagP1020PicTimerHandle   *timer, u32 *tim
 // 说明    :
 // =============================================================================
 bool_t __P1020PicTimer_Ctrl(ptu32_t timerhandle, \
-                         enum _ENUM_TIMER_CTRL_TYPE_ ctrlcmd, \
+                         enum TimerCmdCode ctrlcmd, \
                          ptu32_t inoutpara)
 {
     bool_t result;
-    struct tagP1020PicTimerHandle  *timer;
-    timer = (struct tagP1020PicTimerHandle  *)timerhandle;
+    struct P1020PicTimerHandle  *timer;
+    timer = (struct P1020PicTimerHandle  *)timerhandle;
     if(NULL == timer)
     {
         result = false;
@@ -778,6 +780,20 @@ bool_t __P1020PicTimer_Ctrl(ptu32_t timerhandle, \
 }
 
 // =============================================================================
+// 函数功能:__P1020PicTimer_GetFreq
+//       获取定时器主频
+// 输入参数:timerhandle 待操作的定时器句柄
+// 输出参数:
+// 返回值  :定时器主频
+// 说明    :单位（HZ）
+// =============================================================================
+u32  __P1020PicTimer_GetFreq(ptu32_t timerhandle)
+{
+    
+    return cfg_core_tb_clk;
+}
+
+// =============================================================================
 // 函数功能:module_init_timer
 //          P1020的PICtimer初始化
 // 输入参数:
@@ -787,7 +803,7 @@ bool_t __P1020PicTimer_Ctrl(ptu32_t timerhandle, \
 // =============================================================================
 void module_init_pictimer(void)
 {
-    struct tagTimerChip  p1020pictimer;
+    struct TimerChip  p1020pictimer;
     u32 temp;
     //做基本的初始化
     *((u32 *)cn_pic_timer_tcra) = cn_pic_timer_tcr_set;
@@ -814,9 +830,10 @@ void module_init_pictimer(void)
          *((u32 *)(cn_pic_timer_gtbcrb_base + temp * cn_pic_timer_gt_step)) = cn_pic_timer_msk;
     }
     p1020pictimer.chipname = "P1020PICTIMER";
-    p1020pictimer.timerhardalloc = __P1020PicTimer_Alloc;
-    p1020pictimer.timerhardfree = __P1020PicTimer_Free;
-    p1020pictimer.timerhardctrl = __P1020PicTimer_Ctrl;
+    p1020pictimer.TimerHardAlloc = __P1020PicTimer_Alloc;
+    p1020pictimer.TimerHardFree = __P1020PicTimer_Free;
+    p1020pictimer.TimerHardCtrl = __P1020PicTimer_Ctrl;
+    p1020pictimer.TimerHardGetFreq = __P1020PicTimer_GetFreq;
 
     TimerHard_RegisterChip(&p1020pictimer);
 
