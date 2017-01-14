@@ -94,6 +94,8 @@ extern "C" {
 #define DM9000_CHIPR           0x2C
 #define DM9000_SMCR            0x2F
 
+#define DM9000_BUSCR           0x38
+
 #define DM9000_MRCMDX          0xF0
 #define DM9000_MRCMD           0xF2
 #define DM9000_MRRL            0xF4
@@ -291,6 +293,19 @@ extern "C" {
 #define DM9KS_VID_H 0x29
 #define DM9KS_PID_L 0x2A
 #define DM9KS_PID_H 0x2B
+
+#define EPCR_EPOS_PHY		(1<<3)
+#define EPCR_EPOS_EE		(0<<3)
+#define EPCR_ERPRR		(1<<2)
+#define EPCR_ERPRW		(1<<1)
+#define EPCR_ERRE		(1<<0)
+
+#define FCTR_HWOT(ot)	(( ot & 0xf ) << 4 )
+#define FCTR_LWOT(ot)	( ot & 0xf )
+
+#define BPTR_BPHW(x)	((x) << 4)
+#define BPTR_JPT_200US		(0x07)
+#define BPTR_JPT_600US		(0x0f)
 
 
 typedef struct Dm9000Para

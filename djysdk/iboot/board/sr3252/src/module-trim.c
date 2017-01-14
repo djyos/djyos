@@ -123,7 +123,6 @@ void Sys_ModuleInit(void)
 
     //flash文件系统初始化,依赖:文件系统模块,shell模块
     ModuleInstall_FileSystem(0);
-    ModuleInstall_BootFS();
 
     ModuleInstall_UART(CN_USART0);
     ModuleInstall_UART(CN_USART2);
@@ -143,9 +142,9 @@ void Sys_ModuleInit(void)
     Driver_CtrlDevice(ToDev(stdin),CN_UART_SET_BAUD,115200,0);
 
 	#include "ymodem.h"
-	Dev = Driver_OpenDevice("USART0",D_RDONLY,CN_TIMEOUT_FOREVER);
-	ModuleInstall_Ymodem(Dev);
-	Driver_CloseDevice(Dev);
+
+	ModuleInstall_Ymodem(0);
+
 
 	ModuleInstall_IAP();
 

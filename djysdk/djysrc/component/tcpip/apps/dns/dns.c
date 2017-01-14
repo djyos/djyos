@@ -333,9 +333,6 @@ static void  __DnsUnpackageData(unsigned char *data, unsigned int datalen)
 
 	return ;
 }
-
-#define DNS_DEBUG
-
 #define CN_DNS_SERVER_PORT  53
 #define CN_DNS_MSGBUF_LEN   0x100
 static struct hostent       gHostEnt;
@@ -354,26 +351,17 @@ struct hostent  *DnsNameResolve(const char *name)
 	sock = socket(AF_INET, SOCK_DGRAM,0);
 	if(sock == -1)
 	{
-#ifdef DNS_DEBUG
-		printk("%s:socket err\n\r",__FUNCTION__);
-#endif
 		goto EXIT_DNSMAIN;
 	}
 
 	if(false == RoutDns(EN_IPV_4,(ipaddr_t)&dnsip))
 	{
-#ifdef DNS_DEBUG
-		printk("%s:dns server not set yet!\n\r",__FUNCTION__);
-#endif
 		goto EXIT_DNSMAIN;
 	}
 
 	opt = 5*1000*mS;  //time out time
 	if(0 != setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,&opt,sizeof(opt)))
 	{
-#ifdef DNS_DEBUG
-		printk("%s:TIMEOUT SET FAILED\n\r",__FUNCTION__);
-#endif
 		goto EXIT_DNSMAIN;
 	}
 
@@ -389,9 +377,6 @@ struct hostent  *DnsNameResolve(const char *name)
 
 	if(msglen != datalen)
 	{
-#ifdef DNS_DEBUG
-		printk("%s:PACK SEND FAILED\n\r",__FUNCTION__);
-#endif
 		goto EXIT_DNSMAIN;
 	}
 	msglen = recvfrom(sock,gDnsBuf,CN_DNS_MSGBUF_LEN,0,(struct sockaddr *)&addr,&addrlen);
@@ -410,9 +395,6 @@ struct hostent  *DnsNameResolve(const char *name)
 	}
 	else
 	{
-#ifdef DNS_DEBUG
-		printk("%s:NO PACK RECEIVED YET \n\r",__FUNCTION__);
-#endif
 		goto EXIT_DNSMAIN;
 	}
 

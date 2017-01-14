@@ -68,6 +68,9 @@ typedef void (*IAP_Entry) (unsigned long *cmd, unsigned long *stat);
 #define CLCK 100000
 static tagIAP sIAP;
 
+
+extern u32 gc_ptIbootSize;
+extern u32 gc_ptFlashOffset;
 //-----------------------------------------------------------------------------
 //功能: 获取内置FLASH的信息
 //参数:
@@ -89,8 +92,8 @@ static s32 Flash_GetDescr(struct EmbdFlashDescr *Description)
 	Description->LargeSectorsPerPlane = 0;
 	Description->NormalSectorsPerPlane = 14;
 	Description->Planes = 1;
-	Description->ReservedPages = 128; // 2个sector为256KB大小,最终由lds提供
-	Description->MappedStAddr = 0x000000;
+	Description->ReservedPages = gc_ptIbootSize/1024; //128K
+	Description->MappedStAddr = gc_ptFlashOffset;
 	return (0);
 }
 
@@ -102,23 +105,16 @@ static s32 Flash_GetDescr(struct EmbdFlashDescr *Description)
 //-----------------------------------------------------------------------------
 static s32 Flash_SectorEarse(u32 SectorNo)
 {
-	u32 sector,ReserveSec;
-
-	ReserveSec = sp_tFlashDesrc->ReservedPages / sp_tFlashDesrc->PagesPerNormalSect;
-	if(SectorNo < ReserveSec)
-		return (-1);
-
-	sector = 0x12 + SectorNo - ReserveSec;
 	sIAP.cmd    = 50;                             // Prepare Sector for Erase
-	sIAP.par[0] = sector;                         // Start Sector
-	sIAP.par[1] = sector;                         // End Sector
+	sIAP.par[0] = SectorNo;                         // Start Sector
+	sIAP.par[1] = SectorNo;                         // End Sector
 	IAP_Call (&sIAP.cmd, &sIAP.stat);             // Call IAP Command
 	if (sIAP.stat)
 		return (1);                    			  // Command Failed
 
 	sIAP.cmd    = 52;                             // Erase Sector
-	sIAP.par[0] = sector;                         // Start Sector
-	sIAP.par[1] = sector;                         // End Sector
+	sIAP.par[0] = SectorNo;                         // Start Sector
+	sIAP.par[1] = SectorNo;                         // End Sector
 	sIAP.par[2] = CLCK;                           // CCLK in kHz
 	IAP_Call (&sIAP.cmd, &sIAP.stat);             // Call IAP Command
 	if (sIAP.stat)
@@ -189,6 +185,63 @@ static s32 Flash_PageRead(u32 Page, u8 *Data, u32 Flags)
 	return (sp_tFlashDesrc->BytesPerPage);
 
 }
+
+//-----------------------------------------------------------------------------
+//功能:
+//参数:
+//返回:
+//备注:
+//-----------------------------------------------------------------------------
+static s32 Flash_PageToSector(u32 PageNo, u32 *Remains, u32 *SectorNo)
+{
+	u32 PagesLeft, PagesDone;
+	u32 i;
+	u32 Sector;
+
+	if((!Remains) || (!SectorNo))
+		return (-1);
+
+	Sector = 0;
+	PagesDone = 0;
+
+	PagesLeft = sp_tFlashDesrc->PagesPerSmallSect -
+			   (PageNo % sp_tFlashDesrc->PagesPerSmallSect);
+	for(i = 1; i <= sp_tFlashDesrc->SmallSectorsPerPlane; i++)
+	{
+		if(PageNo < (PagesDone + sp_tFlashDesrc->PagesPerSmallSect * i))
+			goto DONE;
+		Sector++;
+	}
+
+	PagesDone += sp_tFlashDesrc->SmallSectorsPerPlane *
+				 sp_tFlashDesrc->PagesPerSmallSect;
+//	PagesLeft = sp_tFlashDesrc->PagesPerLargeSect -
+//				   (PageNo % sp_tFlashDesrc->PagesPerLargeSect);
+//	for(i = 1; i <= sp_tFlashDesrc->LargeSectorsPerPlane; i++)
+//	{
+//		if(PageNo < (PagesDone + sp_tFlashDesrc->PagesPerLargeSect * i))
+//			goto DONE;
+//		Sector++;
+//	}
+//
+//	PagesDone += sp_tFlashDesrc->LargeSectorsPerPlane *
+//					 sp_tFlashDesrc->PagesPerLargeSect;
+	PagesLeft = sp_tFlashDesrc->PagesPerNormalSect -
+				   (PageNo % sp_tFlashDesrc->PagesPerNormalSect);
+	for(i = 1; i <= sp_tFlashDesrc->NormalSectorsPerPlane; i++)
+	{
+		if(PageNo < (PagesDone + sp_tFlashDesrc->PagesPerNormalSect * i))
+			goto DONE;
+		Sector++;
+	}
+
+	return (-1);
+
+DONE:
+	*SectorNo = Sector; // 从sector零计
+	*Remains = PagesLeft; //
+	return (0);
+}
 //-----------------------------------------------------------------------------
 //功能:
 //参数:
@@ -244,6 +297,7 @@ s32 ModuleInstall_EmbededFlash(const char *ChipName, u32 Flags, u16 Start)
 	Chip->Ops.ErsBlk              = Flash_SectorEarse;
 	Chip->Ops.WrPage              = Flash_PageProgram;
 	Chip->Ops.RdPage              = Flash_PageRead;
+	Chip->Ops.PageToBlk			  = Flash_PageToSector;
 	strcpy(Chip->Name, ChipName); // 设备名
 	if(Flags & FLASH_BUFFERED)
 	{

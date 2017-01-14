@@ -1,34 +1,34 @@
 //----------------------------------------------------
 // Copyright (c) 2014, SHENZHEN PENGRUI SOFT CO LTD. All rights reserved.
 
-// Redistribution and use in source and binary forms, with or without 
+// Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 
-// 1. Redistributions of source code must retain the above copyright notice, 
+// 1. Redistributions of source code must retain the above copyright notice,
 //    this list of conditions and the following disclaimer.
-// 2. Redistributions in binary form must reproduce the above copyright notice, 
-//    this list of conditions and the following disclaimer in the documentation 
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
 //    and/or other materials provided with the distribution.
 // 3. As a constituent part of djyos,do not transplant it to other software
 //    without specific prior written permission.
 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
-// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
 // LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 // CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 // SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 // Copyright (c) 2014 著作权由深圳鹏瑞软件有限公司所有。著作权人保留一切权利。
-// 
+//
 // 这份授权条款，在使用者符合以下三条件的情形下，授予使用者使用及再散播本
 // 软件包装原始码及二进位可执行形式的权利，无论此包装是否经改作皆然：
-// 
+//
 // 1. 对于本软件源代码的再散播，必须保留上述的版权宣告、本条件列表，以
 //    及下述的免责声明。
 // 2. 对于本套件二进位可执行形式的再散播，必须连带以文件以及／或者其他附
@@ -85,6 +85,9 @@ typedef struct UdpCB
     u32                     channelstat;       //used for the select
     int                     sndlimit;          //send the most byte a frame
     tagRBufUdp              rbuf;              //receive buffer
+    s64                     framrcv;           //record the frame receive
+    s64                     framsnd;           //record the frame send
+    u32                     lasterr;           //record the last error
 }tagUdpCB;
 static tagUdpCB          *pUcbFreeLst = NULL;     //this is the udp control list
 static struct MutexLCB   *pUcbFreeLstSync = NULL; //this is used for the ucb protect
@@ -273,7 +276,7 @@ static  bool_t  __UdpCbInit(int len)
     pUcbFreeLstSync = Lock_MutexCreate(NULL);
     if(NULL == pUcbFreeLstSync)
     {
-    	return result;
+        return result;
     }
 
     pUcbFreeLst = malloc(len *sizeof(tagUdpCB));
@@ -349,7 +352,7 @@ static  tagUdpCB * __UdpCbMalloc(void )
     {
         //init the ucb member
         memset((void *)result, 0, sizeof(tagUdpCB));
-        result->rbuf.bufsync = Lock_SempCreate(1,0,CN_SEMP_BLOCK_FIFO,NULL);
+        result->rbuf.bufsync = Lock_SempCreate(1,0,CN_BLOCK_FIFO,NULL);
         if(NULL == result->rbuf.bufsync)
         {
             __UdpCbFree(result);
@@ -357,7 +360,7 @@ static  tagUdpCB * __UdpCbMalloc(void )
         else
         {
             //create two semphore for the rcv and sndbuf
-            result->sndlimit          = CN_UDP_BUFLENDEFAULT;
+            result->sndlimit          = CN_UDP_PKGMSGLEN;
             result->rbuf.buflenlimit  = CN_UDP_BUFLENDEFAULT;
             result->rbuf.timeout      = CN_TIMEOUT_FOREVER;
             result->channelstat       = CN_UDP_CHANNEL_STATASND|CN_UDP_CHANNEL_STATARCV|\
@@ -519,10 +522,10 @@ static int __msgsnd(tagSocket *sock, const void *msg, int len, int flags,\
         pkg = PkgMalloc(sizeof(tagUdpHdr),0);
         if(NULL != pkg)
         {
-        	pkgdata = PkgMalloc(sizeof(tagNetPkg),CN_PKLGLST_END);
-        	if(NULL != pkgdata)
-        	{
-        		//compute the ip and port
+            pkgdata = PkgMalloc(sizeof(tagNetPkg),CN_PKLGLST_END);
+            if(NULL != pkgdata)
+            {
+                //compute the ip and port
                 iplocal = sock->element.v4.iplocal;
                 portlocal =  sock->element.v4.portlocal;
 
@@ -559,11 +562,12 @@ static int __msgsnd(tagSocket *sock, const void *msg, int len, int flags,\
                 }
                 PkgTryFreePart(pkg);
                 PkgTryFreePart(pkgdata);
-        	}
-        	else
-        	{
+                TCPIP_DEBUG_INC(ucb->framsnd);
+            }
+            else
+            {
                 PkgTryFreePart(pkg);
-        	}
+            }
         }
     }
     return result;
@@ -699,7 +703,7 @@ static int __recv(tagSocket *sock, void *buf,int len, unsigned int flags)
                 }
                 else
                 {
-                	result = -1;
+                    result = -1;
                 }
             }
             else
@@ -719,12 +723,12 @@ static int __recv(tagSocket *sock, void *buf,int len, unsigned int flags)
                 sock->iostat &= (~CN_SOCKET_IOREAD);
                 Multiplex_Set(sock->ioselect, sock->iostat);
             }
-        	Lock_MutexPost(sock->sync);
+            Lock_MutexPost(sock->sync);
         }
     }
     else
     {
-    	result = -1;//maybe timeout ;need more try
+        result = -1;//maybe timeout ;need more try
     }
     return  result;
 }
@@ -794,7 +798,7 @@ static int __recvfrom(tagSocket *sock,void *buf, int len, unsigned int flags,\
                 }
                 else
                 {
-                	result = -1;
+                    result = -1;
                 }
             }
             else
@@ -814,12 +818,12 @@ static int __recvfrom(tagSocket *sock,void *buf, int len, unsigned int flags,\
                 sock->iostat &= (~CN_SOCKET_IOREAD);
                 Multiplex_Set(sock->ioselect, sock->iostat);
             }
-        	Lock_MutexPost(sock->sync);
+            Lock_MutexPost(sock->sync);
         }
     }
     else
     {
-    	result = -1;//maybe timeout ;need more try
+        result = -1;//maybe timeout ;need more try
     }
     return  result;
 }
@@ -1002,7 +1006,7 @@ static int __sol_socket(tagSocket *sock,int optname,const void *optval, int optl
         case SO_SNDLOWAT:
             break;
         case SO_RCVTIMEO:
-        	sock->sockstat |=CN_SOCKET_PROBLOCK;
+            sock->sockstat |=CN_SOCKET_PROBLOCK;
             ucb->rbuf.timeout = *(u32 *)optval;
             result = 0;
             break;
@@ -1121,7 +1125,7 @@ static void __addpkg2rbuf(tagUdpCB *ucb, tagNetPkg *pkg)
     ucb->rbuf.buflen+= pkg->datalen;
 
     PkgCachedPart(pkg);
-
+    TCPIP_DEBUG_INC(ucb->framrcv);
     return;
 }
 
@@ -1142,7 +1146,7 @@ static bool_t __UdpRcvV4(u32 ipsrc, u32 ipdst, tagNetPkg *pkg, tagRout *rout)
     tagSocket          *sock;
     struct  sockaddr_in addrin;
     u32                 devfunc;
-    
+
     result  = true;
     devfunc = NetDevGetFunc(rout->dev);
     if((NULL == pkg)||(pkg->datalen <= sizeof(tagUdpHdr)))
@@ -1196,7 +1200,7 @@ static bool_t __UdpRcvV4(u32 ipsrc, u32 ipdst, tagNetPkg *pkg, tagRout *rout)
         }
         if(ucb->rbuf.buflen >= ucb->rbuf.buflenlimit)
         {
-        	result = false;
+            result = false;
         }
 
         if(result)
@@ -1262,6 +1266,7 @@ static void __debug(tagSocket *sock,char *filter)
         printf("%s:rbuf:len:0x%08x buflen:0x%08x triglevel:0x%08x timeout:0x%08x sync:%d\n\r",\
                 prefix,ucb->rbuf.buflen,ucb->rbuf.buflenlimit,ucb->rbuf.triglevel,\
                 ucb->rbuf.timeout,ucb->rbuf.bufsync->lamp_counter);
+        printf("%s:framrcv:0x%llx  framsnd:0x%llx\n\r",prefix,ucb->framrcv,ucb->framsnd);
     }
     else
     {

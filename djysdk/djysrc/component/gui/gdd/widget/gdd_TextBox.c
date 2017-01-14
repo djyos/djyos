@@ -46,7 +46,6 @@
 // 于替代商品或劳务之购用、使用损失、资料损失、利益损失、业务中断等等），
 // 不负任何责任，即在该种使用已获事前告知可能会造成此类损害的情形下亦然。
 //-----------------------------------------------------------------------------
-
 //所属模块: GDD
 //作者:  zhb.
 //版本：V1.0.0
@@ -60,418 +59,1035 @@
 //   修改说明: 原始版本
 //---------------------------------
 
-#if 0
-#include    "gdd.h"
+#include  "gdd.h"
 #include  <gui/gdd/gdd_private.h>
-#include "font.h"
-#include    <widget.h>
+#include  "font.h"
+#include  <gdd_widget.h>
 
-#define CN_CHAR_NUM_LIMIT   128
-#define CN_BYTE_NUM_LIMIT   256
-#define CN_HEIGHT_MIN  10
-//#define TXT_BOX_FIX_SIZE      (0<<0)
-//#define TXT_BOX_ADJUST_SIZE   (1<<0)
+extern HWND g_CursorHwnd;         //光标窗口
 
+#define CN_CHAR_NUM_MAX                 255
+#define CN_CANCLE_KEY                   0xA3
 
-typedef struct
-{
-   u16 height;             //高像素
-   u16 width;              //宽像素
-   u8 len;               //TextBox中所有字符串字节数
-   char *str;            //TextBox中所有的字符组成的字符串
-   u8 chnum;           //字符数
-   WINDOW *hwnd;         //控件句柄
-}TextBox;
-
-
-
-
-/*============================================================================*/
 // =============================================================================
-// 函数功能: 获取字符串有效字符数,TextBox只能显示单行信息，首先检查字符串,如果遇到
-//           \n(换行符)，则只显示第一行字符
+// 函数功能: 获取字符串长度字节数,TextBox只能显示单行信息，首先检查字符串,如果遇到
+//           \n(换行符)则结束，截取换行符之前的字符作为有效的字符串.
 // 输入参数: char *str:字符串
 // 输出参数: 无。
-// 返回值  :第一行字符串长度
+// 返回值  :获取到有效字符字节数。
 // =============================================================================
-u8 __GetValidTextCount(char *str)
+static s16 __GetValidStrLen(char *str)
 {
-    u8 linecount=0;
-    u8 count=0;
+    u8 cnt=0;
     char ch;
-    u8 src_len=0;
-    s32 len;
-    struct FontRsc* cur_font;
-    struct Charset* cur_enc;
-    u32 wc;
-    linecount=GetStrLineCount(str);
-    if(linecount>1)
+    s16 str_len;
+    if(str==NULL)
+        return -1;
+    cnt=GetStrLineCount(str);
+    if(cnt>1)
     {
         while(1)
         {
             ch=*str;
             if(ch!='\n')
             {
-                src_len++;
+                str_len++;
                 str++;
             }
             else
             {
+                *(str+1)='\0';  //todo: 如果是const串怎么办？
                 break;
             }
         }
     }
     else
     {
-        src_len=strlen(str);
+        str_len=strlen(str);
     }
-
-    //计算字符串中字符数
-    cur_font = Font_GetCurFont();
-    cur_enc = Charset_NlsGetCurCharset();
-    for(; src_len > 0;)
-    {
-        len= cur_enc->MbToUcs4(&wc, str, src_len);
-        if(len == -1)
-        { // 无效字符
-            src_len--;
-            str++;
-        }
-        else if(len == 0)
-        {
-            break;
-        }
-        else
-        { // 有效字符
-            str += len;
-            src_len -= len;
-            count++;
-            continue;
-        }
-     }
-
-    return count;
+    return str_len;
 }
 
 // =============================================================================
-// 函数功能: 获取字符串中指定字符的地址
-// 输入参数: char *str:字符串
-// 输出参数: 无。
-// 返回值  :第一行字符串长度
+// 函数功能: 获取字符串中指定编号的字符，编号从1,2,3......开始.
+// 输入参数: str:字符串指针
+//           idx:字符编号
+// 输出参数:
+// 返回值  :ucs4字符
 // =============================================================================
-char * __GetCharAddr(char *str,u8 index)
+static u32 __GetCharByIndex(char *str,u8 idx)
 {
-    char *ch;
+    s16 str_len=0,len=0;
+    struct FontRsc* cur_font;
+    struct Charset* cur_enc;
+    u32 wc=0;
+    u8 cnt;
+    if(str==NULL)
+        return false;
+    str_len=__GetValidStrLen(str);
+    if(str_len==-1)
+        return false;
+     //计算字符串中字符数
+    cur_font = Font_GetCurFont();
+    cur_enc = Charset_NlsGetCurCharset();
+    for(; str_len > 0;)
+    {
+       len= cur_enc->MbToUcs4(&wc, str, -1);
+       if(len == -1)
+       {  // 无效字符
+           str_len--;
+           str++;
+       }
+       else if(len == 0)
+       {
+            break;
+       }
+       else
+       {    // 有效字符
+           str += len;
+           str_len -= len;
+           cnt++;
+           if(cnt==idx)
+           {
+               return wc;
+           }
+        }
+    }
+    return wc;
+
+}
+// =============================================================================
+// 函数功能: 获取字符串中字符数及总的字符所占像素数。
+// 输入参数: str:字符串指针
+//          pChunm:字符数指针,输入参数为NULL时则不计算字符数。
+//          pChWidthSum:字符所占总像素数指针，输入参数为NULL时则不计算字符所占总像素宽度.
+// 输出参数: 无。
+// 返回值  :成功则返回true，失败则返回false.
+// =============================================================================
+static bool_t __GetValidStrInfo(char *str,u16 *pChunm,u16 *pChWidthSum)
+{
+    u16 cnt=0,chwidthsum=0;
+    s16 str_len=0;
+    s32 len,chwidth=0;
     struct FontRsc* cur_font;
     struct Charset* cur_enc;
     u32 wc;
-    u8 src_len=0;
-    s32 len;
-    u8 count=0;
-    src_len=strlen(str);
-
-    if(index==1)
-        return str;
-
-    for(; src_len > 0;)
-    {
-        len= cur_enc->MbToUcs4(&wc, str, src_len);
+    if(str==NULL)
+        return false;
+    str_len=__GetValidStrLen(str);
+    if(str_len==-1)
+        return false;
+     //计算字符串中字符数
+     cur_font = Font_GetCurFont();
+     cur_enc = Charset_NlsGetCurCharset();
+     for(; str_len > 0;)
+     {
+        len= cur_enc->MbToUcs4(&wc, str, -1);
         if(len == -1)
-        { // 无效字符
-            src_len--;
+        {   // 无效字符
+            str_len--;
             str++;
         }
         else if(len == 0)
         {
-            break;
+             break;
         }
         else
-        { // 有效字符
+        {          // 有效字符
             str += len;
-            src_len -= len;
-            count++;
-            if(count==index-1)
+            str_len -= len;
+            if(pChunm!=NULL)
             {
-                return str;
+              cnt++;
+            }
+            if(pChWidthSum!=NULL)
+            {
+              chwidth=cur_font->GetCharWidth(wc);
+              chwidthsum+=chwidth;
             }
             continue;
         }
      }
+
+     *pChWidthSum=chwidthsum;
+     *pChunm=cnt;
+     return true;
+}
+
+// =============================================================================
+// 函数功能: 获取字符串到指定编号字符所占的像素宽度.
+// 输入参数: str:字符串指针
+//          idx:字符编号.
+// 输出参数: 无。
+// 返回值  :字符像素总宽度.
+// =============================================================================
+static s16 __GetStrWidth(char *str,u16 idx)
+{
+    struct FontRsc* cur_font;
+    struct Charset* cur_enc;
+    u32 wc;
+    s32 len,chwidth=0;
+    u16 cnt=0,chwidthsum=0;
+    s16 str_len=0;
+    if(str==NULL)
+         return -1;
+    str_len=__GetValidStrLen(str);
+    if(str_len==-1)
+         return -1;
+    if(idx==0)
+        return 0;
+    //计算字符串中字符数
+    cur_font = Font_GetCurFont();
+    cur_enc = Charset_NlsGetCurCharset();
+    for(; str_len > 0;)
+    {
+        len= cur_enc->MbToUcs4(&wc, str, -1);
+        if(len == -1)
+        {   // 无效字符
+            str_len--;
+            str++;
+        }
+        else if(len == 0)
+             break;
+        else
+        {          // 有效字符
+            str += len;
+            str_len -= len;
+            cnt++;
+            chwidth=cur_font->GetCharWidth(wc);
+            chwidthsum+=chwidth;
+            if(cnt==idx)
+                break;
+            else
+               continue;
+        }
+    }
+
+     return chwidthsum;
+}
+
+// =============================================================================
+// 函数功能: 移动光标.
+// 输入参数: hwnd:文本框窗口句柄;
+//          idx:文本框字符编号.
+// 输出参数: 无。
+// 返回值  :成功则返回true，失败则返回false.
+// =============================================================================
+static bool_t __MoveCursor(HWND hwnd,u8 idx)
+{
+    //内部调用，无需进行参数检查
+    TextBox *pTB;
+    char *str;
+    RECT rc;
+    u16 width;
+    s32 x,y;
+    pTB=(TextBox *)GetWindowPrivateData(hwnd);
+    if(pTB==NULL)
+        return false;
+    GetClientRectToScreen(hwnd,&rc);
+    str=hwnd->Text;
+    if(str==NULL)
+        return false;
+    if(idx==0)
+    {
+        x=rc.left+1;
+    }
+    else
+    {
+        width=__GetStrWidth(str,idx);
+        x=rc.left+width+1;
+    }
+    y=rc.top;
+    MoveWindow(g_CursorHwnd,x,y);
+    UpdateDisplay(CN_TIMEOUT_FOREVER);
+    return true;
 }
 // =============================================================================
-// 函数功能: label控件绘制函数
-// 输入参数: pMsg,窗体消息结构体指针
+// 函数功能: 根据触摸点坐标获取文本框中字符编号
+// 输入参数: hwnd:文本框窗口句柄
+//           x:触摸点x方向坐标
+//           y:触摸点y方向坐标
 // 输出参数: 无。
-// 返回值  :无。
+// 返回值  :文本框中字符编号.
 // =============================================================================
-static  void TextBox_paint(struct WindowMsg *pMsg)
+static s16 __FindIdx(HWND hwnd,u16 x,u16 y)
+{
+    char *str;
+    TextBox *pTB;
+    RECT rc;
+    s16 tmp,val1,val2;
+    u16 chnum,idx,width=0;
+    str=hwnd->Text;
+    if(str==NULL)
+        return -1;
+    pTB=(TextBox *)GetWindowPrivateData(hwnd);
+    if(pTB==NULL)
+        return -1;
+    chnum=pTB->ChNum;
+    GetClientRectToScreen(hwnd,&rc);
+    for(idx=1;idx<chnum;idx++)
+    {
+        width=__GetStrWidth(str, idx);
+        tmp=rc.left+width;
+        if(tmp>x)
+        {
+           break;
+        }
+    }
+    val1=tmp-x;
+    width=__GetStrWidth(str, idx-1);
+    tmp=rc.left+width;
+    val2=x-tmp;
+    if(val1>val2)
+    {
+        return idx-1;
+    }
+    else
+    {
+        return idx;
+    }
+}
+// =============================================================================
+// 函数功能: 获取字符串中从开始到指定编号的字符总的字节数.
+// 输入参数: str:字符串指针
+//           idx:字符串中指定字符序号，从1开始，依次往后增加.
+// 输出参数: 无
+// 返回值  :指定字符地址.
+// =============================================================================
+static s16 __CharToBytes(char *str,u8 num)
+{
+     u16 bytes=0;
+     s16 str_len=0;
+     u8 cnt=0;
+     u32 wc;
+     s32 len;
+     struct FontRsc* cur_font;
+     struct Charset* cur_enc;
+     if(str==NULL)
+          return -1;
+     str_len=__GetValidStrLen(str);
+     if(str_len==-1)
+        return -1;
+     if(num==0)
+         return -1;
+     cur_font = Font_GetCurFont();
+     cur_enc = Charset_NlsGetCurCharset();
+     for(; str_len > 0;)
+     {
+        len= cur_enc->MbToUcs4(&wc, str, -1);
+        if(len == -1)
+        {     // 无效字符
+            str_len--;
+            str++;
+            bytes++;
+        }
+        else if(len == 0)
+        {
+            break;
+        }
+        else
+        {          // 有效字符
+             str += len;
+             str_len -= len;
+             bytes+=len;
+             cnt++;
+         if(cnt==num)
+         {
+             return bytes;
+         }
+              continue;
+         }
+     }
+     return bytes;
+}
+
+// =============================================================================
+// 函数功能:在TextBox中添加字符串
+// 输入参数: hwnd:文本框窗体句柄
+//          str:字符串指针
+// 输出参数: 无。
+// 返回值  :成功则返回true，失败则返回false.
+// =============================================================================
+static bool_t TextBox_AddChar(HWND hwnd,char *str )
+{
+     char *text;
+     s16 len=0,str_len=0;
+     u16 cnt,num=0;
+     s16 bytes;
+     u8 i;
+     TextBox *pTB;
+     bool_t ret;
+     if(hwnd==NULL)
+        return false;
+     if(str==NULL)
+        return false;
+     pTB=(TextBox *)GetWindowPrivateData(hwnd);
+     if(pTB==NULL)
+        return false;
+    //检查文本框编辑属性
+     if(pTB->EditProperty==EN_R_O)
+        return false;
+     text=hwnd->Text;
+     len=__GetValidStrLen(text);
+     if(len==-1)
+          return false;
+     //检查一下str的合法性
+      str_len=__GetValidStrLen(str);
+      if(str_len==-1)
+          return false;
+      ret=__GetValidStrInfo(str,&num,NULL);
+      if(!ret)
+          return false;
+      //字符串原有的字符数
+      cnt=pTB->ChNum;
+      if(cnt+num>CN_CHAR_NUM_MAX)
+      {
+           num=CN_CHAR_NUM_MAX-cnt;
+      }
+      bytes=__CharToBytes(str, num);
+      //将字符串加在原来字符串后面
+      for(i=0;i<bytes;i++)
+      {
+          *(text+len+i)=*(str+i);
+      }
+      *(text+len+bytes)='\0';
+      return true;
+}
+
+// =============================================================================
+// 函数功能:在TextBox指定位置开始删除字符串
+// 输入参数: hwnd,文本框窗体句柄；
+//          idx,字符编号；
+//          count,字符数.
+// 输出参数: 无。
+// 返回值  :成功则返回true，失败则返回false.
+// =============================================================================
+static bool_t TextBox_DeleteChar(HWND hwnd,u8 idx,u8 count)
+{
+     char *text;
+     char temp_str[2*CN_CHAR_NUM_MAX+1];
+     u8 i,cnt,k,tmp;
+     u16 f_len,len,last_len=0;
+     s16 str_len=0;
+     bool_t ret;
+     TextBox *pTB;
+     if(hwnd==NULL)
+         return false;
+     pTB=(TextBox *)GetWindowPrivateData(hwnd);
+     if(pTB==NULL)
+            return false;
+     if(pTB->EditProperty==EN_R_O)
+           return false;
+     text=hwnd->Text;
+     cnt=pTB->ChNum;
+     str_len=__GetValidStrLen(text);
+     if(str_len==-1)
+         return false;
+     if(count>idx)
+         return false;
+     tmp=idx-count;
+     if(tmp==0)
+     {
+         k=cnt-idx;
+         if(k==0)
+         {
+            *text='\0';
+            return true;
+         }
+         else
+         {
+             len=__CharToBytes(text,idx);
+             last_len=str_len-len;
+             for(i=0;i<last_len;i++)
+             {
+                temp_str[i]=*(text+len+i);
+             }
+             temp_str[last_len]='\0';
+             str_len=last_len+1;
+             memcpy(text,temp_str,str_len);
+             return true;
+         }
+     }
+
+     f_len=__CharToBytes(text,tmp);
+     for(i=0;i<f_len;i++)
+     {
+        temp_str[i]=*(text+i);
+     }
+     if(idx!=cnt)
+     {
+        len=__CharToBytes(text,idx);
+        last_len=str_len-len;
+        for(i=0;i<last_len;i++)
+        {
+            temp_str[f_len+i]=*(text+len+i);
+        }
+     }
+     temp_str[f_len+last_len]='\0';
+     str_len=f_len+last_len+1;
+     memcpy(text,temp_str,str_len);
+     return true;
+}
+
+// =============================================================================
+// 函数功能:在TextBox指定字符处开始插入字符串
+// 输入参数:  hwnd,文本框窗体句柄；
+//           idx,字符编号；
+//           str,字符串指针.
+// 输出参数: 无。
+// 返回值  :成功则返回true，失败则返回false.
+// =============================================================================
+static bool_t TextBox_InsertChar(HWND hwnd,u8 idx,char *str)
+{
+     char temp_str[2*CN_CHAR_NUM_MAX+1];
+     char *text;
+     u8 i;
+     u16 f_len,last_len;
+     u16 num=0,cnt;
+     s16 bytes,str_len=0;
+     TextBox *pTB;
+     bool_t ret;
+     if(hwnd==NULL)
+        return false;
+     if(str==NULL)
+        return false;
+     pTB=(TextBox *)GetWindowPrivateData(hwnd);
+     if(pTB==NULL)
+        return false;
+     //检查文本框编辑属性
+     if(pTB->EditProperty==EN_R_O)
+            return false;
+     text=hwnd->Text;
+     str_len=__GetValidStrLen(text);
+     if(str_len==-1)
+         return false;
+     ret=__GetValidStrInfo(str,&num,NULL);
+     if(!ret)
+         return false;
+    //字符串原有的字符数
+     cnt=pTB->ChNum;
+     if(cnt+num>CN_CHAR_NUM_MAX)
+     {
+          num=CN_CHAR_NUM_MAX-cnt;
+     }
+     bytes=__CharToBytes(str, num);
+     f_len=__CharToBytes(text,idx);
+
+     for(i=0;i<f_len;i++)
+     {
+         temp_str[i]=*(text+i);
+     }
+     //Insert
+     for(i=0;i<bytes;i++)
+     {
+         temp_str[f_len+i]=*(str+i);
+     }
+     last_len=str_len-f_len;
+     for(i=0;i<last_len;i++)
+     {
+         temp_str[f_len+bytes+i]=*(text+f_len+i);
+     }
+     temp_str[f_len+bytes+last_len]='\0';
+     str_len=f_len+bytes+last_len+1;
+     memcpy(text,temp_str,str_len);
+
+     return true;
+}
+
+// =============================================================================
+// 函数功能: 文本框控件Create消息处理函数.
+// 输入参数: pMsg,窗体消息指针.
+// 输出参数: 无。
+// 返回值  :成功则返回true，失败则返回false.
+// =============================================================================
+static bool_t TextBox_Create(struct WindowMsg *pMsg)
+{
+	HWND hwnd;
+	TextBox *pTB;
+	if(pMsg==NULL)
+		return false;
+	hwnd =pMsg->hwnd;
+	if(hwnd==NULL)
+		return false;
+	if(pMsg->Param1==0)
+	{
+		pTB=(TextBox *)malloc(sizeof(TextBox));
+		if(pTB==NULL)
+			return false;
+		pTB->ChNum=0;
+		pTB->CharNumLimit=CN_CHAR_NUM_MAX;
+		pTB->EditProperty=EN_R_W;
+		pTB->Visible=true;
+		pTB->CursorLoc=0;
+        pTB->IsMultiLines=false;
+        pTB->MaxLines=1;
+        pTB->CharWidthSum=0;
+        SetWindowPrivateData(hwnd,(void *)pTB);
+    }
+
+    return true;
+}
+// =============================================================================
+// 函数功能: 判断按键按下的字符是否为数字或者小数点字符.
+// 输入参数: keyval:字符ASCII码.
+// 输出参数: 无。
+// 返回值  :是则返回true,否则返回false.
+// =============================================================================
+static bool_t __IsValidInputKey(u8 keyval)
+{
+    bool_t ret=true;
+    if(keyval<VK_NUM_0-1)
+    {
+        if(keyval!=VK_DECIMAL_POINT)
+            return false;
+    }
+    if(keyval>VK_NUM_9+1)
+        return false;
+    return ret;
+}
+// =============================================================================
+// 函数功能: 文本框控件绘制函数
+// 输入参数: pMsg,窗体消息指针
+// 输出参数: 无。
+// 返回值  :成功则返回true，失败则返回false.
+// =============================================================================
+static  bool_t TextBox_Paint(struct WindowMsg *pMsg)
 {
     HWND hwnd;
     HDC hdc;
-    RECT rc,rc0;
-    hwnd=pMsg->hwnd;
+    RECT rc;
     u8 linecount;
     char *str;
-    u8 count;
+    u16 count;
     u32 flag;
+    TextBox *pTB;
+    bool_t ret;
+    if(pMsg==NULL)
+        return false;
+    hwnd =pMsg->hwnd;
+    if(hwnd==NULL)
+        return false;
+    pTB=(TextBox *)GetWindowPrivateData(hwnd);
+    if(pTB==NULL)
+        return false;
     hdc =BeginPaint(hwnd);
     if(NULL!=hdc)
     {
         //由于TextBox只能显示单行信息,因此先判断一下字符串是否包含多行,若为多行,则
         //只显示第一行信息,其他行信息直接忽略.
-       str=hwnd->Text;
-       count=__GetValidTextCount(str);
+        if(!pTB->IsMultiLines)
+        {
+            str=hwnd->Text;
+            ret=__GetValidStrInfo(str,&count,NULL);
+            if(!ret)
+                return false;
+       }
        GetClientRect(hwnd,&rc);
-       SetFillColor(hdc,RGB(255,255,255));
+       SetFillColor(hdc,RGB(255,0,0));
        FillRect(hdc,&rc);
        if(hwnd->Style&WS_BORDER)
        {
-             if(hwnd->Style&BORDER_FIXED3D)
-             {
-                 SetDrawColor(hdc,RGB(173,173,173));
-                 DrawLine(hdc,0,0,0,RectH(&rc)-1); //L
-                 SetDrawColor(hdc,RGB(234,234,234));
-                 DrawLine(hdc,0,0,RectW(&rc)-1,0);   //U
-                 DrawLine(hdc,RectW(&rc)-1,0,RectW(&rc)-1,RectH(&rc)-1); //R
-                 DrawLine(hdc,0,RectH(&rc)-1,RectW(&rc)-1,RectH(&rc)-1); //D
-             }
-             else
-             {
-                 SetDrawColor(hdc,RGB(169,169,169));
-                 DrawLine(hdc,0,0,0,RectH(&rc)-1); //L
-                 DrawLine(hdc,0,0,RectW(&rc)-1,0);   //U
-                 DrawLine(hdc,RectW(&rc)-1,0,RectW(&rc)-1,RectH(&rc)-1); //R
-                 DrawLine(hdc,0,RectH(&rc)-1,RectW(&rc)-1,RectH(&rc)-1); //D
-             }
+          if(hwnd->Style&BORDER_FIXED3D)
+          {
+             SetDrawColor(hdc,RGB(173,173,173));
+             DrawLine(hdc,0,0,0,RectH(&rc)-1); //L
+             SetDrawColor(hdc,RGB(234,234,234));
+             DrawLine(hdc,0,0,RectW(&rc)-1,0);   //U
+             DrawLine(hdc,RectW(&rc)-1,0,RectW(&rc)-1,RectH(&rc)-1); //R
+             DrawLine(hdc,0,RectH(&rc)-1,RectW(&rc)-1,RectH(&rc)-1); //D
+          }
+          else
+          {
+             SetDrawColor(hdc,RGB(169,169,169));
+             DrawLine(hdc,0,0,0,RectH(&rc)-1); //L
+             DrawLine(hdc,0,0,RectW(&rc)-1,0);   //U
+             DrawLine(hdc,RectW(&rc)-1,0,RectW(&rc)-1,RectH(&rc)-1); //R
+             DrawLine(hdc,0,RectH(&rc)-1,RectW(&rc)-1,RectH(&rc)-1); //D
+          }
         }
-        SetTextColor(hdc,RGB(255,255,0));
-        DrawText(hdc,str,count,&rc,DT_VCENTER|DT_CENTER);
+
+        SetTextColor(hdc,RGB(1,1,1));
+        DrawText(hdc,str,count,&rc,DT_VCENTER|DT_LEFT);
         EndPaint(hwnd,hdc);
       }
-}
-// =============================================================================
-// 函数功能:对TextBox的Text属性赋值
-// 输入参数: TextBox * pTxtBox
-// 输出参数: 无。
-// 返回值  :无。
-// 说明：在当前
-// =============================================================================
-static void TextBox_SetText(TextBox * pTxtBox,char *str)
-{
-    WINDOW *hwnd;
-    hwnd=pTxtBox->hwnd;
-    u8 len,i;
-    len=strlen(str);
-    if(len>256)
-    {
-        len=256;
-    }
-    for(i=0;i<len;i++)
-    {
-        hwnd->Text[i]=*(str+i);
-    }
-    PostMessage(hwnd,MSG_PAINT,0,0);
+    return true;
 }
 
 // =============================================================================
-// 函数功能:在TextBox中添加字符串
+// 函数功能: TextBox控件KEY_DOWN_MSG消息响应函数
 // 输入参数: pMsg,窗体消息结构体指针
 // 输出参数: 无。
-// 返回值  :无。
-// 说明：在当前
+// 返回值  :成功返回true,失败则返回false。
 // =============================================================================
-static void TextBox_AddText(TextBox * pTxtBox,char *str,u8 len)
-{
-     WINDOW *hwnd;
-     char *text;
-     u8 Len,i;
-     char ch;
-     u8 str_len=0;
-     text=hwnd->Text;
-     for(i=0;i<len;i++)
-     {
-         ch=*str;
-         if(ch!='\n')
-         {
-             str_len++;
-             str++;
-         }
-         else
-         {
-             break;
-         }
-     }
-     //获取原字符串长度
-     Len=pTxtBox->len;
-     //将字符串加在原来字符串后面
-     for(i=0;i<str_len;i++)
-     {
-        *(text+Len+i)=*(str+i);
-     }
-     PostMessage(hwnd,MSG_PAINT,0,0);
-}
-
-// =============================================================================
-// 函数功能:在TextBox指定位置开始删除字符串
-// 输入参数: pTxtBox,TextBox结构体指针；
-//          index,字符编号，从1开始；
-//          count,字符数.
-// 输出参数: 无。
-// 返回值  :无。
-// 说明：
-// =============================================================================
-static void TextBox_DeleteChar(TextBox * pTxtBox,u8 index,u8 count)
-{
-     WINDOW *hwnd;
-     char *str;
-     char *temp_str;
-     u8 str_len=0;
-     u8 i;
-     u8 f_len,last_len;
-     str=hwnd->Text;
-     char *start_ch;
-     char *end_ch;
-     char *text;
-     str_len=strlen(str);   //字符串原有的字节数
-     //获取到指定编号的字符的起始地址
-     start_ch=__GetCharAddr(str,index);
-     f_len=start_ch-str;
-     for(i=0;i<f_len;i++)
-     {
-         *(text+i)=*(str+i);
-     }
-     end_ch=__GetCharAddr(str,index+count);
-     last_len=str+str_len-end_ch;
-     for(i=0;i<last_len;i++)
-     {
-         *(text+f_len+i)=*(end_ch+i);
-     }
-     *(text+f_len+last_len)='\0';
-     PostMessage(hwnd,MSG_PAINT,0,0);
-}
-
-// =============================================================================
-// 函数功能:在TextBox指定位置开始插入字符串
-// 输入参数: pMsg,窗体消息结构体指针
-// 输出参数: 无。
-// 返回值  :无。
-// 说明：在当前
-// =============================================================================
-static bool_t TextBox_InsertChar(TextBox *pRxtBox,u8 index,char *pText,u8 count)
-{
-     WINDOW *hwnd;
-     char temp_str[256];
-     char *str;
-     u8 str_len=0;
-     u8 i,ch_num;
-     u8 ch_count;
-     u8 f_len,last_len;
-     str=hwnd->Text;
-     char *start_ch;
-     char *end_ch;
-     char *text;
-     struct FontRsc* cur_font;
-     struct Charset* cur_enc;
-     str_len=strlen(str);   //字符串原有的字节数
-     ch_num=pRxtBox->chnum;
-
-     if(ch_num+count>CN_CHAR_NUM_LIMIT)
-     {
-         //获取到指定编号的字符的起始地址
-         start_ch=__GetCharAddr(str,index);
-
-     }
-
-//   last_len=str+str_len-start_ch;
-//   temp_str=(char *)malloc(last_len);
-//   if(temp_str!=NULL)
-//   {
-//       for(i=0;i<last_len;i++)
-//       {
-//           *(temp_str+i)=*(start_ch+i);
-//       }
-//   }
-//
-//   //从指定位置将字符串插入
-//   for(i=0;i<len;i++)
-//   {
-//       *(start_ch+i)=*(pText+i);
-//   }
-//   //将原有被插入的字符串后移
-//   for(i=0;i<last_len;i++)
-//   {
-//       *(start_ch+len+i)=*(temp_str+i);
-//   }
-
-
-}
-
-// =============================================================================
-// 函数功能: label控件消息响应函数
-// 输入参数: pMsg,窗体消息结构体指针
-// 输出参数: 无。
-// 返回值  :无。
-// =============================================================================
-u32 TextBox_proc(struct WindowMsg *pMsg)
+static bool_t TextBox_KeyDown(struct WindowMsg *pMsg)
 {
     HWND hwnd;
+    u8 cursorloc,chnum,chnummax,keyval;
+    TextBox *pTB;
+    char tmpbuf[2];
+    bool_t ret;
+    struct FontRsc* cur_font;
+    struct Charset* cur_enc;
+    u32 wc;
+    s32 chwidth,width=0;
+    u32 ch;
+    char *str;
     RECT rc;
-    HDC hdc;
+    if(pMsg==NULL)
+        return false;
     hwnd =pMsg->hwnd;
-    GetWindowRect(hwnd,&rc);
-    hdc =BeginPaint(hwnd);
-    switch(pMsg->Code)
+    if(hwnd==NULL)
+        return false;
+    ret=IsFocusWindow(hwnd);
+    if(!ret)
+        return false;
+    keyval=(u8)pMsg->Param1;
+    tmpbuf[0]=(char)keyval;
+    tmpbuf[1]='\0';
+    pTB=(TextBox *)GetWindowPrivateData(hwnd);
+    cursorloc=pTB->CursorLoc;
+    chnum=pTB->ChNum;
+    chnummax=pTB->CharNumLimit;
+    ret=__IsValidInputKey( keyval);
+    if(ret)
     {
-        case    MSG_CREATE:
-                printf("textbox[%04XH]: MSG_CREATE.\r\n",hwnd->WinId);
-                return 1;
-                ////
-        case    MSG_LBUTTON_DOWN:
+         if(chnum!=chnummax)
+         {
+            cur_font = Font_GetCurFont();
+            cur_enc = Charset_NlsGetCurCharset();
+            cur_enc->MbToUcs4(&wc, tmpbuf, -1);
+            chwidth=cur_font->GetCharWidth(wc);
+            GetClientRect(hwnd,&rc);
+            width=RectW(&rc);
+            if(width>=pTB->CharWidthSum+chwidth)
+            {
+                if(chnum!=cursorloc)
                 {
-                     SetDrawColor(hdc,RGB(220,220,220));
-                     DrawDottedLine(hdc,0,0,0,RectH(&rc)); //L
-                     DrawDottedLine(hdc,0,0,RectW(&rc),0);   //U
-                     DrawDottedLine(hdc,RectW(&rc),0,RectW(&rc),RectH(&rc)); //R
-                     DrawDottedLine(hdc,0,RectH(&rc),RectW(&rc),RectH(&rc)); //D
-                     InvalidateWindow(hwnd,FALSE);
+                    TextBox_InsertChar(hwnd, cursorloc, tmpbuf);
                 }
-                break;
-                ////
-        case    MSG_LBUTTON_UP:
+                else
                 {
-//                    switch(_get_button_type(hwnd))
-//                    {
-//                        case    BS_NORMAL:
-//                                hwnd->Style &= ~BS_PUSHED;
-//                                PostMessage(Gdd_GetWindowParent(hwnd),MSG_NOTIFY,(BTN_UP<<16)|(hwnd->WinId),(ptu32_t)hwnd);
-//                                break;
-//                                ////
-//                        case    BS_HOLD:
-//                                break;
-//                                ////
-//                    }
-                    InvalidateWindow(hwnd,TRUE);
+                    TextBox_AddChar(hwnd, tmpbuf);
                 }
-                break;
-                ////
-        case    MSG_PAINT:
-                TextBox_paint(pMsg);
-                return 1;
-                ////
-
-        case    MSG_DESTROY:
-                printf("textbox[%04XH]: MSG_DESTROY.\r\n",hwnd->WinId);
-                return 1;
-                ////
-
-        default:
-                return DefWindowProc(pMsg);
-
+                cur_font = Font_GetCurFont();
+                cur_enc = Charset_NlsGetCurCharset();
+                cur_enc->MbToUcs4(&wc, tmpbuf, -1);
+                chwidth=cur_font->GetCharWidth(wc);
+                pTB->ChNum++;
+                pTB->CursorLoc++;
+                pTB->CharWidthSum+=chwidth;
+                InvalidateWindow( hwnd, true);
+                __MoveCursor(hwnd,pTB->CursorLoc);
+             }
+         }
     }
-    return 0;
+    else
+    {
+         switch (keyval)
+         {
+               case VK_RETURN:
+                //todo
+                break;
+               case VK_DEL:
+               case CN_CANCLE_KEY:
+                   if(pTB->ChNum>=1)
+                   {
+                      if(cursorloc!=0)
+                      {
+                         str=hwnd->Text;
+                         ch=__GetCharByIndex(str,pTB->CursorLoc);
+                         cur_font = Font_GetCurFont();
+                         chwidth=cur_font->GetCharWidth(ch);
+                         TextBox_DeleteChar(hwnd, cursorloc,1);
+                         pTB->ChNum--;
+                         pTB->CursorLoc--;
+                         pTB->CharWidthSum-=chwidth;
+                      }
+                      InvalidateWindow( hwnd, true);
+                      __MoveCursor(hwnd,pTB->CursorLoc);
+                   }
+                break;
+
+           default:
+            break;
+
+         }
+    }
+
+    SetWindowPrivateData( hwnd, (void *)pTB);
+    return true;
+}
+
+// =============================================================================
+// 函数功能: TextBox控件KEY_UP_MSG消息响应函数
+// 输入参数: pMsg,窗体消息结构体指针
+// 输出参数: 无。
+// 返回值  :无。
+// =============================================================================
+static bool_t TextBox_KeyUp(struct WindowMsg *pMsg)
+{
 
 }
-#endif
+// =============================================================================
+// 函数功能: TextBox控件KEY_PRESS_MAG消息绘制函数
+// 输入参数: pMsg,窗体消息结构体指针
+// 输出参数: 无。
+// 返回值  :无。
+// =============================================================================
+static bool_t TextBox_KeyPress(struct WindowMsg *pMsg)
+{
+    return true;
+}
 
+
+
+static bool_t TextBoxL_Down(struct WindowMsg *pMsg)
+{
+    return true;
+}
+
+static bool_t TextBoxL_Up(struct WindowMsg *pMsg)
+{
+   return true;
+}
+
+
+static void TextBox_TouchUp(struct WindowMsg *pMsg)
+{
+
+}
+
+// =============================================================================
+// 函数功能: TextBox控件触摸屏按下响应函数。
+// 输入参数: pMsg,窗体消息结构体指针
+// 输出参数: 无。
+// 返回值  :成功返回true,失败则返回false。
+// =============================================================================
+static bool_t TextBox_TouchDown(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    u32 loc;;
+    u16 chnum,idx,CharWidth,x,y;
+    TextBox *pTB;
+    char *str;
+    s32 tmp;
+    RECT rc;
+    bool_t ret;
+    if(pMsg==NULL)
+        return false;
+    hwnd =pMsg->hwnd;
+    if(hwnd==NULL)
+        return false;
+    pTB=(TextBox *)GetWindowPrivateData(hwnd);
+    if(pTB==NULL)
+        return false;
+    //将当前TextBox控件设置为焦点窗口
+    SetFocusWindow(hwnd);
+    //在文本框上
+    loc=pMsg->Param2;   //获取触摸点信息
+    x=loc;
+    y=loc>>16;
+    chnum=pTB->ChNum;
+    str=hwnd->Text;
+    if(str==NULL)
+    {
+         pTB->CursorLoc=0;
+        __MoveCursor(hwnd,0);
+    }
+    else
+    {
+        ret=__GetValidStrInfo(str,NULL,&CharWidth);
+        GetWindowRect(hwnd,&rc);
+        tmp=rc.left+CharWidth;
+        if(x>tmp)
+        {
+            pTB->CursorLoc=chnum;
+            __MoveCursor(hwnd,chnum);
+        }
+        else
+        {
+           idx=__FindIdx(hwnd,x,y);
+           pTB->CursorLoc=idx;
+           __MoveCursor(hwnd,idx);
+        }
+    }
+    SetWindowPrivateData(hwnd,(void *)pTB);
+    return true;
+}
+
+// =============================================================================
+// 函数功能: TextBox控件获得焦点消息响应函数。
+// 输入参数: pMsg,窗体消息指针
+// 输出参数: 无。
+// 返回值  :成功返回true,失败则返回false。
+// ======================================================================
+static bool_t TextBox_SetFocus(struct WindowMsg *pMsg)
+{
+    HWND hwnd,Tmrhwnd;
+    if(pMsg==NULL)
+        return false;
+    hwnd =pMsg->hwnd;
+    if(hwnd==NULL)
+        return false;
+    Tmrhwnd=GetDesktopWindow();
+    if(Tmrhwnd!=NULL)
+    {
+       PostMessage(Tmrhwnd,MSG_TIMER_START,CN_CURSOR_TIMER_ID,(ptu32_t)hwnd);
+    }
+    return true;
+}
+// =============================================================================
+// 函数功能: TextBox控件失去焦点消息响应函数。
+// 输入参数: pMsg,窗体消息指针
+// 输出参数: 无。
+// 返回值  :成功返回true,失败则返回false。
+// ======================================================================
+static bool_t TextBox_KillFocus(struct WindowMsg *pMsg)
+{
+     HWND hwnd,Tmrhwnd;
+     if(pMsg==NULL)
+          return false;
+     hwnd =pMsg->hwnd;
+     if(hwnd==NULL)
+          return false;
+     Tmrhwnd=GetDesktopWindow();
+     if(Tmrhwnd!=NULL)
+     {
+         PostMessage(Tmrhwnd,MSG_TIMER_STOP,CN_CURSOR_TIMER_ID,(ptu32_t)hwnd);
+     }
+     return true;
+}
+
+// =============================================================================
+// 函数功能: TextBox控件获取文本内容函数。
+// 输入参数: hwnd,文本框窗口句柄.
+// 输出参数: 无。
+// 返回值  :无。
+// =============================================================================
+static void __TextBox_GetText(HWND hwnd,char *text)
+{
+     TextBox *pTB;
+     u16 len;
+     char *str;
+     pTB=GetWindowPrivateData(hwnd);
+     if(pTB==NULL)
+         return ;
+     str=hwnd->Text;
+     len=strlen(str);
+     memcpy(text,str,len);
+     *(text+len)='\0';
+}
+
+// =============================================================================
+// 函数功能: TextBox控件设置文本Text函数。
+// 输入参数: hwnd,文本框窗口句柄.
+// 输出参数: 无。
+// 返回值  :无。
+// =============================================================================
+static void __TextBox_SetText(HWND hwnd,char *str)
+{
+     u16 len;
+     char *dst;
+     dst=hwnd->Text;
+     len=strlen(str);
+     memcpy(dst,str,len);
+     *(dst+len)='\0';
+     InvalidateWindow(hwnd, true);
+}
+
+// =============================================================================
+// 函数功能: TextBox控件删除文本函数。
+// 输入参数: hwnd,文本框窗口句柄.
+// 输出参数: 无。
+// 返回值  :无。
+// =============================================================================
+static void __TextBox_DeleteText(HWND hwnd)
+{
+     hwnd->Text='\0';
+     InvalidateWindow(hwnd, true);
+}
+// =============================================================================
+// 函数功能: TextBox控件显示内容控制函数
+// 输入参数: hwnd,TextBox控件窗口句柄;
+//          ctrlcmd,详情参见enum TextCtrlCmd
+//          para1:对于EN_GET_TEXT、EN_SET_TEXT、EN_DELETE_TEXT该参数无效,可直接置0。
+//          para2:对于EN_DELETE_TEXT该参数无效,可直接置0,对于EN_GET_TEXT、EN_SET_TEXT
+//          输入字符串指针.
+// 返回值  :成功则返回true，失败则返回false.
+// =============================================================================
+bool_t TextBox_TextCtrl(HWND hwnd,u8 ctrlcmd,u32 para1,ptu32_t para2)
+{
+    if(hwnd==NULL)
+        return false;
+    switch(ctrlcmd)
+    {
+        case EN_GET_TEXT:
+            __TextBox_GetText(hwnd,(char *)para2);
+            break;
+        case EN_SET_TEXT:
+            __TextBox_SetText(hwnd,(char *)para2);
+            break;
+        case EN_DELETE_TEXT:
+            __TextBox_DeleteText(hwnd);
+            break;
+        default:
+            break;
+    }
+    return true;
+}
+
+
+//默认按钮消息处理函数表，处理用户函数表中没有处理的消息。
+static struct MsgProcTable s_gTextBoxMsgProcTable[] =
+{
+    {MSG_KEY_DOWN,TextBox_KeyDown},
+    {MSG_KEY_UP,TextBox_KeyUp},
+    {MSG_PAINT,TextBox_Paint},
+    {MSG_CREATE,TextBox_Create},
+    {MSG_TOUCH_DOWN,TextBox_TouchDown},
+    {MSG_TOUCH_UP,TextBox_TouchUp},
+    {MSG_SETFOCUS,TextBox_SetFocus},
+    {MSG_KILLFOCUS,TextBox_KillFocus}
+};
+
+static struct MsgTableLink  s_gTextBoxMsgLink;
+// =============================================================================
+// 函数功能: TextBox控件创建函数。
+// 输入参数: Text:文本框窗口Text;
+//           Style:文本框风格，参见gdd.h;
+//           x:文本框起始位置x方向坐标(单位：像素);
+//           y:文本框起始位置y方向坐标(单位：像素);
+//           w:文本框宽度(单位：像素);
+//           h:文本框高度(单位：像素);
+//           hParent:文本框父窗口句柄;
+//           WinId:文本框控件Id;
+//           pdata:文本框控件私有数据结构;
+//           UserMsgTableLink:文本框控件用户消息列表结构指针。
+// 输出参数: 无。
+// 返回值  :成功则返回文本框句柄，失败则返回NULL。
+// =============================================================================
+HWND CreateTextBox(const char *Text,u32 Style,
+                    s32 x,s32 y,s32 w,s32 h,
+                    HWND hParent,u32 WinId,void *pdata,
+                    struct MsgTableLink *UserMsgTableLink)
+{
+    WINDOW *pGddWin=NULL;
+    struct MsgTableLink *Current;
+    if(UserMsgTableLink != NULL)
+    {
+        Current = UserMsgTableLink;
+        while(Current->LinkNext != NULL)
+            Current = Current->LinkNext;
+        Current->LinkNext = &s_gTextBoxMsgLink;
+        Current = UserMsgTableLink;
+    }
+    else
+        Current = &s_gTextBoxMsgLink;
+    s_gTextBoxMsgLink.LinkNext = NULL;
+    s_gTextBoxMsgLink.MsgNum = sizeof(s_gTextBoxMsgProcTable) / sizeof(struct MsgProcTable);
+    s_gTextBoxMsgLink.myTable = (struct MsgProcTable *)&s_gTextBoxMsgProcTable;
+    pGddWin=CreateWindow(Text,WS_CHILD|Style|TEXTBOX,x,y,w,h,hParent,WinId,CN_WINBUF_PARENT,pdata,Current);
+    return pGddWin;
+}
 
 

@@ -63,7 +63,7 @@
 #define AT24_ADDRESS           0x50            //设备地址
 #define AT24_CLK_FRE           (100*1000)      //总线速度，单位Hz
 
-static struct SemaphoreLCB AT24_Semp;	//芯片互斥访问保护
+static struct SemaphoreLCB AT24_Semp;   //芯片互斥访问保护
 
 //定义IICBUS架构下的IIC设备结构
 static struct IIC_Device *ps_AT24_Dev = NULL;
@@ -79,7 +79,7 @@ void __AT24_GpioInit(void)
     //AT24C的WP引脚配置为低，允许写
 //    extern void Board_AT24GpioInit(void);
 //    Board_AT24GpioInit();
-	//已经在board.c里面Board_GpioInit完成
+    //已经在board.c里面Board_GpioInit完成
 }
 
 // =============================================================================
@@ -138,9 +138,9 @@ u32 AT24_WriteBytes(u32 wAddr, u8 *pbyBuf, u32 wBytesNum)
         return false;
 
     if(false == Lock_SempPend(&AT24_Semp,2500*mS))// TODO --- 10*mS
-	{
-		return false;
-	}
+    {
+        return false;
+    }
 
     //分页操作
     while(wBytesNum)
@@ -175,9 +175,9 @@ u32 AT24_ReadBytes(u32 wAddr, u8 *pbyBuf, u32 wBytesNum)
         return false;
 
     if(false == Lock_SempPend(&AT24_Semp,2500*mS))//TODO
-	{
-		return false;
-	}
+    {
+        return false;
+    }
 
     //分页操作
     while(wBytesNum)
@@ -242,8 +242,8 @@ bool_t AT24_ModuleInit(void)
     //GPIO初始化，SDA、SCL已经在IIC中初始化了，此处只需初始化WP即可
     __AT24_GpioInit();
 
-    if(NULL == Lock_SempCreate_s(&AT24_Semp,1,1,CN_SEMP_BLOCK_FIFO,"AT45 semp"))
-	    return false;
+    if(NULL == Lock_SempCreate_s(&AT24_Semp,1,1,CN_BLOCK_FIFO,"AT45 semp"))
+        return false;
 
     //添加FM24CL64到IIC0总线
     if(NULL != IIC_DevAdd_s(&s_AT24_Dev,"TWI0","IIC_Dev_AT24",

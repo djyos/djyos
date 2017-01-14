@@ -118,6 +118,7 @@ bool_t LoopInit(void)
     devpara.private = 0;
     devpara.mtu = CN_LOOP_MTU;
     devpara.devfunc = CN_IPDEV_ALL;
+    memcpy(devpara.mac,CN_MAC_BROAD,CN_MACADDR_LEN);
 
     LoopHandle = NetDevInstall(&devpara);
     if(0 != LoopHandle)

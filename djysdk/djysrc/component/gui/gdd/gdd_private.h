@@ -86,9 +86,15 @@ extern "C" {
 #define DEF_DLGFRAME_SIZE   3   //默认的对话边框大小
 #define DEF_CAPTION_SIZE    28  //默认的标题栏大小
 
+
+//#define CN_DEF_FILL_COLOR           RGB(255,255,255)   //默认窗口填充颜色
+//#define CN_DEF_DRAW_COLOR           RGB(0, 0, 0)  //默认窗口绘制颜色
+//#define CN_DEF_TEXT_COLOR           RGB(0, 0, 0)  //默认窗口文本颜色
+
 #define CN_DEF_FILL_COLOR           RGB(100, 20, 100)   //默认窗口填充颜色
 #define CN_DEF_DRAW_COLOR           RGB(255, 255, 255)  //默认窗口绘制颜色
 #define CN_DEF_TEXT_COLOR           RGB(255, 255, 255)  //默认窗口文本颜色
+
 
 #define WINDOW_BORDER_COLOR         RGB(200,200,200)    //窗口边框颜色
 #define WINDOW_DLGFRAME_COLOR1      RGB(70,70,100)      //窗口对话边框颜色1
@@ -168,7 +174,7 @@ struct WINDOW
 
 };
 
-struct TIMER
+struct WinTimer
 {
 //    u32 Tag ;
     HWND hwnd;              //定时器所属窗口.
@@ -182,6 +188,8 @@ struct TIMER
                             //所属窗口的消息队列中的list_timer上.
 };
 
+#define CN_INTERVAL_TIME         800
+#define CN_CURSOR_TIMER_ID       0xff00
 /*============================================================================*/
 void    GDD_Init(void);
 
@@ -200,7 +208,7 @@ bool_t    HWND_Lock(HWND hwnd);
 void    HWND_Unlock(HWND hwnd);
 
 bool_t    __PostMessage(struct WindowMsgQ *pMsgQ,HWND hwnd,u32 msg,u32 param1,ptu32_t param2);
-void    __PostTimerMessage(TIMER *ptmr);
+void    __PostTimerMessage(struct WinTimer *ptmr);
 
 void    __InvalidateWindow(HWND hwnd,bool_t bErase);
 struct WindowMsgQ*   GUI_CreateMsgQ(u32 size);

@@ -1,1 +1,1 @@
-del *.d *.o *.obj *.lst *.elf *.bin *.map *.bak *.hex *.mk/s
+del *.d *.o *.obj *.lst *.elf *.bin *.map *.bak *.hex *.mk/s *.a

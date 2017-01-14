@@ -5,28 +5,20 @@ INCLUDE  ..\board\explorer\lds\memory.lds
 /*不同的make程序，文件路径表示方式，是不同的，输入段中文件名写法要相应修改*/
 /*正确的写法，可参看console中输出的命令行*/
 SECTIONS
-{
-    Iboot_RevRam :
+{	
+	Rom_Start :
+	{
+	    restore = .; 
+	}>InnerFlash
+	
+    /*RevRam是Ram保留区域，用于存储preload前使用或保存的内在数据,只有IAP_pload.c*/
+    /*的pg_IapVar变量从该段内分配，且该段在iboot.lds和debug/release.lds保持一致*/
+    Iboot_RevRam (NOLOAD):
     {
-        g_cIbootFlag = .;           /*字符串变量，c中可用，用于判断进入APP还是Iboot*/
-    }>BootFlagRAM1
-        
-    Iboot_AppCtrl :
-    {
-        gc_ptIbootCtrl = .;   /*结构变量，c中可用，用于检查APP正确性*/
-    }>AppCtlRom
+        . = ALIGN(0x08);
+        KEEP(*(.IapBootFlgRam .IapBootFlgRam.*))  
+    }>RAM1	
 
-    Iboot_AppInfo :
-    {
-        gc_ptAppInfo = .;         /*ROM区 存储APP的起始地址及大小 */ 
-    }>AppVerfyRom
-       
-    Iboot_AppStart :
-    {
-        gc_AppAddr = .;           /*函数指针变量，指向APP的起始地址*/
-        __AppPreLoad = .;           /*函数指针变量，指向APP的Preload函数*/
-    }>AppRom
-    
     stack_rRAM1_lRAM1 (NOLOAD) :
     {
         . = ALIGN(0x08);
@@ -34,17 +26,17 @@ SECTIONS
         KEEP(* (.data.InitStack))
         msp_top = ALIGN(0x08);
     }>RAM1
-    
+       
     text_startup_rIbootRom_lIbootRom :
     {
        . = ALIGN(0x08);
-        KEEP(*liblibOS_explorerstm32f4_o0.a:initcpuc.o (.rodata .rodata.gc_u32StartupExpTable))
+        KEEP(*(.StartupExpTbl .StartupExpTbl.*)) 
         KEEP(*liblibOS_explorerstm32f4_o0.a:initcpuc.o (.text .text.* .rodata .rodata.*))
         KEEP(*liblibOS_explorerstm32f4_o0.a:sysinit.o (.text .text.* .rodata .rodata.*))
         KEEP(*liblibOS_explorerstm32f4_o0.a:pre_loader.o (.text .text.* .rodata .rodata.*))
         KEEP(*liblibOS_explorerstm32f4_o0.a:IAP_pLoad.o (.text .text.* .rodata .rodata.*))
         KEEP(*board/explorer/src/OS_prjcfg/Iboot_config.o (.text .text.* .rodata .rodata.*))
-    }>IbootRom
+    }>InnerFlash
 
     text_preload_rIbootRom_lIbootRom :
     {
@@ -59,14 +51,14 @@ SECTIONS
         *board/explorer/src/critical/*.o (.text .text.* .rodata .rodata.*)
         *liblibOS_explorerstm32f4_o0.a:heap-static.o (.text .text.* .rodata .rodata.*)
         *liblibOS_explorerstm32f4_o0.a:list.o (.text .text.* .rodata .rodata.*)
-    }>RAM1 AT>IbootRom
+    }>InnerFlash
     
     text_sysload_rIbootRom_lIbootRom :
-    {
+    {       
        . = ALIGN(0x08);
         * (.text .text.* .rodata .rodata.*)
         g_pAppCodeEndRamAddr = .;
-    }>RAM1 AT>IbootRom
+    }>InnerFlash
 
     rw_preload_rRAM1_lIbootRom :
     {
@@ -80,11 +72,14 @@ SECTIONS
         *board/explorer/src/critical/*.o (.data .data.*)
         *liblibOS_explorerstm32f4_o0.a:heap-static.o (.data .data.*)
         *liblibOS_explorerstm32f4_o0.a:list.o (.data .data.*)
-    }>RAM1 AT>IbootRom
+    }>RAM1 AT>InnerFlash
 
+    /*Cortex-M 系列的向量表可重定位，对起始地址的要求是：若有N个向量（包含异常），*/
+    /*先增大到2的整数次幂，若为M，则Addr = ALIGN(4 * M) */
+    /*举例：若cpu有64个中断，则N = 80, M = 128, Addr = ALIGN(0x200)*/
     zi_preload_rRAM1_lRAM1 (NOLOAD) :
     {
-       . = ALIGN(0x100);
+       . = ALIGN(0x200);
         KEEP(* (.table.exceptions .table.exceptions.*))
         KEEP(* (.table.vectors .table.vectors.*))
         *liblibOS_explorerstm32f4_o0.a:loader.o (.bss .bss.* COMMON)
@@ -102,7 +97,7 @@ SECTIONS
     {
        . = ALIGN(0x08);
         * (.data .data.*)
-    }>RAM1 AT>IbootRom
+    }>RAM1 AT>InnerFlash
 
     zi_sysload_rRAM1_lRAM1 (NOLOAD) :
     {
@@ -131,7 +126,7 @@ SECTIONS
         LONG(ADDR(zi_preload_rRAM1_lRAM1))
         LONG(SIZEOF(zi_preload_rRAM1_lRAM1))
         LONG(0)
-    }>IbootRom
+    }>InnerFlash
 
     sysload_cp_table :
     {
@@ -154,21 +149,21 @@ SECTIONS
         LONG(ADDR(zi_sysload_rRAM1_lRAM1))
         LONG(SIZEOF(zi_sysload_rRAM1_lRAM1))
         LONG(0)
-    }>IbootRom
+    }>InnerFlash
 
     heap_rRAM1_lRAM1 (NOLOAD) :
     {
        . = ALIGN(0x08);
         sys_heap_bottom = .;
     }>RAM1
-    sys_heap_top = 0x20000000+128k-16;
-
+    sys_heap_top = InnerRamStart + InnerRamSize;
+    
     heap_rextram_lextram (NOLOAD) :
     {
         . = ALIGN(0x08);
         extram_heap_bottom = .;
     }>extram
-    extram_heap_top = 0x68000000+0x100000;
+    extram_heap_top = ExtRamStart + ExtRamSize;
 
     heap_cp_table :
     {
@@ -206,6 +201,35 @@ SECTIONS
         BYTE(0)                     /*串结束，"extram"是堆的名字*/
         . = ALIGN(0x04);
         LONG(0)                     /*结束标志*/
-    }>IbootRom
+    }>InnerFlash
+    
+    Iboot_Info :
+    {
+        . = ALIGN(0x08);
+        gc_ptIbootSize = .;
+        LONG(IbootSize)
+    }>InnerFlash
+    
+    App_Info :
+    {
+        . = ALIGN(0x08);
+        gc_pAppOffset = .; 			/* APP空间偏置 */
+        LONG(InnerFlashOffset + IbootSize)
+        gc_pAppRange = .; 			/* APP空间范围 */
+        LONG(InnerFlashRange - IbootSize)
+        
+    }>InnerFlash
+    
+    Iboot_AppInfo :
+    {
+        . = restore + IbootSize;
+        gc_ptIbootCtrl = .;         /*结构变量，c中可用，用于检查APP正确性*/
+        . += 256;
+        gc_ptAppInfo = .;           /*ROM区 存储APP的起始地址及大小 */ 
+        . += 256;
+        gc_AppAddr = .;             /*函数指针变量，指向APP的起始地址*/
+        __AppStart = .;           /*函数指针变量，指向APP的Preload函数*/
+    }>InnerFlash
+    
 }
 /**** The End ****/

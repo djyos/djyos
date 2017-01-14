@@ -49,17 +49,111 @@
 #include <cfg/iboot_config.h>
 #include "cpu_peri.h"
 
-extern u32 g_bRunModeFlag;
+//extern u32 g_bRunModeFlag;
 const Pin LedPin[] = {
-		{PIO_PA28,PIOA,ID_PIOA,PIO_OUTPUT_1,PIO_DEFAULT}
+		{PIO_PA27,PIOA,ID_PIOA,PIO_OUTPUT_1,PIO_DEFAULT}
 };
+
+static const Pin RUN[] = {
+        {PIO_PD26, PIOD, ID_PIOD, PIO_OUTPUT_1, PIO_DEFAULT}
+
+};
+
+
+void Led_Blink(void)
+{
+	PIO_Configure(RUN,1);
+	while(1)
+	{
+		PIO_Set(RUN);
+        Djy_DelayUs(1*mS);
+		PIO_Clear(RUN);
+		Djy_DelayUs(1*mS);
+	}
+}
+
+#include <dcoutput.h>
+#include <shell.h>
+static char *Sh_GetWord_r(char *buf,char **next)
+{
+    uint32_t i=0;
+    *next = NULL;
+    if(buf == NULL)
+        return NULL;
+    while(1)
+    {
+        if((buf[i] == ' ') || (buf[i] == 0))
+        {
+            if(buf[i] == 0)
+                return buf;
+            else
+            {
+                buf[i] = '\0';
+                break;
+            }
+        }
+        i++;
+    }
+    i++;
+    while(buf[i] != 0)
+    {
+        if(buf[i]!=' ')
+        {
+            if((buf[i] == '\n') || (buf[i] == '\r'))
+                *next = NULL;
+            else
+                *next = &buf[i];
+            break;
+        }
+        i++;
+    }
+    return buf;
+}
+bool_t Shell_DC(char *param)
+{
+	u32 channel,cycle,dc;
+	char *param_ch,*param_dc,*param_cycle,*next_param;
+
+	param_ch = Sh_GetWord_r(param,&next_param);
+//	param_cycle= Sh_GetWord_r(next_param,&next_param);
+	param_dc = Sh_GetWord_r(next_param,&next_param);
+
+	channel = strtoul(param_ch, (char **)NULL, 0);
+	dc = strtol(param_dc, (char **)NULL, 0);
+//	cycle = strtol(param_cycle, (char **)NULL, 0);
+
+	if(channel > 1)
+		printk("channel err!\r\n");
+	if( (dc < 4000) || (dc > 20000))
+		printk("dc value err!\r\n");
+
+	DC_Output(channel,dc);
+
+	return 1;
+}
+
+static struct ShellCmdTab  gVmacDebug[] =
+{
+    {
+        "dc",
+		Shell_DC,
+        "usage:Virtual_Mac",
+        NULL
+    }
+};
+#define CN_VMACDEBUG_NUM  ((sizeof(gVmacDebug))/(sizeof(struct ShellCmdTab)))
+static struct ShellCmdRsc gVmacDebugCmdRsc[CN_VMACDEBUG_NUM];
 //系统升级用
 ptu32_t djy_main(void)
 {
-	g_bRunModeFlag=0x12345678;
-	printf("Run Mode:Iboot.\r\n");
+	extern void Sh_GetStatus(char *param);
+	extern void Sh_GetRunMode(char *param);
+	Sh_GetRunMode(NULL);
+	Sh_GetStatus(NULL);
 
 	PIO_Configure(LedPin,1);
+
+	Sh_InstallCmd(gVmacDebug,gVmacDebugCmdRsc,CN_VMACDEBUG_NUM);
 	while(1)
 	{
 		PIO_Set(LedPin);

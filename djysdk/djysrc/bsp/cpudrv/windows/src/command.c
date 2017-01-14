@@ -99,7 +99,7 @@ ptu32_t ModuleInstall_Cmd(ptu32_t para)
     Ring_Init(  &s_tRecvRingBuf,
                 (u8 *)cmd_ptcl_recv_buf,
                 cmd_buf_len);
-    s_ptRecvRingBufSemp = Lock_SempCreate(1,0,CN_SEMP_BLOCK_FIFO,NULL);
+    s_ptRecvRingBufSemp = Lock_SempCreate(1,0,CN_BLOCK_FIFO,NULL);
     //以下建立windows 终端输入设备
     cmd_dev = Driver_DeviceCreate( NULL,"windows_cmd",
                                 NULL,NULL,

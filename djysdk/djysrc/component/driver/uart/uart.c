@@ -73,6 +73,8 @@
     struct SemaphoreLCB *SendRingBufSemp;    //发送缓冲区信号量
     struct SemaphoreLCB *RecvRingBufSemp;    //接收缓冲区信号量
     struct SemaphoreLCB *BlockingSemp;       //阻塞信号量
+    struct MutexLCB *WriteMutex;             //app多线程互斥写访问
+    struct MutexLCB *ReadMutex;          //app多线程互斥读访问
 
     u32 RecvRingTrigLevel;      //串口Ring接收触发水平,即收到多少数据时释放信号量
     u32 SendRingTrigLevel;      //发送Ring发送触发水平，当发送环形缓冲区满，将
@@ -121,13 +123,20 @@ ptu32_t UART_AppWrite(struct UartCB *UCB,u8* src_buf,u32 len,
 
     if((len==0) || ((u8*)src_buf == NULL) || (UCB == NULL))
         return 0;
+
     buf = (uint8_t*)src_buf;
-    base_time = (u32)(u32)DjyGetSysTime();
+    base_time = (u32)DjyGetSysTime();
+
+    if(Lock_MutexPend(UCB->WriteMutex,timeout)==false)
+        return completed;
 
     while(1)
     {
         written = Ring_Write(&UCB->SendRingBuf,
                             (uint8_t*)buf+completed,len-completed);
+        //先PEND一次信号量，防止事先已经被释放过，发送过程中，发送完成会释放这个
+        //信号量，无论block_option值是什么，都会释放。
+        Lock_SempPend(UCB->BlockingSemp,0);
         UCB->StartSend(UCB->UartPortTag,rel_timeout);
 
         if(written != len-completed)     //缓冲区满，没有送出全部数据
@@ -135,7 +144,7 @@ ptu32_t UART_AppWrite(struct UartCB *UCB,u8* src_buf,u32 len,
             completed += written;
             if(false == Lock_SempPend(UCB->SendRingBufSemp,rel_timeout))
                 break;
-            rel_timeout = (u32)(u32)DjyGetSysTime() - base_time;
+            rel_timeout = (u32)DjyGetSysTime() - base_time;
             if(rel_timeout > timeout)
                 break;
             else
@@ -144,12 +153,7 @@ ptu32_t UART_AppWrite(struct UartCB *UCB,u8* src_buf,u32 len,
         {
             if(block_option == true)
             {
-                //先PEND一次信号量，防止事先已经被释放过
-                Lock_SempPend(UCB->BlockingSemp,0);
-//                if(Ring_Check(&UCB->SendRingBuf))
-                {
-                    Lock_SempPend(UCB->BlockingSemp,rel_timeout);
-                }
+                Lock_SempPend(UCB->BlockingSemp,rel_timeout);
             }
             completed += written;
             break;
@@ -160,6 +164,8 @@ ptu32_t UART_AppWrite(struct UartCB *UCB,u8* src_buf,u32 len,
         UCB->MplUartStatus &= (~CN_MULTIPLEX_SENSINGBIT_WRITE);
         Multiplex_Set(UCB->pMultiplexUart,UCB->MplUartStatus);
     }
+
+    Lock_MutexPost(UCB->WriteMutex);
     return completed;
 }
 
@@ -190,6 +196,9 @@ ptu32_t UART_AppRead(struct UartCB *UCB,u8* dst_buf,u32 len,
         return 0;
 
     base_time = (u32)DjyGetSysTime();
+    if(Lock_MutexPend(UCB->ReadMutex,timeout)==false)
+        return completed;
+
     completed = Ring_Read(&UCB->RecvRingBuf,(uint8_t*)dst_buf,len);
     if(completed < len)    //缓冲区中数据不够，则等待接收
     {
@@ -204,7 +213,7 @@ ptu32_t UART_AppRead(struct UartCB *UCB,u8* dst_buf,u32 len,
             UCB->RecvRingTrigLevel = triglevel;
             if(Ring_Check(&UCB->RecvRingBuf) < triglevel)
             {
-            	Lock_SempPend(UCB->RecvRingBufSemp,rel_timeout);
+                Lock_SempPend(UCB->RecvRingBufSemp,rel_timeout);
             }
             completed += Ring_Read(&UCB->RecvRingBuf,
                                ((u8*)dst_buf) + completed,
@@ -235,6 +244,7 @@ ptu32_t UART_AppRead(struct UartCB *UCB,u8* dst_buf,u32 len,
         Multiplex_Set(UCB->pMultiplexUart,UCB->MplUartStatus);
     }
 
+    Lock_MutexPost(UCB->ReadMutex);
     return completed;
 }
 
@@ -474,6 +484,7 @@ struct UartCB * UART_InstallPort(struct UartParam *Param)
     UCB = (struct UartCB *)M_Malloc(sizeof(struct UartCB),0);
     if(UCB == NULL)
         goto exit_from_ucb;
+    memset(UCB,0x00,sizeof(struct UartCB));
     pRxRingBuf = (u8*)M_Malloc(Param->RxRingBufLen,0);
     if(pRxRingBuf == NULL)
         goto exit_from_rx_ring_buf;
@@ -482,15 +493,15 @@ struct UartCB * UART_InstallPort(struct UartParam *Param)
         goto exit_from_tx_ring_buf;
 
     //建立串口阻塞使用的信号量
-    UCB->BlockingSemp = Lock_SempCreate(1,0,CN_SEMP_BLOCK_FIFO,"uart blocking");
+    UCB->BlockingSemp = Lock_SempCreate(1,0,CN_BLOCK_FIFO,"uart blocking");
     if(UCB->BlockingSemp == NULL)
         goto exit_from_blocking_semp;
     //保护缓冲区的信号量，使缓冲区中数据量为0时阻塞写入线程，读取线程使缓冲区中
     //数据降至trigger_level以下时释放信号量，使写入线程解除阻塞
-    UCB->SendRingBufSemp = Lock_SempCreate(1,0,CN_SEMP_BLOCK_FIFO,"uart tx buf");
+    UCB->SendRingBufSemp = Lock_SempCreate(1,0,CN_BLOCK_FIFO,"uart tx buf");
     if(UCB->SendRingBufSemp == NULL)
         goto exit_from_send_buf_semp;
-    UCB->RecvRingBufSemp = Lock_SempCreate(1,0,CN_SEMP_BLOCK_FIFO,"uart rx buf");
+    UCB->RecvRingBufSemp = Lock_SempCreate(1,0,CN_BLOCK_FIFO,"uart rx buf");
     if(UCB->RecvRingBufSemp == NULL)
         goto exit_from_recv_buf_semp;
     //为设备创建互斥量，提供设备的互斥访问
@@ -501,13 +512,19 @@ struct UartCB * UART_InstallPort(struct UartParam *Param)
     if(uart_mutexT == NULL)
         goto exit_from_mutexT;
 
+    UCB->WriteMutex = Lock_MutexCreate("UART_WriteMutex");
+    if( NULL == UCB->WriteMutex)
+        goto exit_from_mutexWite;
+    UCB->ReadMutex  = Lock_MutexCreate("UART_ReadMutex");
+    if(NULL == UCB->ReadMutex)
+        goto exit_from_mutexRead;
+
     UCB->SendRingTrigLevel  = (Param->TxRingBufLen)>>2;  //默认缓冲触发水平为1/16
     UCB->RecvRingTrigLevel  = (Param->RxRingBufLen)>>4;
     UCB->MplReadTrigLevel   = (Param->TxRingBufLen)>>4;
     UCB->MplWriteTrigLevel  = (Param->RxRingBufLen)>>2;
     UCB->Baud               = Param->Baud;
     UCB->UartPortTag        = Param->UartPortTag;
-//    UCB->DirectlySend       = Param->DirectlySend;
     UCB->StartSend          = Param->StartSend;
     UCB->UartCtrl           = Param->UartCtrl;
     UCB->pMultiplexUart     = NULL;                     //初始化时为NULL
@@ -530,6 +547,10 @@ struct UartCB * UART_InstallPort(struct UartParam *Param)
     return UCB;
     //如果出现错误，则释放创建的资源，并返回空指针
 exit_from_add_device:
+    Lock_MutexDelete(UCB->ReadMutex);
+exit_from_mutexRead:
+Lock_MutexDelete(UCB->WriteMutex);
+exit_from_mutexWite:
     Lock_MutexDelete(uart_mutexT);
 exit_from_mutexT:
     Lock_MutexDelete(uart_mutexR);

@@ -355,7 +355,7 @@ bool_t  __AtTimer_Free(ptu32_t timerhandle)
             Int_CutLine(irqline);
             Int_IsrDisConnect(irqline);
             Int_EvttDisConnect(irqline);
-			Int_UnRegister(irqline);
+            Int_UnRegister(irqline);
             Int_LowAtomEnd(timeratom);  //原子操作完毕
 
             return true;
@@ -594,7 +594,7 @@ bool_t __AtTimer_GetState(struct AtTimerHandle   *timer, u32 *timerflag)
 // 说明    :
 // =============================================================================
 bool_t __AtTimer_Ctrl(ptu32_t timerhandle, \
-                         enum TimerCmdCode ctrlcmd, \
+                         enum HardTimerCmdCode ctrlcmd, \
                          ptu32_t inoutpara)
 {
     bool_t result;
@@ -674,10 +674,10 @@ void ModuleInstall_Timer(void)
     }
 
     LPCtimer.chipname = "ATTIMER";
-    LPCtimer.TimerHardAlloc = __AtTimer_Alloc;
-    LPCtimer.TimerHardFree = __AtTimer_Free;
-    LPCtimer.TimerHardCtrl = __AtTimer_Ctrl;
-    TimerHard_RegisterChip(&LPCtimer);
+    LPCtimer.HardTimerAlloc = __AtTimer_Alloc;
+    LPCtimer.HardTimerFree = __AtTimer_Free;
+    LPCtimer.HardTimerCtrl = __AtTimer_Ctrl;
+    HardTimer_RegisterChip(&LPCtimer);
 
     return ;
 }

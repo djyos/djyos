@@ -73,8 +73,10 @@
 //-----------------------------------------------------------------------------
 void __assert(const char *file, s32 line)
 {
+	u16 event_id;
     printk("assertion failed: file \"%s\", line %d\r\n",file, line);
     printk("entery endless loop,try shell\r\n");
-    Djy_SetEventPrio(CN_PRIO_SYS_SERVICE-1);
+    event_id=Djy_MyEventId();
+    Djy_SetEventPrio(event_id,CN_PRIO_SYS_SERVICE+1);
     for(;;);
 }

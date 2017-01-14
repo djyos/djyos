@@ -1,32 +1,32 @@
 //----------------------------------------------------
 // Copyright (c) 2014, SHENZHEN PENGRUI SOFT CO LTD. All rights reserved.
 
-// Redistribution and use in source and binary forms, with or without 
+// Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 
-// 1. Redistributions of source code must retain the above copyright notice, 
+// 1. Redistributions of source code must retain the above copyright notice,
 //    this list of conditions and the following disclaimer.
-// 2. Redistributions in binary form must reproduce the above copyright notice, 
-//    this list of conditions and the following disclaimer in the documentation 
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
 //    and/or other materials provided with the distribution.
 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
-// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
 // LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 // CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 // SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 // Copyright (c) 2014 著作权由深圳鹏瑞软件有限公司所有。著作权人保留一切权利。
-// 
+//
 // 这份授权条款，在使用者符合下列条件的情形下，授予使用者使用及再散播本
 // 软件包装原始码及二进位可执行形式的权利，无论此包装是否经改作皆然：
-// 
+//
 // 1. 对于本软件源代码的再散播，必须保留上述的版权宣告、本条件列表，以
 //    及下述的免责声明。
 // 2. 对于本套件二进位可执行形式的再散播，必须连带以文件以及／或者其他附
@@ -64,7 +64,7 @@
 #define CN_TIMER_ENUSE       ((u32)(1<<10))//正在使用
 
 //TIMER的操作码
-enum TimerCmdCode
+enum HardTimerCmdCode
 {
     EN_TIMER_STARTCOUNT,    //使能计数，inoutpara无意义
     EN_TIMER_PAUSECOUNT,    //停止计数，inoutpara无意义
@@ -84,7 +84,7 @@ typedef u32 (*fntTimerIsr)(ptu32_t TimerHandle);
 
 //当注册定时器时，需要使用下述函数原型
 // =============================================================================
-// 函数功能：fnTimerHardAlloc
+// 函数功能：fnHardTimerAlloc
 //           定时器分配
 // 输入参数：
 //          cycle, 指定分配定时器的定时周期，该属性可以使用API函数进行更改设定（单位为微秒）
@@ -95,51 +95,51 @@ typedef u32 (*fntTimerIsr)(ptu32_t TimerHandle);
 //           刚开始分配的定时器应该是各种属性都关闭的，因此属性必须自己重新设置
 //           默认：停止计数，异步中断，reload,中断禁止
 // =============================================================================
-typedef ptu32_t (*fntTimerHardAlloc)(fntTimerIsr timerisr);
+typedef ptu32_t (*fntHardTimerAlloc)(fntTimerIsr timerisr);
 // =============================================================================
-// 函数功能：fnTimerHardFree
+// 函数功能：fnHardTimerFree
 //           定时器释放
 // 输入参数：timerhandle，待释放定时器
 // 输出参数：无
-// 返回值  ：true 成功 false失败 
+// 返回值  ：true 成功 false失败
 // =============================================================================
-typedef bool_t  (*fntTimerHardFree)(ptu32_t timerhandle);
+typedef bool_t  (*fntHardTimerFree)(ptu32_t timerhandle);
 // =============================================================================
 // 函数功能：检查定时器计数频率
 // 输入参数：timerhandle，被检查的定时器
 // 输出参数：无
-// 返回值  ：频率，Hz为单位 
+// 返回值  ：频率，Hz为单位
 // =============================================================================
-typedef u32  (*fntTimerHardGetFreq)(ptu32_t timerhandle);
+typedef u32  (*fntHardTimerGetFreq)(ptu32_t timerhandle);
 // =============================================================================
-// 函数功能：fnTimerHardCtrl
+// 函数功能：fnHardTimerCtrl
 //           操作定时器
-// 输入参数：timerhard，待设置定时器， 
+// 输入参数：timerhard，待设置定时器，
 //           ctrlcmd, 操作命令
 // 输出参数：inoutpara，输入输出参数，根据不同的情况而定
-// 返回值  ：true 操作成功 false操作失败 
-// 说明：ctrlcmd对应的inoutpara的属性定义说明参看enum TimerCmdCode定义
+// 返回值  ：true 操作成功 false操作失败
+// 说明：ctrlcmd对应的inoutpara的属性定义说明参看enum HeadTimerCmdCode定义
 // =============================================================================
-typedef bool_t  (*fntTimerHardCtrl)(ptu32_t timerhandle,\
-                                   enum TimerCmdCode ctrlcmd, \
+typedef bool_t  (*fntHardTimerCtrl)(ptu32_t timerhandle,\
+                                   enum HardTimerCmdCode ctrlcmd, \
                                    ptu32_t inoutpara);
 
 struct TimerChip
 {
     char               *chipname;        //chip名字，必须为静态定义
-    fntTimerHardAlloc  TimerHardAlloc;   //分配定时器
-    fntTimerHardFree   TimerHardFree;    //释放定时器
-    fntTimerHardGetFreq TimerHardGetFreq; //获取定时器计数频率
-    fntTimerHardCtrl   TimerHardCtrl;    //控制定时器
+    fntHardTimerAlloc  HardTimerAlloc;   //分配定时器
+    fntHardTimerFree   HardTimerFree;    //释放定时器
+    fntHardTimerGetFreq HardTimerGetFreq; //获取定时器计数频率
+    fntHardTimerCtrl   HardTimerCtrl;    //控制定时器
 };
 
-bool_t  TimerHard_RegisterChip(struct TimerChip *timerchip);
-bool_t  TimerHard_UnRegisterChip(void);
-ptu32_t TimerHard_Alloc(fntTimerIsr timerhardisr);
-bool_t  TimerHard_Free(ptu32_t timerhandle);
-u32  TimerHard_GetFreq(ptu32_t timerhandle);
-bool_t  TimerHard_Ctrl(ptu32_t timerhandle, \
-                       enum TimerCmdCode ctrlcmd, \
+bool_t  HardTimer_RegisterChip(struct TimerChip *timerchip);
+bool_t  HardTimer_UnRegisterChip(void);
+ptu32_t HardTimer_Alloc(fntTimerIsr timerhardisr);
+bool_t  HardTimer_Free(ptu32_t timerhandle);
+u32  HardTimer_GetFreq(ptu32_t timerhandle);
+bool_t  HardTimer_Ctrl(ptu32_t timerhandle, \
+                       enum HardTimerCmdCode ctrlcmd, \
                        ptu32_t inoutpara);
 
 #endif /* TIMER_HARD_H_ */

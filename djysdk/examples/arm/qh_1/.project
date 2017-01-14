@@ -23,6 +23,13 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>src/gdd_test</name>
+			<type>2</type>
+			<locationURI>DJYOS_SRC_LOCATION/test/gdd_test</locationURI>
+		</link>
+	</linkedResources>
 	<variableList>
 		<variable>
 			<name>DJYOS_SRC_LOCATION</name>

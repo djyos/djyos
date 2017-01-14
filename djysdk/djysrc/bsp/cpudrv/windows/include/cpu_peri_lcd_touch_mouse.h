@@ -73,7 +73,7 @@ void __lcd_power_enable(int ,int );
 void __lcd_hard_init(void);
 bool_t __lcd_set_pixel_screen(s32 x,s32 y,u32 color,u32 rop2_code);
 ptu32_t ModuleInstall_Lcd(char *DisplayName,char *HeapName);
-ptu32_t ModuleInstall_TouchWindows(char * TouchName);
+ptu32_t ModuleInstall_TouchWindows(struct GkWinRsc *desktop,char * TouchName);
 
 #ifdef __cplusplus
 }

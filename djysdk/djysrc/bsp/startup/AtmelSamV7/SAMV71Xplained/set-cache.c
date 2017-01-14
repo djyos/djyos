@@ -56,7 +56,15 @@
 #include "mpu.h"
 
 #define memory_sync()        __DSB();__ISB();
-#define memory_barrier()    __DSB()
+
+// =============================================================================
+#define MPU_NOCACHE_SRAM_REGION_NUM    11
+
+//将内部SRAM分为三个段，以适应MPU的配置
+//每一个region 的起始地址必须按RamSize对齐，且RamSize 大小必须2^(N+1) ， 3 < N < 32
+extern uint32_t gc_ptCacheRam1Size;
+extern uint32_t gc_ptCacheRam2Size;
+extern uint32_t gc_ptNoCacheRamSize;
 // =============================================================================
 // 功能：配置MPU，主要是配置了cache的区域，具体配置信息如下：
 /* Default memory map
@@ -75,7 +83,6 @@
 // =============================================================================
 void Cache_config( void )
 {
-
 	uint32_t dwRegionBaseAddr;
 	uint32_t dwRegionAttr;
 
@@ -92,6 +99,7 @@ void Cache_config( void )
 
 	dwRegionAttr =
 		MPU_AP_PRIVILEGED_READ_WRITE |
+		MPU_REGION_EXECUTE_NEVER |
 		MPU_CalMPURegionSize(ITCM_END_ADDRESS - ITCM_START_ADDRESS) |
 		MPU_REGION_ENABLE;
 
@@ -131,6 +139,7 @@ void Cache_config( void )
 
 	dwRegionAttr =
 		MPU_AP_PRIVILEGED_READ_WRITE |
+		MPU_REGION_EXECUTE_NEVER |
 		MPU_CalMPURegionSize(DTCM_END_ADDRESS - DTCM_START_ADDRESS) |
 		MPU_REGION_ENABLE;
 
@@ -142,19 +151,23 @@ void Cache_config( void )
 	END_Addr:-    0x2043FFFFUL
 ******************************************************/
 	/* SRAM memory  region */
-	dwRegionBaseAddr =
-		SRAM_FIRST_START_ADDRESS |
-		MPU_REGION_VALID |
-		MPU_DEFAULT_SRAM_REGION_1;         //4
 
-	dwRegionAttr =
-		MPU_AP_FULL_ACCESS    |
-		INNER_NORMAL_WB_NWA_TYPE( NON_SHAREABLE ) |
-		MPU_CalMPURegionSize(SRAM_FIRST_END_ADDRESS - SRAM_FIRST_START_ADDRESS)
-		| MPU_REGION_ENABLE;
+	if(gc_ptCacheRam1Size)
+	{
+		dwRegionBaseAddr =
+			SRAM_START_ADDRESS |
+			MPU_REGION_VALID |
+			MPU_DEFAULT_SRAM_REGION_1;         //4
 
-	MPU_SetRegion( dwRegionBaseAddr, dwRegionAttr);
+		dwRegionAttr =
+			MPU_AP_FULL_ACCESS    |
+			MPU_REGION_EXECUTE_NEVER |
+			INNER_NORMAL_WB_NWA_TYPE( NON_SHAREABLE ) |
+			MPU_CalMPURegionSize(gc_ptCacheRam1Size - 1) |
+			MPU_REGION_ENABLE;
 
+		MPU_SetRegion( dwRegionBaseAddr, dwRegionAttr);
+	}
 
 /****************************************************
 	Internal SRAM second partition memory region --- Normal
@@ -162,33 +175,39 @@ void Cache_config( void )
 	END_Addr:-    0x2045FFFFUL
 ******************************************************/
 	/* SRAM memory region */
-	dwRegionBaseAddr =
-		SRAM_SECOND_START_ADDRESS |
-		MPU_REGION_VALID |
-		MPU_DEFAULT_SRAM_REGION_2;         //5
+	if(gc_ptCacheRam2Size)
+	{
+		dwRegionBaseAddr =
+			(SRAM_START_ADDRESS + gc_ptCacheRam1Size) |
+			MPU_REGION_VALID |
+			MPU_DEFAULT_SRAM_REGION_2;         //5
 
-	dwRegionAttr =
-		MPU_AP_FULL_ACCESS    |
-		INNER_NORMAL_WB_NWA_TYPE( NON_SHAREABLE ) |
-		MPU_CalMPURegionSize(SRAM_SECOND_END_ADDRESS - SRAM_SECOND_START_ADDRESS) |
-		MPU_REGION_ENABLE;
+		dwRegionAttr =
+			MPU_AP_FULL_ACCESS    |
+			MPU_REGION_EXECUTE_NEVER |
+			INNER_NORMAL_WB_NWA_TYPE( NON_SHAREABLE ) |
+			MPU_CalMPURegionSize(gc_ptCacheRam2Size - 1) |
+			MPU_REGION_ENABLE;
 
-	MPU_SetRegion( dwRegionBaseAddr, dwRegionAttr);
+		MPU_SetRegion( dwRegionBaseAddr, dwRegionAttr);
+	}
 
-#ifdef MPU_HAS_NOCACHE_REGION
-	dwRegionBaseAddr =
-        SRAM_NOCACHE_START_ADDRESS |
-        MPU_REGION_VALID |
-        MPU_NOCACHE_SRAM_REGION;          //11
+	if(gc_ptNoCacheRamSize)
+	{
+		dwRegionBaseAddr =
+			(SRAM_START_ADDRESS + gc_ptCacheRam1Size + gc_ptCacheRam2Size) |
+			MPU_REGION_VALID |
+			MPU_NOCACHE_SRAM_REGION_NUM;          //11
 
-    dwRegionAttr =
-        MPU_AP_FULL_ACCESS    |
-        INNER_OUTER_NORMAL_NOCACHE_TYPE( SHAREABLE ) |
-        MPU_CalMPURegionSize(NOCACHE_SRAM_REGION_SIZE) |
-        MPU_REGION_ENABLE;
+		dwRegionAttr =
+			MPU_AP_FULL_ACCESS    |
+			MPU_REGION_EXECUTE_NEVER |
+			INNER_OUTER_NORMAL_NOCACHE_TYPE( SHAREABLE ) |
+			MPU_CalMPURegionSize(gc_ptNoCacheRamSize - 1) |
+			MPU_REGION_ENABLE;
 
-    MPU_SetRegion( dwRegionBaseAddr, dwRegionAttr);
-#endif
+		MPU_SetRegion( dwRegionBaseAddr, dwRegionAttr);
+	}
 
 /****************************************************
 	Peripheral memory region --- DEVICE Shareable
@@ -221,6 +240,7 @@ void Cache_config( void )
 
 	dwRegionAttr =
 		MPU_AP_FULL_ACCESS |
+		MPU_REGION_EXECUTE_NEVER |
 		/* External memory Must be defined with 'Device' or 'Strongly Ordered'
 		attribute for write accesses (AXI) */
 		STRONGLY_ORDERED_SHAREABLE_TYPE |
@@ -240,6 +260,7 @@ void Cache_config( void )
 
 	dwRegionAttr =
 		MPU_AP_FULL_ACCESS    |
+		MPU_REGION_EXECUTE_NEVER |
 		//INNER_NORMAL_WB_NWA_TYPE( SHAREABLE ) |
 		INNER_NORMAL_NOCACHE_TYPE(NON_SHAREABLE)|
 		MPU_CalMPURegionSize(SDRAM_END_ADDRESS - SDRAM_START_ADDRESS) |
@@ -258,6 +279,7 @@ void Cache_config( void )
 
 	dwRegionAttr =
 		MPU_AP_FULL_ACCESS |
+		MPU_REGION_EXECUTE_NEVER |
 		STRONGLY_ORDERED_SHAREABLE_TYPE |
 		MPU_CalMPURegionSize(QSPI_END_ADDRESS - QSPI_START_ADDRESS) |
 		MPU_REGION_ENABLE;
@@ -292,4 +314,5 @@ void Cache_config( void )
 
 	memory_sync();
 }
+
 

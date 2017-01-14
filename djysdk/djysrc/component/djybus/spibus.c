@@ -62,10 +62,10 @@ struct SPI_CB *SPI_BusAdd(struct SPI_Param *NewSPIParam)
         goto exit_from_add_node;
 
     //创建总线信号量和阻塞信号量
-    NewSPI->SPI_BusSemp= Lock_SempCreate(1,1,CN_SEMP_BLOCK_FIFO,"spi bus semp");
+    NewSPI->SPI_BusSemp= Lock_SempCreate(1,1,CN_BLOCK_FIFO,"spi bus semp");
     if(NewSPI->SPI_BusSemp== NULL)
         goto exit_from_spi_bus_semp;
-    NewSPI->SPI_BlockSemp = Lock_SempCreate(1,0,CN_SEMP_BLOCK_FIFO,"spi block semp");
+    NewSPI->SPI_BlockSemp = Lock_SempCreate(1,0,CN_BLOCK_FIFO,"spi block semp");
     if(NewSPI->SPI_BlockSemp== NULL)
         goto exit_from_spi_buf_semp;
 
@@ -120,10 +120,10 @@ struct SPI_CB *SPI_BusAdd_s(struct SPI_CB *NewSPI,struct SPI_Param *NewSPIParam)
         goto exit_from_add_node;
 
     //创建总线信号量和阻塞发送信号量
-    NewSPI->SPI_BusSemp= Lock_SempCreate(1,1,CN_SEMP_BLOCK_FIFO,"spi bus semp");
+    NewSPI->SPI_BusSemp= Lock_SempCreate(1,1,CN_BLOCK_FIFO,"spi bus semp");
     if(NewSPI->SPI_BusSemp== NULL)
         goto exit_from_spi_bus_semp;
-    NewSPI->SPI_BlockSemp = Lock_SempCreate(1,0,CN_SEMP_BLOCK_FIFO,"spi block semp");
+    NewSPI->SPI_BlockSemp = Lock_SempCreate(1,0,CN_BLOCK_FIFO,"spi block semp");
     if(NewSPI->SPI_BlockSemp== NULL)
         goto exit_from_spi_buf_semp;
 

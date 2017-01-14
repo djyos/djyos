@@ -65,15 +65,15 @@
 #include "gkernel.h"
 #include "systime.h"
 #include <LCM240128C/sr5333/lcm240128c_config.h>
+#include <driver/flash/embedded_flash.h>
 #include <driver/flash/flash.h>
-
 
 struct AdjustValue
 {
-	s16 XAdjustLeft;
-	s16 YAdjustTop;
-	s16 XAdjustRight;
-	s16 YAdjustBottom;
+    s16 XAdjustLeft;
+    s16 YAdjustTop;
+    s16 XAdjustRight;
+    s16 YAdjustBottom;
 };
 
 
@@ -82,6 +82,10 @@ static struct AdjustValue* s_ptAdjustVaule=(struct AdjustValue*)(CN_ADJUST_ADDR)
 
 static const Pin PenStatus[] = {
         {PIO_PC28, PIOC, ID_PIOC, PIO_INPUT, PIO_PULLUP}
+};
+
+static const Pin SpiCs[]={
+        {PIO_PC25, PIOC, ID_PIOC, PIO_OUTPUT_0, PIO_DEFAULT}
 };
 
 //定义SPIBUS架构下的SPI设备结构
@@ -103,7 +107,7 @@ static bool_t Touch_WriteAdjustValue(struct AdjustValue* pAdjustValue)
     u8 buf[512];
     s32 ret;
     if(pAdjustValue==NULL)
-    	return false;
+        return false;
     left=pAdjustValue->XAdjustLeft;
     right=pAdjustValue->XAdjustRight;
     top=pAdjustValue->YAdjustTop;
@@ -111,7 +115,7 @@ static bool_t Touch_WriteAdjustValue(struct AdjustValue* pAdjustValue)
     //先读最后一页
     ret=EEFC_PageRead(4095,buf,0);
     if(ret==-1)
-    	return false;
+        return false;
     //然后擦除整个Sector，擦除只能以Sector为单位
     ret=EEFC_SectorEarse(15);
     if(ret==-1)
@@ -160,7 +164,10 @@ static bool_t Touch_ReadXY(s16 *X, s16 *Y)
     data.RecvLen = 23;
     data.RecvOff = 1;
     //读4个采样点的值
+    PIO_Clear(SpiCs);
     result = SPI_Transfer(&s_tgTouch_Dev, &data, true, CN_TIMEOUT_FOREVER);
+    Djy_EventDelay(1000);
+    PIO_Set(SpiCs);
 #else
 
     data.SendBuf = xybuf;
@@ -268,28 +275,31 @@ static ptu32_t ScanTouch(void)
         {
             if(count++ > 2)
             {
+                Djy_EventDelay(1000);
+
                 trans = Touch_ReadXY(&x,&y);
+
                 trans &= Touch_Touched( );
                 if(trans)
                 {
-                	s_s16gXAdjustLeft=s_ptAdjustVaule->XAdjustLeft;
-                	s_s16gXAdjustRight=s_ptAdjustVaule->XAdjustRight;
-                	s_s16gYAdjustTop=s_ptAdjustVaule->YAdjustTop;
-                	s_s16gYAdjustBottom=s_ptAdjustVaule->YAdjustBottom;
+                    s_s16gXAdjustLeft=s_ptAdjustVaule->XAdjustLeft;
+                    s_s16gXAdjustRight=s_ptAdjustVaule->XAdjustRight;
+                    s_s16gYAdjustTop=s_ptAdjustVaule->YAdjustTop;
+                    s_s16gYAdjustBottom=s_ptAdjustVaule->YAdjustBottom;
                     x = 200 * (s32)(x - s_s16gXAdjustLeft)/(s_s16gXAdjustRight - s_s16gXAdjustLeft)+20;
                     y = 88 * (s32)(y - s_s16gYAdjustTop)/(s_s16gYAdjustBottom - s_s16gYAdjustTop)+20;
 
                     if( ( ( (xp -x)*(xp-x) + (yp-y)*(yp-y) ) >= 36) && (count >5 ) )
                     {
-                    	//如果连续触摸且两 次采样之间移动距离达到6个像素，说明是提笔过程中的误读,不处理
+                        //如果连续触摸且两 次采样之间移动距离达到6个像素，说明是提笔过程中的误读,不处理
                     }
                     else
                     {
-						atom = Int_LowAtomStart( );
-						xp = x;
-						yp = y;
-						z = 1;
-						Int_LowAtomEnd(atom);
+                        atom = Int_LowAtomStart( );
+                        xp = x;
+                        yp = y;
+                        z = 1;
+                        Int_LowAtomEnd(atom);
                     }
                     count = 5;
                 }
@@ -343,155 +353,155 @@ void touch_ratio_adjust(struct GkWinRsc *desktop)
 
     pAdjustValue=(struct AdjustValue*)malloc(sizeof(struct AdjustValue));
     if(pAdjustValue==NULL)
-    	return;
-	tempx = 0;
-	tempy = 0;
-	GK_ApiFillWin(desktop,CN_COLOR_BLACK,0);
+        return;
+    tempx = 0;
+    tempy = 0;
+    GK_ApiFillWin(desktop,CN_COLOR_BLACK,0);
 
-	temp=s_ptAdjustVaule->XAdjustLeft;
-	adjustvalue|=temp;
-	temp=s_ptAdjustVaule->XAdjustRight;
-	temp=temp<<16;
-	adjustvalue|=temp;
-	temp=s_ptAdjustVaule->YAdjustBottom;
-	temp=temp<<32;
-	adjustvalue|=temp;
-	temp=s_ptAdjustVaule->YAdjustTop;
-	temp=temp<<48;
-	adjustvalue|=temp;
+    temp=s_ptAdjustVaule->XAdjustLeft;
+    adjustvalue|=temp;
+    temp=s_ptAdjustVaule->XAdjustRight;
+    temp=temp<<16;
+    adjustvalue|=temp;
+    temp=s_ptAdjustVaule->YAdjustBottom;
+    temp=temp<<32;
+    adjustvalue|=temp;
+    temp=s_ptAdjustVaule->YAdjustTop;
+    temp=temp<<48;
+    adjustvalue|=temp;
 
-	//先判断Flash中是否已存储有效的校准值   必须要校验
-	if(adjustvalue==0xffffffffffffffff)
-	{
-		GK_ApiDrawText(desktop,NULL,NULL,40,20,
-						"触摸屏矫正 ",11,CN_COLOR_WHITE,CN_R2_COPYPEN,0);
-		GK_ApiDrawText(desktop,NULL,NULL,40,40,
-						"请准确点击十字交叉点",20,CN_COLOR_WHITE,CN_R2_COPYPEN,0);
+    //先判断Flash中是否已存储有效的校准值   必须要校验
+    if(adjustvalue==0xffffffffffffffff)
+    {
+        GK_ApiDrawText(desktop,NULL,NULL,40,20,
+                        "触摸屏矫正 ",11,CN_COLOR_WHITE,CN_R2_COPYPEN,0);
+        GK_ApiDrawText(desktop,NULL,NULL,40,40,
+                        "请准确点击十字交叉点",20,CN_COLOR_WHITE,CN_R2_COPYPEN,0);
 
-		draw_cursor(desktop, 20, 20);
-		//    for(loop =10; loop < 128;)
-		//    {
-		//      GK_ApiLineto(desktop,0,loop,240,loop,CN_COLOR_WHITE,CN_R2_COPYPEN,0); //上
-		//      loop +=10;
-		//    }
-		//    for(loop =10; loop < 240;)
-		//    {
-		//        GK_ApiLineto(desktop,loop,0,loop,128,CN_COLOR_WHITE,CN_R2_COPYPEN,0); //上
-		//      loop+=10;
-		//    }
-		//    GK_ApiSyncShow(1000*mS);
+        draw_cursor(desktop, 20, 20);
+        //    for(loop =10; loop < 128;)
+        //    {
+        //      GK_ApiLineto(desktop,0,loop,240,loop,CN_COLOR_WHITE,CN_R2_COPYPEN,0); //上
+        //      loop +=10;
+        //    }
+        //    for(loop =10; loop < 240;)
+        //    {
+        //        GK_ApiLineto(desktop,loop,0,loop,128,CN_COLOR_WHITE,CN_R2_COPYPEN,0); //上
+        //      loop+=10;
+        //    }
+        //    GK_ApiSyncShow(1000*mS);
 
-		while(Touch_Touched() == false);
-		Djy_EventDelay(100*mS);
+        while(Touch_Touched() == false);
+        Djy_EventDelay(100*mS);
 
-		for(loop = 0;loop < 50; )
-		{
-			if(Touch_Touched())
-			{
-				loop++;
-				Djy_DelayUs(30000);
-			}
-		}
-		for(loop = 0;loop < 7; )
-		{
-			if(Touch_Touched())
-			{
-				if(Touch_ReadXY(&x[loop], &y[loop]))
-				{
-					if(Touch_Touched())
-					{
-						tempx +=x[loop];
-						tempy +=y[loop];
-						if(x[loop] > maxx)
-							maxx = x[loop];
-						if(x[loop] < minx)
-							minx = x[loop];
-						if(y[loop] > maxy)
-							maxy = y[loop];
-						if(y[loop] < miny)
-							miny = y[loop];
-						loop++;
-					}
-				}
-				Djy_DelayUs(30000);
-			}
-		}
-		tempx -= maxx + minx;
-		tempy -= maxy + miny;
-		s_s16gXAdjustLeft = tempx / 5;
-		s_s16gYAdjustTop = tempy / 5;
+        for(loop = 0;loop < 50; )
+        {
+            if(Touch_Touched())
+            {
+                loop++;
+                Djy_DelayUs(30000);
+            }
+        }
+        for(loop = 0;loop < 7; )
+        {
+            if(Touch_Touched())
+            {
+                if(Touch_ReadXY(&x[loop], &y[loop]))
+                {
+                    if(Touch_Touched())
+                    {
+                        tempx +=x[loop];
+                        tempy +=y[loop];
+                        if(x[loop] > maxx)
+                            maxx = x[loop];
+                        if(x[loop] < minx)
+                            minx = x[loop];
+                        if(y[loop] > maxy)
+                            maxy = y[loop];
+                        if(y[loop] < miny)
+                            miny = y[loop];
+                        loop++;
+                    }
+                }
+                Djy_DelayUs(30000);
+            }
+        }
+        tempx -= maxx + minx;
+        tempy -= maxy + miny;
+        s_s16gXAdjustLeft = tempx / 5;
+        s_s16gYAdjustTop = tempy / 5;
 
 
-		//    printk("x=%d,y=%d\n\r",s_s16gXAdjustLeft,s_s16gYAdjustTop);
-		//    s_s16gXAdjustLeft = 0;
-		//    s_s16gYAdjustTop = 0;
-		//    maxx=0,minx=65535,maxy=0,miny=65535,tempx=0,tempy=0;
-		//    Djy_DelayUs(300*mS);
-		//    }
-		clr_cursor(desktop, 20, 20);
-		draw_cursor(desktop, 220, 108);
-		while(Touch_Touched() == true);
-		Djy_EventDelay(300*mS);
-		while(Touch_Touched() == false);
-		Djy_EventDelay(100*mS);
-		maxx=0;
-		minx=65535;
-		maxy=0;
-		miny=65535;
-		tempx = 0;
-		tempy = 0;
-		for(loop = 0;loop < 50; )
-		{
-			if(Touch_Touched())
-			{
-				loop++;
-				Djy_DelayUs(30000);
-			}
-		}
-		for(loop = 0;loop < 7; )
-		{
-			if(Touch_Touched())
-			{
-				if(Touch_ReadXY(&x[loop], &y[loop]))
-				{
-					if(Touch_Touched())
-					{
-						tempx +=x[loop];
-						tempy +=y[loop];
-						if(x[loop] > maxx)
-							maxx = x[loop];
-						if(x[loop] < minx)
-							minx = x[loop];
-						if(y[loop] > maxy)
-							maxy = y[loop];
-						if(y[loop] < miny)
-							miny = y[loop];
-						loop++;
-					}
-				}
-				Djy_DelayUs(30000);
-			}
-		}
-		tempx -= maxx +minx;
-		tempy -= maxy +miny;
-		s_s16gXAdjustRight = tempx / 5;
-		s_s16gYAdjustBottom = tempy / 5;
+        //    printk("x=%d,y=%d\n\r",s_s16gXAdjustLeft,s_s16gYAdjustTop);
+        //    s_s16gXAdjustLeft = 0;
+        //    s_s16gYAdjustTop = 0;
+        //    maxx=0,minx=65535,maxy=0,miny=65535,tempx=0,tempy=0;
+        //    Djy_DelayUs(300*mS);
+        //    }
+        clr_cursor(desktop, 20, 20);
+        draw_cursor(desktop, 220, 108);
+        while(Touch_Touched() == true);
+        Djy_EventDelay(300*mS);
+        while(Touch_Touched() == false);
+        Djy_EventDelay(100*mS);
+        maxx=0;
+        minx=65535;
+        maxy=0;
+        miny=65535;
+        tempx = 0;
+        tempy = 0;
+        for(loop = 0;loop < 50; )
+        {
+            if(Touch_Touched())
+            {
+                loop++;
+                Djy_DelayUs(30000);
+            }
+        }
+        for(loop = 0;loop < 7; )
+        {
+            if(Touch_Touched())
+            {
+                if(Touch_ReadXY(&x[loop], &y[loop]))
+                {
+                    if(Touch_Touched())
+                    {
+                        tempx +=x[loop];
+                        tempy +=y[loop];
+                        if(x[loop] > maxx)
+                            maxx = x[loop];
+                        if(x[loop] < minx)
+                            minx = x[loop];
+                        if(y[loop] > maxy)
+                            maxy = y[loop];
+                        if(y[loop] < miny)
+                            miny = y[loop];
+                        loop++;
+                    }
+                }
+                Djy_DelayUs(30000);
+            }
+        }
+        tempx -= maxx +minx;
+        tempy -= maxy +miny;
+        s_s16gXAdjustRight = tempx / 5;
+        s_s16gYAdjustBottom = tempy / 5;
 
-		pAdjustValue->XAdjustLeft=s_s16gXAdjustLeft;
-		pAdjustValue->XAdjustRight=s_s16gXAdjustRight;
-		pAdjustValue->YAdjustBottom=s_s16gYAdjustBottom;
-		pAdjustValue->YAdjustTop=s_s16gYAdjustTop;
-		result=Touch_WriteAdjustValue(pAdjustValue);
-		if(result)
-		{
-			GK_ApiDrawText(desktop,NULL,NULL,50,600,"校准成功",
-										8,CN_COLOR_WHITE,CN_R2_COPYPEN,0);
-			Djy_EventDelay(200*mS);
-		}
+        pAdjustValue->XAdjustLeft=s_s16gXAdjustLeft;
+        pAdjustValue->XAdjustRight=s_s16gXAdjustRight;
+        pAdjustValue->YAdjustBottom=s_s16gYAdjustBottom;
+        pAdjustValue->YAdjustTop=s_s16gYAdjustTop;
+        result=Touch_WriteAdjustValue(pAdjustValue);
+        if(result)
+        {
+            GK_ApiDrawText(desktop,NULL,NULL,50,600,"校准成功",
+                                        8,CN_COLOR_WHITE,CN_R2_COPYPEN,0);
+            Djy_EventDelay(200*mS);
+        }
 
-		clr_cursor(desktop, 220, 108);
+        clr_cursor(desktop, 220, 108);
 
-	}
+    }
 
 }
 //----初始化触摸屏模块---------------------------------------------------------
@@ -522,18 +532,10 @@ bool_t ModuleInstall_LCM240128Touch(struct GkWinRsc *desktop,const char *touch_d
     else
         printf("安装触摸屏SPI驱动出错\n\r");
 
-extern s32 ModuleInstall_EmbededFlash(const char *ChipName, u32 Flags, u16 Start);
-    Ret = ModuleInstall_EmbededFlash("embedded flash", FLASH_BUFFERED, 0);
-    if(Ret)
-    {
-	   printf("install \"embedded flash\" error\r\n");
-	   return (-1);
-    }
-
     touch_ratio_adjust(desktop);
 
     touch_dev.read_touch = ReadTouch;
-    touch_dev.touch_loc.display = NULL;
+    touch_dev.touch_loc.display = NULL;     //NULL表示用默认桌面
     Touch_InstallDevice(touch_dev_name,&touch_dev);
 
     evtt_id = Djy_EvttRegist(EN_CORRELATIVE,CN_PRIO_RRS,0,0,

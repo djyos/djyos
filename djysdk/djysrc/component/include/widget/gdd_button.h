@@ -67,20 +67,20 @@ extern "C" {
 #endif
 #include    "gdd.h"
 
-// 按钮风格，使用struct WINDOW结构Style的低16位
-#define BS_TYPE_MASK        (3<<0)  //类型掩码
-#define BS_NORMAL           (0<<0)  //常规按钮
-#define BS_HOLD             (1<<0)  //自锁按钮
-#define BS_RADIO            (2<<0)  //单选按钮
+// 按钮风格，使用struct WINDOW结构Style的低16位中的高8位
+#define BS_TYPE_MASK        (3<<8)  //类型掩码
+#define BS_NORMAL           (0<<8)  //常规按钮
+#define BS_HOLD             (1<<8)  //自锁按钮
+#define BS_RADIO            (2<<8)  //单选按钮
 
 //按钮外观设置
-#define BS_SURFACE_MASK     (3<<2)  //外观掩码
-#define BS_NICE             (0<<2)  //美观风格
-#define BS_SIMPLE           (1<<2)  //简朴风格
-#define BS_FLAT             (2<<2)  //平面风格
+#define BS_SURFACE_MASK     (3<<10)  //外观掩码
+#define BS_NICE             (0<<10)  //美观风格
+#define BS_SIMPLE           (1<<10)  //简朴风格
+#define BS_FLAT             (2<<10)  //平面风格
 
 //按钮状态
-#define BS_PUSHED           (1<<4)  //按钮按下
+#define BS_PUSHED           (1<<12)  //按钮按下
 
 HWND CreateButton(  const char *Text,u32 Style,
                     s32 x,s32 y,s32 w,s32 h,

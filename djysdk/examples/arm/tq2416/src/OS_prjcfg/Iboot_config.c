@@ -58,22 +58,9 @@
 #include "cpu_peri.h"
 #include "IAP.h"
 
-enum _ENUM_RUN_MODE_
-{
-	EN_LOAD_FORM_DATA=0,
-	EN_DIRECT_RUN,
-};
 
 
-enum _ENUM_USE_CRC_
-{
-	EN_NO_USE_CRC=0,
-	EN_USE_CRC,
-};
-
-
-
-extern const char *g_pcIbootDir = "yaffs2/tq2416.bin";
+const char *g_pcIbootDir = "yaffs2/tq2416.bin";
 const u8 g_IbootType           =EN_LOAD_FORM_DATA;
 const u8 g_IbootCRC            =EN_USE_CRC;
 

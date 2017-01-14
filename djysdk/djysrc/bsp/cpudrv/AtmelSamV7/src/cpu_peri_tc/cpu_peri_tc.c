@@ -609,7 +609,7 @@ bool_t __AtTimer_GetState(struct AtTimerHandle   *timer, u32 *timerflag)
 // หตร๗    :
 // =============================================================================
 bool_t __AtTimer_Ctrl(ptu32_t timerhandle, \
-                         enum TimerCmdCode ctrlcmd, \
+                         enum HardTimerCmdCode ctrlcmd, \
                          ptu32_t inoutpara)
 {
     bool_t result;
@@ -708,11 +708,11 @@ void ModuleInstall_Timer(void)
     }
 
     AtTimer.chipname = "ATTIMER";
-    AtTimer.TimerHardAlloc = __AtTimer_Alloc;
-    AtTimer.TimerHardFree = __AtTimer_Free;
-    AtTimer.TimerHardCtrl = __AtTimer_Ctrl;
-    AtTimer.TimerHardGetFreq = __AtTimer_GetFreq;
-    TimerHard_RegisterChip(&AtTimer);
+    AtTimer.HardTimerAlloc = __AtTimer_Alloc;
+    AtTimer.HardTimerFree = __AtTimer_Free;
+    AtTimer.HardTimerCtrl = __AtTimer_Ctrl;
+    AtTimer.HardTimerGetFreq = __AtTimer_GetFreq;
+    HardTimer_RegisterChip(&AtTimer);
 
     return ;
 }

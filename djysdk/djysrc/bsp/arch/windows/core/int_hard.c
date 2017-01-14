@@ -432,7 +432,7 @@ void Int_Init(void)
     __Int_ClearAllLine();
     for(ufl_line=0;ufl_line <= CN_INT_LINE_LAST;ufl_line++)
     {
-        tg_pIntLineTable[ufl_line] = (ufast_t)NULL;
+        tg_pIntLineTable[ufl_line] = NULL;
     }
 
     for(ufl_line=0; ufl_line < CN_INT_BITS_WORDS; ufl_line++)

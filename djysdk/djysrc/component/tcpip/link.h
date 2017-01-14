@@ -68,7 +68,7 @@ enum _EN_NET_PROTO_TYPE
 //the tcpip stack call this func to send an frame
 bool_t LinkSend(tagRout *rout,tagNetPkg *pkg,u32 framlen,u32 devtask,u16 proto,\
                 enum_ipv_t ver,ipaddr_t ip);
-bool_t LinkSendRaw(tagRout *rout,tagNetPkg *pkg,u32 framlen,u32 devtask);
+
 
 
 #endif /* __LINK_H */

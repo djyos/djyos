@@ -184,9 +184,9 @@ int dhry_main (void)
     if(dhry_evtt != CN_EVTT_ID_INVALID)
     {
     	Djy_EventPop(dhry_evtt,NULL,0,0,0,0);
-    	printf("dhry_main() Regist Evtt Failed !\r\n");
     	return 0;
     }
+    printf("dhry_main() Regist Evtt Failed !\r\n");
     return 1;
 }
 

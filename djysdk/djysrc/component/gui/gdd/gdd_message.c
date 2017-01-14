@@ -63,11 +63,10 @@
 
 /*============================================================================*/
 
-typedef struct QMSG
+struct QMSG
 {
     struct WindowMsg Msg;
     struct QMSG *Next;
-
 };
 
 struct WindowMsgQ
@@ -76,12 +75,15 @@ struct WindowMsgQ
     struct SemaphoreLCB   *sem_msg;         //消息信号量
     struct SemaphoreLCB   *sem_sync_send;   //同步消息发送信号量
     struct SemaphoreLCB   *sem_sync_recv;   //同步消息接收信号量
-    struct WindowMsg     sync_msg;           //同步消息
-    struct WindowMsg     quit_msg;           //退出消息
-    list_t  list_msg_close;     //CLOSE消息链表
-    list_t  list_msg_ncpaint;   //NCPAINT消息链表
-    list_t  list_msg_paint;     //PAINT消息链表
-    list_t  list_msg_timer;     //TIMER消息链表
+
+    //同步和退出消息，一个主窗口只有一条，直接定义。
+    struct WindowMsg     sync_msg;          //同步消息
+    struct WindowMsg     quit_msg;          //退出消息
+    //以下四种消息，因有多条，且要优先于post消息处理，故单独成链表。
+    list_t  list_msg_close;                 //CLOSE消息链表
+    list_t  list_msg_ncpaint;               //NCPAINT消息链表
+    list_t  list_msg_paint;                 //PAINT消息链表
+    list_t  list_msg_timer;                 //TIMER消息链表
 
     //Post类型消息数据
     void    *post_pbuf;         //记录原始的post消息缓冲区首址(用于动态内存释放)
@@ -145,11 +147,11 @@ struct WindowMsgQ*   GUI_CreateMsgQ(u32 size)
     pMsgQ->mutex_lock =Lock_MutexCreate(NULL);
 
     //创建消息信号量
-//  pMsgQ->sem_msg  =Lock_SempCreate(1000,0,CN_SEMP_BLOCK_PRIO,NULL);
-    pMsgQ->sem_msg  =Lock_SempCreate(size,0,CN_SEMP_BLOCK_PRIO,NULL);
+//  pMsgQ->sem_msg  =Lock_SempCreate(1000,0,CN_BLOCK_PRIO,NULL);
+    pMsgQ->sem_msg  =Lock_SempCreate(size,0,CN_BLOCK_PRIO,NULL);
 
-    pMsgQ->sem_sync_send =Lock_SempCreate(1,0,CN_SEMP_BLOCK_PRIO,NULL);
-    pMsgQ->sem_sync_recv =Lock_SempCreate(1,0,CN_SEMP_BLOCK_PRIO,NULL);
+    pMsgQ->sem_sync_send =Lock_SempCreate(1,0,CN_BLOCK_PRIO,NULL);
+    pMsgQ->sem_sync_recv =Lock_SempCreate(1,0,CN_BLOCK_PRIO,NULL);
 
     //创建post消息链表缓冲区
     pMsgQ->post_pbuf =(void*)malloc(size*sizeof(struct QMSG));
@@ -268,7 +270,7 @@ static u32 __PostSyncMessage(HWND hwnd,u32 msg,u32 param1,ptu32_t param2)
 //------------------------------------------------------------------------------
 static void __HandleSyncMessage(struct WindowMsgQ *pMsgQ)
 {
-    if(Lock_SempPend(pMsgQ->sem_sync_recv, CN_TIMEOUT_FOREVER))
+    if(Lock_SempPend(pMsgQ->sem_sync_recv, 1000))
     {
         struct WindowMsg *pMsg;
 
@@ -384,7 +386,7 @@ static void    __PostPaintMessage(struct WindowMsgQ *pMsgQ,HWND hwnd,bool_t bEra
 //参数：ptmr: 定时器结构指针.
 //返回：无.
 //------------------------------------------------------------------------------
-void    __PostTimerMessage(TIMER *ptmr)
+void    __PostTimerMessage(struct WinTimer *ptmr)
 {
     struct WindowMsgQ *pMsgQ;
     HWND hwnd=ptmr->hwnd;
@@ -649,14 +651,14 @@ static  bool_t    __PeekPaintMessage(struct WindowMsgQ *pMsgQ,struct WindowMsg *
 static  bool_t    __PeekTimerMessage(struct WindowMsgQ *pMsgQ,struct WindowMsg *pMsg)
 {
     list_t *n;
-    TIMER *ptmr;
+    struct WinTimer *ptmr;
 
     if(!dListIsEmpty(&pMsgQ->list_msg_timer))
     {
 //      n =pMsgQ->list_msg_timer.next;
         n =dListGetAfter(&pMsgQ->list_msg_timer);
         dListRemove(n);
-        ptmr =dListEntry(n,TIMER,node_msg_timer);
+        ptmr =dListEntry(n,struct WinTimer,node_msg_timer);
         __InitMsg(pMsg,ptmr->hwnd,MSG_TIMER,ptmr->Id,(u32)ptmr);
         return TRUE;
     }

@@ -508,7 +508,7 @@ void Int_Init(void)
     pg_scb_reg->CCR |= 1<<bo_scb_ccr_usersetmpend;
     for(ufl_line=0;ufl_line <= CN_INT_LINE_LAST;ufl_line++)
     {
-        tg_pIntLineTable[ufl_line] = (ufast_t)NULL;
+        tg_pIntLineTable[ufl_line] = NULL;
         fg_vect_table[ufl_line] = __start_asyn_signal;  //全部初始化为异步信号
         pg_int_reg->pri[ufl_line] = 0xff;                        //异步信号优先级最低
     }

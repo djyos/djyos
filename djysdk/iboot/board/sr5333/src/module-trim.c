@@ -56,6 +56,7 @@
 #include "lowpower.h"
 #include "list.h"
 #include "..\heap\heap-in.h"
+#include "ymodem.h"
 
 extern ptu32_t ModuleInstall_DebugInfo(ptu32_t para);
 extern ptu32_t ModuleInstall_IAP(void);
@@ -140,8 +141,6 @@ void Sys_ModuleInit(void)
     ModuleInstall_FileSystem();
     //flash文件系统初始化,依赖:文件系统模块,shell模块
 
-    ModuleInstall_BootFS();
-
    //ModuleInstall_UART(CN_USART0);
 //    ModuleInstall_UART(CN_USART2);
 
@@ -163,10 +162,7 @@ void Sys_ModuleInit(void)
     Driver_CtrlDevice(ToDev(stdin),CN_UART_SET_BAUD,115200,0);
     Driver_CtrlDevice(ToDev(stdin),CN_UART_START,0,0);
 
-	#include "ymodem.h"
-
-    //安装人机交互输入模块，例如键盘、鼠标等
-	ModuleInstall_Ymodem(NULL);
+	ModuleInstall_Ymodem(0);
 	Ymodem_PathSet("/iboot");
     //djybus模块
     ModuleInstall_DjyBus(0);
@@ -186,9 +182,8 @@ void Sys_ModuleInit(void)
     ModuleInstall_TM(0);
     ModuleInstall_CpuRtc(0);
     //键盘输入模块
-    extern ptu32_t ModuleInstall_TimerSoft(ptu32_t para);
-    ModuleInstall_Timer();
-    ModuleInstall_TimerSoft(CN_TIMER_SOURCE_HARD);
+    extern ptu32_t ModuleInstall_Timer(ptu32_t para);
+    ModuleInstall_Timer(CN_TIMER_SOURCE_HARD);
     extern ptu32_t ModuleInstall_NetStaticIP(ptu32_t para);
     ModuleInstall_NetStaticIP(0);
 

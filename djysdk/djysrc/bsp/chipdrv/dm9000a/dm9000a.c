@@ -52,16 +52,30 @@
 
 #include "dm9000a.h"
 
+struct DM9000_Dbg
+{
+    u32 IsrCnt;
+    u32 IsrRcvCnt;
+    u32 RcvTaskCnt;
+    u32 RcvPkgCnt;
+    u32 RxReadyErr;
+    u32 RxHardOverCnt;
+    u32 SndCnt;
+    u32 ResetCnt;
+};
+
+static struct DM9000_Dbg dm9000dbg  = {0,0,0,0,0,0,0,0};
+
 #ifndef DM9000_DBG
 #define DM9000_DBG       printk
 #endif
 
-#define CN_PKG_MAX_LEN   1500
+#define CN_PKG_MAX_LEN   1522
 #define CN_DM9000NAME_LEN  32
 typedef struct
 {
-	char   devname[CN_DM9000NAME_LEN];
-	u8     devmac[CN_MACADDR_LEN];
+    char   devname[CN_DM9000NAME_LEN];
+    u8     devmac[CN_MACADDR_LEN];
     struct SemaphoreLCB rcvsync;
     struct MutexLCB     devsync;
     ptu32_t handle;
@@ -73,16 +87,16 @@ typedef struct
 
 u8  regread(tagDm9000Dev *dm9000,u16 reg)
 {
-	u16  data;
-	*dm9000->cmdaddr = reg;
-	data = *dm9000->dataddr;
-	return (u8)data;
+    u16  data;
+    *dm9000->cmdaddr = reg;
+    data = *dm9000->dataddr;
+    return (u8)data;
 }
 void  regwrite(tagDm9000Dev *dm9000,u16 reg,u16 data)
 {
-	*dm9000->cmdaddr = reg;
-	*dm9000->dataddr = data;
-	return;
+    *dm9000->cmdaddr = reg;
+    *dm9000->dataddr = data;
+    return;
 }
 
 static u8  regTab[]={0,1,2,3,4,5,6,7,8,9,10,254,255};
@@ -90,15 +104,15 @@ static u8  regTab[]={0,1,2,3,4,5,6,7,8,9,10,254,255};
 
 void __showDm9000Reg(tagDm9000Dev *dm9000)
 {
-	int i;
-	u8  value;
-	for(i =0;i < CN_REGLEN;i++ )
-	{
-		value = regread(dm9000,regTab[i]);
-		printk("reg:0x%02x:value:0x%02x\n\r",regTab[i],value);
-	}
+    int i;
+    u8  value;
+    for(i =0;i < CN_REGLEN;i++ )
+    {
+        value = regread(dm9000,regTab[i]);
+        printk("reg:0x%02x:value:0x%02x\n\r",regTab[i],value);
+    }
 
-	return;
+    return;
 }
 
 static bool_t __dm9000Probe(tagDm9000Dev *dm9000)
@@ -139,6 +153,20 @@ static void __dm9000PhyWrite(tagDm9000Dev *dm9000,u8 phy_reg, u16 writedata)
     while(regread(dm9000,DM9000_REG_EPCR) & 0x01); //todo 加退出条件  /* 查寻是否执行结束 */
     regwrite(dm9000,DM9000_REG_EPCR, 0x08);                       /* 清除写入命令 */
 }
+
+static u16 __dm9000PhyRead(tagDm9000Dev *dm9000,int reg)
+{
+    u16 val;
+
+    /* Fill the phyxcer register into REG_0C */
+    regwrite(dm9000,DM9000_EPAR, DM9000_PHY | reg);
+    regwrite(dm9000,DM9000_EPCR, 0xc);  /* Issue phyxcer read command */
+    Djy_DelayUs(100);           /* Wait read complete */
+    val = (regread(dm9000,DM9000_EPDRH) << 8) | regread(dm9000,DM9000_EPDRL);
+    regwrite(dm9000,DM9000_EPCR, 0x8);  /* Clear phyxcer read command */
+
+    return val;
+}
 // =============================================================================
 // 功  能: 对dm9000E进行软件复位
 // 参数：无
@@ -147,40 +175,32 @@ static void __dm9000PhyWrite(tagDm9000Dev *dm9000,u8 phy_reg, u16 writedata)
 static  void __dm9000Reset(tagDm9000Dev *dm9000)
 {
 
-	if(Lock_MutexPend(&dm9000->devsync,CN_TIMEOUT_FOREVER))
-	{
-	    regwrite(dm9000,DM9000_REG_NCR, DM9000_REG_RESET);            /* 对 dm9000 进行软件重置 */
-	    Djy_DelayUs(10);                                /* delay 10us */
-	    regwrite(dm9000,DM9000_REG_NCR, DM9000_REG_RESET);            /* 对 dm9000 进行软件重置 */
-	    Djy_DelayUs(10);                                /* delay 10us */
+    if(Lock_MutexPend(&dm9000->devsync,CN_TIMEOUT_FOREVER))
+    {
+        regwrite(dm9000,DM9000_GPCR, (1<<0));            /* 对 dm9000 进行软件重置 */
+        regwrite(dm9000,DM9000_GPCR,0);
 
-	    /* 基本记存器相关设置 */
-	    regwrite(dm9000,DM9000_REG_IMR, DM9000_IMR_OFF);          /* 开启内存自环模式 */
-	    regwrite(dm9000,DM9000_REG_TCR2, DM9000_TCR2_SET);        /* 设置 LED 显示模式1:全双工亮，半双工灭 */
+        regwrite(dm9000,DM9000_NCR, DM9000_REG_RESET);
+        do {
+            DM9000_DBG("resetting the DM9000, 1st reset\r\n");
+            Djy_DelayUs(25);                            /* Wait at least 20 us */
+        } while (regread(dm9000,DM9000_NCR) & 1);
 
-	    /* 清除多余资讯 */
-	    regwrite(dm9000,DM9000_REG_NSR, 0x2c);
-	    regwrite(dm9000,DM9000_REG_TCR, 0x00);
-	    regwrite(dm9000,DM9000_REG_ISR, 0x3f);
+        regwrite(dm9000,DM9000_REG_NCR, 0x00);
+        regwrite(dm9000,DM9000_REG_NCR, DM9000_REG_RESET);            /* 对 dm9000 进行软件重置 */
+        do {
+            DM9000_DBG("resetting the DM9000, 2nd reset\r\n");
+            Djy_DelayUs(25); /* Wait at least 20 us */
+        } while (regread(dm9000,DM9000_NCR) & 1);
 
-	#ifdef dm9000_FLOW_CONTROL
-	    regwrite(dm9000,DM9000_REG_BPTR, DM9000_BPTR_SET);            /* 半双工流控设置 */
-	    regwrite(dm9000,DM9000_REG_FCTR, DM9000_FCTR_SET);            /* 全双工流控设置 */
-	    regwrite(dm9000,DM9000_REG_FCR, DM9000_FCR_SET);          /* 开启流控设置 */
-	#endif
+        /* Check whether the ethernet controller is present */
+        if ((regread(dm9000,DM9000_PIDL) != 0x0) ||
+            (regread(dm9000,DM9000_PIDH) != 0x90))
+            printf("ERROR: resetting DM9000 -> not responding.\r\n");
 
-	#ifdef dm9000_UPTO_100M
-	    /* dm9000无此寄存器 */
-	    regwrite(dm9000,DM9000_REG_OTCR, DM9000_OTCR_SET);            /* 工作频率到 100Mhz 设置 */
-	#endif
-
-	    regwrite(dm9000,DM9000_REG_IMR, DM9000_IMR_SET);          /* 开启 中断模式 */
-
-	    regwrite(dm9000,DM9000_REG_RCR, 0x39/*DM9000_RCR_SET*/);
-
-    	Lock_MutexPost(&dm9000->devsync);
-	}
-         /* 开启 接收工能 */
+        dm9000dbg.ResetCnt ++;
+        Lock_MutexPost(&dm9000->devsync);
+    }
 }
 
 
@@ -194,6 +214,12 @@ static void dm9000_hash_table(tagDm9000Dev *dm9000)
     u8 i;
     u8 mac[6],*p;
 
+    /* 设置 网卡 MAC 位置，来自於 MyHardware */
+    for(i = 0; i < 6; i++)
+    {
+        regwrite(dm9000,DM9000_REG_PAR + i, dm9000->devmac[i]);
+    }
+
     if(1)
     {
         p   =mac;
@@ -204,12 +230,6 @@ static void dm9000_hash_table(tagDm9000Dev *dm9000)
 
         DM9000_DBG("DM_MAC:  %02X,%02X,%02X,%02X,%02X,%02X.\r\n",
                     p[0],p[1],p[2],p[3],p[4],p[5]);
-    }
-
-    /* 设置 网卡 MAC 位置，来自於 MyHardware */
-    for(i = 0; i < 6; i++)
-    {
-        regwrite(dm9000,DM9000_REG_PAR + i, dm9000->devmac[i]);
     }
 
     for(i = 0; i < 8; i++)                              /* 清除 网卡多播设置 */
@@ -227,47 +247,98 @@ static void dm9000_hash_table(tagDm9000Dev *dm9000)
 // =============================================================================
 static void __dm9000HardInit(tagDm9000Dev *dm9000)
 {
-	u32 timeout = 1000;
-	regwrite(dm9000,DM9000_REG_NCR, DM9000_REG_RESET);            /* 对 dm9000 进行软件重置 */
-    Djy_DelayUs(10);                                /* delay 10us */
+    u32 timeout = 1000;
+    u8 io_mode;
+    u16 lnk;
 
-    dm9000_hash_table(dm9000);                               /* 设置 dm9000 MAC 及 多播*/
+    regwrite(dm9000,DM9000_REG_GPR, DM9000_PHY_OFF);
+    __dm9000Reset(dm9000);
 
-    __dm9000Reset(dm9000);                                    /* 进行 dm9000 软件设置 */
+    __dm9000PhyWrite(dm9000,0x04,0x00a1);
+    __dm9000PhyWrite(dm9000,0x00,0x1200);
 
-    regwrite(dm9000,DM9000_REG_GPR, DM9000_PHY_OFF);          /* 关闭 PHY ，进行 PHY 设置*/
-    __dm9000PhyWrite(dm9000,0x00, 0x8000);                    /* 重置 PHY 的寄存器 */
-#ifdef dm9000_FLOW_CONTROL
-    __dm9000PhyWrite(dm9000,0x04, 0x01e1 | 0x0400);           /* 设置 自适应模式相容表 */
-#else
-    __dm9000PhyWrite(dm9000,0x04, 0x01e1);                    /* 设置 自适应模式相容表 */
-#endif
-    //__dm9000PhyWrite(dm9000,0x00, 0x1000);                  /* 设置 基本连接模式 */
-    /* 连接模式设置
-      0x0000 : 固定10M半双工
-      0x0100 : 固定10M全双工
-      0x2000 : 固定100M半双工
-      0x2100 : 固定100M全双工
-      0x1000 : 自适应模式
-    */
-    __dm9000PhyWrite(dm9000,0x00, 0x1000);                   /* 设置 基本连接模式 */
+    io_mode = regread(dm9000,DM9000_ISR) >> 6;
+    switch (io_mode) {
+    case 0x0:  /* 16-bit mode */
+        printf("DM9000: running in 16 bit mode\r\n");
+        break;
+    case 0x01:  /* 32-bit mode */
+        printf("DM9000: running in 32 bit mode\r\n");
+        break;
+    case 0x02: /* 8 bit mode */
+        printf("DM9000: running in 8 bit mode\r\n");
+        break;
+    default:
+        /* Assume 8 bit mode, will probably not work anyway */
+        printf("DM9000: Undefined IO-mode:0x%x\r\n", io_mode);
+        break;
+    }
+
+    /* Program operating register, only internal phy supported */
+    regwrite(dm9000,DM9000_NCR, 0x0);
+    /* TX Polling clear */
+    regwrite(dm9000,DM9000_TCR, 0);
+    /* Less 3Kb, 200us */
+    regwrite(dm9000,DM9000_BPTR, BPTR_BPHW(3) | BPTR_JPT_600US);
+    /* Flow Control : High/Low Water */
+    regwrite(dm9000,DM9000_FCTR, FCTR_HWOT(3) | FCTR_LWOT(8));
+    /* SH FIXME: This looks strange! Flow Control */
+    regwrite(dm9000,DM9000_FCR, 0x28);
+    /* Special Mode */
+    regwrite(dm9000,DM9000_SMCR, 0x00);
+    /* clear TX status */
+    regwrite(dm9000,DM9000_NSR, NSR_WAKEST | NSR_TX2END | NSR_TX1END);
+    /* Clear interrupt status */
+    regwrite(dm9000,DM9000_ISR, ISR_ROOS | ISR_ROS | ISR_PTS | ISR_PRS);
+
+    regwrite(dm9000,DM9000_BUSCR, 0x6b);
+
+    dm9000_hash_table(dm9000);
+
+    /* Activate DM9000 */
+    /* Enable TX/RX interrupt mask */
+    regwrite(dm9000,DM9000_IMR, IMR_PAR);
+
+    /* RX enable */
+    regwrite(dm9000,DM9000_RCR, RCR_DIS_LONG | RCR_DIS_CRC | RCR_RXEN);
 
     regwrite(dm9000,DM9000_REG_GPR, DM9000_PHY_ON);  /* 结束 PHY 设置, 开启 PHY */
 
-
     while(!(regread(dm9000,DM9000_NSR) & NSR_LINKST))
     {
-    	if(timeout == 0)
-    	{
-    		DM9000_DBG("DM9000 Link failed!\r\n");
-    		break;
-    	}
-    	timeout--;
-    	Djy_EventDelay(1000);
+        if(timeout == 0)
+        {
+            DM9000_DBG("DM9000 Link failed!\r\n");
+            break;
+        }
+        timeout--;
+        Djy_EventDelay(1000);
     }
 
     if(timeout)
-    	DM9000_DBG("DM9000 Linked!\r\n");
+    {
+        DM9000_DBG("DM9000 Linked : ");
+        lnk = __dm9000PhyRead(dm9000,17) >> 12;
+        switch (lnk)
+        {
+        case 1:
+            printf("10M half duplex ");
+            break;
+        case 2:
+            printf("10M full duplex ");
+            break;
+        case 4:
+            printf("100M half duplex ");
+            break;
+        case 8:
+            printf("100M full duplex ");
+            break;
+        default:
+            printf("unknown: %d ", lnk);
+            break;
+        }
+        printf("\r\n");
+    }
 }
 
 // =============================================================================
@@ -284,15 +355,15 @@ static bool_t __dm9000Snd(ptu32_t handle,tagNetPkg *pkg,u32 netdevtask)
 {
     bool_t  result;
     tagNetPkg *tmp;
-    u16 *mysrc;
+    u8 *mysrc;
     u16 sndlen;
-    u16 i;
+    u16 i,u16Data,sndTimeout = 5000;
     tagDm9000Dev  *dm9000;
 
     result = false;
     if((0 != handle)&&(NULL != pkg))
     {
-    	dm9000 = (tagDm9000Dev  *)NetDevPrivate(handle);
+        dm9000 = (tagDm9000Dev  *)NetDevPrivate(handle);
         sndlen = 0;
         tmp = pkg;
         //cout the len
@@ -318,6 +389,7 @@ static bool_t __dm9000Snd(ptu32_t handle,tagNetPkg *pkg,u32 netdevtask)
                 Djy_DelayUs (5);
             }
 
+            regwrite(dm9000,DM9000_ISR, IMR_PTM);
             //snd all the pkg
             tmp = pkg;
             //init the dm9000
@@ -329,11 +401,20 @@ static bool_t __dm9000Snd(ptu32_t handle,tagNetPkg *pkg,u32 netdevtask)
             while(NULL!= tmp)
             {
                 sndlen = tmp->datalen;
-                mysrc = (u16 *)(tmp->buf + tmp->offset);
+                mysrc = (u8 *)(tmp->buf + tmp->offset);
                 //发送数据
-                for(i=0;i<sndlen;i+=2)
+                i = sndlen;
+                while(i > 1)
                 {
-                    *dm9000->dataddr = *mysrc++;  //8位数据转换为16位数据输出
+                    u16Data = (*mysrc++);
+                    u16Data += ((*mysrc++) << 8);
+                    i -= 2;
+                    *dm9000->dataddr = u16Data;
+                }
+                if(i > 0)
+                {
+                    u16Data = (u16)((*mysrc++) & 0x00FF);
+                    *dm9000->dataddr = u16Data;
                 }
                 if(PKG_ISLISTEND(tmp))
                 {
@@ -347,13 +428,22 @@ static bool_t __dm9000Snd(ptu32_t handle,tagNetPkg *pkg,u32 netdevtask)
             //ok now start transfer;
             regwrite(dm9000,DM9000_REG_TCR, DM9000_TCR_SET);  /* 进行传送 */
 
-    //        while((dm9000_reg_read(DM9000_NSR) & 0x0c) == 0)
-    //        ;                                               //等待数据发送完成
-            regwrite(dm9000,DM9000_NSR, 0x2c);                 //清除TX状态
+            while ( !(regread(dm9000,DM9000_NSR) & (NSR_TX1END | NSR_TX2END)) ||
+                !(regread(dm9000,DM9000_ISR) & IMR_PTM) )
+            {
+                Djy_DelayUs(1);
+                if (!sndTimeout)
+                {
+                    printk("transmission timeout\n");
+                    break;
+                }
+                sndTimeout --;
+            }
+            regwrite(dm9000,DM9000_ISR, IMR_PTM); /* Clear Tx bit in ISR */
 
             result = true;
-
-        	Lock_MutexPost(&dm9000->devsync);
+            dm9000dbg.SndCnt ++;
+            Lock_MutexPost(&dm9000->devsync);
         }
 
     }
@@ -378,11 +468,12 @@ static tagNetPkg *__dm9000RcvPkg(tagDm9000Dev *dm9000)
     if(Lock_MutexPend(&dm9000->devsync,CN_TIMEOUT_FOREVER))
     {
         rx_ready = regread(dm9000,DM9000_MRCMDX);      //先读取一个无效的数据,一般读到0
-        rx_ready = regread(dm9000,DM9000_MRCMDX);     //真正读取到的数据包首字节
+        rx_ready = regread(dm9000,DM9000_MRCMDX);      //真正读取到的数据包首字节
 
-        if(rx_ready == 1)                           //判读首字节是否为1或0
+        if(rx_ready == 1)                              //判读首字节是否为1或0
         {
-        	*dm9000->cmdaddr = DM9000_MRCMD;            //连续读取数据包内容
+            dm9000dbg.RcvTaskCnt ++;
+            *dm9000->cmdaddr = DM9000_MRCMD;            //连续读取数据包内容
             rx_status = *dm9000->dataddr;               //状态字节
             rx_length = *dm9000->dataddr;               //数据长度
             rx_status &= 0xff;
@@ -409,8 +500,16 @@ static tagNetPkg *__dm9000RcvPkg(tagDm9000Dev *dm9000)
                 pkg->partnext= NULL;
             }
         }
+        else if(rx_ready == 0)
+        {
+            pkg = NULL;     //未接收到数据
+        }
+        else
+        {
+            dm9000dbg.RxReadyErr ++;
+        }
 
-    	Lock_MutexPost(&dm9000->devsync);
+        Lock_MutexPost(&dm9000->devsync);
     }
 
 
@@ -421,8 +520,9 @@ static tagNetPkg *__dm9000RcvPkg(tagDm9000Dev *dm9000)
 #define CN_DM9000RCV_TIMEOUT   (1*mS)    //5 seconds timeout
 static ptu32_t dm9000Rcv(void)
 {
+    u8  rcvstat;
     tagNetPkg *pkg;
-	tagDm9000Dev *dm9000;
+    tagDm9000Dev *dm9000;
 
     Djy_GetEventPara((ptu32_t *)&dm9000,NULL);
     while(1)
@@ -430,35 +530,32 @@ static ptu32_t dm9000Rcv(void)
         Lock_SempPend(&dm9000->rcvsync,CN_DM9000RCV_TIMEOUT);
         while((pkg = __dm9000RcvPkg(dm9000))!= NULL)
         {
+            dm9000dbg.RcvPkgCnt ++;
             LinkPost(dm9000->handle,pkg);
             PkgTryFreePart(pkg);
         }
-    	//rcv overflow will reset the dm9000a
-        u8  rcvstat;
-    	u32 times = 0;
 
         rcvstat = regread(dm9000,DM9000_REG_NSR);
         if(rcvstat &NSR_RXOV)
         {
-        	times++;
-        	rcvstat = regread(dm9000,DM9000_REG_RSR);
-        	printk("RSR  :0X%02x\n\r",rcvstat);
-        	rcvstat = regread(dm9000,DM9000_REG_ROCR);
-        	printk("ROCR :0X%02x\n\r",rcvstat);
+            dm9000dbg.RxHardOverCnt ++;
+            rcvstat = regread(dm9000,DM9000_REG_RSR);
+            printk("RSR  :0X%02x\n\r",rcvstat);
+            rcvstat = regread(dm9000,DM9000_REG_ROCR);
+            printk("ROCR :0X%02x\n\r",rcvstat);
 
-
-    		__dm9000Reset(dm9000);
-    		printk("%s:dm9000a reset for rcv overflow--%08d times\n\r",\
-    				__FUNCTION__,times++);
+            __dm9000HardInit(dm9000);
         }
     }
     return 0;
 }
 u32  __dm9000Isr(ptu32_t para)
 {
-	tagDm9000Dev *dm9000;
+    tagDm9000Dev *dm9000;
     u8 IntStatus;
     dm9000 = (tagDm9000Dev *)para;
+
+    dm9000dbg.IsrCnt ++;
 
     regwrite(dm9000,DM9000_REG_IMR , DM9000_IMR_OFF); //关闭 DM9000A 中断
 
@@ -466,6 +563,7 @@ u32  __dm9000Isr(ptu32_t para)
     regwrite(dm9000,DM9000_REG_ISR,IntStatus);    //清中断
     if(IntStatus & ISR_PRS)                       //接收中断
     {
+        dm9000dbg.IsrRcvCnt ++;
         Lock_SempPost(&dm9000->rcvsync);
     }
     dm9000->clearextint(dm9000->irqno);               //清楚CPU中断标志
@@ -478,24 +576,24 @@ u32  __dm9000Isr(ptu32_t para)
 
 static bool_t __dm9000CreateDev(tagDm9000Dev *dm9000)
 {
-	bool_t res = false;
+    bool_t res = false;
     u16 evttID;
     u16 eventID;
     tagNetDevPara  devpara;
 
     Lock_MutexCreate_s(&dm9000->devsync,NULL);
-    Lock_SempCreate_s(&dm9000->rcvsync,1,0,CN_SEMP_BLOCK_FIFO,NULL);
-    evttID = Djy_EvttRegist(EN_CORRELATIVE, CN_PRIO_RRS, 0, 1,
-    						(ptu32_t (*)(void))dm9000Rcv,NULL, 0x1000, dm9000->devname);
+    Lock_SempCreate_s(&dm9000->rcvsync,1,0,CN_BLOCK_FIFO,NULL);
+    evttID = Djy_EvttRegist(EN_CORRELATIVE, CN_PRIO_RRS-1, 0, 1,
+                            (ptu32_t (*)(void))dm9000Rcv,NULL, 0x1000, dm9000->devname);
     if(evttID == CN_EVTT_ID_INVALID)
     {
-    	goto EVTT_FAILED;
+        goto EVTT_FAILED;
     }
 
     eventID=Djy_EventPop(evttID, NULL, 0, (ptu32_t)dm9000, 0, 0);
     if(eventID == CN_EVENT_ID_INVALID)
     {
-    	goto EVENT_FAILED;
+        goto EVENT_FAILED;
     }
     devpara.ifsend = __dm9000Snd;
     devpara.iftype = EN_LINK_ETHERNET;
@@ -509,7 +607,7 @@ static bool_t __dm9000CreateDev(tagDm9000Dev *dm9000)
 
     if(0 == dm9000->handle)
     {
-    	goto DEV_FAILED;
+        goto DEV_FAILED;
     }
 
     //OK,NOW INSTALL THE INTERRUPT
@@ -527,26 +625,84 @@ static bool_t __dm9000CreateDev(tagDm9000Dev *dm9000)
 DEV_FAILED:
     //do the unpop
 EVENT_FAILED:
-	Djy_EvttUnregist(evttID);
+    Djy_EvttUnregist(evttID);
 EVTT_FAILED:
-	Lock_MutexDelete_s(&dm9000->devsync);
-	Lock_SempDelete_s(&dm9000->rcvsync);
+    Lock_MutexDelete_s(&dm9000->devsync);
+    Lock_SempDelete_s(&dm9000->rcvsync);
     return res;
 }
 
-
 static tagDm9000Dev *pDm9000;
+bool_t dm9000debuginfo(char* param)
+{
+    u8 rAddrH,rAddrL;
+
+    printf("DM9000 IsrCnt = %d \r\n",       dm9000dbg.IsrCnt);
+    printf("DM9000 IsrRcvCnt = %d \r\n",    dm9000dbg.IsrRcvCnt);
+    printf("DM9000 RcvPkgCnt = %d \r\n",    dm9000dbg.RcvPkgCnt);
+    printf("DM9000 RcvTaskCnt = %d \r\n",   dm9000dbg.RcvTaskCnt);
+    printf("DM9000 RxReadyErr = %d \r\n",   dm9000dbg.RxReadyErr);
+    printf("DM9000 RxHardOverCnt = %d \r\n",dm9000dbg.RxHardOverCnt);
+    printf("DM9000 SndCnt = %d \r\n",       dm9000dbg.SndCnt);
+    printf("DM9000 ResetCnt = %d \r\n", dm9000dbg.ResetCnt);
+
+    rAddrH = regread(pDm9000,DM9000_MRRH);
+    rAddrL = regread(pDm9000,DM9000_MRRL);
+
+    printf("DM9000 Read Addr High = 0x%02x , Low = 0x%02x \r\n",rAddrH,rAddrL);
+    return 1;
+}
+
+bool_t dm9000reg(char *param)
+{
+    __showDm9000Reg(pDm9000);
+    return 1;
+}
+bool_t dm9000Reset(char *param)
+{
+    __dm9000HardInit(pDm9000);
+    return 1;
+}
+
+#include <shell.h>
+static struct ShellCmdTab  gDm9000Debug[] =
+{
+    {
+        "dm9000",
+        dm9000debuginfo,
+        "dm9000 debug info",
+        NULL
+    },
+    {
+        "dm9000reg",
+        dm9000reg,
+        "print dm9000 reg",
+        NULL
+    },
+    {
+        "dm9000reset",
+        dm9000Reset,
+        "reset dm9000",
+        NULL
+    }
+};
+
+
+#define CN_DM9000DEBUG_NUM  ((sizeof(gDm9000Debug))/(sizeof(struct ShellCmdTab)))
+static struct ShellCmdRsc gGdm9000DebugCmdRsc[CN_DM9000DEBUG_NUM];
+
+
 //THIS FUNCTION USED BY USER TO INSTALL AN DM9000 DEV WITH THE SPECIFIED NAME AND MAC
 bool_t Dm9000Install(tagDm9000Para *para)
 {
-	bool_t res = false;
+    bool_t res = false;
     tagDm9000Dev *dm9000;
 
     dm9000 = malloc(sizeof(tagDm9000Dev));
     if(NULL == dm9000)
     {
-    	DM9000_DBG("%s:mem failed\n\r",__FUNCTION__);
-    	goto MEM_FAILED;
+        DM9000_DBG("%s:mem failed\n\r",__FUNCTION__);
+        goto MEM_FAILED;
     }
 
     memset((void *)dm9000,0,sizeof(tagDm9000Dev));
@@ -562,8 +718,8 @@ bool_t Dm9000Install(tagDm9000Para *para)
     res = __dm9000Probe(dm9000);
     if(false == res)
     {
-    	DM9000_DBG("%s:probe failed\n\r",__FUNCTION__);
-    	goto PROBE_FAILED;
+        DM9000_DBG("%s:probe failed\n\r",__FUNCTION__);
+        goto PROBE_FAILED;
     }
 
     //OK,NOW HARD INITIALIZE
@@ -573,28 +729,30 @@ bool_t Dm9000Install(tagDm9000Para *para)
     res = __dm9000CreateDev(dm9000);
     if(false == res)
     {
-    	DM9000_DBG("%s:Creaet Dm9000 Dev failed\n\r",__FUNCTION__);
-    	goto DEV_FAILED;
+        DM9000_DBG("%s:Creaet Dm9000 Dev failed\n\r",__FUNCTION__);
+        goto DEV_FAILED;
     }
-	DM9000_DBG("%s:ISNTALL DM9000 DEV SUCCESS\n\r",__FUNCTION__);
-	pDm9000 = dm9000;
-	__showDm9000Reg(dm9000);
+    DM9000_DBG("%s:ISNTALL DM9000 DEV SUCCESS\n\r",__FUNCTION__);
+    pDm9000 = dm9000;
+    __showDm9000Reg(dm9000);
+
+    Sh_InstallCmd(gDm9000Debug,gGdm9000DebugCmdRsc,CN_DM9000DEBUG_NUM);
     return res;
 
 
 DEV_FAILED:
 PROBE_FAILED:
-	free((void *)dm9000);
-	dm9000 = NULL;
+    free((void *)dm9000);
+    dm9000 = NULL;
 
 MEM_FAILED:
-	return res;
+    return res;
 }
 
 bool_t shellDm9000Reg(char *param)
 {
-	__showDm9000Reg(pDm9000);
-	return true;
+    __showDm9000Reg(pDm9000);
+    return true;
 }
 
 

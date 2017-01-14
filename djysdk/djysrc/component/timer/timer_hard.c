@@ -1,32 +1,32 @@
 //----------------------------------------------------
 // Copyright (c) 2014, SHENZHEN PENGRUI SOFT CO LTD. All rights reserved.
 
-// Redistribution and use in source and binary forms, with or without 
+// Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 
-// 1. Redistributions of source code must retain the above copyright notice, 
+// 1. Redistributions of source code must retain the above copyright notice,
 //    this list of conditions and the following disclaimer.
-// 2. Redistributions in binary form must reproduce the above copyright notice, 
-//    this list of conditions and the following disclaimer in the documentation 
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
 //    and/or other materials provided with the distribution.
 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
-// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
 // LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 // CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 // SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 // Copyright (c) 2014 著作权由深圳鹏瑞软件有限公司所有。著作权人保留一切权利。
-// 
+//
 // 这份授权条款，在使用者符合下列条件的情形下，授予使用者使用及再散播本
 // 软件包装原始码及二进位可执行形式的权利，无论此包装是否经改作皆然：
-// 
+//
 // 1. 对于本软件源代码的再散播，必须保留上述的版权宣告、本条件列表，以
 //    及下述的免责声明。
 // 2. 对于本套件二进位可执行形式的再散播，必须连带以文件以及／或者其他附
@@ -53,24 +53,24 @@
 // 备注：该文件重在留给使用定时器的任务一个统一的接口，实现还是在timer_driver.c文件
 #include "timer_hard.h"
 #include "stddef.h"
-static struct TimerChip   s_tTimerHardChip = {NULL};//注册的芯片驱动
+static struct TimerChip   s_tHardTimerChip = {NULL};//注册的芯片驱动
 // =============================================================================
-// 函数功能：TimerHard_RegisterChip
+// 函数功能：HardTimer_RegisterChip
 //          注册定时器芯片到系统定时器模块
 // 输入参数:timerchip,定时器芯片
 // 输出参数：无
 // 返回值  ：true 成功 false失败，本层实现
 // =============================================================================
-bool_t  TimerHard_RegisterChip(struct TimerChip *timerchip)
+bool_t  HardTimer_RegisterChip(struct TimerChip *timerchip)
 {
     if(NULL != timerchip)
     {
         //不能整体赋值，此时memcpy没有加载，整体赋值会间接调用memcpy。
-        s_tTimerHardChip.chipname  = timerchip->chipname;
-        s_tTimerHardChip.TimerHardAlloc = timerchip->TimerHardAlloc;
-        s_tTimerHardChip.TimerHardFree =  timerchip->TimerHardFree;
-        s_tTimerHardChip.TimerHardGetFreq = timerchip->TimerHardGetFreq;
-        s_tTimerHardChip.TimerHardCtrl = timerchip->TimerHardCtrl;
+        s_tHardTimerChip.chipname  = timerchip->chipname;
+        s_tHardTimerChip.HardTimerAlloc = timerchip->HardTimerAlloc;
+        s_tHardTimerChip.HardTimerFree =  timerchip->HardTimerFree;
+        s_tHardTimerChip.HardTimerGetFreq = timerchip->HardTimerGetFreq;
+        s_tHardTimerChip.HardTimerCtrl = timerchip->HardTimerCtrl;
         return true;
     }
     else
@@ -79,23 +79,23 @@ bool_t  TimerHard_RegisterChip(struct TimerChip *timerchip)
     }
 }
 // =============================================================================
-// 函数功能：TimerHard_UnRegisterChip
+// 函数功能：HardTimer_UnRegisterChip
 //          定时器芯片注销
 // 输入参数：无
 // 输出参数：无
 // 返回值  ：true 成功 false失败
 // 说明    :目前而言是没有用，主要是register之后必然有unregister，本层实现
 // =============================================================================
-bool_t TimerHard_UnRegisterChip(void)
+bool_t HardTimer_UnRegisterChip(void)
 {
-    s_tTimerHardChip.TimerHardAlloc = NULL;
-    s_tTimerHardChip.TimerHardFree = NULL;
-    s_tTimerHardChip.TimerHardGetFreq = NULL;
-    s_tTimerHardChip.TimerHardCtrl = NULL;
+    s_tHardTimerChip.HardTimerAlloc = NULL;
+    s_tHardTimerChip.HardTimerFree = NULL;
+    s_tHardTimerChip.HardTimerGetFreq = NULL;
+    s_tHardTimerChip.HardTimerCtrl = NULL;
     return true;
 }
 // =============================================================================
-// 函数功能：TimerHard_Alloc
+// 函数功能：HardTimer_Alloc
 //          HAL定时器分配
 // 输入参数：
 //     timerisr,分配的定时器的中断服务函数,中断中调用
@@ -105,35 +105,35 @@ bool_t TimerHard_UnRegisterChip(void)
 //        刚开始分配的定时器应该是各种属性都关闭的，因此属性必须自己重新设置
 //        默认：停止计数，异步中断，reload,中断禁止
 // =============================================================================
-ptu32_t TimerHard_Alloc(fntTimerIsr timerisr)
+ptu32_t HardTimer_Alloc(fntTimerIsr timerisr)
 {
-    if(NULL == s_tTimerHardChip.TimerHardAlloc)
+    if(NULL == s_tHardTimerChip.HardTimerAlloc)
     {
         return 0;
     }
     else
     {
-        return s_tTimerHardChip.TimerHardAlloc(timerisr);
+        return s_tHardTimerChip.HardTimerAlloc(timerisr);
     }
 }
 
 // =============================================================================
-// 函数功能：TimerHard_Free
+// 函数功能：HardTimer_Free
 //          HAL定时器释放
 // 输入参数：timerhandle，待释放定时器
 // 输出参数：无
-// 返回值  ：true 成功 false失败 
+// 返回值  ：true 成功 false失败
 // 说明    : 依赖芯片驱动实现
 // =============================================================================
-bool_t  TimerHard_Free(ptu32_t timerhandle)
+bool_t  HardTimer_Free(ptu32_t timerhandle)
 {
-    if(NULL == s_tTimerHardChip.TimerHardFree)
+    if(NULL == s_tHardTimerChip.HardTimerFree)
     {
         return false;
     }
     else
     {
-        return s_tTimerHardChip.TimerHardFree(timerhandle);
+        return s_tHardTimerChip.HardTimerFree(timerhandle);
     }
 }
 
@@ -141,42 +141,42 @@ bool_t  TimerHard_Free(ptu32_t timerhandle)
 // 函数功能：去定时器时钟源频率
 // 输入参数：timerhandle，待释放定时器
 // 输出参数：无
-// 返回值  ：时钟源频率，Hz 
+// 返回值  ：时钟源频率，Hz
 // 说明    : 依赖芯片驱动实现
 // =============================================================================
-u32  TimerHard_GetFreq(ptu32_t timerhandle)
+u32  HardTimer_GetFreq(ptu32_t timerhandle)
 {
-    if(NULL == s_tTimerHardChip.TimerHardGetFreq)
+    if(NULL == s_tHardTimerChip.HardTimerGetFreq)
     {
         return false;
     }
     else
     {
-        return s_tTimerHardChip.TimerHardGetFreq(timerhandle);
+        return s_tHardTimerChip.HardTimerGetFreq(timerhandle);
     }
 }
 
 // =============================================================================
-// 函数功能：TimerHard_Ctrl
+// 函数功能：HardTimer_Ctrl
 //          操作硬件定时器
-// 输入参数：timerhard，待设置定时器， 
-//          ctrlcmd, 操作命令，参见fnTimerHardCtrl类型声明的注释
+// 输入参数：timerhard，待设置定时器，
+//          ctrlcmd, 操作命令，参见fnHardTimerCtrl类型声明的注释
 // 输出参数：inoutpara，输入输出参数，根据不同的情况而定
-// 返回值  ：true 操作成功 false操作失败 
+// 返回值  ：true 操作成功 false操作失败
 // 说明：ctrlcmd对应的inoutpara的属性定义说明
 // =============================================================================
-bool_t TimerHard_Ctrl(ptu32_t timerhandle, \
-                      enum TimerCmdCode ctrlcmd, \
+bool_t HardTimer_Ctrl(ptu32_t timerhandle, \
+                      enum HardTimerCmdCode ctrlcmd, \
                       ptu32_t inoutpara)
 {
     bool_t result;
-    if(NULL == s_tTimerHardChip.TimerHardCtrl)
+    if(NULL == s_tHardTimerChip.HardTimerCtrl)
     {
         result = false;
     }
     else
     {
-        result = s_tTimerHardChip.TimerHardCtrl(timerhandle, ctrlcmd, inoutpara);
+        result = s_tHardTimerChip.HardTimerCtrl(timerhandle, ctrlcmd, inoutpara);
     }
     return result;
 }

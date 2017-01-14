@@ -686,12 +686,12 @@ static void __Ax88796IntInstall(tagAx88796Pri  *pri)
     //apply the interrupt and bind it to the isr
     if(true == Int_Register(irqno))
     {
-	    Int_SetClearType(irqno,CN_INT_CLEAR_AUTO);
-	    Int_IsrConnect(irqno,__Ax88796Isr);
-	    Int_SettoAsynSignal(irqno);
-	    Int_ClearLine(irqno);
-	    Int_RestoreAsynLine(irqno);
-	    Int_SetIsrPara(irqno,(ptu32_t)pri);
+        Int_SetClearType(irqno,CN_INT_CLEAR_AUTO);
+        Int_IsrConnect(irqno,__Ax88796Isr);
+        Int_SettoAsynSignal(irqno);
+        Int_ClearLine(irqno);
+        Int_RestoreAsynLine(irqno);
+        Int_SetIsrPara(irqno,(ptu32_t)pri);
     }
 }
 
@@ -722,7 +722,7 @@ tagAx88796Pri *Ax88796Install(tagAx88796Para *para)
     {
         goto DEVSYNC_FAILED;
     }
-    ax88796->rcvsync = Lock_SempCreate(1,0,CN_SEMP_BLOCK_FIFO,NULL);
+    ax88796->rcvsync = Lock_SempCreate(1,0,CN_BLOCK_FIFO,NULL);
     if(NULL == ax88796->rcvsync)
     {
         goto RCVSYNC_FAILED;

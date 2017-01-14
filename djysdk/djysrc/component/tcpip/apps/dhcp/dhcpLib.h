@@ -214,6 +214,7 @@ typedef struct
 
 void makeDhcpRequestMsg(tagDhcpMsg *msg,tagDhcpRequestPara *para);
 void showDhcpRequestMsg(tagDhcpRequestPara *para);
+void showDhcpReplyMsg(tagDhcpReplyPara *para);
 bool_t pasteDhcpReplyMsg(tagDhcpReplyPara *para,tagDhcpMsg *msg);
 void makeDhcpReplyMsg(tagDhcpMsg *msg,tagDhcpReplyPara *para);
 bool_t pasteDhcpRequestMsg(tagDhcpRequestPara *para,tagDhcpMsg *msg);

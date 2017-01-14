@@ -91,7 +91,6 @@ static int __initSocket(void)
     if(-1 == result)
     {
         closesocket(result);
-        printf("%s:err socket\n\r",__FUNCTION__);
         goto ERR_SOCKET;
     }
 
@@ -102,7 +101,6 @@ static int __initSocket(void)
     if(-1 == bind(result, (struct sockaddr *)&ipportaddr, sizeof(ipportaddr)))
     {
         closesocket(result);
-        printf("%s:err bind\n\r",__FUNCTION__);
         goto ERR_SOCKET;
     }
 
@@ -112,14 +110,12 @@ static int __initSocket(void)
     if(-1 == connect(result,(struct sockaddr *)&ipportaddr,sizeof(ipportaddr)))
     {
         closesocket(result);
-        printf("%s:err connect\n\r",__FUNCTION__);
         goto ERR_SOCKET;
     }
     int opt = 1;
     if(0 != setsockopt(result,SOL_SOCKET,SO_NOBLOCK,&opt, sizeof(opt)))
     {
         closesocket(result);
-        printf("%s:err setsockopt block\n\r",__FUNCTION__);
         goto ERR_SOCKET;
     }
 
@@ -127,7 +123,6 @@ static int __initSocket(void)
     if(0 != setsockopt(result,SOL_SOCKET,SO_BROADCAST,&opt, sizeof(opt)))
     {
         closesocket(result);
-        printf("%s:err setsockopt broad\n\r",__FUNCTION__);
         goto ERR_SOCKET;
     }
     return result;
@@ -157,14 +152,11 @@ static bool_t __cpyReplyMsg(tagDhcpMsg *msg)
         	pasteDhcpReplyMsg(&tmp->replypara,msg);
         	if(tmp->replypara.msgtype == DHCP_OFFER)
         	{
-        		printf("%s:offer!\n\r",__FUNCTION__);
         		tmp->stat = EN_CLIENT_REQUEST;
         		tmp->timeout = 0;
         	}
         	else if(tmp->replypara.msgtype == DHCP_ACK)
         	{
-        		printf("%s:ack!\n\r",__FUNCTION__);
-
         		tmp->stat = EN_CLIENT_INFORM;
         		tmp->timeout = tmp->replypara.leasetime;
         		//here we also to update the rout info
@@ -179,8 +171,6 @@ static bool_t __cpyReplyMsg(tagDhcpMsg *msg)
         	}
         	else if(tmp->replypara.msgtype == DHCP_NAK)
         	{
-        		printf("%s:nak!\n\r",__FUNCTION__);
-
         		tmp->stat = EN_CLIENT_DICOVER;
         		tmp->timeout = 0;
         	}
@@ -217,7 +207,6 @@ static void __dealTask(void)
             	makeDhcpRequestMsg(&gDhcpClientMsg,&reqpara);
             	send(gDhcpClientSock,(void *)&gDhcpClientMsg,sizeof(gDhcpClientMsg),0);
                 task->timeout = CN_DHCP_TIMEOUT;
-                printf("%s:discover..\n\r",__FUNCTION__);
             }
             else if(task->stat == EN_CLIENT_REQUEST)
             {
@@ -231,7 +220,6 @@ static void __dealTask(void)
             	makeDhcpRequestMsg(&gDhcpClientMsg,&reqpara);
             	send(gDhcpClientSock,(void *)&gDhcpClientMsg,sizeof(gDhcpClientMsg),0);
                 task->timeout = CN_DHCP_TIMEOUT;
-                printf("%s:request..\n\r",__FUNCTION__);
             }
             else
             {
@@ -239,7 +227,6 @@ static void __dealTask(void)
             	task->stat = EN_CLIENT_DICOVER;
                 task->transID = gDhcpClientTxID++;
                 task->timeout = 0;
-                printf("%s:inform..\n\r",__FUNCTION__);
             }
             memset((void *)&gDhcpClientMsg,0,sizeof(gDhcpClientMsg));
         }
@@ -274,10 +261,6 @@ ptu32_t __DhcpClientMain(void)
             Lock_MutexPost(pDhcpClientSync);
             Djy_EventDelay(1000*mS);        //each seconds we will be runing
         }
-    }
-    else
-    {
-        printf("%s:DHCP CLIENT SOCKET ERR\n\r",__FUNCTION__);
     }
     return 0;
 }

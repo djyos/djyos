@@ -91,6 +91,7 @@ static struct Object s_tDisplayRootRsc;
 static struct Object s_tWindowRootRsc;
 u32 g_u32DefaultBackColor,g_u32DefaultColor;
 u16 g_u16GkServerEvtt,g_u16GkUsercallServerEvtt;
+u16 g_u16GkServerEvent,g_u16GkUsercallServerEvent;
 
 
 struct GkChunnel g_tGkChunnel;
@@ -105,7 +106,7 @@ struct GkWinRsc *g_ptZ_Topmost;
 struct SemaphoreLCB *g_ptUsercallSemp;
 //如果调用方希望gui kernel服务完成再返回，使用这个信号量
 struct SemaphoreLCB *g_ptSyscallSemp;
-struct MutexLCB *g_ptGkServerSync;
+struct SemaphoreLCB *g_ptGkServerSync;
 u8 *draw_chunnel_buf;
 
 u32 __ExecOneCommand(u16 DrawCommand,u8 *ParaAddr);
@@ -135,31 +136,34 @@ ptu32_t ModuleInstall_GK(ptu32_t para)
                         g_tGkChunnel.syscall_buf,gc_u32CfgGuiCmdDeep);
 
     g_tGkChunnel.syscall_mutex = Lock_MutexCreate("gui chunnel to gk mutex");
-    g_tGkChunnel.syscall_semp = Lock_SempCreate(1,0,CN_SEMP_BLOCK_FIFO,"gui chunnel to gk semp");
-    g_tGkChunnel.usercall_semp = Lock_SempCreate(1,0,CN_SEMP_BLOCK_FIFO,"gui chunnel from gk semp");
+    g_tGkChunnel.syscall_semp = Lock_SempCreate(1,0,CN_BLOCK_FIFO,"gui chunnel to gk semp");
+    g_tGkChunnel.usercall_semp = Lock_SempCreate(1,0,CN_BLOCK_FIFO,"gui chunnel from gk semp");
 
     g_tGkChunnel.usercall_msgq = MsgQ_Create(CN_USERCALL_MSGQ_SIZE,CN_USERCALL_MSG_SIZE,0);
 
 
 
-    g_ptGkServerSync = Lock_MutexCreate("gk server sync");
-//    g_ptGkServerSync = Lock_SempCreate(1,0,CN_SEMP_BLOCK_FIFO,"gk server sync");
-    g_ptUsercallSemp = Lock_SempCreate(1,0,CN_SEMP_BLOCK_FIFO,"gk wait repaint");
-    g_ptSyscallSemp = Lock_SempCreate(10000,0,CN_SEMP_BLOCK_FIFO,"gk wait job");
-    g_u16GkServerEvtt = Djy_EvttRegist(EN_CORRELATIVE,1,0,0,GK_Server,
+//  g_ptGkServerSync = Lock_MutexCreate("gk server sync");
+    g_ptGkServerSync = Lock_SempCreate(1,0,CN_BLOCK_FIFO,"gk server sync");
+    g_ptUsercallSemp = Lock_SempCreate(1,0,CN_BLOCK_FIFO,"gk wait repaint");
+    g_ptSyscallSemp = Lock_SempCreate(1,0,CN_BLOCK_FIFO,"gk wait job");
+    g_u16GkServerEvtt = Djy_EvttRegist(EN_CORRELATIVE,249,0,0,GK_Server,
                                     NULL,8120,"gui kernel server");
 
-    g_u16GkUsercallServerEvtt= Djy_EvttRegist(EN_CORRELATIVE,1,0,0,GK_UsercallServer,
-            NULL,4096,"gkernel usercall server");
+    g_u16GkUsercallServerEvtt= Djy_EvttRegist(EN_CORRELATIVE,249,0,0,
+                    GK_UsercallServer,NULL,4096,"gkernel usercall server");
 
     g_ptClipRectPool = Mb_CreatePool(&g_tClipRect,
                                   CN_CLIP_INIT_NUM,
                                   sizeof(struct ClipRect),
                                   100,2000, "clip area");
 
+    g_u16GkServerEvent = Djy_EventPop(g_u16GkServerEvtt,NULL,0,0,0,0);
+    g_u16GkUsercallServerEvent = Djy_EventPop(g_u16GkUsercallServerEvtt,NULL,0,0,0,0);
+
     if(    (g_ptClipRectPool == NULL)
-        || (g_u16GkServerEvtt == CN_EVTT_ID_INVALID)
-        || (g_u16GkUsercallServerEvtt == CN_EVTT_ID_INVALID)
+        || (g_u16GkServerEvent == CN_EVENT_ID_INVALID)
+        || (g_u16GkUsercallServerEvent == CN_EVENT_ID_INVALID)
         || (g_ptSyscallSemp == NULL)
         || (g_ptUsercallSemp == NULL)
         || (g_ptGkServerSync == NULL)
@@ -172,8 +176,6 @@ ptu32_t ModuleInstall_GK(ptu32_t para)
     }
 
 
-    Djy_EventPop(g_u16GkServerEvtt,NULL,0,0,0,0);
-    Djy_EventPop(g_u16GkUsercallServerEvtt,NULL,0,0,0,0);
 
     return 1;
 
@@ -183,8 +185,8 @@ exit_error:
     Djy_EvttUnregist(g_u16GkUsercallServerEvtt);
     Lock_SempDelete(g_ptSyscallSemp);
     Lock_SempDelete(g_ptUsercallSemp);
-//    Lock_SempDelete(g_ptGkServerSync);
-    Lock_MutexDelete(g_ptGkServerSync);
+    Lock_SempDelete(g_ptGkServerSync);
+//  Lock_MutexDelete(g_ptGkServerSync);
     Lock_SempDelete(g_tGkChunnel.usercall_semp);
     Lock_SempDelete(g_tGkChunnel.syscall_semp);
     Lock_MutexDelete(g_tGkChunnel.syscall_mutex);
@@ -501,7 +503,6 @@ struct GkWinRsc *GK_CreateDesktop(struct GkscParaCreateDesktop *para)
     s32 desktop_x,desktop_y;
     u32 msk_size;
     struct GkscParaFillWin para_fill;
-    struct RopGroup RopCode = (struct RopGroup){ 0, 0, 0, CN_R2_COPYPEN, 0, 0, 0  };
     if(para->display == NULL)
     {
         return NULL;
@@ -1272,6 +1273,8 @@ void GK_SetVisible(struct GkscParaSetVisible *para)
         return;
     gkwin->WinProperty.Visible = para->Visible;
 
+    gkwin->disp->reset_clip = true;
+
 }
 
 //----设置窗口显示优先级-------------------------------------------------------
@@ -1846,13 +1849,22 @@ u16 GK_SyscallChunnel(u16 command,u32 sync_time,void *param1,u16 size1,
 {
     u16 completed = 0;
     u8 buf[2];
-    Lock_MutexPend(g_tGkChunnel.syscall_mutex,1000*mS);   //管道访问互斥
+    u32 base_time,rel_timeout = sync_time;
+    base_time = (u32)DjyGetSysTime();
+    //管道访问互斥，用于多个上层应用并发调用之间的互斥
+    Lock_MutexPend(g_tGkChunnel.syscall_mutex,rel_timeout);
     while(1)
     {
         if((Ring_Capacity(&g_tGkChunnel.ring_syscall)
                     - Ring_Check(&g_tGkChunnel.ring_syscall)) <(u32)(size1+size2+2))
-        {       //管道空闲容量不够
-            if(!Lock_SempPend(g_tGkChunnel.syscall_semp,1000*mS))//等待管道释放空间
+        {
+            //管道空闲容量不够
+            rel_timeout = (u32)DjyGetSysTime() - base_time;
+            if(rel_timeout >= sync_time)
+                break;
+            else
+                rel_timeout = sync_time - rel_timeout;
+            if(!Lock_SempPend(g_tGkChunnel.syscall_semp,rel_timeout))//等待管道释放空间
                 break;                                  //等待管道失败
             else
                 continue;                               //再次检查容量
@@ -1866,15 +1878,26 @@ u16 GK_SyscallChunnel(u16 command,u32 sync_time,void *param1,u16 size1,
             completed += Ring_Write(&g_tGkChunnel.ring_syscall,param2,size2);
         break;
     }
-    Lock_MutexPost(g_tGkChunnel.syscall_mutex);    //管道访问互斥解除
     if(Djy_IsMultiEventStarted())
     {
-//        if(Lock_SempQueryFree(g_ptSyscallSemp) == 0)
-        Lock_SempPost(g_ptSyscallSemp);
+        //上层应用多次下发命令后，gk_server将一次处理，条件判一下，避免gk_server
+        //空转
+        if(Lock_SempQueryFree(g_ptSyscallSemp) == 0)
+            Lock_SempPost(g_ptSyscallSemp);
         if(0 != sync_time)      //设定了等待时间
         {
-            Lock_MutexPend(g_ptGkServerSync,sync_time);
-            Lock_MutexPost(g_ptGkServerSync);
+            //先PEND一次信号量，防止事先已经被释放过
+            Lock_SempPend(g_ptGkServerSync,0);
+            Djy_RaiseTempPrio(g_u16GkServerEvent);
+            rel_timeout = (u32)DjyGetSysTime() - base_time;
+            if(rel_timeout < sync_time)
+            {
+                rel_timeout = sync_time - rel_timeout;
+                Lock_SempPend(g_ptGkServerSync,rel_timeout);
+                Djy_SetEventPrio(g_u16GkServerEvent, 249);
+            }
+//          Lock_MutexPend(g_ptGkServerSync,sync_time);
+//          Lock_MutexPost(g_ptGkServerSync);
         }
     }
     else
@@ -1883,6 +1906,7 @@ u16 GK_SyscallChunnel(u16 command,u32 sync_time,void *param1,u16 size1,
                                         gc_u32CfgGuiCmdDeep);
         __ExecOneCommand(command,draw_chunnel_buf+2);
     }
+    Lock_MutexPost(g_tGkChunnel.syscall_mutex);    //管道访问互斥解除
     return completed;
 }
 
@@ -2151,8 +2175,8 @@ ptu32_t GK_Server(void)
 {
     u16 command;
     u32 num,offset;
-    Lock_MutexPend(g_ptGkServerSync,CN_TIMEOUT_FOREVER);
-    Djy_SetEventPrio(248);
+//    Lock_MutexPend(g_ptGkServerSync,CN_TIMEOUT_FOREVER);
+//  Djy_SetEventPrio(249);
     while(1)
     {
         //一次读取全部命令，因为发送时有互斥量保护，所以管道中的数据肯定是完整的
@@ -2165,10 +2189,11 @@ ptu32_t GK_Server(void)
             //所有命令均执行完后，检查有没有win buffer需要刷到screen上
 //            __gk_redraw_all();
 
-            Djy_SetEventPrio(1);
-            Lock_MutexPost(g_ptGkServerSync);
-            Lock_MutexPend(g_ptGkServerSync,CN_TIMEOUT_FOREVER);
-            Djy_SetEventPrio(248);
+//          Djy_SetEventPrio(1);
+//          Lock_MutexPost(g_ptGkServerSync);
+//          Lock_MutexPend(g_ptGkServerSync,CN_TIMEOUT_FOREVER);
+            Lock_SempPost(g_ptGkServerSync);
+            Djy_RestorePrio( );
             Lock_SempPend(g_ptSyscallSemp,CN_TIMEOUT_FOREVER);
             continue;
         }

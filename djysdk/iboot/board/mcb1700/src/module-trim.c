@@ -57,6 +57,8 @@
 #include "lowpower.h"
 #include "list.h"
 #include "..\heap\heap-in.h"
+#include "ymodem.h"
+
 extern ptu32_t ModuleInstall_DebugInfo(ptu32_t para);
 
 
@@ -124,8 +126,6 @@ void Sys_ModuleInit(void)
     //文件系统模块,依赖:shell
     ModuleInstall_FileSystem();
 
-    ModuleInstall_BootFS();
-
 //    ModuleInstall_UART(CN_UART0);
     //设置工作路径,依赖:文件系统,且相关路径存在.
 //    Djyfs_SetWorkPath(gc_pCfgWorkPath);
@@ -148,8 +148,7 @@ void Sys_ModuleInit(void)
 
     //安装人机交互输入模块，例如键盘、鼠标等
 //    ModuleInstall_HmiIn( 0 );
-    extern ptu32_t ModuleInstall_Ymodem(struct DjyDevice *para);
-    ModuleInstall_Ymodem(NULL);
+    ModuleInstall_Ymodem(0);
 	Ymodem_PathSet("/iboot");
     ModuleInstall_IAP();
 
@@ -167,8 +166,8 @@ void Sys_ModuleInit(void)
 //    ModuleInstall_RTC(0);
 
     //定时器组件
-//    extern ptu32_t ModuleInstall_TimerSoft(ptu32_t para);
-//    ModuleInstall_TimerSoft(CN_TIMER_SOURCE_TICK);
+//    extern ptu32_t ModuleInstall_Timer(ptu32_t para);
+//    ModuleInstall_Timer(CN_TIMER_SOURCE_TICK);
 
    //网络协议栈组件
 //    extern  ptu32_t ModuleInstall_DjyIp(ptu32_t para);

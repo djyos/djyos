@@ -349,7 +349,7 @@ bool_t  __LPCTimer_Free(ptu32_t timerhandle)
             Int_CutLine(irqline);
             Int_IsrDisConnect(irqline);
             Int_EvttDisConnect(irqline);
-	        Int_UnRegister(irqline);
+            Int_UnRegister(irqline);
             Int_LowAtomEnd(timeratom);  //原子操作完毕
 
             return true;
@@ -584,7 +584,7 @@ bool_t __LPCTimer_GetState(struct LPCTimerHandle   *timer, u32 *timerflag)
 // 说明    :
 // =============================================================================
 bool_t __LPCTimer_Ctrl(ptu32_t timerhandle, \
-                         enum TimerCmdCode ctrlcmd, \
+                         enum HardTimerCmdCode ctrlcmd, \
                          ptu32_t inoutpara)
 {
     bool_t result;
@@ -681,11 +681,11 @@ void ModuleInstall_HardTimer(void)
     }
 
     LPCtimer.chipname = "LPCTIMER";
-    LPCtimer.TimerHardAlloc = __LPCTimer_Alloc;
-    LPCtimer.TimerHardFree = __LPCTimer_Free;
-    LPCtimer.TimerHardCtrl = __LPCTimer_Ctrl;
-    LPCtimer.TimerHardGetFreq = __LPCTimer_GetFreq;
-    TimerHard_RegisterChip(&LPCtimer);
+    LPCtimer.HardTimerAlloc = __LPCTimer_Alloc;
+    LPCtimer.HardTimerFree = __LPCTimer_Free;
+    LPCtimer.HardTimerCtrl = __LPCTimer_Ctrl;
+    LPCtimer.HardTimerGetFreq = __LPCTimer_GetFreq;
+    HardTimer_RegisterChip(&LPCtimer);
 
     return ;
 }

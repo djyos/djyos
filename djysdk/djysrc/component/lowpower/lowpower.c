@@ -12,6 +12,9 @@ struct LowPowerCtrl g_tLowPower;
 //功能: 调用本函数后,进入设定的低功耗状态,进入前调用相关回调函数.
 //参数: 无
 //返回: CN_SLEEP_NORMAL,CN_SLEEP_L0-L3之一, 不可能返回CN_SLEEP_L4
+//说明：使用L3要特别注意，许多设备，进入如此深的休眠后，其配置会丢失，唤醒时往往
+//      不能正常工作，或者中作状态不正确。因此，必须充分利用EntrySleepReCall和
+//      ExitSleepReCall两个函数。
 //----------------------------------------------------------------------------
 u32 LP_EntryLowPower(struct ThreadVm *vm)
 {

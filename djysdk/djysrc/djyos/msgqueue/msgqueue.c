@@ -64,6 +64,7 @@
 #include "systime.h"
 #include "int.h"
 #include "lock.h"
+#include <djyos.h>
 #include "msgqueue.h"
 static struct Object s_tMsgQ_Node;
 static struct MutexLCB s_tMsgQ_Mutex;
@@ -101,16 +102,16 @@ struct MsgQueue *MsgQ_Create( u32 MaxMsgs,u32  MsgLength,u32 Options)
         if( (Options & CN_MSGQ_TYPE_MASK) == CN_MSGQ_TYPE_PRIO)
         {
             Lock_SempCreate_s(&(MQ->MsgSendSemp),MaxMsgs,MaxMsgs,
-                                CN_SEMP_BLOCK_PRIO,"消息队列");
+                                CN_BLOCK_PRIO,"消息队列");
             Lock_SempCreate_s(&(MQ->MsgRecvSemp),MaxMsgs,0,
-                                CN_SEMP_BLOCK_PRIO,"消息队列");
+                                CN_BLOCK_PRIO,"消息队列");
         }
         else
         {
             Lock_SempCreate_s(&(MQ->MsgSendSemp),MaxMsgs,MaxMsgs,
-                                CN_SEMP_BLOCK_FIFO,"消息队列");
+                                CN_BLOCK_FIFO,"消息队列");
             Lock_SempCreate_s(&(MQ->MsgRecvSemp),MaxMsgs,0,
-                                CN_SEMP_BLOCK_FIFO,"消息队列");
+                                CN_BLOCK_FIFO,"消息队列");
         }
         MQ->MsgSize = MsgLength;
         MQ->MsgUsed = 0;
@@ -142,16 +143,16 @@ struct MsgQueue *MsgQ_Create_s(struct MsgQueue *pMsgQ, u32 MaxMsgs,
         if( (Options & CN_MSGQ_TYPE_MASK) == CN_MSGQ_TYPE_PRIO)
         {
             Lock_SempCreate_s(&(pMsgQ->MsgSendSemp),MaxMsgs,MaxMsgs,
-                                CN_SEMP_BLOCK_PRIO,"消息队列");
+                                CN_BLOCK_PRIO,"消息队列");
             Lock_SempCreate_s(&(pMsgQ->MsgRecvSemp),MaxMsgs,0,
-                                CN_SEMP_BLOCK_PRIO,"消息队列");
+                                CN_BLOCK_PRIO,"消息队列");
         }
         else
         {
             Lock_SempCreate_s(&(pMsgQ->MsgSendSemp),MaxMsgs,MaxMsgs,
-                                CN_SEMP_BLOCK_FIFO,"消息队列");
+                                CN_BLOCK_FIFO,"消息队列");
             Lock_SempCreate_s(&(pMsgQ->MsgRecvSemp),MaxMsgs,0,
-                                CN_SEMP_BLOCK_FIFO,"消息队列");
+                                CN_BLOCK_FIFO,"消息队列");
         }
         pMsgQ->MsgSize = MsgLength;
         pMsgQ->MsgUsed = 0;

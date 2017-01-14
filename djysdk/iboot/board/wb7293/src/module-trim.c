@@ -56,6 +56,7 @@
 #include "lowpower.h"
 #include "list.h"
 #include "..\heap\heap-in.h"
+#include "ymodem.h"
 
 extern ptu32_t ModuleInstall_DebugInfo(ptu32_t para);
 
@@ -94,7 +95,7 @@ void Sys_ConfigRunParam(char *CfgfileName)
 //参数：无
 //返回：无
 //-----------------------------------------------------------------------------
-extern struct HeapCB *tg_pSysHeap;
+
 void Sys_ModuleInit(void)
 {
     uint16_t evtt_main;
@@ -109,8 +110,6 @@ void Sys_ModuleInit(void)
     Stdio_KnlInOutInit( 0 );
    //shell模块,依赖:无
     ModuleInstall_Sh(0);
-    //文件系统模块,依赖:shell
-//    ModuleInstall_Djyfs(0);
     //设备驱动模块
     ModuleInstall_Driver(0);
     //多路复用模块,提供类似Linux的epoll、select的功能
@@ -127,8 +126,6 @@ void Sys_ModuleInit(void)
     //ModuleInstall_NAND("nand", 1, 0);
     ModuleInstall_FileSystem();
     //flash文件系统初始化,依赖:文件系统模块,shell模块
-
-    ModuleInstall_BootFS();
 
     ModuleInstall_UART(CN_UART1);   //print
     ModuleInstall_UART(CN_UART3);   //debug
@@ -149,16 +146,16 @@ void Sys_ModuleInit(void)
 //    Driver_CtrlDevice(ToDev(stdin),CN_UART_DMA_USED,0,0);
     Driver_CtrlDevice(ToDev(stdin),CN_UART_START,0,0);
 
-	#include "ymodem.h"
-	ModuleInstall_Ymodem(NULL);
+	ModuleInstall_Ymodem(0);
 	Ymodem_PathSet("/iboot");
+	ModuleInstall_IAP();
 
     ModuleInstall_DjyBus(0);
     ModuleInstall_IICBus(0);
    // ModuleInstall_TWI(CN_TWI0);
    // AT24_ModuleInit();
    // ModuleInstall_SPIBus(0);
-	ModuleInstall_IAP();
+
    // ADS8688_Init( 0 );
   //  ModuleInstall_at45db321();
     ModuleInstall_BrdExp();
@@ -167,11 +164,17 @@ void Sys_ModuleInit(void)
     ModuleInstall_TM(0);
     ModuleInstall_CpuRtc(0);
 
-    extern ptu32_t ModuleInstall_TimerSoft(ptu32_t para);
-    ModuleInstall_Timer();
-    ModuleInstall_TimerSoft(CN_TIMER_SOURCE_HARD);
+    ModuleInstall_Timer(CN_TIMER_SOURCE_HARD);
     extern ptu32_t ModuleInstall_NetStaticIP(ptu32_t para);
     ModuleInstall_NetStaticIP(0);
+
+
+    //   extern  bool_t ModuleInstall_MAC(const char *devname,const char *virdevname,
+    //    							struct COMParam *com,u32 loopcycle);
+    //
+    //   u8 virMac[] = {0x00,0x01,0xaa,0xbb,0x02,0x01};
+    //   ModuleInstall_MAC("UartVirMac","UART3",virMac,10*mS);
+
 
     extern ptu32_t ModuleInstall_Wdt(ptu32_t para);
     ModuleInstall_BrdWdt();

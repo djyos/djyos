@@ -548,6 +548,7 @@ int select(int maxfd, fd_set *reads,fd_set *writes, fd_set *exps, \
            struct timeval *timeout);
 int string2arg(int *argc, char *argv[],char *string);
 bool_t string2Mac(char *str,u8 *mac);  //string must be xx-xx-xx-xx-xx-xx style
+char* Mac2string(u8 *mac);
 
 ////////////////////////NETDEV DRIVER USED INTERFACE///////////////////////////////
 //ip address defines
@@ -599,8 +600,12 @@ typedef enum
 
 enum _EN_LINK_INTERFACE_TYPE
 {
-    EN_LINK_ETHERNET = 0,  //ethenet net device
+    EN_LINK_ETHERNET = 0,  //ethenet net device,ethernetII
     EN_LINK_RAW,           //raw device without mac
+	EN_LINK_NOVEL,
+	EN_LINK_80203,
+	EN_LINK_SNAP,
+	EN_LINK_80211,
     EN_LINK_LAST,
 };
 //net device type
@@ -624,6 +629,7 @@ typedef struct NetDevPara
 }tagNetDevPara;  //we use the para to create an net device
 //the following we be cut in the socket.h
 ptu32_t NetDevInstall(tagNetDevPara *para);          //return net dev handle, 0 failed
+ptu32_t NetDevHandle(const char *name);
 bool_t NetDevCtrl(const char *name,enNetDevCmd cmd, ptu32_t para);
 bool_t NetDevCtrlByHandle(ptu32_t handle,enNetDevCmd cmd, ptu32_t para);
 bool_t NetDevUninstall(const char *name);
@@ -636,6 +642,13 @@ bool_t NetDevFilterSet(const char *name,enNetDevFramType type,u32 framelimit,\
 bool_t NetDevFilterEnable(const char *name,enNetDevFramType type,bool_t enable);
 bool_t NetDevFilterCounter(ptu32_t handle,enNetDevFramType type);
 bool_t NetDevFilterCheck(ptu32_t handle);
+
+//the user could use the following api to listen on more protocol or send specified frames
+typedef bool_t (*fnLinkProtoDealer)(ptu32_t devhandle,u16 proto,tagNetPkg *pkg);
+bool_t LinkRegisterRcvHook(fnLinkProtoDealer hook, ptu32_t devhandle,u16 proto,const char *hookname);
+bool_t LinkUnRegisterRcvHook(fnLinkProtoDealer hook, ptu32_t devhandle,u16 proto,const char *hookname);
+bool_t LinkSendRaw(ptu32_t devhandle,tagNetPkg *pkg,u32 framlen,u32 devtask);
+bool_t LinkSendBufRaw(ptu32_t devhandle,u8 *buf,u32 len);
 
 //the user could use these function to create delete modify the rout
 //warning: ipaddr_t for ip, if ver is EN_IPV_4, then it is an u32 or an point

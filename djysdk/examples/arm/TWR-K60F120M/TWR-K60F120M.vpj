@@ -198,44 +198,56 @@
     <CustomFolders>
         <Folder
             Name="Source Files"
-            Filters="*.c;*.C;*.cc;*.cpp;*.cp;*.cxx;*.c++;*.prg;*.pas;*.dpr;*.asm;*.s;*.bas;*.java;*.cs;*.sc;*.e;*.cob;*.html;*.rc;*.tcl;*.py;*.pl;*.d;*.m;*.mm;*.go"/>
+            Filters="*.c;*.C;*.cc;*.cpp;*.cp;*.cxx;*.c++;*.prg;*.pas;*.dpr;*.asm;*.s;*.bas;*.java;*.cs;*.sc;*.e;*.cob;*.html;*.rc;*.tcl;*.py;*.pl;*.d;*.m;*.mm;*.go"
+            GUID="{AE2E44D3-67D5-4D11-4EFF-E2CC63D06D9E}"></Folder>
         <Folder
             Name="Header Files"
-            Filters="*.h;*.H;*.hh;*.hpp;*.hxx;*.inc;*.sh;*.cpy;*.if"/>
+            Filters="*.h;*.H;*.hh;*.hpp;*.hxx;*.inc;*.sh;*.cpy;*.if"
+            GUID="{08ED42E8-60FA-414D-6F13-7290B3369BBC}"></Folder>
         <Folder
             Name="Resource Files"
-            Filters="*.ico;*.cur;*.dlg"/>
+            Filters="*.ico;*.cur;*.dlg"
+            GUID="{74D78C00-5CDF-49F4-1C4C-EA30C6ADE79D}"/>
         <Folder
             Name="Bitmaps"
-            Filters="*.bmp"/>
+            Filters="*.bmp"
+            GUID="{F3E2E13A-601B-4667-9044-BD78267BC19C}"/>
         <Folder
             Name="Other Files"
-            Filters=""/>
+            Filters=""
+            GUID="{1D605E62-C23C-4677-8CA4-BF22FCD1C5A8}"></Folder>
         <Folder
             Name="config"
-            Filters=""></Folder>
+            Filters=""
+            GUID="{8DDDE8B0-C9C0-400E-0482-C46889EE3CB9}"></Folder>
         <Folder
             Name="src"
-            Filters=""></Folder>
+            Filters=""
+            GUID="{701FD9A3-EA89-4F79-C629-FC2EAA27AC81}"></Folder>
     </CustomFolders>
     <Files AutoFolders="DirectoryView">
-        <Folder Name="config">
-            <F N="config/Debug.lds"/>
-            <F N="config/Release.lds"/>
+        <Folder Name="lds">
+            <F N="lds/Debug.lds"/>
+            <F N="lds/memory.lds"/>
+            <F N="lds/Release.lds"/>
         </Folder>
         <Folder Name="src">
             <Folder Name="OS_prjcfg">
                 <Folder Name="include">
-                    <F N="src/OS_prjcfg/include/config-prj.h"/>
+                    <F N="src/OS_prjcfg/include/gui_config.h"/>
+                    <F N="src/OS_prjcfg/include/IO_config.h"/>
+                    <F N="src/OS_prjcfg/include/local_config.h"/>
+                    <F N="src/OS_prjcfg/include/misc_config.h"/>
                 </Folder>
-            </Folder>
-            <Folder Name="user">
-                <Folder Name="critical">
-                    <F N="src/user/critical/critical.c"/>
+                <Folder Name="network">
+                    <F N="src/OS_prjcfg/network/boardnetcfg.c"/>
+                    <F N="src/OS_prjcfg/network/tcpipconfig.c"/>
                 </Folder>
-                <F N="src/user/main.c"/>
-                <F N="src/user/main_test.c"/>
-                <F N="src/user/module-trim.c"/>
+                <F N="src/OS_prjcfg/core_config.c"/>
+                <F N="src/OS_prjcfg/gui_config.c"/>
+                <F N="src/OS_prjcfg/IO_config.c"/>
+                <F N="src/OS_prjcfg/local_config.c"/>
+                <F N="src/OS_prjcfg/misc_config.c"/>
             </Folder>
         </Folder>
     </Files>

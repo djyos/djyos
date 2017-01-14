@@ -121,6 +121,7 @@ void __Int_ResetAsynSignal(void)
 {
     Int_CutAsynSignal();
     tg_int_global.en_asyn_signal_counter =1;
+    g_bScheduleEnable = false;
     return;
 }
 
@@ -551,10 +552,9 @@ bool_t Int_AsynSignalSync(ufast_t ufl_line)
 //----注册中断到中断模块----------------------------------------------------------
 //功能: 注册中断到操作系统的中断模块，动态分配结构为struct IntLine，并初始化它，赋值对应
 //      的中断位图tg_pIntLineTable[ufl_line ]
-//参数: ufl_line,等待的目标中断线
-//返回: false = 该中断已经被其他线程等待，直接返回。
-//      true = 成功同步，并在该中断发生后返回。
-//说明：必须先注册成功，调用其它中断API才有效
+//参数: ufl_line,被注册的目标中断线
+//返回: false = 注册失败，直接返回。
+//      true = 注册成功或已经注册。
 //-----------------------------------------------------------------------------
 bool_t Int_Register(ufast_t ufl_line)
 {

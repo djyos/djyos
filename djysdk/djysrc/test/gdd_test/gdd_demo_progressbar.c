@@ -4,7 +4,7 @@
 #include    "stdio.h"
 #include    "djyos.h"
 #include    "gdd.h"
-#include  <widget.h>
+#include <gdd_widget.h>
 /*============================================================================*/
 #define ID_CLOSE    0x1000
 #define ID_SHOWTEXT 0x1100
@@ -175,7 +175,7 @@ static ptu32_t HmiNotify(struct WindowMsg *pMsg)
 	switch(id)
 	{
 		case ID_CLOSE:
-			if(event==BTN_UP)
+			if(event==MSG_BTN_DOWN)
 			{
 				PostMessage(hwnd,MSG_CLOSE,0,0);
 			}
@@ -253,7 +253,8 @@ void    GDD_Demo_Progressbar(void)
                     NULL,0x0000, CN_WINBUF_PARENT,NULL,&s_gHmiMsgLink);
 
     SetFocusWindow(g_ptMainHwnd);//设置为焦点窗口
-    ShowWindow(g_ptMainHwnd,TRUE);  //显示窗口
+   
+    SetWindowShow(g_ptMainHwnd);
 
     while(GetMessage(&msg,g_ptMainHwnd))
     {

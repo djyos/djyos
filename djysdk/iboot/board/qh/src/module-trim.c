@@ -141,7 +141,6 @@ void Sys_ModuleInit(void)
 
     // 文件系统模块
     ModuleInstall_FileSystem();
-    ModuleInstall_BootFS();
     // 安装yaffs2文件系统,依赖:文件系统模块和NAND设备
 //    ModuleInstall_YAFFS2("/dev/nand");
     // 安装fat文件系统,依赖:文件系统模块和SD设备
@@ -184,8 +183,8 @@ void Sys_ModuleInit(void)
 //    ModuleInstall_RTC(0);
 
     //定时器组件
-//    extern ptu32_t ModuleInstall_TimerSoft(ptu32_t para);
-//    ModuleInstall_TimerSoft(CN_TIMER_SOURCE_TICK);
+//    extern ptu32_t ModuleInstall_Timer(ptu32_t para);
+//    ModuleInstall_Timer(CN_TIMER_SOURCE_TICK);
 
    //网络协议栈组件
 //    extern  ptu32_t ModuleInstall_DjyIp(ptu32_t para);

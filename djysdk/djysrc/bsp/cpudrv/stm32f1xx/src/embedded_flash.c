@@ -44,6 +44,7 @@
 //-----------------------------------------------------------------------------
 
 #include <stdlib.h>
+#include <string.h>
 #include <driver.h>
 #include <driver/flash/flash.h>
 #include <cpu_peri.h>
@@ -51,11 +52,10 @@
 #include "stm32f10x.h"
 #include "stm32f10x_flash.h"
 
-#define MPU_APP_FLASH_REGION     (12)
-#define MPU_APP_START_ADDRESS    (0x08000000) // 内置FLASH起始地址
-#define MPU_APP_END_ADDRESS      (0x08080000 ) // 512kb
 static struct EmbdFlashDescr *sp_tFlashDesrc;
-
+extern u32 gc_ptIbootSize;
+extern u32 gc_ptFlashOffset;
+extern u32 gc_ptFlashRange;
 //-----------------------------------------------------------------------------
 //功能: 获取内置FLASH的信息
 //参数:
@@ -70,10 +70,10 @@ static s32 Flash_GetDescr(struct EmbdFlashDescr *Description)
     Description->PagesPerNormalSect = 1;
     Description->SmallSectorsPerPlane = 0;
     Description->LargeSectorsPerPlane = 0;
-    Description->NormalSectorsPerPlane = 256;
+    Description->NormalSectorsPerPlane = gc_ptFlashRange/2048;
     Description->Planes = 1;
-    Description->ReservedPages = 64;
-    Description->MappedStAddr = 0x8000000;
+    Description->ReservedPages = gc_ptIbootSize/2048;
+    Description->MappedStAddr = gc_ptFlashOffset;
     return (0);
 }
 //-----------------------------------------------------------------------------
@@ -154,6 +154,25 @@ static s32 Flash_PageRead(u32 Page, u8 *Data, u32 Flags)
     return (sp_tFlashDesrc->BytesPerPage);
 
 }
+
+//-----------------------------------------------------------------------------
+//功能: 查找page所在sector
+//参数: PageNo -- 页号
+//     Remains -- 剩余页数
+//     SectorNo -- 页所在sector
+//返回:
+//备注: sector0和normal sector大小时一样的，将其区分开来，只是为了便于阅读理解
+//-----------------------------------------------------------------------------
+s32 Flash_PageToSector(u32 PageNo, u32 *Remains, u32 *SectorNo)
+{
+	if((!Remains) || (!SectorNo))
+		return (-1);
+
+	*Remains  = 1;
+	*SectorNo = PageNo;
+
+	return (0);
+}
 //-----------------------------------------------------------------------------
 //功能:
 //参数:
@@ -210,6 +229,7 @@ s32 ModuleInstall_EmbededFlash(const char *ChipName, u32 Flags, u16 Start)
     Chip->Ops.ErsBlk              = Flash_SectorEarse;
     Chip->Ops.WrPage              = Flash_PageProgram;
     Chip->Ops.RdPage              = Flash_PageRead;
+    Chip->Ops.PageToBlk			  = Flash_PageToSector;
     strcpy(Chip->Name, ChipName); // 设备名
     if(Flags & FLASH_BUFFERED)
     {

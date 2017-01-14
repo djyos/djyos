@@ -53,6 +53,7 @@
 #include "stdint.h"
 #include "cpu_peri.h"
 #include "systime.h"
+#include "stddef.h"
 
 //初始化PF9和PF10为输出口.并使能这两个口的时钟
 //LED IO初始化
@@ -78,11 +79,13 @@ void LED_Off (unsigned int num)
 {
 	GPIOF->BSRRH = led_mask[num];
 }
-extern u32 g_bRunModeFlag;
+
 ptu32_t djy_main(void)
 {
-	g_bRunModeFlag=0x12345678;
-	printf("Run Mode:Iboot.\r\n");
+	extern void Sh_GetStatus(char *param);
+	extern void Sh_GetRunMode(char *param);
+	Sh_GetRunMode(NULL);
+	Sh_GetStatus(NULL);
 	LED_Init();
 	while(1)
 	{

@@ -596,7 +596,7 @@ static s32 __PathLen(struct Object *Obj, u8 Opts)
                     }
                     else
                         break;
-            defalut: goto DONE;
+            default: goto DONE;
         }
         PathSegment++;
     }

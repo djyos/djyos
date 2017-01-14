@@ -59,5 +59,5 @@
 
 const u32 gc_u32CfgGuiCmdDeep = 1024;   //gkernel命令缓冲区深度(字节数,非命令条数)
 const u32 gc_u32CfgGuiStsDeep = 256;    //gkernel状态缓冲区深度(字节数,非命令条数)
-const bool_t gc_bShowMouse    = true;   //是否显示鼠标true or  false
+const bool_t gc_bShowMouse    = false;  //是否显示鼠标true or  false
 const bool_t gc_bShowTouch    = true;   //是否显示触摸点

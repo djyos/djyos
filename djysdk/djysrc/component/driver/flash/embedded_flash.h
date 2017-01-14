@@ -56,17 +56,24 @@ extern "C" {
 
 struct EmbdFlashDescr{
 	u16      BytesPerPage;      		  // 页中包含的字节数
-	u16      PagesPerSmallSect;      	  // 第一块的small sector的页数
-	u16 	 PagesPerLargeSect;           // 第一块的large sector的页数
+	u16      PagesPerSmallSect;      	  // small sector的页数
+	u16 	 PagesPerLargeSect;           // large sector的页数
 	u16      PagesPerNormalSect;          // Normal sector的页数
 	u16      SmallSectorsPerPlane;        // 每plane的small sector数
 	u16      LargeSectorsPerPlane;        // 每plane的large sector数
 	u16      NormalSectorsPerPlane;       // 每plane的normal sector数
 	u16 	 Planes;                      // plane数
-//	u16      ReservedSects;               // 保留的块数,从第0块开始;		bak
-	u16      ReservedPages;
+	u16      ReservedPages;				  // 保留page个数，一般配置为iboot.bin所占page数
 	u32      MappedStAddr;                // 内存映射起始地址;
 };
+
+s32 ModuleInstall_EmbededFlash(const char *ChipName, u32 Flags, u16 Start);
+s32 EEFC_PageRead(u32 Page, u8 *Data, u32 Flags);
+s32 EEFC_PageProgram(u32 Page, u8 *Data, u32 Flags);
+s32 EEFC_SectorEarse(u32 SectorNo);
+
+
+
 
 #ifdef __cplusplus
 }

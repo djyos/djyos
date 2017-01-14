@@ -338,10 +338,6 @@ ptu32_t __DhcpServerMain(void)
             Djy_EventDelay(1000*mS);
         }
     }
-    else
-    {
-        printf("%s:DHCP CLIENT SOCKET ERR\n\r",__FUNCTION__);
-    }
     return 0;
 }
 //this is main dhcp client module

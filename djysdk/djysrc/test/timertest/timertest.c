@@ -8,29 +8,29 @@
 #include "timer_hard.h"
 
 
-void timerisr(tagTimerSoft *timer)
+void timerisr(struct Timer *timer)
 {
-    printk("Timername = %s\n\r", TimerSoft_GetName(timer));
+    printk("Timername = %s\n\r", Timer_GetName(timer));
 }
 
 
 void timertest(void)
 {
-	tagTimerSoft *timer;
-	timer = TimerSoft_Create("Timer1",1000*mS,timerisr);
-	if(NULL != timer)
-	{
-		TimerSoft_Ctrl(timer,EN_TIMER_STARTCOUNT,0);
-	}
+    struct Timer *timer;
+    timer = Timer_Create("Timer1",1000*mS,timerisr);
+    if(NULL != timer)
+    {
+        Timer_Ctrl(timer,EN_TIMER_STARTCOUNT,0);
+    }
 
-	timer = TimerSoft_Create("Timer2",2000*mS,timerisr);
-	if(NULL != timer)
-	{
-		TimerSoft_Ctrl(timer,EN_TIMER_STARTCOUNT,0);
-	}
-	timer = TimerSoft_Create("Timer3",3000*mS,timerisr);
-	if(NULL != timer)
-	{
-		TimerSoft_Ctrl(timer,EN_TIMER_STARTCOUNT,0);
-	}
+    timer = Timer_Create("Timer2",2000*mS,timerisr);
+    if(NULL != timer)
+    {
+        Timer_Ctrl(timer,EN_TIMER_STARTCOUNT,0);
+    }
+    timer = Timer_Create("Timer3",3000*mS,timerisr);
+    if(NULL != timer)
+    {
+        Timer_Ctrl(timer,EN_TIMER_STARTCOUNT,0);
+    }
 }

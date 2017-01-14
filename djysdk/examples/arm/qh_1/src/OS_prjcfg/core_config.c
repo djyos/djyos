@@ -64,7 +64,7 @@ const u32 gc_IdleSeventStackSize = 1024;   //
 const u32 gc_u32CfgDeviceLimit = 8;     //定义设备数量。
 //定义锁数量。用户调用semp_create和mutex_create创建的锁，不包括用Lock_SempCreate_s和
 //Lock_MutexCreate_s创建的锁
-const u32 gc_u32CfgLockLimit = 30;      //
+const u32 gc_u32CfgLockLimit = 50;      //
 const u32 gc_u32CfgEventLimit = 14;     //事件数量
 const u32 gc_u32CfgEvttLimit = 15;      //总事件类型数
 const u32 gc_u32CfgWdtLimit = 3;       //允许养狗数量

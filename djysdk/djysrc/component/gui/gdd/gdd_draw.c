@@ -61,7 +61,7 @@
 //------------------------------------------------------
 
 #include    <gui/gdd/gdd_private.h>
-
+#include <loc_string.h>
 /*============================================================================*/
 
 static  bool_t    BeginDraw(HDC hdc)
@@ -770,9 +770,9 @@ void AdjustTextRect(HDC hdc,const char *text,s32 count, RECT *prc,u32 flag)
 s32  GetStrLineCount(const char *str)
 {
     s32 count,linenum = 0;
-    char *line,*linenext;
+    const char *line=str;
+    char *linenext;
     count=0;
-    line = str;
     while(1)
     {
         linenext = mbstrchr(line, "\n", &count);
@@ -846,7 +846,7 @@ bool_t    DrawText(HDC hdc,const char *text,s32 count,const RECT *prc,u32 flag)
         else
         {
             //¶àÐÐ
-            s32 x0,y0,i,line_h;
+            s32 x0,y0,line_h;
             char *p0,*p1;
 
             line_h = Font_GetFontLineHeight(hdc->pFont);

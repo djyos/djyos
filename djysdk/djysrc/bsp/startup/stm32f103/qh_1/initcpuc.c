@@ -74,7 +74,6 @@ extern void __set_CONTROL(uint32_t control);
 
 extern void SRAM_Init(void);
 extern void IAP_SelectLoadProgam(void);
-extern char g_cIbootFlag[];
 
 struct ScbReg volatile * const startup_scb_reg
                         = (struct ScbReg *)0xe000ed00;
@@ -87,7 +86,7 @@ void Startup_Hardfault(void)
     while(1);
 }
 void Init_Cpu(void);
-const u32 gc_u32StartupExpTable[4] =
+const u32 gc_u32StartupExpTable[4] __attribute__ ((section(".StartupExpTbl")))=
 {
     (u32)msp_top,
     (u32)Init_Cpu,
@@ -106,10 +105,10 @@ void Init_Cpu(void)
         case CN_M3_REVISION_R0P0:
             break;    //市场没有版本0的芯片
         case CN_M3_REVISION_R1P0:
-        	startup_scb_reg->CCR |= 1<<bo_scb_ccr_stkalign;
+            startup_scb_reg->CCR |= 1<<bo_scb_ccr_stkalign;
             break;
         case CN_M3_REVISION_R1P1:
-        	startup_scb_reg->CCR |= 1<<bo_scb_ccr_stkalign;
+            startup_scb_reg->CCR |= 1<<bo_scb_ccr_stkalign;
             break;
         case CN_M3_REVISION_R2P0:break;    //好像没什么要做的
     }
@@ -123,84 +122,88 @@ void Init_Cpu(void)
     {
         //开始初始化时钟
         //step1:复位时钟控制寄存器
-    	RCC->CR |= (uint32_t)0x00000001;
+        RCC->CR |= (uint32_t)0x00000001;
         // 复位 SW[1:0], HPRE[3:0], PPRE1[2:0], PPRE2[2:0], ADCPRE[1:0] MCO[2:0] 位
-    	RCC->CFGR &= (uint32_t)0xF8FF0000;
+        RCC->CFGR &= (uint32_t)0xF8FF0000;
         // 复位 HSEON, CSSON and PLLON 位
-    	RCC->CR &= (uint32_t)0xFEF6FFFF;
+        RCC->CR &= (uint32_t)0xFEF6FFFF;
         // 复位 HSEBYP 位
-    	RCC->CR &= (uint32_t)0xFFFBFFFF;
+        RCC->CR &= (uint32_t)0xFFFBFFFF;
         // 复位 PLLSRC, PLLXTPRE, PLLMUL[3:0] and USBPRE 位
-    	RCC->CFGR &= (uint32_t)0xFF80FFFF;
+        RCC->CFGR &= (uint32_t)0xFF80FFFF;
         // 禁止所有中断
-    	RCC->CIR = 0x00000000;
+        RCC->CIR = 0x00000000;
 
         //step2:设置各时钟控制位以及倍频、分频值
-    	RCC->CFGR = cn_cfgr_set+(7<<24);   // set clock configuration register
-    	RCC->CR   = cn_cr_set;     // set clock control register
+        RCC->CFGR = cn_cfgr_set+(7<<24);   // set clock configuration register
+        RCC->CR   = cn_cr_set;     // set clock control register
 
         while(bb_rcc_cr_hserdy ==0);
         while(bb_rcc_cr_pllrdy ==0);
     }
     SRAM_Init();
-//    __LP_BSP_HardInit( );
-//    if( __LP_BSP_GetSleepLevel() == CN_SLEEP_L3)
-//    {
-//        __LP_BSP_RestoreRamL3();
+
+    __LP_BSP_HardInit( );   //本函数须连接到startup
+
+//  if( __LP_BSP_GetSleepLevel() == CN_SLEEP_L3)    //本函数须连接到startup
+//  {
+//      __LP_BSP_RestoreRamL3();    //此后，内存已经恢复，可以调用全部函数了。
 //
-//        HardExp_Init();
-//        Int_ContactTrunk();
-//        cm_cpsie_f();
+//      HardExp_Init();
+//      Int_ContactTrunk();
+//      cm_cpsie_f();
 //
-//        __asm_start_thread(g_ptEventRunning->vm);
-//    }
-//    else
+//      __asm_start_thread(g_ptEventRunning->vm);
+//  }
+//  else
 //      Load_Preload( );
+
     IAP_SelectLoadProgam();
+}
+
+extern void Load_Preload(void);
+void AppStart(void)
+{
+	__set_MSP((uint32_t)msp_top);
+	__set_PSP((uint32_t)msp_top);
+	Load_Preload();
 }
 
 
 //-----------------------------------------------------------------
-//功能：IAP组件控制运行模式的GPIO引脚初始化SW4-GPIOC_10
+//功能：IAP组件控制运行模式所需的GPIO引脚初始化，由于此时系统还没有加载，只能使
+//      用直接地址操作，不能调用gpio相关的库函数。
+//      如果不是使用gpio做标志，本函数不是必须，可删掉。
 //参数：无
 //返回：无。
-//说明： 具体选择哪个引脚由具体板件确定，选择何种电平对应何种运行状态也随板件确定。
-//选择原则是：该GPIO引脚正常情况下不起作用，只有在APP程序出现异常跑飞，无法通过shell
-//命令切换到IBOOT状态时，才跳上跳线冒启用该GPIO引脚。具体是高电平运行Iboot还是低电平
-//运行IBOOT,由硬件决定。
-
+//-----------------------------------------------------------------
 void IAP_GpioPinInit(void)
 {
-//   bb_rcc_apb2enr_iopcen=1;//使能gpioc
-//   pg_gpio_regc->CRH  =(pg_gpio_regc->CRH &(~(0xf <<((10-8)<<2))))
-//                                  | ((CN_GPIO_MODE_IN_PULLUP & 0xf)<< ((10-8)<<2));
-//   pg_gpio_regc->BSRR = 1<<10;//上拉输入
-//     GPIO_PowerOn(CN_GPIO_C);
-//     GPIO_CfgPinFunc(CN_GPIO_C, 10, CN_GPIO_MODE_IN_PULLUP);
 }
 
+//-----------------------------------------------------------------
+//功能：由硬件决定是否强制进入Iboot，若此函数返回TRUE，则强制运行Iboot。通常会使
+//      用一个gpio，通过跳线决定。
+//      正常情况下，如果正在运行APP，是可以用runiboot命令切换到Iboot状态的，设置
+//      此硬件的目的有二：
+//     1、在严重异常错误，不能用shell切换时，提供一个补救措施。
+//     2、出于安全考虑，APP中没有包含切换代码，或者由于资源的关系，裁掉了shell。
+//参数：无
+//返回：无。
+//说明：本函数所涉及到的硬件，须在本文件中初始化，特别需要注意的是，不允许调用未
+//      加载的函数，特别是库函数。
+//      本函数必须提供，如果没有设置相应硬件，可以简单返回false。
+//-----------------------------------------------------------------
 bool_t IAP_IsForceIboot(void)
 {
 //    u32 flag;
+//    IAP_GpioPinInit( );
 //    flag=pg_gpio_regc->IDR&(1<<10);
 //    if(flag==0)
 //        return false;
 //    return true;
-	return false;
+
+    return false;
 
 }
 
-
-bool_t IAP_IsRamIbootFlag(void)
-{
-    u8 i;
-    char bootflag[8]="RunIboot";
-    for(i=0;i<8;i++)
-    {
-        if(g_cIbootFlag[i]!=bootflag[i])
-        {
-            return false;
-        }
-    }
-    return true;
-}

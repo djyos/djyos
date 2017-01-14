@@ -47,19 +47,35 @@
 #include "string.h"
 #include "IAP.h"
 #include <cfg/iboot_config.h>
+#include "stddef.h"
+#include "cpu_peri.h"
 
-extern const u8 g_IbootType  ;
-
-extern u32 g_bRunModeFlag;
+static const Pin RUN_LED[] = {
+		{PIO_PA20,PIOA,ID_PIOA,PIO_OUTPUT_0,PIO_DEFAULT}
+};
 //系统升级用
 ptu32_t djy_main(void)
 {
-	bool_t result;
-	g_bRunModeFlag=0x12345678;
-	printf("Run Mode:Iboot.\r\n");
+	bool_t ret=true;
+	extern void Sh_GetStatus(char *param);
+	extern void Sh_GetRunMode(char *param);
+	Sh_GetRunMode(NULL);
+	Sh_GetStatus(NULL);
+	PIO_Configure(RUN_LED,  PIO_LISTSIZE(RUN_LED));
+
 	while(1)
 	{
-		Djy_EventDelay(500*mS);
+		if(ret)
+		{
+			PIO_Set(&RUN_LED);
+			ret=false;
+		}
+		else
+		{
+			PIO_Clear(&RUN_LED);
+			ret=true;
+		}
+		Djy_EventDelay(2000*mS);
 	}
 	return 0;
 }

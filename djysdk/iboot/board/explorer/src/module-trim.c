@@ -58,6 +58,8 @@
 #include "lowpower.h"
 #include "list.h"
 #include "..\heap\heap-in.h"
+#include "ymodem.h"
+
 extern ptu32_t ModuleInstall_DebugInfo(ptu32_t para);
 
 
@@ -115,10 +117,7 @@ void Sys_ModuleInit(void)
     Stdio_KnlInOutInit( 0 );
    //shell模块,依赖:无
     ModuleInstall_Sh(0);
-    //文件系统模块,依赖:shell
-#if 0
-    ModuleInstall_Djyfs(0);
-#endif
+
     //设备驱动模块
     ModuleInstall_Driver(0);
     //多路复用模块,提供类似Linux的epoll、select的功能
@@ -131,21 +130,12 @@ void Sys_ModuleInit(void)
 
     //异常监视模块,依赖:shell模块
     ModuleInstall_Exp(0);
-#if 0
-    //flash文件系统初始化,依赖:文件系统模块,shell模块
-//    ModuleInstall_DFFSD(0);
-    //nand flash驱动,依赖:flash文件系统模块
-//    ModuleInstall_FsNandFlash(0);
-    //设置工作路径,依赖:文件系统,且相关路径存在.
-//    Djyfs_SetWorkPath(gc_pCfgWorkPath);
-#else
 //    ModuleInstall_SD("sd", 0);
 //   ModuleInstall_NAND("nand", 1, 0);
    	ModuleInstall_FileSystem();
 //   	ModuleInstall_YAFFS2();
 //   	ModuleInstall_FAT();
-   	ModuleInstall_BootFS();
-#endif
+
 
     ModuleInstall_UART(CN_UART1);
     ModuleInstall_UART(CN_UART2);
@@ -171,8 +161,7 @@ void Sys_ModuleInit(void)
     //安装人机交互输入模块，例如键盘、鼠标等
     ModuleInstall_HmiIn( 0 );
 
-    extern ptu32_t ModuleInstall_Ymodem(struct DjyDevice *para);
-    ModuleInstall_Ymodem(NULL);
+    ModuleInstall_Ymodem(0);
 	Ymodem_PathSet("/iboot");
     ModuleInstall_IAP();
 
@@ -189,8 +178,7 @@ void Sys_ModuleInit(void)
 //    ModuleInstall_RTC(0);
 
     //定时器组件
-    extern ptu32_t ModuleInstall_TimerSoft(ptu32_t para);
-//    ModuleInstall_TimerSoft(CN_TIMER_SOURCE_TICK);
+//    ModuleInstall_Timer(CN_TIMER_SOURCE_TICK);
 //
    //网络协议栈组件
 //    extern ptu32_t ModuleInstall_DjyIp(ptu32_t para);

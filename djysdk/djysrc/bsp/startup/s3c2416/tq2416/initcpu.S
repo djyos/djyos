@@ -176,6 +176,66 @@ copy_isr_table:
 	nop
 	b	.
 
+.section .text.AppStart, "ax", %progbits
+.align  2
+.global AppStart
+AppStart:
+    mov     r0,#0
+    mcr     p15,0,r0,c7,c7,0    //Invalidate I+D Cache
+    mcr     p15,0,r0,c8,c7,0    //Invalidate I+D TLB
+
+    mrs     r0, cpsr                //取CPSR
+    bic     r0, r0, #SF_MODEMASK    //清模式位
+    orr     r1, r0, #(SF_SVCMODE|SF_IRQ_BIT|SF_FIQ_BIT) //设置为管理态，并禁止中断
+    msr     cpsr,r1
+    nop
+    ldr     r0,=0xFFFF0000          //设置中断向量表
+    ldr     r1,=isr_vector
+    ldr     r2,=isr_vector_end
+appcopy_isr_table:
+    ldmia   r1!,{r4-r7}
+    stmia   r0!,{r4-r7}
+    cmp     r1,r2
+    bcc     appcopy_isr_table
+    nop
+    nop
+   //// 初始化栈指针
+    mov     r1,#SF_UNDEFMODE|SF_IRQ_BIT|SF_FIQ_BIT
+    msr     cpsr_cxsf,r1        //UndefMode
+    ldr     sp,=undef_top
+    bic     sp,sp,#0x07
+
+    mov     r1,#SF_ABORTMODE|SF_IRQ_BIT|SF_FIQ_BIT
+    msr     cpsr_cxsf,r1        //AbortMode
+    ldr     sp,=abort_top
+    bic     sp,sp,#0x07
+
+    mov     r1,#SF_IRQMODE|SF_IRQ_BIT|SF_FIQ_BIT
+    msr     cpsr_cxsf,r1        //IRQMode
+    ldr     sp,=irq_top
+    bic     sp,sp,#0x07
+
+    mov     r1,#SF_FIQMODE|SF_IRQ_BIT|SF_FIQ_BIT
+    msr     cpsr_cxsf,r1        //FIQMode
+    ldr     sp,=fiq_top
+    bic     sp,sp,#0x07
+
+    mov     r1,#SF_SVCMODE|SF_IRQ_BIT|SF_FIQ_BIT
+    msr     cpsr_cxsf,r1        //SVCMode
+    ldr     sp,=svc_top
+    bic     sp,sp,#0x07
+
+    mov     r1,#SF_SYSMODE|SF_IRQ_BIT|SF_FIQ_BIT
+    msr     cpsr_cxsf,r1        //SYSMode
+    ldr     sp,=usr_top
+    bic     sp,sp,#0x07
+    nop
+    nop
+    bl      Load_Preload
+    nop
+    nop
+    b   .
+
 ////////////////////////////
 
 init_clock:

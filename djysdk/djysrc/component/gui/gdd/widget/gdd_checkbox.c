@@ -61,7 +61,7 @@
 //------------------------------------------------------
 #include    "gdd.h"
 #include    <gui/gdd/gdd_private.h>
-#include    <widget.h>
+#include    <gdd_widget.h>
 
 
 //----CheckBox绘制函数----------------------------------------------------------
@@ -147,12 +147,12 @@ static  bool_t CheckBox_Paint(struct WindowMsg *pMsg)
 }
 
 
-//----左键选中响应函数---------------------------------------------------------
+//----CheckBox选中响应函数---------------------------------------------------------
 //功能：略
 //参数：pMsg，消息指针
 //返回：固定true
 //-----------------------------------------------------------------------------
-static bool_t CheckBoxL_Down(struct WindowMsg *pMsg)
+static bool_t CheckBox_Down(struct WindowMsg *pMsg)
 {
      HWND hwnd;
      hwnd =pMsg->hwnd;
@@ -175,12 +175,12 @@ static bool_t CheckBoxL_Down(struct WindowMsg *pMsg)
 
 }
 
-//----左键不选中响应函数---------------------------------------------------------
+//----CheckBox不选中响应函数---------------------------------------------------------
 //功能：略
 //参数：pMsg，消息指针
 //返回：固定true
 //-----------------------------------------------------------------------------
-static bool_t CheckBoxL_Up(struct WindowMsg *pMsg)
+static bool_t CheckBox_Up(struct WindowMsg *pMsg)
 {
      return true;
 }
@@ -188,9 +188,11 @@ static bool_t CheckBoxL_Up(struct WindowMsg *pMsg)
 //默认复选框消息处理函数表，处理用户函数表中没有处理的消息。
 static struct MsgProcTable s_gCheckBoxMsgProcTable[] =
 {
-    {MSG_LBUTTON_DOWN,CheckBoxL_Down},
-    {MSG_LBUTTON_UP,CheckBoxL_Up},
-    {MSG_PAINT,CheckBox_Paint}
+    {MSG_LBUTTON_DOWN,CheckBox_Down},
+    {MSG_LBUTTON_UP,CheckBox_Up},
+    {MSG_PAINT,CheckBox_Paint},
+	{MSG_TOUCH_DOWN,CheckBox_Down},
+	{MSG_TOUCH_UP,CheckBox_Up}
 };
 
 static struct MsgTableLink  s_gCheckBoxMsgLink;

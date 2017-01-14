@@ -42,6 +42,7 @@
 // 于替代商品或劳务之购用、使用损失、资料损失、利益损失、业务中断等等），
 // 不负任何责任，即在该种使用已获事前告知可能会造成此类损害的情形下亦然。
 //-----------------------------------------------------------------------------
+#include "stddef.h"
 #include "os.h"
 #include "cpu_peri.h"
 #include "string.h"
@@ -83,9 +84,10 @@ void led_init(void)
 
 ptu32_t djy_main(void)
 {
-	extern u32 g_bRunModeFlag;
-	g_bRunModeFlag=0x12345678;
-	printf("Run Mode:Iboot.\r\n");
+	extern void Sh_GetStatus(char *param);
+	extern void Sh_GetRunMode(char *param);
+	Sh_GetRunMode(NULL);
+	Sh_GetStatus(NULL);
 
 	led_init();
 	while(1)

@@ -263,7 +263,7 @@ bool_t ModuleInstall_TOUCH_S3C2440(struct GkWinRsc *desktop,const char *touch_de
     }
     touch_ratio_adjust(desktop);
     touch_dev.read_touch = read_touch_data;
-    touch_dev.touch_loc.display = NULL;
+    touch_dev.touch_loc.display = NULL;     //NULL表示用默认桌面
     Touch_InstallDevice(touch_dev_name,&touch_dev);
     return true;
 }

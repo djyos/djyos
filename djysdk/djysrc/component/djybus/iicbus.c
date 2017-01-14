@@ -107,10 +107,10 @@ struct IIC_CB *IIC_BusAdd(struct IIC_Param *NewIICParam)
         goto exit_from_add_node;
 
     //创建总线信号量和缓冲区信号量
-    NewIIC->IIC_BusSemp= Lock_SempCreate(1,1,CN_SEMP_BLOCK_FIFO,"iic bus semp");
+    NewIIC->IIC_BusSemp= Lock_SempCreate(1,1,CN_BLOCK_FIFO,"iic bus semp");
     if(NewIIC->IIC_BusSemp== NULL)
         goto exit_from_iic_bus_semp;
-    NewIIC->IIC_BufSemp = Lock_SempCreate(1,0,CN_SEMP_BLOCK_FIFO,"iic buf semp");
+    NewIIC->IIC_BufSemp = Lock_SempCreate(1,0,CN_BLOCK_FIFO,"iic buf semp");
     if(NewIIC->IIC_BufSemp== NULL)
         goto exit_from_iic_buf_semp;
 
@@ -168,10 +168,10 @@ struct IIC_CB *IIC_BusAdd_s(struct IIC_CB *NewIIC,struct IIC_Param *NewIICParam)
         goto exit_from_add_node;
 
     //创建总线信号量和缓冲区信号量
-    NewIIC->IIC_BusSemp= Lock_SempCreate(1,1,CN_SEMP_BLOCK_FIFO,"iic bus semp");
+    NewIIC->IIC_BusSemp= Lock_SempCreate(1,1,CN_BLOCK_FIFO,"iic bus semp");
     if(NewIIC->IIC_BusSemp== NULL)
         goto exit_from_iic_bus_semp;
-    NewIIC->IIC_BufSemp = Lock_SempCreate(1,0,CN_SEMP_BLOCK_FIFO,"iic buf semp");
+    NewIIC->IIC_BufSemp = Lock_SempCreate(1,0,CN_BLOCK_FIFO,"iic buf semp");
     if(NewIIC->IIC_BufSemp== NULL)
         goto exit_from_iic_buf_semp;
 

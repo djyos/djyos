@@ -62,19 +62,49 @@
 #ifndef __GDD_WIDGET_H__
 #define __GDD_WIDGET_H__
 
+#include    <widget/gdd_button.h>
+#include    <widget/gdd_label.h>
+#include    <widget/gdd_progressbar.h>
+#include    <widget/gdd_checkbox.h>
+#include    <widget/gdd_listbox.h>
+#include    <widget/gdd_listview.h>
+#include    <widget/gdd_textbox.h>
+#include    <widget/gdd_keyboard.h>
+#include    <widget/gdd_qurcode.h>
+
+//#include    <widget/gdd_richtextbox.h>
 #if __cplusplus
 extern "C" {
 #endif
-#include    "gdd.h"
 
-#include "gdd_button.h"
-#include "gdd_checkbox.h"
-#include "gdd_label.h"
-#include "gdd_listview.h"
-#include "gdd_progressbar.h"
-#include "gdd_textbox.h"
+struct WidgetSize
+{
+	u16 height;     //高像素
+	u16 width;      //宽像素
+};
 
 
+struct WidgetLoc
+{
+    u16 x;
+    u16 y;
+};
+
+struct WidgetAttr
+{
+	struct WidgetSize size;
+	struct WidgetLoc  location;
+};
+
+/*============================================================================*/
+///定义控件通用属性
+#define WGT_SIZE_ATTR                    0x00
+#define WGT_LOC_ATTR                     0x01
+#define WGT_VISIBLE_ATTR               0x02
+#define WGT_FILLCOLOR_ATTR          0x03
+#define WGT_DRAWCOLOR_ATTR       0x04
+#define WGT_TEXTCOLOR_ATTR        0X05
+#define WGT_TEXT_ATTR                   0x06
 
 
 #if __cplusplus

@@ -417,11 +417,11 @@ static void Enet_IntInit(ufast_t IntLine,u32 (*isr)(ufast_t))
 {
     if(true == Int_Register(IntLine))
     {
-    	Int_Register(IntLine);
-		Int_IsrConnect(IntLine,isr);
-		Int_SettoAsynSignal(IntLine);
-		Int_ClearLine(IntLine);
-		Int_ContactLine(IntLine);
+        Int_Register(IntLine);
+        Int_IsrConnect(IntLine,isr);
+        Int_SettoAsynSignal(IntLine);
+        Int_ClearLine(IntLine);
+        Int_ContactLine(IntLine);
     }
 }
 
@@ -520,11 +520,11 @@ static void Enet_MAC_Init(void)
     ENET->GAUR = 0;
 
     __Enet_MAC_AddrSet(s_EnetConfig.mac);   // Set the Physical Address
-    ENET->EIMR = ENET_EIMR_RXF_MASK			// Enable RX and err interrupts
-    			| ENET_EIMR_BABR_MASK
-				| ENET_EIMR_BABT_MASK
-				| ENET_EIMR_EBERR_MASK
-				| ENET_EIMR_UN_MASK;
+    ENET->EIMR = ENET_EIMR_RXF_MASK         // Enable RX and err interrupts
+                | ENET_EIMR_BABR_MASK
+                | ENET_EIMR_BABT_MASK
+                | ENET_EIMR_EBERR_MASK
+                | ENET_EIMR_UN_MASK;
     ENET->EIR = 0xFFFFFFFF;                 // Clear all FEC interrupt events
 
     // Initialize the Receive Control Register
@@ -640,34 +640,34 @@ static tagNetPkg *__Enet_RcvPacket(ptu32_t handle)
 
     }
 
-	LastBuffer = 0;
-	RxBdIndex = sNextRxBd;
-	while(!LastBuffer)                             //是否为该Frame的最后一个BD项
-	{
-		status = spRxBdTab[RxBdIndex].status;
-		len = ENET_REVSH(spRxBdTab[RxBdIndex].length);
-		len = (length > len) ? len : length;
-		length -= len;
+    LastBuffer = 0;
+    RxBdIndex = sNextRxBd;
+    while(!LastBuffer)                             //是否为该Frame的最后一个BD项
+    {
+        status = spRxBdTab[RxBdIndex].status;
+        len = ENET_REVSH(spRxBdTab[RxBdIndex].length);
+        len = (length > len) ? len : length;
+        length -= len;
 
         //--TODO, this code has something err, you could't memcpy when
         //        there is no pkg for you~!
-		if(len > 0)
-		{
-			memcpy(rcvbuf,(uint8_t *)ENET_REV((u32)spRxBdTab[RxBdIndex].data),len);
-			rcvbuf = rcvbuf + len;
-		}
-		if(status & RX_BD_W)
-		{
-			spRxBdTab[RxBdIndex].status = (RX_BD_W | RX_BD_E);
-			RxBdIndex = 0;
-		}
-		else
-		{
-			spRxBdTab[RxBdIndex].status = RX_BD_E;
-			RxBdIndex++;
-		}
-		LastBuffer = (status & RX_BD_L);
-	}
+        if(len > 0)
+        {
+            memcpy(rcvbuf,(uint8_t *)ENET_REV((u32)spRxBdTab[RxBdIndex].data),len);
+            rcvbuf = rcvbuf + len;
+        }
+        if(status & RX_BD_W)
+        {
+            spRxBdTab[RxBdIndex].status = (RX_BD_W | RX_BD_E);
+            RxBdIndex = 0;
+        }
+        else
+        {
+            spRxBdTab[RxBdIndex].status = RX_BD_E;
+            RxBdIndex++;
+        }
+        LastBuffer = (status & RX_BD_L);
+    }
 
     sNextRxBd = RxBdIndex;                     // 更新读NEXT BD表标志
     ENET->RDAR = ENET_RDAR_RDAR_MASK;           // 更新RX BD列表
@@ -687,7 +687,7 @@ u32 Enet_RxISR(ufast_t IntLine)
     ENET->EIR = ENET_EIR_RXF_MASK;                      // 清中断标志位
     if(event & ENET_EIR_RXF_MASK)
     {
-    	Lock_SempPost(pEnetRcvSync);
+        Lock_SempPost(pEnetRcvSync);
     }
     return 0;
 }
@@ -701,10 +701,10 @@ u32 Enet_ErrISR(ufast_t IntLine)
 {
     u32 event;
 
-    event = ENET->EIR;         				// 获取中断寄存器
-    ENET->EIR = event;          			// 清中断标志位
+    event = ENET->EIR;                      // 获取中断寄存器
+    ENET->EIR = event;                      // 清中断标志位
 
-	ENET_DBG("ENET error occurred, event = %8x !\r\n" ,event);
+    ENET_DBG("ENET error occurred, event = %8x !\r\n" ,event);
 
     return 0;
 }
@@ -735,56 +735,56 @@ static bool_t Enet_SendPacket(ptu32_t hanlde,tagNetPkg * pkglst,u32 framlen, u32
 
     if(Lock_MutexPend(pEnetSndSync,CN_TIMEOUT_FOREVER))
     {
-		TxBdIndex = sNextTxBd;
+        TxBdIndex = sNextTxBd;
 
-		if( !(spTxBdTab[TxBdIndex].status & TX_BD_R) )		//当前BD已准备就绪
-		{
-			dst = (u8 *)ENET_REV((u32)spTxBdTab[TxBdIndex].data);
+        if( !(spTxBdTab[TxBdIndex].status & TX_BD_R) )      //当前BD已准备就绪
+        {
+            dst = (u8 *)ENET_REV((u32)spTxBdTab[TxBdIndex].data);
 
             pkglen = 0;
             len =0;
-			tmppkg = pkglst;
-			do{
-				//拷贝数据
-				src = (tmppkg->buf + tmppkg->offset);
-				len = tmppkg->datalen;
-				memcpy((void *)dst,(void *)src,len);
-				dst += len;
-				pkglen+=len;
-				if(pkglen > TX_BUFFER_SIZE)
-				{
-					break;//溢出
-				}
+            tmppkg = pkglst;
+            do{
+                //拷贝数据
+                src = (tmppkg->buf + tmppkg->offset);
+                len = tmppkg->datalen;
+                memcpy((void *)dst,(void *)src,len);
+                dst += len;
+                pkglen+=len;
+                if(pkglen > TX_BUFFER_SIZE)
+                {
+                    break;//溢出
+                }
 
-				if(PKG_ISLISTEND(tmppkg))
-				{
-					tmppkg = NULL;
-					break;
-				}
-				else
-				{
-					tmppkg = tmppkg->partnext;
-				}
-			}while(tmppkg != NULL);
+                if(PKG_ISLISTEND(tmppkg))
+                {
+                    tmppkg = NULL;
+                    break;
+                }
+                else
+                {
+                    tmppkg = tmppkg->partnext;
+                }
+            }while(tmppkg != NULL);
 
-	        spTxBdTab[TxBdIndex].status = TX_BD_TC | TX_BD_R | TX_BD_L;
-	        spTxBdTab[TxBdIndex].length = ENET_REVSH(pkglen);
+            spTxBdTab[TxBdIndex].status = TX_BD_TC | TX_BD_R | TX_BD_L;
+            spTxBdTab[TxBdIndex].length = ENET_REVSH(pkglen);
 
-	        // Wrap if this was last TxBD
-	        if(++TxBdIndex == NUM_TXBDS)
-	        {
-	            spTxBdTab[NUM_TXBDS - 1].status |= TX_BD_W;
-	            TxBdIndex = 0;
-	        }
+            // Wrap if this was last TxBD
+            if(++TxBdIndex == NUM_TXBDS)
+            {
+                spTxBdTab[NUM_TXBDS - 1].status |= TX_BD_W;
+                TxBdIndex = 0;
+            }
 
-	        // Update the global txbd index
-	        sNextTxBd = TxBdIndex;
+            // Update the global txbd index
+            sNextTxBd = TxBdIndex;
 
-	        // Indicate that Descriptors are ready to transmit
-	        ENET->TDAR = ENET_TDAR_TDAR_MASK;
+            // Indicate that Descriptors are ready to transmit
+            ENET->TDAR = ENET_TDAR_TDAR_MASK;
 
-	        result = true;
-		}
+            result = true;
+        }
         else
         {
             //no bd here
@@ -878,7 +878,7 @@ static bool_t Enet_AddNetDev(void)
     tagNetDevPara   devpara;
 
     //创建发送和接收同步量
-    pEnetRcvSync = Lock_SempCreate(1,1,CN_SEMP_BLOCK_FIFO,NULL);
+    pEnetRcvSync = Lock_SempCreate(1,1,CN_BLOCK_FIFO,NULL);
     if(NULL == pEnetRcvSync)
     {
         goto RcvSyncFailed;
@@ -911,16 +911,16 @@ static bool_t Enet_AddNetDev(void)
     return true;
 
 RcvTaskFailed:
-	NetDevUninstall(s_EnetConfig.name);
+    NetDevUninstall(s_EnetConfig.name);
 NetInstallFailed:
-	Lock_MutexDelete(pEnetSndSync);
-	pEnetSndSync = NULL;
+    Lock_MutexDelete(pEnetSndSync);
+    pEnetSndSync = NULL;
 SndSyncFailed:
-	Lock_SempDelete(pEnetRcvSync);
-	pEnetRcvSync = NULL;
+    Lock_SempDelete(pEnetRcvSync);
+    pEnetRcvSync = NULL;
 RcvSyncFailed:
-	printf("%s:Install gmac failed\n\r",__FUNCTION__);
-	return false;
+    printf("%s:Install gmac failed\n\r",__FUNCTION__);
+    return false;
 }
 
 
@@ -934,7 +934,7 @@ bool_t ModuleInstall_Enet(ptu32_t para)
     bool_t result = false;
 
     if(para == (u32)NULL)
-    	return false;
+        return false;
 
     memcpy(&s_EnetConfig,(u8*)para,sizeof(tagEnetCfg));
 

@@ -20,6 +20,8 @@ int      _EXFUN(memcmp,(const _PTR, const _PTR, size_t));
 _PTR     _EXFUN(memcpy,(_PTR __restrict, const _PTR __restrict, size_t));
 _PTR     _EXFUN(memmove,(_PTR, const _PTR, size_t));
 _PTR     _EXFUN(memset,(_PTR, int, size_t));
+_PTR     _EXFUN(memset16,(_PTR, u16, size_t));
+_PTR     _EXFUN(memset32,(_PTR, u32, size_t));
 char    *_EXFUN(strcat,(char *__restrict, const char *__restrict));
 char    *_EXFUN(strchr,(const char *, int));
 int  _EXFUN(strcmp,(const char *, const char *));

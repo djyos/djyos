@@ -93,7 +93,8 @@ struct Object *__Lock_RscAddLockTree(struct Object *Obj,
 extern void __Djy_EventReady(struct EventECB *event_ready);
 extern void __Djy_CutReadyEvent(struct EventECB *event);
 extern void __Djy_ResumeDelay(struct EventECB *delay_event);
-extern void ___Djy_AddToDelay(u32 u32l_uS);
+extern void __Djy_AddToDelay(u32 u32l_uS);
+extern void __Djy_AddRunningToBlock(struct EventECB **Head,bool_t Qsort,u32 timeout,u32 Status);
 
 //----初始化锁模块模块step1----------------------------------------------------
 //功能：初始化信号量模块的第一步，此后可以调用除semp_create和mutex_create以外的
@@ -139,9 +140,9 @@ ptu32_t ModuleInstall_Lock2(ptu32_t para)
 //功能：建立一个信号量，以后就可以使用这个信号量了。信号量控制块从内存池中分配。
 //参数：semp_limit,信号灯的总数，cn_limit_uint32=有无限多的信号灯。
 //      init_lamp,初始信号灯数量
+//      sync_order,被阻塞的事件排队顺序，取值为 CN_BLOCK_FIFO
+//          或 CN_BLOCK_PRIO，注意，互斥量总是以优先级排队。
 //      name，信号量的名字，所指向的字符串内存区不能是局部变量，可以是空
-//      sync_order,被阻塞的事件排队顺序，取值为 CN_SEMP_BLOCK_FIFO
-//          或 CN_SEMP_BLOCK_PRIO
 //返回：新建立的信号量指针
 //-----------------------------------------------------------------------------
 struct SemaphoreLCB *Lock_SempCreate(u32 lamps_limit,u32 init_lamp,
@@ -171,6 +172,8 @@ struct SemaphoreLCB *Lock_SempCreate(u32 lamps_limit,u32 init_lamp,
 //参数：semp,目标信号量指针
 //      semp_limit,信号灯的总数，cn_limit_uint32=有无限多的信号灯。
 //      init_lamp,初始信号灯数量
+//      sync_order,被阻塞的事件排队顺序，取值为 CN_BLOCK_FIFO
+//          或 CN_BLOCK_PRIO，注意，互斥量总是以优先级排队。
 //      name，信号量的名字，所指向的字符串内存区不能是局部变量，可以是空
 //返回：新建立的信号量指针
 //-----------------------------------------------------------------------------
@@ -237,8 +240,8 @@ void Lock_SempPost(struct SemaphoreLCB *semp)
 //----请求一盏信号灯-----------------------------------------------------------
 //功能：请求然后熄灭一盏信号灯，表示可用资源数减1。
 //参数：semp,信号量指针
-//      timeout，超时设置,单位是微秒，cn_timeout_forever=无限等待，0则立即按
-//      超时返回。非0值将被向上调整为cn_tick_us的整数倍
+//      timeout，超时设置,单位是微秒，CN_TIMEOUT_FOREVER=无限等待，0则立即按
+//      超时返回。非0值将被向上调整为CN_CFG_TICK_US的整数倍
 //返回：true=取得信号返回或资源不受信号灯保护(semp == NULL)，semp==NULL时返回
 //      true是有意义的，如果你希望代码在不管是否受信号灯保护都保持一致，把semp
 //      设为NULL是明智的选择，比如你要构建一个不受信号灯保护的设备，可把该设备
@@ -283,51 +286,53 @@ bool_t Lock_SempPend(struct SemaphoreLCB *semp,u32 timeout)
         return false;   //没有取得信号灯返回
     }
 
-    __Djy_CutReadyEvent(g_ptEventRunning);
-    g_ptEventRunning->previous = NULL;
-    g_ptEventRunning->next = NULL;
+    __Djy_AddRunningToBlock(&(semp->semp_sync),semp->sync_order,timeout,CN_STS_WAIT_SEMP);
+//  __Djy_CutReadyEvent(g_ptEventRunning);
+//  g_ptEventRunning->previous = NULL;
+//  g_ptEventRunning->next = NULL;
+//
+//  g_ptEventRunning->sync_head = &semp->semp_sync;
+//  if(semp->semp_sync == NULL)
+//  {//同步队列空,running事件自成双向循环链表
+//      g_ptEventRunning->multi_next = g_ptEventRunning;
+//      g_ptEventRunning->multi_previous = g_ptEventRunning;
+//      semp->semp_sync = g_ptEventRunning;
+//  }else
+//  {
+//      event = semp->semp_sync;
+//      if(semp->sync_order == CN_BLOCK_PRIO)   //同步队列按优先级排序
+//      {
+//          do
+//          { //找到一个优先级低于新事件的事件.
+//              if(event->prio <= g_ptEventRunning->prio)
+//                  event = event->multi_next;
+//              else
+//                  break;
+//          }while(event != semp->semp_sync);
+//          g_ptEventRunning->multi_next = event;
+//          g_ptEventRunning->multi_previous = event->multi_previous;
+//          event->multi_previous->multi_next = g_ptEventRunning;
+//          event->multi_previous = g_ptEventRunning;
+//          if(semp->semp_sync->prio > g_ptEventRunning->prio)
+//              semp->semp_sync = semp->semp_sync->multi_previous;
+//      }else                               //按先后顺序，新事件直接排在队尾
+//      {
+//          g_ptEventRunning->multi_next = event;
+//          g_ptEventRunning->multi_previous = event->multi_previous;
+//          event->multi_previous->multi_next = g_ptEventRunning;
+//          event->multi_previous = g_ptEventRunning;
+//      }
+//  }
+//  if(timeout != CN_TIMEOUT_FOREVER)
+//  {
+//      //事件状态设为等待信号量 +  超时
+//      g_ptEventRunning->event_status = CN_STS_WAIT_SEMP + CN_STS_SYNC_TIMEOUT;
+//      __Djy_AddToDelay(timeout);
+//  }else
+//  {
+//      g_ptEventRunning->event_status = CN_STS_WAIT_SEMP;  //事件状态设为等待信号量
+//  }
 
-    g_ptEventRunning->sync_head = &semp->semp_sync;
-    if(semp->semp_sync == NULL)
-    {//同步队列空,running事件自成双向循环链表
-        g_ptEventRunning->multi_next = g_ptEventRunning;
-        g_ptEventRunning->multi_previous = g_ptEventRunning;
-        semp->semp_sync = g_ptEventRunning;
-    }else
-    {
-        event = semp->semp_sync;
-        if(semp->sync_order == CN_SEMP_BLOCK_PRIO)   //同步队列按优先级排序
-        {
-            do
-            { //找到一个优先级低于新事件的事件.
-                if(event->prio <= g_ptEventRunning->prio)
-                    event = event->multi_next;
-                else
-                    break;
-            }while(event != semp->semp_sync);
-            g_ptEventRunning->multi_next = event;
-            g_ptEventRunning->multi_previous = event->multi_previous;
-            event->multi_previous->multi_next = g_ptEventRunning;
-            event->multi_previous = g_ptEventRunning;
-            if(semp->semp_sync->prio > g_ptEventRunning->prio)
-                semp->semp_sync = semp->semp_sync->multi_previous;
-        }else                               //按先后顺序，新事件直接排在队尾
-        {
-            g_ptEventRunning->multi_next = event;
-            g_ptEventRunning->multi_previous = event->multi_previous;
-            event->multi_previous->multi_next = g_ptEventRunning;
-            event->multi_previous = g_ptEventRunning;
-        }
-    }
-    if(timeout != CN_TIMEOUT_FOREVER)
-    {
-        //事件状态设为等待信号量 +  超时
-        g_ptEventRunning->event_status = CN_STS_WAIT_SEMP + CN_STS_SYNC_TIMEOUT;
-        ___Djy_AddToDelay(timeout);
-    }else
-    {
-        g_ptEventRunning->event_status = CN_STS_WAIT_SEMP;  //事件状态设为等待信号量
-    }
     Int_RestoreAsynSignal();  //恢复中断，将触发上下文切换
     //检查从哪里返回，是超时还是同步事件完成。
     if(g_ptEventRunning->wakeup_from & CN_STS_SYNC_TIMEOUT)
@@ -451,7 +456,7 @@ bool_t Lock_SempCheckBlock(struct SemaphoreLCB *Semp)
 //      的事件的优先级排序。信号量初创建的时候，默认是按优先级排序的。
 //      该设置只影响调用本函数后加入队列的事件，原来在队列中的事件不受影响。
 //参数: semp: 被设置的信号量
-//      order: CN_SEMP_BLOCK_PRIO=优先级排队，sort_time=先后顺序排队
+//      order: CN_BLOCK_PRIO=优先级排队，sort_time=先后顺序排队
 //返回: 无
 //-----------------------------------------------------------------------------
 void Lock_SempSetSyncSort(struct SemaphoreLCB *semp,u32 order)
@@ -475,7 +480,7 @@ struct MutexLCB *Lock_MutexCreate(const char *name)
         return NULL;
     mutex->enable = 0;   //互斥量的初始状态是可用的,否则必须指定onwer
     mutex->mutex_sync = NULL;
-    mutex->prio_bak = CN_PRIO_INVALID;
+//  mutex->prio_bak = CN_PRIO_INVALID;
     mutex->owner = NULL;
     //把新节点挂到信号量根节点下
     OBJ_AddChild(pg_mutex_rsc,&mutex->node,
@@ -498,7 +503,7 @@ struct MutexLCB *Lock_MutexCreate_s( struct MutexLCB *mutex,const char *name)
         return NULL;
     mutex->enable = 0;   //互斥量的初始状态是可用的,否则必须指定onwer
     mutex->mutex_sync = NULL;
-    mutex->prio_bak = CN_PRIO_INVALID;
+//  mutex->prio_bak = CN_PRIO_INVALID;
     mutex->owner = NULL;
     //把新节点挂到信号量根节点下
     OBJ_AddChild(pg_mutex_rsc,&mutex->node,
@@ -565,21 +570,10 @@ void Lock_MutexPost(struct MutexLCB *mutex)
                 __Djy_ResumeDelay(event);    //如果事件在超时等待队列中，取出
             event->event_status = CN_STS_EVENT_READY;
             event->wakeup_from = CN_STS_WAIT_MUTEX;
+//          if( (mutex->prio_bak != CN_PRIO_INVALID)  //该互斥量发生了优先级继承
+//             ||(!Djy_IsEventPrioChanged(event->event_id))) //且无主动改变优先级
+            Djy_RestorePrio( );
             __Djy_EventReady(event);
-            if(mutex->prio_bak != CN_PRIO_INVALID)  //该互斥量发生了优先级继承
-            {
-                //如果发生优先级继承后，事件又自己改变了优先级，则条件不会成立，
-                //因为改优先级是用户自己的行为，此时OS不能擅作主张为其恢复优先级
-                //有一个特例，就是用户恰好改到被继承的优先级，此时无法识别。
-                if(g_ptEventRunning->prio == event->prio)
-                {
-                    __Djy_CutReadyEvent(g_ptEventRunning);  //取出running事件
-                    g_ptEventRunning->prio = mutex->prio_bak;   //恢复优先级
-                     //重新把running插入就绪队列(新位置)
-                    __Djy_EventReady(g_ptEventRunning);
-                }
-                mutex->prio_bak = CN_PRIO_INVALID;
-            }
         }
     }
     Int_RestoreAsynSignal();
@@ -590,8 +584,8 @@ void Lock_MutexPost(struct MutexLCB *mutex)
 //      间或事件与异步信号之间同步。只有存在owner成员，才能实现优先级继承。
 //      如果在异步信号中请求互斥量，则不会启动阻塞机制，也不会有优先级继承。
 //参数：mutex,互斥量指针
-//      timeout，超时设置,单位是微秒，cn_timeout_forever=无限等待，0则立即按
-//      超时返回。非0值将被向上调整为cn_tick_us的整数倍
+//      timeout，超时设置,单位是微秒，CN_TIMEOUT_FOREVER=无限等待，0则立即按
+//      超时返回。非0值将被向上调整为CN_CFG_TICK_US的整数倍
 //返回：true=取得信号返回或资源不受信号灯保护(mutex == NULL)，mutex==NULL时返回
 //      true是有意义的，如果你希望代码在不管是否受信号灯保护都保持一致，把semp
 //      设为NULL是明智的选择，比如你要构建一个不受信号灯保护的设备，可把该设备
@@ -641,7 +635,7 @@ bool_t Lock_MutexPend(struct MutexLCB *mutex,u32 timeout)
     {
         lamp = true;
         mutex->enable = 1;
-        mutex->prio_bak = CN_PRIO_INVALID;
+//      mutex->prio_bak = CN_PRIO_INVALID;
         mutex->owner = g_ptEventRunning;
     }else                       //信号灯不可用
     {
@@ -659,58 +653,52 @@ bool_t Lock_MutexPend(struct MutexLCB *mutex,u32 timeout)
         return false;   //没有取得互斥量返回
     }
 
-    __Djy_CutReadyEvent(g_ptEventRunning);
-    g_ptEventRunning->previous = NULL;
-    g_ptEventRunning->next = NULL;
+    __Djy_AddRunningToBlock(&(mutex->mutex_sync),CN_BLOCK_PRIO,timeout,CN_STS_WAIT_MUTEX);
+//  __Djy_CutReadyEvent(g_ptEventRunning);
+//  g_ptEventRunning->previous = NULL;
+//  g_ptEventRunning->next = NULL;
+//
+//  g_ptEventRunning->sync_head = &mutex->mutex_sync;
+//  if(mutex->mutex_sync == NULL)
+//  {//同步队列空,running事件自成双向循环链表
+//      g_ptEventRunning->multi_next = g_ptEventRunning;
+//      g_ptEventRunning->multi_previous = g_ptEventRunning;
+//      mutex->mutex_sync = g_ptEventRunning;
+//  }else
+//  {//同步队列非空,按优先级排序
+//      pl_ecb = mutex->mutex_sync;
+//      do
+//      { //找到一个优先级低于新事件的事件.
+//          if(pl_ecb->prio <= g_ptEventRunning->prio)
+//              pl_ecb = pl_ecb->multi_next;
+//          else
+//              break;
+//      }while(pl_ecb != mutex->mutex_sync);
+//      g_ptEventRunning->multi_next = pl_ecb;
+//      g_ptEventRunning->multi_previous = pl_ecb->multi_previous;
+//      pl_ecb->multi_previous->multi_next = g_ptEventRunning;
+//      pl_ecb->multi_previous = g_ptEventRunning;
+//      if(mutex->mutex_sync->prio > g_ptEventRunning->prio)
+//          mutex->mutex_sync = mutex->mutex_sync->multi_previous;
+//  }
+//  if(timeout != CN_TIMEOUT_FOREVER)
+//  {
+//      //事件状态设为等待信号量 + 超时
+//      g_ptEventRunning->event_status = CN_STS_WAIT_MUTEX +CN_STS_SYNC_TIMEOUT;
+//      __Djy_AddToDelay(timeout);
+//  }else
+//  {
+//      g_ptEventRunning->event_status = CN_STS_WAIT_MUTEX;  //事件状态设为等待信号量
+//  }
 
-    g_ptEventRunning->sync_head = &mutex->mutex_sync;
-    if(mutex->mutex_sync == NULL)
-    {//同步队列空,running事件自成双向循环链表
-        g_ptEventRunning->multi_next = g_ptEventRunning;
-        g_ptEventRunning->multi_previous = g_ptEventRunning;
-        mutex->mutex_sync = g_ptEventRunning;
-    }else
-    {//同步队列非空,按优先级排序
-        pl_ecb = mutex->mutex_sync;
-        do
-        { //找到一个优先级低于新事件的事件.
-            if(pl_ecb->prio <= g_ptEventRunning->prio)
-                pl_ecb = pl_ecb->multi_next;
-            else
-                break;
-        }while(pl_ecb != mutex->mutex_sync);
-        g_ptEventRunning->multi_next = pl_ecb;
-        g_ptEventRunning->multi_previous = pl_ecb->multi_previous;
-        pl_ecb->multi_previous->multi_next = g_ptEventRunning;
-        pl_ecb->multi_previous = g_ptEventRunning;
-        if(mutex->mutex_sync->prio > g_ptEventRunning->prio)
-            mutex->mutex_sync = mutex->mutex_sync->multi_previous;
-    }
-    if(timeout != CN_TIMEOUT_FOREVER)
-    {
-        //事件状态设为等待信号量 + 超时
-        g_ptEventRunning->event_status = CN_STS_WAIT_MUTEX +CN_STS_SYNC_TIMEOUT;
-        ___Djy_AddToDelay(timeout);
-    }else
-    {
-        g_ptEventRunning->event_status = CN_STS_WAIT_MUTEX;  //事件状态设为等待信号量
-    }
     //下面看看是否要做优先级继承
     pl_ecb = mutex->owner;
-    if(pl_ecb->prio > g_ptEventRunning->prio) //需要继承优先级
-    {//1、处于就绪态，2、处于某种阻塞态。
-        if(pl_ecb->event_status == CN_STS_EVENT_READY)//占用互斥量的事件在就绪态
-        {
-            __Djy_CutReadyEvent(pl_ecb);
-            //prio_bak保留事件的原始优先级，防止出现多次继承中被修改为中间优先级
-            if(mutex->prio_bak == CN_PRIO_INVALID)
-                mutex->prio_bak = pl_ecb->prio;
-            pl_ecb->prio = g_ptEventRunning->prio;
-            __Djy_EventReady(pl_ecb);
-        }else       //占用互斥量的事件处于某种阻塞态，暂不处理
-        {
-        }
-    }
+    Djy_RaiseTempPrio(pl_ecb->event_id);
+//    if(pl_ecb->prio > g_ptEventRunning->prio)  //需要继承优先级
+//    {
+////        Djy_SetEventTempPrio(pl_ecb->event_id,g_ptEventRunning->prio);
+//        pl_ecb->prio = g_ptEventRunning->prio;
+//    }
     Int_RestoreAsynSignal();  //恢复中断，将触发上下文切换
     //检查从哪里返回，是超时还是同步事件完成。
     if(g_ptEventRunning->wakeup_from & CN_STS_SYNC_TIMEOUT)
@@ -825,7 +813,7 @@ void __Lock_ShowLock(void)
             break;
         }
         if(((struct SemaphoreLCB *)current_node)->sync_order
-                                        == CN_SEMP_BLOCK_PRIO)
+                                        == CN_BLOCK_PRIO)
         {
             printf("prio  ");
         }
@@ -871,11 +859,10 @@ void __Lock_ShowLock(void)
         {
             printf("占用  ");
             pl_ecb = ((struct MutexLCB *)current_node)->owner;
-            if(((struct MutexLCB *)current_node)->prio_bak
-                                    != CN_PRIO_INVALID)
+            if(pl_ecb->prio_base != pl_ecb->prio)
             {
                 printf("%05d   %03d       ",pl_ecb->event_id,
-                        ((struct MutexLCB *)current_node)->prio_bak);
+                        pl_ecb->prio_base);
                 printf("%03d       ",pl_ecb->prio);
             }
             else

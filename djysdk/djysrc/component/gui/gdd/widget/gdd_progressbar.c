@@ -62,7 +62,7 @@
 
 #include    "gdd.h"
 #include    <gui/gdd/gdd_private.h>
-#include    <widget.h>
+#include    <gdd_widget.h>
 
 
 bool_t    MakeProgressRect(RECT *dst,const RECT *src,u32 Range,u32 Val,EN_PB_MODE mode)
@@ -270,7 +270,7 @@ static bool_t ProgressBar_Create(struct WindowMsg *pMsg)
      if(pMsg->Param1==0)
      {
          pPB =(PROGRESSBAR_DATA*)malloc(sizeof(PROGRESSBAR_DATA));
-         pMsg->Param1=(ptu32_t*)pPB;
+         pMsg->Param1=(ptu32_t)pPB;
          pPB->Flag =0;
          pPB->Range =100;
          pPB->Pos   =0;
@@ -278,7 +278,7 @@ static bool_t ProgressBar_Create(struct WindowMsg *pMsg)
          pPB->BGColor =RGB(0,0,200);
          pPB->DrawTextFlag =DT_VCENTER|DT_CENTER;
      }
-     SetWindowPrivateData(hwnd,pMsg->Param1);
+     SetWindowPrivateData(hwnd,(void*)pMsg->Param1);
      return true;
 
 }

@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <gkernel.h>
 #include <gdd.h>
-#include <widget.h>
+#include <gdd_widget.h>
 
 static HWND hwnd;
 static RECT rc0;
@@ -32,7 +32,7 @@ static ptu32_t HmiNotify(struct WindowMsg *pMsg)
     event =HI16(pMsg->Param1);
     id =LO16(pMsg->Param1);
 
-    if(event==BTN_UP && id==ID_CLOSE)
+    if(event==MSG_BTN_UP && id==ID_CLOSE)
     {
         PostMessage(hwnd,MSG_CLOSE,0,0);
     }
@@ -92,7 +92,8 @@ void Hello_Word(void)
 							rc.left,rc.top,RectW(&rc),RectH(&rc),      //窗口的位置及大小。
                             NULL,0x0000, CN_WINBUF_PARENT,NULL,&s_gHmiMsgLink); //窗口的父窗口，ID,附加数据。);
     SetFocusWindow(hwnd);
-    ShowWindow(hwnd,TRUE);  //显示窗口
+      //显示窗口
+    SetWindowShow(hwnd);
 
     while(GetMessage(&msg,hwnd))
     {

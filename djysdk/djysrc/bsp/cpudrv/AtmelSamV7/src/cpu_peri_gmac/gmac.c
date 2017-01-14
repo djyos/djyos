@@ -67,77 +67,80 @@
 /** Receive buffer descriptor struct */
 typedef struct
 {
-	union rcvaddr
-	{
-		uint32_t val;
-		struct addrstat
-		{
-			uint32_t bOwnership:1;  /**< User clear, GMAC set this to one once
-										 it has successfully written a frame to
-										 memory */
-			uint32_t bWrap:1;       /**< Marks last descriptor in receive buffer */
-			uint32_t addrDW:30;     /**< Address in number of DW */
-		} bm;
-	} addr;                    /**< Address, Wrap & Ownership */
-	union rcvstat
-	{
-		uint32_t val;
-		struct macrcvstatbits
-		{
-			uint32_t len:12,                /** Length of frame including FCS */
-					 offset:2,              /** Receive buffer offset,
-												bits 13:12 of frame length for jumbo
-												frame */
-					 bSof:1,                /** Start of frame */
-					 bEof:1,                /** End of frame */
-					 bCFI:1,                /** Concatenation Format Indicator */
-					 vlanPriority:3,        /** VLAN priority (if VLAN detected) */
-					 bPriorityDetected:1,   /** Priority tag detected */
-					 bVlanDetected:1,       /**< VLAN tag detected */
-					 bTypeIDMatch:1,        /**< Type ID match */
-					 bAddr4Match:1,         /**< Address register 4 match */
-					 bAddr3Match:1,         /**< Address register 3 match */
-					 bAddr2Match:1,         /**< Address register 2 match */
-					 bAddr1Match:1,         /**< Address register 1 match */
-					 reserved:1,
-					 bExtAddrMatch:1,       /**< External address match */
-					 bUniHashMatch:1,       /**< Unicast hash match */
-					 bMultiHashMatch:1,     /**< Multicast hash match */
-					 bBroadcastDetected:1;  /**< Global all ones broadcast
-												 address detected */
-		} bm;
-	} status;
+    union rcvaddr
+    {
+        uint32_t val;
+        struct addrstat
+        {
+            uint32_t bOwnership:1;  /**< User clear, GMAC set this to one once
+                                         it has successfully written a frame to
+                                         memory */
+            uint32_t bWrap:1;       /**< Marks last descriptor in receive buffer */
+            uint32_t addrDW:30;     /**< Address in number of DW */
+        } bm;
+    } addr;                    /**< Address, Wrap & Ownership */
+    union rcvstat
+    {
+        uint32_t val;
+        struct macrcvstatbits
+        {
+            uint32_t len:12,                /** Length of frame including FCS */
+                     offset:2,              /** Receive buffer offset,
+                                                bits 13:12 of frame length for jumbo
+                                                frame */
+                     bSof:1,                /** Start of frame */
+                     bEof:1,                /** End of frame */
+                     bCFI:1,                /** Concatenation Format Indicator */
+                     vlanPriority:3,        /** VLAN priority (if VLAN detected) */
+                     bPriorityDetected:1,   /** Priority tag detected */
+                     bVlanDetected:1,       /**< VLAN tag detected */
+                     bTypeIDMatch:1,        /**< Type ID match */
+                     bAddr4Match:1,         /**< Address register 4 match */
+                     bAddr3Match:1,         /**< Address register 3 match */
+                     bAddr2Match:1,         /**< Address register 2 match */
+                     bAddr1Match:1,         /**< Address register 1 match */
+                     reserved:1,
+                     bExtAddrMatch:1,       /**< External address match */
+                     bUniHashMatch:1,       /**< Unicast hash match */
+                     bMultiHashMatch:1,     /**< Multicast hash match */
+                     bBroadcastDetected:1;  /**< Global all ones broadcast
+                                                 address detected */
+        } bm;
+    } status;
 } tagRcvBD ;    /* GCC */
 
 /** Transmit buffer descriptor struct */
 typedef struct
 {
-	uint32_t addr;
-	union macsndstatus
-	{
-		uint32_t val;
-		struct macsndstatusbits
-		{
-			uint32_t len:11,        /**< Length of buffer */
-					 reserved:4,
-					 bLastBuffer:1, /**< Last buffer (in the current frame) */
-					 bNoCRC:1,      /**< No CRC */
-					 reserved1:10,
-					 bExhausted:1,  /**< Buffer exhausted in mid frame */
-					 bUnderrun:1,   /**< Transmit under run */
-					 bError:1,      /**< Retry limit exceeded, error detected */
-					 bWrap:1,       /**< Marks last descriptor in TD list */
-					 bUsed:1;       /**< User clear, GMAC sets this once a frame
-										 has been successfully transmitted */
-		} bm;
-	} status;
+    uint32_t addr;
+    union macsndstatus
+    {
+        uint32_t val;
+        struct macsndstatusbits
+        {
+            uint32_t len:11,        /**< Length of buffer */
+                     reserved:4,
+                     bLastBuffer:1, /**< Last buffer (in the current frame) */
+                     bNoCRC:1,      /**< No CRC */
+                     reserved1:10,
+                     bExhausted:1,  /**< Buffer exhausted in mid frame */
+                     bUnderrun:1,   /**< Transmit under run */
+                     bError:1,      /**< Retry limit exceeded, error detected */
+                     bWrap:1,       /**< Marks last descriptor in TD list */
+                     bUsed:1;       /**< User clear, GMAC sets this once a frame
+                                         has been successfully transmitted */
+        } bm;
+    } status;
 } tagSndBD;     /* GCC */
 
 // ====================================mem resource need========================
 //config for the que0
+
 #ifdef __GNUC__
+
+#if 0
 #define CN_TXBUF0_LEN    128
-#define CN_TXBD0_LEN     8
+#define CN_TXBD0_LEN     16
 #define CN_RXBUF0_LEN    1600
 #define CN_RXBD0_LEN     8
 static vu8 gTxBuffer0[CN_TXBD0_LEN][CN_TXBUF0_LEN] __attribute__((aligned(32)));
@@ -164,6 +167,36 @@ static volatile tagRcvBD gRxDs2[CN_RXBD2_LEN] __attribute__((aligned(32)));
 static volatile tagSndBD gTxDs2[CN_TXBD2_LEN] __attribute__((aligned(32)));
 
 #else
+
+#define CN_TXBUF0_LEN    128
+#define CN_TXBD0_LEN     16
+#define CN_RXBUF0_LEN    1600
+#define CN_RXBD0_LEN     8
+static vu8 gTxBuffer0[CN_TXBD0_LEN][CN_TXBUF0_LEN] __attribute__((section(".nocacheram")));
+static vu8 gRxBuffer0[CN_RXBD0_LEN][CN_RXBUF0_LEN] __attribute__((section(".nocacheram")));
+static volatile tagRcvBD gRxDs0[CN_RXBD0_LEN] __attribute__((section(".nocacheram")));
+static volatile tagSndBD gTxDs0[CN_TXBD0_LEN] __attribute__((section(".nocacheram")));
+//config for the que1
+#define CN_TXBUF1_LEN    128
+#define CN_TXBD1_LEN     1
+#define CN_RXBUF1_LEN    1600
+#define CN_RXBD1_LEN     1
+static vu8 gTxBuffer1[CN_TXBD1_LEN][CN_TXBUF1_LEN] __attribute__((section(".nocacheram")));
+static vu8 gRxBuffer1[CN_RXBD1_LEN][CN_RXBUF1_LEN] __attribute__((section(".nocacheram")));
+static volatile tagRcvBD gRxDs1[CN_RXBD1_LEN] __attribute__((section(".nocacheram")));
+static volatile tagSndBD gTxDs1[CN_TXBD1_LEN] __attribute__((section(".nocacheram")));
+//config for the que2
+#define CN_TXBUF2_LEN    128
+#define CN_TXBD2_LEN     1
+#define CN_RXBUF2_LEN    1600
+#define CN_RXBD2_LEN     1
+static vu8 gTxBuffer2[CN_TXBD2_LEN][CN_TXBUF2_LEN] __attribute__((section(".nocacheram")));
+static vu8 gRxBuffer2[CN_RXBD2_LEN][CN_RXBUF2_LEN] __attribute__((section(".nocacheram")));
+static volatile tagRcvBD gRxDs2[CN_RXBD2_LEN] __attribute__((section(".nocacheram")));
+static volatile tagSndBD gTxDs2[CN_TXBD2_LEN] __attribute__((section(".nocacheram")));
+#endif
+
+#else
 #error "bd must be 8-byte aligned"
 #endif
 
@@ -181,7 +214,7 @@ typedef struct
     vu16                 sndbdcur;
     vu8                 *sndmem;
     vu16                 sndmemlen;
-    vu16			     sndbdlast;
+    vu16                 sndbdlast;
 }tagQueue;
 
 typedef struct
@@ -195,12 +228,12 @@ typedef struct
     vu32  bnaInts;                  //bna ins counter
     vu32  sndTimes;                 //the snd times counter
     vu32  sndOkTimes;               //the send success counter
-    vu32  sndnobdTimes;				//not enough bd rings
+    vu32  sndnobdTimes;             //not enough bd rings
     vu32  sndInts;                  //the send ints counter
     vu32  sndErrInts;               //the send err ints counter
     vu32  rxTaskRun;                //the rx task run counter
     vu32  rsttimes;                 //the reset counter
-    vu32  badframe;					//the bad gmac frame
+    vu32  badframe;                 //the bad gmac frame
 }tagMacDebug;
 
 //this is the mac receive hook, if any hook rcv,then the data will goto the hook
@@ -214,12 +247,12 @@ typedef bool_t (*fnRcvDeal)(u8 *buf, u16 len);
 #define CN_DEVNAME_LEN  32
 typedef struct
 {
-	//os member
-	struct SemaphoreLCB   *rcvsync;          //activate the receive task
-	struct MutexLCB       *protect;          //protect the device
-	ptu32_t                devhandle;        //returned by the tcpip stack
-	char                   devname[CN_DEVNAME_LEN];
-	//hardware
+    //os member
+    struct SemaphoreLCB   *rcvsync;          //activate the receive task
+    struct MutexLCB       *protect;          //protect the device
+    ptu32_t                devhandle;        //returned by the tcpip stack
+    char                   devname[CN_DEVNAME_LEN];
+    //hardware
     Gmac         *pHw;                        //hardware register group
     vu8           bId;                        //hardware id
     tagQueue      queueList[CN_QUE_NUM];      //queue info
@@ -227,15 +260,15 @@ typedef struct
     //which used to descript the device or control the device
     struct devstat
     {
-    	vu32 caf:1;       //1 copy all the frame while 0 only copy the valid
-    	vu32 nbc:1;       //1 no broadcast receive while 0 perimit receive broadcast frames
-    	vu32 duplex:1;    //1 full while 0 half
-    	vu32 speed:1;     //1 means 100Mb while 0 10 Mb
-    	vu32 mii:1;       //1 means mii mode while 0 rmii mode
+        vu32 caf:1;       //1 copy all the frame while 0 only copy the valid
+        vu32 nbc:1;       //1 no broadcast receive while 0 perimit receive broadcast frames
+        vu32 duplex:1;    //1 full while 0 half
+        vu32 speed:1;     //1 means 100Mb while 0 10 Mb
+        vu32 mii:1;       //1 means mii mode while 0 rmii mode
     }macstat;
     //dev method
-	vu32 loop:1;      //1 use the loop mode while 0 interrupt mode
-	vu32 loopcycle:31;//unit:ms
+    vu32 loop:1;      //1 use the loop mode while 0 interrupt mode
+    vu32 loopcycle:31;//unit:ms
     fnRcvDeal     fnrcvhook;                  //rcv hook function
     //debug info
     tagMacDebug   debuginfo;                  //debug info
@@ -245,19 +278,19 @@ static tagMacDriver   gMacDriver;
 ///////////////////////////THE FOLLOWING USED FOR THE FILTER LOGIC//////////////
 static void __macbitsset(vu32 *reg,u32 bits)
 {
-	vu32 value;
-	value = *reg;
-	value |=bits;
-	*reg = value;
-	return;
+    vu32 value;
+    value = *reg;
+    value |=bits;
+    *reg = value;
+    return;
 }
 static void __macbitsclear(vu32 *reg,u32 bits)
 {
-	vu32 value;
-	value = *reg;
-	value &=(~bits);
-	*reg = value;
-	return;
+    vu32 value;
+    value = *reg;
+    value &=(~bits);
+    *reg = value;
+    return;
 }
 ///////////////////////////////////////////////////////////////////////////////
 // =============================================================================
@@ -279,22 +312,22 @@ static void __MacBdSndInit(u32 qindex)
     u32       address;
     u32       status;
 
-	queue = &gMacDriver.queueList[qindex];
+    queue = &gMacDriver.queueList[qindex];
 
-	//initialize the send bd
-	status = GMAC_TX_USED_BIT;
-	for(i =0;i < queue->sndbdlen;i++)
-	{
-		sndbd = queue->sndbdtab + i;
-		address = (u32)(queue->sndmem + queue->sndbuflen*i);
-		sndbd->addr = address&GMAC_ADDRESS_MASK;
-		sndbd->status.val = status;
-	}
-	sndbd->status.val = status|GMAC_TX_WRAP_BIT;   //the last one must be wrap
-	queue->sndbdcur = 0;
-	queue->sndbdlast = 0;
+    //initialize the send bd
+    status = GMAC_TX_USED_BIT;
+    for(i =0;i < queue->sndbdlen;i++)
+    {
+        sndbd = queue->sndbdtab + i;
+        address = (u32)(queue->sndmem + queue->sndbuflen*i);
+        sndbd->addr = address&GMAC_ADDRESS_MASK;
+        sndbd->status.val = status;
+    }
+    sndbd->status.val = status|GMAC_TX_WRAP_BIT;   //the last one must be wrap
+    queue->sndbdcur = 0;
+    queue->sndbdlast = 0;
 
-	//set the address to the register
+    //set the address to the register
     GMAC_SetTxQueue(gMacDriver.pHw, (u32)queue->sndbdtab, qindex);
     return;
 }
@@ -306,37 +339,37 @@ static void __MacBdRcvInit(u32 qindex)
     u32       address;
     u32       status;
 
-	queue = &gMacDriver.queueList[qindex];
-	//initialize the receive bd
-	status = 0;
-	for(i =0;i < queue->rcvbdlen;i++)
-	{
-		rcvbd = queue->rcvbdtab + i;
-		address = (u32)(queue->rcvmem + queue->rcvbuflen*i);
-		rcvbd->addr.val = address&GMAC_ADDRESS_MASK;
-		rcvbd->status.val = status;
-	}
-	rcvbd->addr.val |= GMAC_RX_WRAP_BIT;   //the last one must be wrap
-	queue->rcvbdcur = 0;
+    queue = &gMacDriver.queueList[qindex];
+    //initialize the receive bd
+    status = 0;
+    for(i =0;i < queue->rcvbdlen;i++)
+    {
+        rcvbd = queue->rcvbdtab + i;
+        address = (u32)(queue->rcvmem + queue->rcvbuflen*i);
+        rcvbd->addr.val = address&GMAC_ADDRESS_MASK;
+        rcvbd->status.val = status;
+    }
+    rcvbd->addr.val |= GMAC_RX_WRAP_BIT;   //the last one must be wrap
+    queue->rcvbdcur = 0;
 
-	//set the address to the register
-	GMAC_SetRxQueue(gMacDriver.pHw, (u32)queue->rcvbdtab, qindex);
+    //set the address to the register
+    GMAC_SetRxQueue(gMacDriver.pHw, (u32)queue->rcvbdtab, qindex);
     return;
 }
 
 extern void PMC_EnablePeripheral(vu8 uID);
 static void __MacInitialize(tagMacDriver *pDrive)
 {
-	Gmac      *pHw;
-	tagQueue  *que;
-	u32        index;
-	u32        value;
+    Gmac      *pHw;
+    tagQueue  *que;
+    u32        index;
+    u32        value;
 
-	pHw = pDrive->pHw;
+    pHw = pDrive->pHw;
     GMAC_DEBUG("Mac Initialize start...\n\r");
-	//make it power on
+    //make it power on
     PMC_EnablePeripheral(pDrive->bId);
-	//first,we must stop the device to receive or send
+    //first,we must stop the device to receive or send
     GMAC_NetworkControl(pHw, 0);
     //disable all the interrupts
     GMAC_DisableAllQueueIt(pHw, ~0u);
@@ -361,12 +394,12 @@ static void __MacInitialize(tagMacDriver *pDrive)
         /*set the dma configuration*/
         if(index == CN_QUE_0)
         {
-        	value = (GMAC_DCFGR_DRBS(que->rcvbuflen >> 6) )
+            value = (GMAC_DCFGR_DRBS(que->rcvbuflen >> 6) )
                 | GMAC_DCFGR_RXBMS(3) | GMAC_DCFGR_TXPBMS |GMAC_DCFGR_DDRP|GMAC_DCFGR_FBLDO_INCR4;
         }
         else
         {
-        	value = (GMAC_RBSRPQ_RBS(que->rcvbuflen >> 6) );
+            value = (GMAC_RBSRPQ_RBS(que->rcvbuflen >> 6) );
         }
         GMAC_SetDMAConfig(pHw, value, index);
         //anyway, we open the interrupt,the interrupt could goto the core depends on the
@@ -384,49 +417,49 @@ static void __MacInitialize(tagMacDriver *pDrive)
               GMAC_NCFGR_MAXFS | GMAC_NCFGR_PEN | GMAC_NCFGR_RFCS;
     pHw->GMAC_NCFGR = dwNcfgr;
     if (pDrive->macstat.duplex)
-	{
-		pHw->GMAC_NCFGR |= GMAC_NCFGR_FD;
-	}
-	else
-	{
-		pHw->GMAC_NCFGR &= ~GMAC_NCFGR_FD;
-	}
-	if (pDrive->macstat.speed)
-	{
-		pHw->GMAC_NCFGR |= GMAC_NCFGR_SPD;
-	}
-	else
-	{
-		pHw->GMAC_NCFGR &= ~GMAC_NCFGR_SPD;
-	}
+    {
+        pHw->GMAC_NCFGR |= GMAC_NCFGR_FD;
+    }
+    else
+    {
+        pHw->GMAC_NCFGR &= ~GMAC_NCFGR_FD;
+    }
+    if (pDrive->macstat.speed)
+    {
+        pHw->GMAC_NCFGR |= GMAC_NCFGR_SPD;
+    }
+    else
+    {
+        pHw->GMAC_NCFGR &= ~GMAC_NCFGR_SPD;
+    }
 
 
 
-	if(pDrive->macstat.mii)
-	{
-		pHw->GMAC_UR |= GMAC_UR_RMII;
-	}
-	else
-	{
-		pHw->GMAC_UR &= ~GMAC_UR_RMII;
-	}
-	//now,we finished  configure the mac, so enable the receive and send
-	pHw->GMAC_NCR |=  (GMAC_NCR_RXEN | GMAC_NCR_TXEN);
+    if(pDrive->macstat.mii)
+    {
+        pHw->GMAC_UR |= GMAC_UR_RMII;
+    }
+    else
+    {
+        pHw->GMAC_UR &= ~GMAC_UR_RMII;
+    }
+    //now,we finished  configure the mac, so enable the receive and send
+    pHw->GMAC_NCR |=  (GMAC_NCR_RXEN | GMAC_NCR_TXEN);
 
-	//now return for the call back
-	return;
+    //now return for the call back
+    return;
 }
 
 
 void MacReset(tagMacDriver *pDrive)
 {
-	if(Lock_MutexPend(pDrive->protect,CN_TIMEOUT_FOREVER))
-	{
-		__MacInitialize(pDrive);
-		pDrive->debuginfo.rsttimes++;
-		Lock_MutexPost(pDrive->protect);
-	}
-	return ;
+    if(Lock_MutexPend(pDrive->protect,CN_TIMEOUT_FOREVER))
+    {
+        __MacInitialize(pDrive);
+        pDrive->debuginfo.rsttimes++;
+        Lock_MutexPost(pDrive->protect);
+    }
+    return ;
 }
 
 //we use this function to deal with the send errors
@@ -553,13 +586,13 @@ static tagNetPkg *__GmacRcv(ptu32_t devhandle)
     pDrive = &gMacDriver;
     que = &pDrive->queueList[CN_QUE_0];
 //    GMAC_CACHE_COHERENCE
-    SCB_CleanInvalidateDCache_by_Addr((u32*)gRxDs0,sizeof(gRxDs0));
+    //SCB_CleanInvalidateDCache_by_Addr((u32*)gRxDs0,sizeof(gRxDs0));
     //each time try your best to find an valid bd to receive the data
     //check from the receive current buffer descriptor will reduce the check time
     offset=que->rcvbdcur;
     for(i=0;i<que->rcvbdlen;i++)
     {
-    	pRcvBD = que->rcvbdtab + offset;
+        pRcvBD = que->rcvbdtab + offset;
         if(pRcvBD->addr.bm.bOwnership) //this bd GOT AN NEW FRAME
         {
             if(pRcvBD->status.bm.bSof&&pRcvBD->status.bm.bEof)
@@ -569,8 +602,8 @@ static tagNetPkg *__GmacRcv(ptu32_t devhandle)
             }
             else
             {
-            	pRcvBD->addr.bm.bOwnership = 0;
-            	pRcvBD->status.val = 0;
+                pRcvBD->addr.bm.bOwnership = 0;
+                pRcvBD->status.val = 0;
             }
         }
         offset++;
@@ -581,7 +614,7 @@ static tagNetPkg *__GmacRcv(ptu32_t devhandle)
     }
 
     pRcvBD = que->rcvbdtab + que->rcvbdcur;
-    SCB_CleanInvalidateDCache_by_Addr((u32*)gRxBuffer0[que->rcvbdcur],CN_RXBUF0_LEN);
+    //SCB_CleanInvalidateDCache_by_Addr((u32*)gRxBuffer0[que->rcvbdcur],CN_RXBUF0_LEN);
     if(pRcvBD->addr.bm.bOwnership) //this buffer descriptor GOT AN NEW FRAME
     {
         if(pRcvBD->status.bm.bSof&&pRcvBD->status.bm.bEof)
@@ -599,7 +632,7 @@ static tagNetPkg *__GmacRcv(ptu32_t devhandle)
         }
         else
         {
-        	pDrive->debuginfo.badframe ++;
+            pDrive->debuginfo.badframe ++;
         }
         que->rcvbdcur++;
         if(que->rcvbdcur >= que->rcvbdlen)
@@ -610,24 +643,24 @@ static tagNetPkg *__GmacRcv(ptu32_t devhandle)
         //i want to know it is broad or not
         if(pRcvBD->status.bm.bBroadcastDetected)
         {
-        	//it is broad
-        	type = EN_NETDEV_FRAME_BROAD;
+            //it is broad
+            type = EN_NETDEV_FRAME_BROAD;
         }
         else if(pRcvBD->status.bm.bMultiHashMatch)
         {
-        	//it is broad
-        	type = EN_NETDEV_FRAME_MULTI;
+            //it is broad
+            type = EN_NETDEV_FRAME_MULTI;
         }
         else
         {
-        	type = EN_NETDEV_FRAME_POINT;
+            type = EN_NETDEV_FRAME_POINT;
         }
         pRcvBD->addr.bm.bOwnership = 0;
         pRcvBD->status.val = 0;
     }
 //     GMAC_CACHE_COHERENCE
-	SCB_CleanInvalidateDCache_by_Addr((u32*)gRxDs0,sizeof(gRxDs0));
-	NetDevFilterCounter(pDrive->devhandle,type);
+    //SCB_CleanInvalidateDCache_by_Addr((u32*)gRxDs0,sizeof(gRxDs0));
+    NetDevFilterCounter(pDrive->devhandle,type);
 
     return pkg;
 }
@@ -640,60 +673,60 @@ bool_t  GmacCtrl(ptu32_t devhandle,u8 cmd,ptu32_t para)
 
     pDrive = &gMacDriver;
     if((pDrive->devhandle == devhandle)&&\
-    	(Lock_MutexPend(pDrive->protect,CN_TIMEOUT_FOREVER)))
+        (Lock_MutexPend(pDrive->protect,CN_TIMEOUT_FOREVER)))
     {
         switch(cmd)
         {
-        	case EN_NETDEV_SETNOPKG:
-            	if(para)
-            	{
-            		__MacInitialize(pDrive);
+            case EN_NETDEV_SETNOPKG:
+                if(para)
+                {
+                    __MacInitialize(pDrive);
                     pDrive->debuginfo.rsttimes++;
-            	}
+                }
                 result = true;
                 break;
-        	case EN_NETDEV_SETBORAD:
-        		if(para)
-        		{
-        			__macbitsclear(&pDrive->pHw->GMAC_NCFGR,GMAC_NCFGR_NBC);
+            case EN_NETDEV_SETBORAD:
+                if(para)
+                {
+                    __macbitsclear(&pDrive->pHw->GMAC_NCFGR,GMAC_NCFGR_NBC);
                     printk("mac broad enable\n\r");
-        		}
-        		else
-        		{
-        			__macbitsset(&pDrive->pHw->GMAC_NCFGR,GMAC_NCFGR_NBC);
+                }
+                else
+                {
+                    __macbitsset(&pDrive->pHw->GMAC_NCFGR,GMAC_NCFGR_NBC);
                     printk("mac broad disable\n\r");
-        		}
-        		result = true;
-        		break;
-        	case EN_NETDEV_SETPOINT:
-        		if(para)
-        		{
-        			__macbitsset(&pDrive->pHw->GMAC_NCR,GMAC_NCR_RXEN);
-        		}
-        		else
-        		{
-        			__macbitsclear(&pDrive->pHw->GMAC_NCR,GMAC_NCR_RXEN);
-        		}
-        		result = true;
-        		break;
-        	case EN_NETDEV_SETMULTI:
-        		result = false;
-        		break;
-        	case EN_NETDEV_SETRECV:
-        		if(para)
-        		{
-        			__macbitsset(&pDrive->pHw->GMAC_NCR,GMAC_NCR_RXEN);
-        			__MacInitialize(pDrive);
+                }
+                result = true;
+                break;
+            case EN_NETDEV_SETPOINT:
+                if(para)
+                {
+                    __macbitsset(&pDrive->pHw->GMAC_NCR,GMAC_NCR_RXEN);
+                }
+                else
+                {
+                    __macbitsclear(&pDrive->pHw->GMAC_NCR,GMAC_NCR_RXEN);
+                }
+                result = true;
+                break;
+            case EN_NETDEV_SETMULTI:
+                result = false;
+                break;
+            case EN_NETDEV_SETRECV:
+                if(para)
+                {
+                    __macbitsset(&pDrive->pHw->GMAC_NCR,GMAC_NCR_RXEN);
+                    __MacInitialize(pDrive);
                     pDrive->debuginfo.rsttimes++;
-        		}
-        		else
-        		{
-        			__macbitsclear(&pDrive->pHw->GMAC_NCR,GMAC_NCR_RXEN);
-        		}
-        		result = true;
-        		break;
-        	case EN_NETDEV_SETSEND:
-        		break;
+                }
+                else
+                {
+                    __macbitsclear(&pDrive->pHw->GMAC_NCR,GMAC_NCR_RXEN);
+                }
+                result = true;
+                break;
+            case EN_NETDEV_SETSEND:
+                break;
             case EN_NETDEV_SETMAC:
                 memcpy(pDrive->macaddr,(u8 *)para, CN_MACADDR_LEN);
                 __MacInitialize(pDrive);
@@ -710,15 +743,15 @@ bool_t  GmacCtrl(ptu32_t devhandle,u8 cmd,ptu32_t para)
                 }
                 break;
             case EN_NETDEV_RESET:
-            	if(para)
-            	{
+                if(para)
+                {
                     __MacInitialize(pDrive);
                     pDrive->debuginfo.rsttimes++;
                     result = true;
-            	}
+                }
                 break;
             default:
-            	result = false;
+                result = false;
                 break;
         }
         Lock_MutexPost(pDrive->protect);
@@ -728,54 +761,54 @@ bool_t  GmacCtrl(ptu32_t devhandle,u8 cmd,ptu32_t para)
 
 //use this function to do the send function
 static u8 gTxBuffer[1600];
-#define CN_MAC_MAXDELAY 32
-static u32 gSndbdDelay[CN_MAC_MAXDELAY];
-static u32 gSndbdDelayTotal = 0;
+#define CN_MAC_MAXDELAY 320
+static u32 gSndbdDelay[CN_MAC_MAXDELAY+1];
+static u32 gSndbdTimeoutTotal = 0;
 
 static bool_t MacDelay(char *param)
 {
-	printf("%-10s%-10s%10d\n\r","Item","Cnt(HEX)",gSndbdDelayTotal);
-	u32 i = 0;
-	for(i = 0;i <CN_MAC_MAXDELAY;i++)
-	{
-		printf("%-10d%08x\n\r",i,gSndbdDelay[i]);
-	}
-	return true;
+    printf("%-10s%-10s%10d\n\r","Item","Cnt(HEX)",gSndbdTimeoutTotal);
+    u32 i = 0;
+    for(i = 0;i <CN_MAC_MAXDELAY;i++)
+    {
+        printf("%-10d%08x\n\r",i,gSndbdDelay[i]);
+    }
+    return true;
 }
 
 static bool_t MacSndBDClear(char *param)
 {
-	vu16  bdnum;
+    vu16  bdnum;
     tagMacDriver      *pDrive;
     volatile tagSndBD *pSndBD;
     tagQueue          *q;
 
     pDrive = &gMacDriver;
-	bdnum = strtol(param,NULL,0);
+    bdnum = strtol(param,NULL,0);
     if(Lock_MutexPend(pDrive->protect,CN_TIMEOUT_FOREVER))
     {
-    	 q = &gMacDriver.queueList[CN_QUE_0];
-    	 if(bdnum < q->sndbdlen)
-    	 {
- 			SCB_CleanInvalidateDCache_by_Addr((u32*)gTxDs0,sizeof(gTxDs0));
-         	pSndBD = q->sndbdtab + bdnum;
-         	pSndBD->status.bm.bUsed = 1;
- 			SCB_CleanInvalidateDCache_by_Addr((u32*)gTxDs0,sizeof(gTxDs0));
-    	 }
+         q = &gMacDriver.queueList[CN_QUE_0];
+         if(bdnum < q->sndbdlen)
+         {
+            //SCB_CleanInvalidateDCache_by_Addr((u32*)gTxDs0,sizeof(gTxDs0));
+            pSndBD = q->sndbdtab + bdnum;
+            pSndBD->status.bm.bUsed = 1;
+            //SCB_CleanInvalidateDCache_by_Addr((u32*)gTxDs0,sizeof(gTxDs0));
+         }
 
-    	Lock_MutexPost(pDrive->protect);
+        Lock_MutexPost(pDrive->protect);
     }
-	return true;
+    return true;
 }
 static bool_t MacSndHalt(char *param)
 {
-	GMAC_TransmissionHalt(GMAC);
-	return true;
+    GMAC_TransmissionHalt(GMAC);
+    return true;
 }
 static bool_t MacSndStart(char *param)
 {
-	GMAC_TransmissionStart(GMAC);
-	return true;
+    GMAC_TransmissionStart(GMAC);
+    return true;
 }
 static bool_t MacSndEn(char *param)
 {
@@ -785,11 +818,11 @@ static bool_t MacSndEn(char *param)
     pDrive = &gMacDriver;
     if(Lock_MutexPend(pDrive->protect,CN_TIMEOUT_FOREVER))
     {
-    	pDrive->pHw->GMAC_NCR |= GMAC_NCR_TXEN;
+        pDrive->pHw->GMAC_NCR |= GMAC_NCR_TXEN;
 
-    	Lock_MutexPost(pDrive->protect);
+        Lock_MutexPost(pDrive->protect);
     }
-	return true;
+    return true;
 }
 static bool_t MacSndDis(char *param)
 {
@@ -798,11 +831,11 @@ static bool_t MacSndDis(char *param)
     pDrive = &gMacDriver;
     if(Lock_MutexPend(pDrive->protect,CN_TIMEOUT_FOREVER))
     {
-    	pDrive->pHw->GMAC_NCR &= ~GMAC_NCR_TXEN;
+        pDrive->pHw->GMAC_NCR &= ~GMAC_NCR_TXEN;
 
-    	Lock_MutexPost(pDrive->protect);
+        Lock_MutexPost(pDrive->protect);
     }
-	return true;
+    return true;
 }
 
 
@@ -815,8 +848,8 @@ static bool_t GmacSnd(ptu32_t handle,tagNetPkg * pkg,u32 framelen, u32 netdevtas
     volatile tagSndBD *pSndBD;
     tagQueue          *q;
     u8                *dst,*src;
-    u16       		   len;
-    u8 				   bdnums,bdcnt;
+    u16                len;
+    u8                 bdnums,bdcnt;
     result = false;
     pDrive = &gMacDriver;
     pDrive->debuginfo.sndTimes++;
@@ -825,32 +858,32 @@ static bool_t GmacSnd(ptu32_t handle,tagNetPkg * pkg,u32 framelen, u32 netdevtas
 
     if(Lock_MutexPend(pDrive->protect,CN_TIMEOUT_FOREVER))
     {
-		SCB_CleanInvalidateDCache_by_Addr((u32*)gTxDs0,sizeof(gTxDs0));
+        //SCB_CleanInvalidateDCache_by_Addr((u32*)gTxDs0,sizeof(gTxDs0));
 
         q = &gMacDriver.queueList[CN_QUE_0];
         // 1.set the bd bused flag mannul
         while(q->sndbdlast != q->sndbdcur)
         {
-        	pSndBD = q->sndbdtab + q->sndbdlast;
-        	if(pSndBD->status.bm.bUsed)
-        	{
-        		while(!pSndBD->status.bm.bLastBuffer)
-        		{
-        			pSndBD->status.bm.bUsed = 1;
-		            q->sndbdlast++;
-		            if(q->sndbdlast >= q->sndbdlen)
-		            {
-		                q->sndbdlast =0;
-		            }
-		            pSndBD = q->sndbdtab + q->sndbdlast;
-        		}
-        		pSndBD->status.bm.bUsed = 1;
-        		pSndBD->status.bm.bLastBuffer = 0;
-        	}
-        	else
-        	{
-        		break;		//说明还有未发送完成的包
-        	}
+            pSndBD = q->sndbdtab + q->sndbdlast;
+            if(pSndBD->status.bm.bUsed)
+            {
+                while(!pSndBD->status.bm.bLastBuffer)
+                {
+                    pSndBD->status.bm.bUsed = 1;
+                    q->sndbdlast++;
+                    if(q->sndbdlast >= q->sndbdlen)
+                    {
+                        q->sndbdlast =0;
+                    }
+                    pSndBD = q->sndbdtab + q->sndbdlast;
+                }
+                pSndBD->status.bm.bUsed = 1;
+                pSndBD->status.bm.bLastBuffer = 0;
+            }
+            else
+            {
+                break;      //说明还有未发送完成的包
+            }
             q->sndbdlast++;
             if(q->sndbdlast >= q->sndbdlen)
             {
@@ -864,14 +897,14 @@ static bool_t GmacSnd(ptu32_t handle,tagNetPkg * pkg,u32 framelen, u32 netdevtas
         bdnums = 0;
         while(pSndBD->status.bm.bUsed)
         {
-        	bdnums ++;
-        	bdcnt ++;
+            bdnums ++;
+            bdcnt ++;
             if(bdcnt >= q->sndbdlen)
             {
-            	bdcnt =0;
+                bdcnt =0;
             }
             if(bdcnt == q->sndbdcur)
-            	break;
+                break;
             pSndBD = q->sndbdtab + bdcnt;
         }
 
@@ -882,8 +915,8 @@ static bool_t GmacSnd(ptu32_t handle,tagNetPkg * pkg,u32 framelen, u32 netdevtas
         {
             src = (tmppkg->buf + tmppkg->offset);
             len = tmppkg->datalen;
-        	memcpy(dst,src,len);
-        	dst      += len;
+            memcpy(dst,src,len);
+            dst      += len;
             if(PKG_ISLISTEND(tmppkg))
             {
                 tmppkg = NULL;
@@ -895,66 +928,65 @@ static bool_t GmacSnd(ptu32_t handle,tagNetPkg * pkg,u32 framelen, u32 netdevtas
             }
         }while(NULL != tmppkg );
 
-		//4.how many bd needed,and fill the bd, and send
-		bdcnt = (framelen + q->sndbuflen - 1)/q->sndbuflen;
-		vu16 curbd;
-		if( (bdcnt <= bdnums) && (bdcnt > 0))
-		{
-			curbd = q->sndbdcur;
-			src = &gTxBuffer[0];
-			while(framelen)
-			{
-				pSndBD = q->sndbdtab + q->sndbdcur;
-				dst =(u8 *)(((unsigned int)(pSndBD->addr))&GMAC_ADDRESS_MASK);
-				pSndBD->addr = (unsigned int)dst;
+        //4.how many bd needed,and fill the bd, and send
+        bdcnt = (framelen + q->sndbuflen - 1)/q->sndbuflen;
+        vu16 curbd;
+        if( (bdcnt <= bdnums) && (bdcnt > 0))
+        {
+            curbd = q->sndbdcur;
+            src = &gTxBuffer[0];
+            while(framelen)
+            {
+                pSndBD = q->sndbdtab + q->sndbdcur;
+                dst =(u8 *)(((unsigned int)(pSndBD->addr))&GMAC_ADDRESS_MASK);
+                pSndBD->addr = (unsigned int)dst;
 
-				len = (framelen > q->sndbuflen) ? q->sndbuflen : framelen;
-				memcpy((void *)dst,(void *)src,len);
-				src		 += len;
-				framelen -= len;
+                len = (framelen > q->sndbuflen) ? q->sndbuflen : framelen;
+                memcpy((void *)dst,(void *)src,len);
+                src      += len;
+                framelen -= len;
 
-				pSndBD->status.bm.bUsed = 0;
-				pSndBD->status.bm.len = (len) & 0x3FFF;
-				if(framelen > 0)
-				{
-					pSndBD->status.bm.bLastBuffer = 0;
-				}
-				else
-				{
-					pSndBD->status.bm.bLastBuffer = 1;//最后一包
-					result = true;
-					pDrive->debuginfo.sndOkTimes++;
-				}
-				SCB_CleanInvalidateDCache_by_Addr((u32*)gTxBuffer0[q->sndbdcur],CN_TXBUF0_LEN);
-				q->sndbdcur++;
-				if(q->sndbdcur >= q->sndbdlen)
-				{
-					q->sndbdcur =0;
-				}
-			}
-			SCB_CleanInvalidateDCache_by_Addr((u32*)gTxDs0,sizeof(gTxDs0));
-			GMAC_TransmissionStart(GMAC);
-			//just  wait the mac to finish
-		    u32        delay = 0;
-		    pSndBD = q->sndbdtab + curbd;
-			while(pSndBD->status.bm.bUsed == 0)
-			{
-				Djy_DelayUs(1);
-				delay++;
-				if(delay >= CN_MAC_MAXDELAY)
-				{
-					printf("Send Bd TimeOUT us! \r\n");
-					break;
-				}
-				SCB_CleanInvalidateDCache_by_Addr((u32*)gTxDs0,sizeof(gTxDs0));
-			}
-			gSndbdDelay[delay]++;
-			gSndbdDelayTotal++;
-		}
-		else
-		{
-			pDrive->debuginfo.sndnobdTimes++;
-		}
+                pSndBD->status.bm.bUsed = 0;
+                pSndBD->status.bm.len = (len) & 0x3FFF;
+                if(framelen > 0)
+                {
+                    pSndBD->status.bm.bLastBuffer = 0;
+                }
+                else
+                {
+                    pSndBD->status.bm.bLastBuffer = 1;//最后一包
+                    result = true;
+                    pDrive->debuginfo.sndOkTimes++;
+                }
+                //SCB_CleanInvalidateDCache_by_Addr((u32*)gTxBuffer0[q->sndbdcur],CN_TXBUF0_LEN);
+                q->sndbdcur++;
+                if(q->sndbdcur >= q->sndbdlen)
+                {
+                    q->sndbdcur =0;
+                }
+            }
+            //SCB_CleanInvalidateDCache_by_Addr((u32*)gTxDs0,sizeof(gTxDs0));
+            GMAC_TransmissionStart(GMAC);
+            //just  wait the mac to finish
+            u32        delay = 0;
+            pSndBD = q->sndbdtab + curbd;
+            while(pSndBD->status.bm.bUsed == 0)
+            {
+                Djy_DelayUs(1);
+                delay++;
+                if(delay >= CN_MAC_MAXDELAY)
+                {
+                    gSndbdTimeoutTotal++;
+                    break;
+                }
+                //SCB_CleanInvalidateDCache_by_Addr((u32*)gTxDs0,sizeof(gTxDs0));
+            }
+            gSndbdDelay[delay]++;
+        }
+        else
+        {
+            pDrive->debuginfo.sndnobdTimes++;
+        }
         Lock_MutexPost(pDrive->protect);
     }
     return result;
@@ -963,24 +995,24 @@ static bool_t GmacSnd(ptu32_t handle,tagNetPkg * pkg,u32 framelen, u32 netdevtas
 //you could use this function to send data as usual
 u32 GMAC_SendData(u8 *buf,u32 len)
 {
-	tagNetPkg          pkg;
+    tagNetPkg          pkg;
     tagMacDriver      *pDrive;
 
     pDrive = &gMacDriver;
 
-	pkg.partnext = NULL;
-	pkg.pkgflag  = (1<<0);	//只有一个包
-	pkg.offset   = 0;
-	pkg.datalen  = len;
-	pkg.buf      = buf;
-	if(GmacSnd(pDrive->devhandle,&pkg,len,0))
-	{
-		return len;
-	}
-	else
-	{
-		return 0;
-	}
+    pkg.partnext = NULL;
+    pkg.pkgflag  = (1<<0);  //只有一个包
+    pkg.offset   = 0;
+    pkg.datalen  = len;
+    pkg.buf      = buf;
+    if(GmacSnd(pDrive->devhandle,&pkg,len,0))
+    {
+        return len;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 //this is the receive task
@@ -996,14 +1028,14 @@ static ptu32_t __GmacRcvTask(void)
     Djy_GetEventPara(&handle,NULL);
     while(1)
     {
-    	Lock_SempPend(pDrive->rcvsync,pDrive->loopcycle);
+        Lock_SempPend(pDrive->rcvsync,pDrive->loopcycle);
         pDrive->debuginfo.rxTaskRun++;
         while(1)
         {
             if(Lock_MutexPend(pDrive->protect,CN_TIMEOUT_FOREVER))
             {
-            	pkg = __GmacRcv(handle);
-            	Lock_MutexPost(pDrive->protect);
+                pkg = __GmacRcv(handle);
+                Lock_MutexPost(pDrive->protect);
             }
             if(NULL != pkg)
             {
@@ -1026,7 +1058,7 @@ static ptu32_t __GmacRcvTask(void)
             {
                 //check the any filter logic matches
                 NetDevFilterCheck(pDrive->devhandle);
-            	break;
+                break;
             }
         }
     }
@@ -1062,10 +1094,10 @@ static bool_t __CreateRcvTask(ptu32_t handle)
 //for shell to do the restart
 bool_t GmacReset(char *param)
 {
-	tagMacDriver   *pDrive = &gMacDriver;
+    tagMacDriver   *pDrive = &gMacDriver;
 
-	MacReset(pDrive);
-	return true;
+    MacReset(pDrive);
+    return true;
 }
 
 //show the gmac status
@@ -1117,7 +1149,7 @@ bool_t gmacreg(char *param)
     vu32    value;
 
     printf("%-10s%-10s\n\r",\
-    		"Addr(Hex)","Value(Hex)");
+            "Addr(Hex)","Value(Hex)");
     addr = (u32 *)CN_GMAC_REG_BASE;
     for(i=0;i < CN_GMAC_SHOW_NUM;i++)
     {
@@ -1135,7 +1167,7 @@ bool_t  gmacpost(char *param)
     if(Lock_MutexPend(pDrive->protect,CN_TIMEOUT_FOREVER))
     {
         Lock_SempPost(pDrive->rcvsync);
-    	Lock_MutexPost(pDrive->protect);
+        Lock_MutexPost(pDrive->protect);
     }
 
     return true;
@@ -1155,38 +1187,38 @@ bool_t gmacrcvbdcheck(char *param)
         que = &pDrive->queueList[CN_QUE_0];
         len = que->rcvbdlen*sizeof(tagRcvBD);
 
-        SCB_CleanInvalidateDCache_by_Addr((u32*)que->rcvbdtab,len); //cache sync
+        //SCB_CleanInvalidateDCache_by_Addr((u32*)que->rcvbdtab,len); //cache sync
         //do the copy and print the result
         mem = (void*)malloc(len);
         if(NULL != mem)
         {
-        	pRcvBD = (tagRcvBD *)mem;
-        	memcpy(mem,(void *)que->rcvbdtab,len);
+            pRcvBD = (tagRcvBD *)mem;
+            memcpy(mem,(void *)que->rcvbdtab,len);
         }
-    	Lock_MutexPost(pDrive->protect);
-    	if(NULL != mem)
-    	{
-        	printf("Rcvbd:total:%08d CurID:%08d Time:0x%08llx\n\r",\
-        			que->rcvbdlen,que->rcvbdcur,DjyGetSysTime());
+        Lock_MutexPost(pDrive->protect);
+        if(NULL != mem)
+        {
+            printf("Rcvbd:total:%08d CurID:%08d Time:0x%08llx\n\r",\
+                    que->rcvbdlen,que->rcvbdcur,DjyGetSysTime());
             printf("%-10s%-10s%-10s%-10s%-10s%-10s\n\r",\
-            		"RcvBdNum","Addr(hex)","BAddr(hex)","State","Last","BValue");
+                    "RcvBdNum","Addr(hex)","BAddr(hex)","State","Last","BValue");
             for(i =0; i < que->rcvbdlen;i++)
             {
                 printf("%-08d  %-08x  %-08x  %-10s%-10s%-08x  \n\r",\
-                		i,\
-						(u32)(que->rcvbdtab + i),\
-						pRcvBD->addr.bm.addrDW<<2,\
-						pRcvBD->addr.bm.bOwnership?"busy":"free",\
-                		pRcvBD->addr.bm.bWrap?"Yes":"No",\
-                		pRcvBD->status.val);
+                        i,\
+                        (u32)(que->rcvbdtab + i),\
+                        pRcvBD->addr.bm.addrDW<<2,\
+                        pRcvBD->addr.bm.bOwnership?"busy":"free",\
+                        pRcvBD->addr.bm.bWrap?"Yes":"No",\
+                        pRcvBD->status.val);
                 pRcvBD++;
             }
             free(mem);
-    	}
-    	else
-    	{
-    		printf("%s:mem error\n\r",__FUNCTION__);
-    	}
+        }
+        else
+        {
+            printf("%s:mem error\n\r",__FUNCTION__);
+        }
     }
     return true;
 }
@@ -1204,44 +1236,44 @@ bool_t gmacsndbdcheck(char *param)
     {
         que = &pDrive->queueList[CN_QUE_0];
         len = que->sndbdlen*sizeof(tagSndBD);
-        SCB_CleanInvalidateDCache_by_Addr((u32*)que->sndbdtab,len);
+        //SCB_CleanInvalidateDCache_by_Addr((u32*)que->sndbdtab,len);
         //do the copy and print the result
         mem = (tagSndBD*)malloc(len);
         if(NULL != mem)
         {
-        	memcpy(mem,(void *)que->sndbdtab,len);
+            memcpy(mem,(void *)que->sndbdtab,len);
         }
-    	Lock_MutexPost(pDrive->protect);
+        Lock_MutexPost(pDrive->protect);
 
-    	if(NULL != mem)
-    	{
-        	pSndBD = (tagSndBD *)mem;
-        	printf("Sndbd:total:%08d CurID:%08d  LastID:%08d Time:0x%08x\n\r",\
-        			que->sndbdlen,que->sndbdcur,que->sndbdlast,DjyGetSysTime());
+        if(NULL != mem)
+        {
+            pSndBD = (tagSndBD *)mem;
+            printf("Sndbd:total:%08d CurID:%08d  LastID:%08d Time:0x%08x\n\r",\
+                    que->sndbdlen,que->sndbdcur,que->sndbdlast,DjyGetSysTime());
             printf("%-10s%-10s%-10s%-10s%-10s%-10s%-10s%-10s%-10s%-10s%-10s\n\r",\
-            		"SndBdNum","State","Addr(hex)","BAddr(hex)","Len(hex)","NoCrc","Exhausted","Error","UnderRun","Last","Wrap");
+                    "SndBdNum","State","Addr(hex)","BAddr(hex)","Len(hex)","NoCrc","Exhausted","Error","UnderRun","Last","Wrap");
             for(i =0; i < que->sndbdlen;i++)
             {
                 printf("%-08d  %-10s%-08x  %-08x  %-08x  %-10s%-10s%-10s%-10s%-10s%-10s\n\r",\
-                		i,pSndBD->status.bm.bUsed?"free":"busy",\
-                		(u32)(que->sndbdtab +i),\
-                		(u32)pSndBD->addr,\
-                		pSndBD->status.bm.len,\
-						pSndBD->status.bm.bNoCRC?"Yes":"No",\
-						pSndBD->status.bm.bExhausted?"Yes":"No",\
-						pSndBD->status.bm.bError?"Yes":"No",\
-						pSndBD->status.bm.bUnderrun?"Yes":"No",\
-						pSndBD->status.bm.bLastBuffer?"Yes":"No",\
-						pSndBD->status.bm.bWrap?"Yes":"No"\
-						);
+                        i,pSndBD->status.bm.bUsed?"free":"busy",\
+                        (u32)(que->sndbdtab +i),\
+                        (u32)pSndBD->addr,\
+                        pSndBD->status.bm.len,\
+                        pSndBD->status.bm.bNoCRC?"Yes":"No",\
+                        pSndBD->status.bm.bExhausted?"Yes":"No",\
+                        pSndBD->status.bm.bError?"Yes":"No",\
+                        pSndBD->status.bm.bUnderrun?"Yes":"No",\
+                        pSndBD->status.bm.bLastBuffer?"Yes":"No",\
+                        pSndBD->status.bm.bWrap?"Yes":"No"\
+                        );
                 pSndBD++;
             }
             free(mem);
-    	}
-    	else
-    	{
-    		printf("%s:mem error\n\r",__FUNCTION__);
-    	}
+        }
+        else
+        {
+            printf("%s:mem error\n\r",__FUNCTION__);
+        }
     }
     return true;
 }
@@ -1281,43 +1313,43 @@ static struct ShellCmdTab  gGmacDebug[] =
     },
     {
         "macreset",
-		GmacReset,
+        GmacReset,
         "usage:reset gmac",
         NULL
     },
     {
         "macdelay",
-		MacDelay,
+        MacDelay,
         "usage:MacDelay",
         NULL
     },
     {
         "macsndbdclear",
-		MacSndBDClear,
+        MacSndBDClear,
         "usage:MacSndBdClear + ndnum",
         NULL
     },
     {
         "macsndhalt",
-		MacSndHalt,
+        MacSndHalt,
         "usage:MacSndHalt",
         NULL
     },
     {
         "macsndstart",
-		MacSndStart,
+        MacSndStart,
         "usage:MacSndStart",
         NULL
     },
     {
         "macsnden",
-		MacSndEn,
+        MacSndEn,
         "usage:MacSndEn",
         NULL
     },
     {
         "macsnddis",
-		MacSndDis,
+        MacSndDis,
         "usage:MacSndDis",
         NULL
     },
@@ -1344,7 +1376,7 @@ bool_t ModuleInstall_GMAC(const char *devname, u8 *mac,\
     memcpy((void *)pDrive->macaddr,mac,CN_MACADDR_LEN);
     if(loop)
     {
-    	pDrive->loop = 1;
+        pDrive->loop = 1;
     }
     pDrive->loopcycle = loopcycle;
     pDrive->fnrcvhook = rcvHook;
@@ -1394,7 +1426,7 @@ bool_t ModuleInstall_GMAC(const char *devname, u8 *mac,\
 
     //all the configuration has set in the pDrive now,we need some sys assistant
     //application some semphore and mutex
-    pDrive->rcvsync = Lock_SempCreate(1,1,CN_SEMP_BLOCK_FIFO,NULL);
+    pDrive->rcvsync = Lock_SempCreate(1,1,CN_BLOCK_FIFO,NULL);
     if(NULL == pDrive->rcvsync)
     {
         goto RCVSYNC_FAILED;
@@ -1428,7 +1460,7 @@ bool_t ModuleInstall_GMAC(const char *devname, u8 *mac,\
 
     if(false == loop)
     {
-	    Int_Register(CN_INT_LINE_GMAC);
+        Int_Register(CN_INT_LINE_GMAC);
         Int_SettoAsynSignal(CN_INT_LINE_GMAC);
         Int_ClearLine(CN_INT_LINE_GMAC);
         Int_IsrConnect(CN_INT_LINE_GMAC,GMAC_IntHandler);
@@ -1455,65 +1487,65 @@ RCVSYNC_FAILED:
 //install a new hook
 bool_t GmacInstall_Hook(bool_t (*rcvHook)(u8 *buf, u16 len))
 {
-	tagMacDriver   *pDrive = &gMacDriver;
+    tagMacDriver   *pDrive = &gMacDriver;
 
-	if(Lock_MutexPend(pDrive->protect,CN_TIMEOUT_FOREVER))
-	{
-		if(rcvHook != NULL)
-		{
-			 pDrive->fnrcvhook= rcvHook;
-		}
+    if(Lock_MutexPend(pDrive->protect,CN_TIMEOUT_FOREVER))
+    {
+        if(rcvHook != NULL)
+        {
+             pDrive->fnrcvhook= rcvHook;
+        }
 
-		Lock_MutexPost(pDrive->protect);
-	}
-	return true;
+        Lock_MutexPost(pDrive->protect);
+    }
+    return true;
 }
 //uninstall the hook
 bool_t GmacUnInstall_Hook(void)
 {
-	tagMacDriver   *pDrive = &gMacDriver;
+    tagMacDriver   *pDrive = &gMacDriver;
 
-	if(Lock_MutexPend(pDrive->protect,CN_TIMEOUT_FOREVER))
-	{
-		if(pDrive->fnrcvhook != NULL)
-		{
-			pDrive->fnrcvhook = NULL;
-		}
+    if(Lock_MutexPend(pDrive->protect,CN_TIMEOUT_FOREVER))
+    {
+        if(pDrive->fnrcvhook != NULL)
+        {
+            pDrive->fnrcvhook = NULL;
+        }
 
-		Lock_MutexPost(pDrive->protect);
-	}
-	return true;
+        Lock_MutexPost(pDrive->protect);
+    }
+    return true;
 }
 
 //set the mac filter:caf or nbc
 void GmacInstall_Cfg(bool_t EnCAF, bool_t EnNBC)
 {
-	tagMacDriver   *pDrive = &gMacDriver;
+    tagMacDriver   *pDrive = &gMacDriver;
 
-	if(Lock_MutexPend(pDrive->protect,CN_TIMEOUT_FOREVER))
-	{
-		if(EnCAF)
-		{
-			pDrive->macstat.caf = 1;
-		}
-		else
-		{
-			pDrive->macstat.caf = 0;
-		}
+    if(Lock_MutexPend(pDrive->protect,CN_TIMEOUT_FOREVER))
+    {
+        if(EnCAF)
+        {
+            pDrive->macstat.caf = 1;
+        }
+        else
+        {
+            pDrive->macstat.caf = 0;
+        }
 
-		if(EnNBC)
-		{
-			pDrive->macstat.nbc = 1;
-		}
-		else
-		{
-			pDrive->macstat.nbc = 0;
-		}
+        if(EnNBC)
+        {
+            pDrive->macstat.nbc = 1;
+        }
+        else
+        {
+            pDrive->macstat.nbc = 0;
+        }
 
-		__MacInitialize(pDrive);
-		Lock_MutexPost(pDrive->protect);
-	}
-	return;
+        __MacInitialize(pDrive);
+        Lock_MutexPost(pDrive->protect);
+    }
+    return;
 }
 
 
@@ -1522,15 +1554,15 @@ void GmacInstall_Cfg(bool_t EnCAF, bool_t EnNBC)
 extern void GMAC_EnableMdio( Gmac *pGmac );
 extern void GMAC_DisableMdio( Gmac *pGmac );
 extern void GMAC_PHYMaintain(Gmac      *pGmac,
-							 uint8_t   bPhyAddr,
-							 uint8_t   bRegAddr,
-							 uint8_t   bRW,
-							 uint16_t  wData);
+                             uint8_t   bPhyAddr,
+                             uint8_t   bRegAddr,
+                             uint8_t   bRW,
+                             uint16_t  wData);
 extern uint16_t GMAC_PHYData(Gmac *pGmac);
 bool_t GMAC_MdioR(u8 dev,u8 reg, u16 *value)
 {
     bool_t    result = false;
-	tagMacDriver   *pDrive = &gMacDriver;
+    tagMacDriver   *pDrive = &gMacDriver;
 
     if(Lock_MutexPend(pDrive->protect,CN_TIMEOUT_FOREVER))
     {
@@ -1541,9 +1573,9 @@ bool_t GMAC_MdioR(u8 dev,u8 reg, u16 *value)
 
         GMAC_DisableMdio(GMAC);
 
-    	Lock_MutexPost(pDrive->protect);
+        Lock_MutexPost(pDrive->protect);
 
-    	result = true;
+        result = true;
     }
     return result;
 }
@@ -1551,7 +1583,7 @@ bool_t GMAC_MdioR(u8 dev,u8 reg, u16 *value)
 bool_t GMAC_MdioW(u8 dev,u8 reg, u16 value)
 {
     bool_t    result = false;
-	tagMacDriver   *pDrive = &gMacDriver;
+    tagMacDriver   *pDrive = &gMacDriver;
 
     if(Lock_MutexPend(pDrive->protect,CN_TIMEOUT_FOREVER))
     {
@@ -1562,8 +1594,8 @@ bool_t GMAC_MdioW(u8 dev,u8 reg, u16 value)
 
         GMAC_DisableMdio(GMAC);
 
-    	Lock_MutexPost(pDrive->protect);
-    	result = true;
+        Lock_MutexPost(pDrive->protect);
+        result = true;
     }
     return result;
 }

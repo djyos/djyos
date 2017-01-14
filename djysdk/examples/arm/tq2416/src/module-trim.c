@@ -202,8 +202,8 @@ void Sys_ModuleInit(void)
     ModuleInstall_IAP();
 
     //定时器组件
-    extern ptu32_t ModuleInstall_TimerSoft(ptu32_t para);
-    ModuleInstall_TimerSoft(CN_TIMER_SOURCE_TICK);
+    extern ptu32_t ModuleInstall_Timer(ptu32_t para);
+    ModuleInstall_Timer(CN_TIMER_SOURCE_TICK);
 
    //网络协议栈组件，请参考tcpip目录下的boardnetcfg.cfg文件来实现下述函数
    //来配置该板件的网络，如果你想使用网络的话 

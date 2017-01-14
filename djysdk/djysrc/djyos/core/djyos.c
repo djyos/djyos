@@ -187,33 +187,9 @@ void Djy_DelayUs(u32 time)
 {
     volatile u32 i;
 
-    //延时量达到8个ticks，且允许调度，改用系统延时
-//  if(time > (CN_CFG_TICK_US<<3) && Djy_QuerySch())
-//  {
-//      Djy_EventDelay(time);
-//      return;
-//  }
     i = (time << 10) / g_u32CycleSpeed;
     for(; i >0 ; i--);
 }
-//----微秒级延时-------------------------------------------------------------
-//功能：利用系统时钟实现的uS级延时，与Djy_EventDelay的不同在于，Djy_EventDelay
-//      只能实现整ticks延迟，而本函数是精确延迟。
-//参数：time，延时时间，单位为微秒
-//返回：无
-//-----------------------------------------------------------------------------
-//void Djy_DelayUs(u32 time)
-//{
-//    s64 end;
-//    end = DjyGetSysTime( ) + time;
-//    //延时量达到8个ticks，且允许调度，改用系统延时
-//    if((time > CN_CFG_TICK_US) && Djy_QuerySch())
-//    {
-//        Djy_EventDelay(time);
-//        return;
-//    }
-//    while(DjyGetSysTime( ) < end);
-//}
 
 //----线程栈检查---------------------------------------------------------------
 //功能: 检查一个事件的线程是否有栈溢出风险，方法:检测栈最低1/16空间内，内容是否
@@ -326,9 +302,7 @@ void  Djy_IsrTick(u32 inc_ticks)
                     }
                     pl_ecb->sync_head = NULL;   //事件头指针置空
                 }
-                //1、cn_event_delay=1表示延时返回
-                //2、cn_sts_sync_timeout=1则要联合其他bit判断具体原因，例如:
-                //CN_STS_WAIT_SEMP=1表示 等待信号量时超时返回。
+
                 pl_ecb->wakeup_from = pl_ecb->event_status;
                 pl_ecb->event_status = CN_STS_EVENT_READY;
                 if(pl_ecb->next == pl_ecb)      //这是闹钟同步队列最后一个结点.
@@ -966,10 +940,7 @@ const struct EventECB cn_sys_event = {
                         NULL,NULL,//multi_next,multi_previous
                         NULL,                       //vm
                         0,0,                        //param1,param2
-//                        NULL,                       //para_high_prio
-//                        NULL,                       //para_low_prio
-//                        NULL,                       //para_current
-                        NULL,                       //sync
+                       NULL,                       //sync
                         NULL,                       //sync_head
                         0,                          //EventStartTime
                         0,                          //consumed_time
@@ -984,10 +955,10 @@ const struct EventECB cn_sys_event = {
                         0,                          //wait_mem_size
                         CN_WF_EVENT_NORUN,          //wakeup_from
                         CN_STS_EVENT_READY,         //event_status
+                        CN_PRIO_SYS_SERVICE,        //prio_base
                         CN_PRIO_SYS_SERVICE,        //prio
                         CN_EVTT_ID_BASE,            //evtt_id
                         0,                          //sync_counter
-//                      0,                          //paras
                         0,                          //event_id
                         0                           //local_memory
                         };
@@ -1029,19 +1000,9 @@ void __Djy_InitSys(void)
         //是不会变化的.
         g_ptECB_Table[i].previous = (struct EventECB*)&s_ptEventFree;
         g_ptECB_Table[i].event_id = i;    //本id号在程序运行期维持不变
-        g_ptECB_Table[i].evtt_id = CN_EVTT_ID_INVALID;  //todo
+        g_ptECB_Table[i].evtt_id = CN_EVENT_ID_INVALID;
     }
     s_ptEventFree = &g_ptECB_Table[1];
-
-    //初始化参数缓冲区
-//  for(i = 0; i < CN_CFG_PARAS_LIMIT; i++)
-//  {
-//      if(i==(CN_CFG_PARAS_LIMIT-1))
-//          s_tEventParaTable[i].next = NULL;
-//      else
-//          s_tEventParaTable[i].next = &s_tEventParaTable[i+1];
-//  }
-//  s_ptParaFree = s_tEventParaTable;
 
     g_ptEventReady = g_ptECB_Table;
     g_ptEventRunning = g_ptEventReady;
@@ -1180,14 +1141,14 @@ void __Djy_ResumeDelay(struct EventECB *delay_event)
 //功能：由正在执行的事件调用,直接把自己加入延时队列，不引起调度也不操作ready
 //      队列，一般由同步函数调用，在timeout!=0时把事件加入闹钟同步队列实现
 //      timeout功能，是特定条件下对y_timer_sync函数的简化。
-//参数：u32l_uS,延迟时间,单位是微秒，将被向上调整为cn_tick_us的整数倍
+//参数：u32l_uS,延迟时间,单位是微秒，将被向上调整为CN_CFG_TICK_US的整数倍
 //返回：无
 //备注：1、操作系统内部使用的函数，且需在关闭中断（禁止调度）的条件下使用。
 //      2、调用本函数前running事件已经从就绪表中取出，本函数不改变就绪表。
 //      3、与其他内部函数一样，由调用方保证参数合理性，即u32l_uS>0.
 //-----------------------------------------------------------------------------
 //change by lst in 20130922,ticks改为64bit后，删掉处理32位数溢出回绕的代码
-void ___Djy_AddToDelay(u32 u32l_uS)
+void __Djy_AddToDelay(u32 u32l_uS)
 {
     struct EventECB * event;
 
@@ -1227,25 +1188,209 @@ void ___Djy_AddToDelay(u32 u32l_uS)
     }
 }
 
+//----添加处理中事件进阻塞队列-------------------------------------------------
+//功能：把正在运行的事件，添加进阻塞队列，只添加队列，不调度。
+//      只支持FIFO方式或者优先级排序，其他排序方式不能使用本函数
+//      本函数只允许内核模块调用，调用者保证并发安全。
+//参数：Head,阻塞队列头
+//      Qsort，阻塞队列排队方式，只支持CN_BLOCK_FIFO和CN_BLOCK_PRIO
+//      timeout，超时设置,不等于0则进入阻塞队列的同时，还进入超时队列。
+//         单位是微秒，timeout==CN_TIMEOUT_FOREVER则不会进入超时队列，
+//         timeout ==0则不应调用本函数。非0值将被向上调整为CN_CFG_TICK_US的倍数
+//      Status，阻塞状态，参看CN_STS_EVENT_READY系列定义
+//返回：无
+//-----------------------------------------------------------------------------
+void __Djy_AddRunningToBlock(struct EventECB **Head,bool_t Qsort,u32 timeout,u32 Status)
+{
+    struct EventECB *event;
+    __Djy_CutReadyEvent(g_ptEventRunning);
+    g_ptEventRunning->previous = NULL;
+    g_ptEventRunning->next = NULL;
+
+    g_ptEventRunning->sync_head = Head;
+    if(*Head == NULL)
+    {//同步队列空,running事件自成双向循环链表
+        g_ptEventRunning->multi_next = g_ptEventRunning;
+        g_ptEventRunning->multi_previous = g_ptEventRunning;
+        *Head = g_ptEventRunning;
+    }else
+    {
+        event = *Head;
+        if(Qsort == CN_BLOCK_PRIO)   //同步队列按优先级排序
+        {
+            do
+            {   //找到一个优先级低于新事件的事件.
+                //如果找不到，会停在队列头的位置，该位置也是正确的插入点。
+                if(event->prio <= g_ptEventRunning->prio)
+                    event = event->multi_next;
+                else
+                    break;
+            }while(event != *Head);
+            g_ptEventRunning->event_status |= CN_BLOCK_PRIO_SORT;
+            g_ptEventRunning->multi_next = event;
+            g_ptEventRunning->multi_previous = event->multi_previous;
+            event->multi_previous->multi_next = g_ptEventRunning;
+            event->multi_previous = g_ptEventRunning;
+            if((*Head)->prio > g_ptEventRunning->prio)
+                *Head = g_ptEventRunning;
+        }else                               //按先后顺序，新事件直接排在队尾
+        {
+            g_ptEventRunning->event_status &= ~CN_BLOCK_PRIO_SORT;
+            g_ptEventRunning->multi_next = event;
+            g_ptEventRunning->multi_previous = event->multi_previous;
+            event->multi_previous->multi_next = g_ptEventRunning;
+            event->multi_previous = g_ptEventRunning;
+        }
+    }
+    if(timeout != CN_TIMEOUT_FOREVER)
+    {
+        //事件状态设为等待信号量 +  超时
+        g_ptEventRunning->event_status = Status + CN_STS_SYNC_TIMEOUT;
+        __Djy_AddToDelay(timeout);
+    }else
+    {
+        g_ptEventRunning->event_status = Status;  //事件状态设为等待信号量
+    }
+}
+
+//----修改阻塞队列-------------------------------------------------------------
+//功能：调整指定事件在以PRIO排序的阻塞队列中的位置，在修改了阻塞中的事件优先级后，
+//      就需要调用本函数改变其在队列中的位置。
+//      本函数只允许内核模块调用，调用者保证并发安全。
+//参数：Event，被操作的事件
+//返回：无
+//-----------------------------------------------------------------------------
+void __Djy_ChangeBlockQueue(struct EventECB *Event)
+{
+    struct EventECB *pl_ecb;
+    struct EventECB *Head;
+    ufast_t Prio;
+    Head = *Event->sync_head;
+    pl_ecb = Head;
+    Prio = Event->prio;
+    //无须移动位置的条件：
+    //第一行：处于队列头，且最小。
+    //第二行：优先不低于后一个，不高于前一个。
+    //第三行：处于队列尾，且最大。
+    if( ((Event == pl_ecb)  && (Prio <= Event->multi_next->prio))
+       ||((Prio >= Event->multi_previous->prio)&& (Prio <= Event->multi_next->prio))
+       ||((Event == pl_ecb->multi_previous)&& (Prio >= Event->multi_previous->prio)) )
+        return ;
+
+    //从队列中取出事件控制块
+    Event->multi_previous->multi_next = Event->multi_next;
+    Event->multi_next->multi_previous = Event->multi_previous;
+    do
+    {   //找到一个优先级低于新事件的事件.
+        //如果找不到，会停在队列头的位置，该位置也是正确的插入点。
+        if(pl_ecb->prio < Event->prio)
+            pl_ecb = pl_ecb->multi_next;
+        else
+            break;
+    }while(pl_ecb != Head);
+
+    Event->multi_next = pl_ecb;
+    Event->multi_previous = pl_ecb->multi_previous;
+    pl_ecb->multi_previous->multi_next = Event;
+    pl_ecb->multi_previous = pl_ecb;
+    if((Head)->prio > Event->prio)
+        Head = Event;
+}
+
 //----设置事件优先级-----------------------------------------------------------
-//功能: 事件处理中，可以调用本函数，改变自身的优先级。如果优先级被改低了，可能
-//      立即调度，阻塞本事件运行。
-//参数: new_prio,设置的新优先级
+//功能: 改变事件优先级，如果改变自身的优先级，并把优先级被改低了，可能立即调度，
+//      阻塞本事件运行。
+//参数: event_id，被操作的事件id
+//      new_prio,设置的新优先级
 //返回: true = 成功设置，false=失败，一般是优先级不合法
 //-----------------------------------------------------------------------------
-bool_t Djy_SetEventPrio(ufast_t new_prio)
+bool_t Djy_SetEventPrio(u16 event_id,ufast_t new_prio)
 {
-    if((new_prio >= CN_PRIO_SYS_SERVICE) || (new_prio == 0))
-        return false;
-    if(new_prio == g_ptEventRunning->prio)
-        return true;
-    Int_SaveAsynSignal();
-    __Djy_CutReadyEvent(g_ptEventRunning);
-    g_ptEventRunning->next = NULL;
-    g_ptEventRunning->previous = NULL;
-    g_ptEventRunning->prio = new_prio;
-    __Djy_EventReady(g_ptEventRunning);
+    struct EventECB * pl_ecb;
 
+    if((new_prio >= CN_PRIO_SYS_SERVICE) || (new_prio == 0)
+       || (event_id >= gc_u32CfgEventLimit))
+        return false;
+
+    Int_SaveAsynSignal();
+    pl_ecb = &g_ptECB_Table[event_id];
+    pl_ecb->prio_base = new_prio;
+    if(new_prio != pl_ecb->prio)
+    {
+        //事件原来的状态，可能：1、处于就绪态，2、处于某种阻塞态。
+        //如果处于某种阻塞态，假如队列是按优先级排序的，则要修改该队列。
+        if(pl_ecb->event_status == CN_STS_EVENT_READY)
+        {
+            //注：此三句的顺序不能变，因为prio的值对__Djy_CutReadyEvent函数执行
+            //    结果有影响
+            __Djy_CutReadyEvent(pl_ecb);
+            pl_ecb->prio = new_prio;
+            __Djy_EventReady(pl_ecb);
+        }
+        else if(pl_ecb->event_status & CN_BLOCK_PRIO_SORT)
+        {
+            pl_ecb->prio = new_prio;
+            __Djy_ChangeBlockQueue(pl_ecb);
+        }
+    }
+    Int_RestoreAsynSignal();
+    return true;
+}
+
+//----继承事件优先级-----------------------------------------------------------
+//功能: 如果g_ptEventRunning的优先级较高，event_id临时以g_ptEventRunning的优先级
+//      运行，直到调用Djy_RestorePrio，否则不改变优先级。
+//参数: event_id，被操作的事件id
+//返回: true = 成功设置，false=失败，一般是优先级不合法
+//-----------------------------------------------------------------------------
+bool_t Djy_RaiseTempPrio(u16 event_id)
+{
+    struct EventECB * pl_ecb;
+
+    if(event_id >= gc_u32CfgEventLimit)
+        return false;
+
+    Int_SaveAsynSignal();
+    pl_ecb = &g_ptECB_Table[event_id];
+    if(g_ptEventRunning->prio < pl_ecb->prio)
+    {
+        //事件原来的状态，可能：1、处于就绪态，2、处于某种阻塞态。
+        //如果处于某种阻塞态，假如队列是按优先级排序的，则要修改该队列。
+        if(pl_ecb->event_status == CN_STS_EVENT_READY)
+        {
+            //注：此三句的顺序不能变，因为prio的值对__Djy_CutReadyEvent函数执行
+            //    结果有影响
+            __Djy_CutReadyEvent(pl_ecb);
+            pl_ecb->prio = g_ptEventRunning->prio;
+            __Djy_EventReady(pl_ecb);
+        }
+        else if(pl_ecb->event_status & CN_BLOCK_PRIO_SORT)
+        {
+            pl_ecb->prio = g_ptEventRunning->prio;
+            __Djy_ChangeBlockQueue(pl_ecb);
+        }
+    }
+    Int_RestoreAsynSignal();
+    return true;
+}
+
+//----恢复事件优先级-----------------------------------------------------------
+//功能: 调用Djy_SetTempPrio后，可以调用本函数恢复g_ptEventRunning的优先级。
+//参数: 无，
+//返回: true = 成功设置，false=失败，一般是优先级不合法
+//-----------------------------------------------------------------------------
+bool_t Djy_RestorePrio(void)
+{
+
+    Int_SaveAsynSignal();
+    if(g_ptEventRunning->prio != g_ptEventRunning->prio_base)
+    {
+        //注：此三句的顺序不能变，因为prio的值对__Djy_CutReadyEvent函数执行
+        //    结果有影响
+        __Djy_CutReadyEvent(g_ptEventRunning);
+        g_ptEventRunning->prio = g_ptEventRunning->prio_base;
+        __Djy_EventReady(g_ptEventRunning);
+    }
     Int_RestoreAsynSignal();
     return true;
 }
@@ -1253,7 +1398,7 @@ bool_t Djy_SetEventPrio(ufast_t new_prio)
 //----闹钟同步-----------------------------------------------------------------
 //功能：由正在执行的事件调用,使自己暂停u32l_uS微秒后继续运行.
 //参数：u32l_uS,延迟时间,单位是微秒，0且允许轮转调度则把事件放到同优先级的
-//      最后。非0值将被向上调整为cn_tick_us的整数倍
+//      最后。非0值将被向上调整为CN_CFG_TICK_US的整数倍
 //返回：实际延时时间us数
 //备注：延时队列为双向循环链表
 //change by lst in 20130922,ticks改为64bit后，删掉处理32位数溢出回绕的代码
@@ -1327,7 +1472,7 @@ u32 Djy_EventDelay(u32 u32l_uS)
 
 //----闹钟同步2----------------------------------------------------------------
 //功能：由正在执行的事件调用,使自己暂停至s64l_uS微秒后继续运行.
-//参数：s64l_uS,延迟结束时刻,单位是微秒，将被向上调整为cn_tick_us的整数倍
+//参数：s64l_uS,延迟结束时刻,单位是微秒，将被向上调整为CN_CFG_TICK_US的整数倍
 //返回：实际延时时间us数
 //备注：延时队列为双向循环链表
 //add by lst in 20130922
@@ -1389,8 +1534,8 @@ u32 Djy_EventDelayTo(s64 s64l_uS)
 //功能: 把正在运行的事件加入到指定事件的同步队列中去,然后重新调度。当指定事件
 //      处理完成，或者超时时间到，将唤醒当前事件。
 //参数: event_id,目标事件id号
-//      timeout，超时设置,单位是微秒，cn_timeout_forever=无限等待，0则立即按
-//      超时返回。非0值将被向上调整为cn_tick_us的整数倍
+//      timeout，超时设置,单位是微秒，CN_TIMEOUT_FOREVER=无限等待，0则立即按
+//      超时返回。非0值将被向上调整为CN_CFG_TICK_US的整数倍
 //返回: CN_SYNC_SUCCESS=同步条件成立返回，
 //      CN_SYNC_TIMEOUT=超时返回，
 //      EN_KNL_CANT_SCHED=禁止调度时不可执行同步操作
@@ -1439,7 +1584,7 @@ u32 Djy_WaitEventCompleted(u16 event_id,u32 timeout)
     {
         g_ptEventRunning->event_status = CN_STS_WAIT_EVENT_DONE
                                         +CN_STS_SYNC_TIMEOUT;
-        ___Djy_AddToDelay(timeout);
+        __Djy_AddToDelay(timeout);
     }
     else
     {
@@ -1465,8 +1610,8 @@ u32 Djy_WaitEventCompleted(u16 event_id,u32 timeout)
 //      同步以目标事件类型的完成次数为同步条件。
 //参数: evtt_id,目标事件类型号
 //      done_times,完成次数，0表示待最后一条该类型事件完成.
-//      timeout，超时设置,单位是微秒，cn_timeout_forever=无限等待，0则立即按
-//      超时返回。非0值将被向上调整为cn_tick_us的整数倍
+//      timeout，超时设置,单位是微秒，CN_TIMEOUT_FOREVER=无限等待，0则立即按
+//      超时返回。非0值将被向上调整为CN_CFG_TICK_US的整数倍
 //返回: CN_SYNC_SUCCESS=同步条件成立返回，
 //      CN_SYNC_TIMEOUT=超时返回，
 //      EN_KNL_CANT_SCHED=禁止调度时不可执行同步操作
@@ -1530,7 +1675,7 @@ u32 Djy_WaitEvttCompleted(u16 evtt_id,u16 done_times,u32 timeout)
     {
         g_ptEventRunning->event_status = CN_STS_WAIT_EVTT_DONE
                                          +CN_STS_SYNC_TIMEOUT;
-        ___Djy_AddToDelay(timeout);
+        __Djy_AddToDelay(timeout);
     }else
     {
         g_ptEventRunning->event_status = CN_STS_WAIT_EVTT_DONE;
@@ -1559,8 +1704,8 @@ u32 Djy_WaitEvttCompleted(u16 evtt_id,u16 done_times,u32 timeout)
 //      base_times,弹出次数起始值，目标事件累计弹出*base_times+1作为同步条件，
 //          同步条件达到时，返回实际弹出次数。如果给NULL,则从调用时的弹出次数+1
 //          做同步条件，不能得到实际弹出次数。
-//      timeout，超时设置,单位是微秒，cn_timeout_forever=无限等待，0则立即按
-//      超时返回。非0值将被向上调整为cn_tick_us的整数倍
+//      timeout，超时设置,单位是微秒，CN_TIMEOUT_FOREVER=无限等待，0则立即按
+//      超时返回。非0值将被向上调整为CN_CFG_TICK_US的整数倍
 //返回: CN_SYNC_SUCCESS=同步条件成立返回，
 //      CN_SYNC_TIMEOUT=超时返回，
 //      CN_SYNC_ERROR=出错，
@@ -1635,7 +1780,7 @@ u32 Djy_WaitEvttPop(u16 evtt_id,u32 *base_times, u32 timeout)
     {
         g_ptEventRunning->event_status = CN_STS_WAIT_EVTT_POP
                                          + CN_STS_SYNC_TIMEOUT;
-        ___Djy_AddToDelay(timeout);
+        __Djy_AddToDelay(timeout);
     }else
     {
         g_ptEventRunning->event_status = CN_STS_WAIT_EVTT_POP;
@@ -1678,21 +1823,8 @@ u32 Djy_WaitEvttPop(u16 evtt_id,u32 *base_times, u32 timeout)
 //              如果timeout ==0，则pop_result无意义。
 //
 //          如果函数返回了cn_invalid_event_id，则返回具体的出错信息
-//      event_para,事件参数指针，其含义由事件处理函数解析，最好不超过32字节。如
-//          果需要创建新的事件，event_para里的数据将拷贝到task_current中，如果不
-//          需要创建新事件，则根据prio拷贝到task_low_prio或task_high_prio队列中。
-//      para_size，参数长度，最好不超过32.0表示无参数
-//      para_options, 参数选项，只有两个bit有用:
-//          bit0:1=总是创建新参数控制块保存参数，
-//               0=如果相应队列尚无参数，则创建新任务保存参数，
-//                 否则替代该队列的最后一个参数的内容。
-//          bit1:参数内容超过cn_para_limited时的处理方法，
-//              0=直接使用调用方提供的缓冲区，此时应用程序应该自行解决内存访问冲
-//              突的问题，如果timoout=cn_timeout_forever，则不会有访问冲突问题。
-//              如果timoout ≠cn_timeout_forever，切记不要使用局部数组变量
-//              1=malloc一个内存块，由系统负责释放。
-//              如果超过cn_para_limited，用户又不想自己处理访问冲突问题，可使本
-//              参数为1.
+//      PopPrarm1，PopPrarm2：传递给事件的参数，如果连续弹出关联型事件，事件控
+//          制块中总是保存最后一次弹出的参数。
 //      prio,事件优先级,对于需要创建新事件的情况，0表示新事件使用默认值(存在事件
 //          类型控制块中)。
 //          对于无需创建新事件的情况，分两种情况:
@@ -1709,9 +1841,6 @@ u16 Djy_EventPop(   u16  hybrid_id,
                     u32 timeout,    //如果阻塞，定义超时时间，
                     ptu32_t PopPrarm1,
                     ptu32_t PopPrarm2,
-//                  void *event_para,
-//                  u32 para_size,
-//                  ufast_t para_options,
                     ufast_t prio)
 {
     struct ExpThrowPara  parahead;
@@ -1719,15 +1848,9 @@ u16 Djy_EventPop(   u16  hybrid_id,
     struct EventECB *pl_ecb;
     struct EventType *pl_evtt;
     struct EventECB *pl_ecb_temp;
-//  struct ParaPCB *oping_para=NULL;
-//  struct ParaPCB **oping_queue=NULL;
     u16 evtt_offset;
     u16 return_result;
     bool_t schbak;          //是否允许调度
-//    bool_t new_ecb = false; //是否分配了新的事件控制块，用于出错退出时释放资源
-//  bool_t new_para = false;//是否分配了新的参数控制块，用于出错退出时释放资源
-//  bool_t para_sync = false;//若需要同步，是否进入参数同步队列
-//    bool_t malloc_para;        //参见para_options的参数说明
     if(hybrid_id >= CN_EVTT_ID_BASE)
     {
         evtt_offset = hybrid_id & (~CN_EVTT_ID_MASK);
@@ -1823,8 +1946,8 @@ u16 Djy_EventPop(   u16  hybrid_id,
                                             = pl_ecb_temp->multi_previous;
                     }
                     __Djy_EventReady(pl_ecb_temp);
-                    if(pl_evtt->pop_sync != NULL)
-                        pl_evtt = NULL;
+//                  if(pl_evtt->pop_sync != NULL)
+//                      pl_evtt = NULL;
                 }else
                 {
                     pl_ecb->sync_counter--;
@@ -1874,7 +1997,6 @@ u16 Djy_EventPop(   u16  hybrid_id,
             pl_ecb = s_ptEventFree;         //从空闲链表中提取一个事件控制块
             s_ptEventFree=s_ptEventFree->next;  //空闲事件控制块数量减1
             pl_evtt->events++;
-//            new_ecb = true;
             //设置新事件的事件控制块
             pl_ecb->next = NULL;
             pl_ecb->previous = NULL;
@@ -1883,8 +2005,6 @@ u16 Djy_EventPop(   u16  hybrid_id,
             pl_ecb->vm = NULL;
             pl_ecb->param1 = PopPrarm1;
             pl_ecb->param2 = PopPrarm2;
-//          pl_ecb->para_high_prio = NULL;
-//          pl_ecb->para_low_prio = NULL;
             pl_ecb->sync = NULL;
             pl_ecb->sync_head = NULL;
 
@@ -1902,7 +2022,6 @@ u16 Djy_EventPop(   u16  hybrid_id,
             pl_ecb->event_status = CN_STS_EVENT_READY;
             pl_ecb->evtt_id = evtt_offset | CN_EVTT_ID_MASK;    //设置事件类型
             pl_ecb->sync_counter = 0;
-//          pl_ecb->paras = 0;
             pl_ecb->local_memory = 0;
             pl_evtt->property.inuse = 1;
             if(pl_evtt->property.correlative == EN_CORRELATIVE)
@@ -1913,54 +2032,15 @@ u16 Djy_EventPop(   u16  hybrid_id,
             {
 
             }
-//            if(para_size != 0)          //有参数
-//            {
-//                pl_ecb->paras = 1;          //表示队列中有一个参数
-//                oping_para = s_ptParaFree;
-//                s_ptParaFree = s_ptParaFree->next;
-//                new_para = true;
-//                para_sync = true;       //如果需要同步，进入参数同步队列
-//                oping_para->dynamic_mem = false;
-//                oping_para->sync = NULL;
-//                if(para_size > CN_PARA_LIMITED)
-//                {
-//                    if(malloc_para == true)    //动态分配内存，然后copy参数
-//                    {
-//                        //参数是申请给被弹出的事件用的，故用全局内存
-//                        oping_para->event_para = (void*)M_Malloc(para_size,0);
-//                        if(oping_para->event_para == NULL)
-//                        {
-//                            Djy_SaveLastError(EN_KNL_MEMORY_OVER);
-//                            return_result = CN_EVENT_ID_INVALID;
-//                            if(pop_result != NULL)
-//                                *pop_result = (u32)EN_KNL_MEMORY_OVER;
-//                            goto end_pop_save;
-//                        }else
-//                        {
-//                            memcpy(oping_para->event_para,event_para,para_size);
-//                            oping_para->dynamic_mem = true;
-//                        }
-//                    }else
-//                        oping_para->event_para = event_para;  //直接使用调用者提供的缓冲区，
-//                                                //无须copy参数
-//                }else   //参数尺寸小于32，直接使用参数控制块自带的32字节缓冲区
-//                {
-//                    oping_para->event_para = oping_para->static_para;
-//                    memcpy(oping_para->event_para,event_para,para_size);
-//                }
-////#if(CN_CFG_DEBUG_INFO == 1)
-////                oping_para->ParaStartTime = DjyGetSysTime();
-////#endif
-//            }
-
-//          pl_ecb->para_current = oping_para;
-//          pl_ecb->para_high_prio = NULL;
-//          pl_ecb->para_low_prio = NULL;
             if(prio != 0)
             {
                 pl_ecb->prio = prio;                    //设置事件优先级,
+                pl_ecb->prio_base = pl_ecb->prio;       //设置事件优先级,
             }else
-                pl_ecb->prio =pl_evtt->default_prio;//从事件类型中继承优先级
+            {
+                pl_ecb->prio =pl_evtt->default_prio;    //从事件类型中继承优先级
+                pl_ecb->prio_base = pl_ecb->prio;       //设置事件优先级,
+            }
             __Djy_EventReady(pl_ecb);
             return_result = pl_ecb->event_id;
         }
@@ -1980,275 +2060,31 @@ u16 Djy_EventPop(   u16  hybrid_id,
         pl_ecb->param2 = PopPrarm2;
         return_result = pl_ecb->event_id;
 
-//        if(para_size != 0)          //有参数
-//        {
-//            if(!(hybrid_id & CN_EVTT_ID_MASK))
-//                pl_ecb = &g_ptECB_Table[hybrid_id];
-//            else
-//                pl_ecb = pl_evtt->mark_event;
-//            if(prio >= pl_ecb->prio)
-//                oping_queue = &pl_ecb->para_low_prio;
-//            else
-//                oping_queue = &pl_ecb->para_high_prio;
-//            para_sync = true;       //如果需要同步，进入参数同步队列
-//            if((para_options && CN_CREAT_NEW_PARA)      //创建新参数
-//                    || (*oping_queue == NULL))           //参数队列尚无参数
-//            {
-//                //无空闲参数控制块或者该事件类型所使用的参数控制块已经达到限制
-//                if((s_ptParaFree==NULL) || (pl_ecb->paras>=pl_evtt->para_limit))
-//                {
-//                    Djy_SaveLastError(EN_KNL_PCB_EXHAUSTED);
-//                    return_result = CN_EVENT_ID_INVALID;
-//                    if(pop_result != NULL)
-//                        *pop_result = (u32)EN_KNL_PCB_EXHAUSTED;
-//                    goto end_pop_save;
-//                }else
-//                {
-//                    pl_ecb->paras++;           //队列中的参数个数增加
-//                    new_para = true;           //标记申请了新参数
-//                    oping_para = s_ptParaFree;    //以下两行分配参数控制块
-//                    s_ptParaFree = s_ptParaFree->next;
-//                    oping_para->sync = NULL;
-//                    if(*oping_queue == NULL)          //原队列空
-//                    {
-//                        oping_para->next = oping_para;
-//                        oping_para->previous = oping_para;
-//                        *oping_queue = oping_para;
-//                    }else                           //原队列非空，新参数加到最后
-//                    {
-//                        oping_para->next = *oping_queue;
-//                        oping_para->previous = (*oping_queue)->previous;
-//                        (*oping_queue)->previous->next = oping_para;
-//                        (*oping_queue)->previous = oping_para;
-//                    }
-//
-////#if(CN_CFG_DEBUG_INFO == 1)
-////                    oping_para->ParaStartTime = DjyGetSysTime();
-////#endif
-//                    oping_para->dynamic_mem = false;
-//                    if(para_size > CN_PARA_LIMITED)
-//                    {
-//                        if(malloc_para == true)    //动态分配内存，然后copy参数
-//                        {
-//                            //参数是申请给被弹出的事件用的，故用全局内存
-//                            oping_para->event_para =
-//                                    (void*)M_Malloc(para_size,0);
-//                            if(oping_para->event_para == NULL)
-//                            {
-//                                Djy_SaveLastError(EN_KNL_MEMORY_OVER);
-//                                return_result = CN_EVENT_ID_INVALID;
-//                                if(pop_result != NULL)
-//                                    *pop_result = (u32)EN_KNL_MEMORY_OVER;
-//                                goto end_pop_save;
-//                            }else
-//                            {
-//                                memcpy(oping_para->event_para,event_para,para_size);
-//                                oping_para->dynamic_mem = true;
-//                            }
-//                        }else
-//                            oping_para->event_para = event_para;  //直接使用调用者提供的缓冲区，
-//                                                    //无须copy参数
-//                    }else   //参数尺寸小于32，直接使用参数控制块自带的32字节缓冲区
-//                    {
-//                        oping_para->event_para = oping_para->static_para;
-//                        memcpy(oping_para->event_para,event_para,para_size);
-//                    }
-//                }
-//            }else
-//            {
-//                //替换原任务队列中的最后一个任务的参数。
-//                oping_para = (*oping_queue)->previous;
-//                if(para_size <= CN_PARA_LIMITED)
-//                {
-//                    if(oping_para->dynamic_mem)     //原参数是动态分配的
-//                    {
-//                        oping_para->dynamic_mem = false;
-//                        free(oping_para->event_para);
-//                    }
-//                    oping_para->event_para = oping_para->static_para;
-//                    memcpy(oping_para->event_para,event_para,para_size);
-//                }
-//                else
-//                {
-//                    if(oping_para->dynamic_mem)     //原参数缓冲区是动态分配的
-//                    {
-//                        if(malloc_para == false)    //使用用户提供的缓冲区
-//                        {
-//                            oping_para->dynamic_mem = false;
-//                            free(oping_para->event_para);
-//                            oping_para->event_para = event_para;
-//                        }
-//                        else
-//                        {
-//                            //看原来分配的尺寸是否还满足要求
-//                            if(M_CheckSize(oping_para->event_para) >= para_size)
-//                            {
-//                                memcpy(oping_para->event_para,event_para,para_size);
-//                            }
-//                            else    //不满足要求，须重新分配
-//                            {
-//                                free(oping_para->event_para);
-//                                oping_para->event_para =
-//                                        (void*)M_Malloc(para_size,0);
-//                                if(oping_para->event_para == NULL)
-//                                {
-//                                    Djy_SaveLastError(EN_KNL_MEMORY_OVER);
-//                                    return_result = CN_EVENT_ID_INVALID;
-//                                    if(pop_result != NULL)
-//                                        *pop_result = (u32)EN_KNL_MEMORY_OVER;
-//                                    goto end_pop_save;
-//                                }else
-//                                {
-//                                    memcpy(oping_para->event_para,event_para,para_size);
-//                                }
-//                            }
-//                        }
-//                    }
-//                    else  //原参数缓冲区非动态分配，可能是静态，也可能是用户提供
-//                    {
-//                        if(malloc_para == false)    //使用用户提供的缓冲区
-//                        {
-//                            oping_para->event_para = event_para;
-//                        }
-//                        else
-//                        {
-//                            oping_para->event_para =
-//                                            (void*)M_Malloc(para_size,0);
-//                            if(oping_para->event_para == NULL)
-//                            {
-//                                Djy_SaveLastError(EN_KNL_MEMORY_OVER);
-//                                return_result = CN_EVENT_ID_INVALID;
-//                                if(pop_result != NULL)
-//                                    *pop_result = (u32)EN_KNL_MEMORY_OVER;
-//                                goto end_pop_save;
-//                            }else
-//                            {
-//                                memcpy(oping_para->event_para,event_para,para_size);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }else       //无参数，不需要做任何处理。
-//        {
-//        }
     }
     //设定了超时时间，将重新调度
-    //如果有附带参数，则调用者进入参数的同步队列，阻塞直到该参数所代表的任务
-    //完成才返回，即目标事件处理函数调用djy_para_used
     //否则进入事件同步队列，事件处理函数自然返回或异常退出才解除阻塞
     pl_evtt->pop_times++;
     if(timeout != 0)
     {
-//      if(para_sync)       //进入参数同步队列
-//      {
-//          __Djy_CutReadyEvent(g_ptEventRunning);
-//
-//          //以下把pg_event_running加入到目标事件的同步队列中
-//          g_ptEventRunning->sync_head = &(oping_para->sync);
-//          if(oping_para->sync != NULL)
-//          {//被同步事件的同步队列不是空的
-//              g_ptEventRunning->multi_next = oping_para->sync;
-//              g_ptEventRunning->multi_previous = oping_para->sync->multi_previous;
-//              oping_para->sync->multi_previous->multi_next = g_ptEventRunning;
-//              oping_para->sync->multi_previous = g_ptEventRunning;
-//          }else
-//          {//被同步事件的同步队列是空的
-//              oping_para->sync = g_ptEventRunning;
-//              g_ptEventRunning->multi_next = g_ptEventRunning;
-//              g_ptEventRunning->multi_previous = g_ptEventRunning;
-//          }
-//
-//          if(timeout != CN_TIMEOUT_FOREVER)
-//          {
-//              g_ptEventRunning->event_status = CN_STS_WAIT_PARA_USED
-//                                               + CN_STS_SYNC_TIMEOUT;
-//              ___Djy_AddToDelay(timeout);
-//          }else
-//          {
-//              g_ptEventRunning->event_status = CN_STS_WAIT_PARA_USED;
-//          }
-//          Int_RestoreAsynSignal();  //恢复中断会引发重新调度
-//
-//          //注:事件处理结果在djy_para_used函数中给event_result赋值
-//          //检查从哪里返回，是超时还是同步事件完成。
-//          if(g_ptEventRunning->wakeup_from & CN_STS_SYNC_TIMEOUT)
-//          {//说明同步条件未到，从超时返回。
-//              if(pop_result != NULL)
-//                  *pop_result = (u32)CN_SYNC_TIMEOUT;
-//          }else if(g_ptEventRunning->wakeup_from & CN_STS_EVENT_EXP_EXIT)
-//          {//被同步事件被异常终止，可能没有被正确执行
-//              if(pop_result != NULL)
-//                  *pop_result = (u32)EN_KNL_EVENT_SYNC_EXIT;
-//          }else
-//          {
-//              if(pop_result != NULL)
-//                  *pop_result = (u32)CN_SYNC_SUCCESS;
-//          }
-//      }
-//      else            //进入事件同步队列
-//      {
-            __Djy_CutReadyEvent(g_ptEventRunning);
+        __Djy_AddRunningToBlock(&pl_ecb->sync, CN_BLOCK_FIFO, timeout, CN_STS_WAIT_EVENT_DONE);
+        Int_RestoreAsynSignal();  //恢复中断会引发重新调度
 
-            //以下把pg_event_running加入到目标事件的同步队列中
-            g_ptEventRunning->sync_head = &pl_ecb->sync;
-            if(pl_ecb->sync != NULL)
-            {//被同步事件的同步队列不是空的
-                g_ptEventRunning->multi_next = pl_ecb->sync;
-                g_ptEventRunning->multi_previous = pl_ecb->sync->multi_previous;
-                pl_ecb->sync->multi_previous->multi_next = g_ptEventRunning;
-                pl_ecb->sync->multi_previous = g_ptEventRunning;
-            }else
-            {//被同步事件的同步队列是空的
-                pl_ecb->sync = g_ptEventRunning;
-                g_ptEventRunning->multi_next = g_ptEventRunning;
-                g_ptEventRunning->multi_previous = g_ptEventRunning;
-            }
-
-            if(timeout != CN_TIMEOUT_FOREVER)
-            {
-                g_ptEventRunning->event_status = CN_STS_WAIT_EVENT_DONE
-                                                 + CN_STS_SYNC_TIMEOUT;
-                ___Djy_AddToDelay(timeout);
-            }else
-            {
-                g_ptEventRunning->event_status = CN_STS_WAIT_EVENT_DONE;
-            }
-            Int_RestoreAsynSignal();  //恢复中断会引发重新调度
-
-            //注:事件处理结果在djy_task_completed函数中给event_result赋值
-            //检查从哪里返回，是超时还是同步事件完成。
-            if(g_ptEventRunning->wakeup_from & CN_STS_SYNC_TIMEOUT)
-            {//说明同步条件未到，从超时返回。
-                if(pop_result != NULL)
-                    *pop_result = (u32)CN_SYNC_TIMEOUT;
-            }else if(g_ptEventRunning->wakeup_from & CN_STS_EVENT_EXP_EXIT)
-            {//被同步事件被异常终止，可能没有被正确执行
-                if(pop_result != NULL)
-                    *pop_result = (u32)CN_STS_EVENT_EXP_EXIT;
-            }else
-            {
-                if(pop_result != NULL)
-                    *pop_result = (u32)CN_SYNC_SUCCESS;
-            }
-//      }
+        //注:事件处理结果在djy_task_completed函数中给event_result赋值
+        //检查从哪里返回，是超时还是同步事件完成。
+        if(g_ptEventRunning->wakeup_from & CN_STS_SYNC_TIMEOUT)
+        {//说明同步条件未到，从超时返回。
+            if(pop_result != NULL)
+                *pop_result = (u32)CN_SYNC_TIMEOUT;
+        }else if(g_ptEventRunning->wakeup_from & CN_STS_EVENT_EXP_EXIT)
+        {//被同步事件被异常终止，可能没有被正确执行
+            if(pop_result != NULL)
+                *pop_result = (u32)CN_STS_EVENT_EXP_EXIT;
+        }else
+        {
+            if(pop_result != NULL)
+                *pop_result = (u32)CN_SYNC_SUCCESS;
+        }
     }
-//    goto end_pop;
-
-//end_pop_save:
-//    if(new_ecb == true)
-//    {
-//        pl_ecb->next = s_ptEventFree;//释放pl_ecb
-//        s_ptEventFree = pl_ecb;
-//        pl_ecb->previous = (struct EventECB*)&s_ptEventFree;
-//        pl_evtt->events--;
-//    }
-//  if(new_para == true)
-//  {
-//      oping_para->next = s_ptParaFree;//释放op_queue
-//      s_ptParaFree = oping_para;
-//
-//  }
 end_pop:
     Int_RestoreAsynSignal();  //恢复中断状态
     return return_result;
@@ -2292,53 +2128,6 @@ void Djy_GetEventPara(ptu32_t *Param1,ptu32_t *Param2)
     if(Param2 != NULL)
         *Param2 = g_ptEventRunning->param2;
 }
-//{
-//    struct ParaPCB *sub;
-//    void *result;
-//    atom_low_t  atom_bak;
-//    atom_bak = Int_LowAtomStart();
-//    if(g_ptEventRunning->para_current != NULL)
-//    {
-//        result = (void*)g_ptEventRunning->para_current->event_para;
-//    }else if(g_ptEventRunning->para_high_prio != NULL) //高优先级参数队列非空
-//    {
-//        sub = g_ptEventRunning->para_high_prio;  //取高优先级参数队列
-//        if(sub->next == sub)                    //队列中只有一个参数
-//        {
-//            g_ptEventRunning->para_high_prio = NULL;
-//        }else                                   //队列中超过一个参数
-//        {
-//            sub->next->previous = sub->previous;
-//            sub->previous->next = sub->next;
-//            g_ptEventRunning->para_high_prio = sub->next;
-//        }
-//        g_ptEventRunning->para_current = sub;
-//        result = (void*)sub->event_para;
-//    }else if(g_ptEventRunning->para_low_prio != NULL)//低优先级参数队列非空
-//    {
-//        sub = g_ptEventRunning->para_low_prio;   //取低优先级参数队列
-//        if(sub->next == sub)                    //队列中只有一个参数
-//        {
-//            g_ptEventRunning->para_low_prio = NULL;
-//        }else                                   //队列中超过一个参数
-//        {
-//            sub->next->previous = sub->previous;
-//            sub->previous->next = sub->next;
-//            g_ptEventRunning->para_low_prio = sub->next;
-//        }
-//        g_ptEventRunning->para_current = sub;
-//        result = (void*)sub->event_para;
-//    }else
-//    {
-//        result = NULL;
-//    }
-//    Int_LowAtomEnd(atom_bak);
-////#if(CN_CFG_DEBUG_INFO == 1)
-////    if((result != NULL) && (time != NULL))
-////        *time = g_ptEventRunning->para_current->ParaStartTime;
-////#endif
-//    return result;
-//}
 
 //----取自身的事件类型id-------------------------------------------------------
 //功能: 由应用程序调用，取正在处理的事件的事件类型id
@@ -2778,8 +2567,8 @@ void Djy_EventExit(struct EventECB *event, u32 exit_code,u32 action)
 //      A事件调用Djy_EventPop弹出C事件,timeout = 0,因C被阻塞,未切换到C.
 //      B事件调用Djy_EventPop弹出C事件,timeout = 无穷,切换到C.
 //      C 调用Djy_EventSessionComplete,B也将激活.
-//      此种情况下,将有不同的理解,C该调用两次Djy_EventSessionComplete分别对应两
-//      次弹出,第二次弹出时才能激活B.也可以认为,关联型事件所完成的,总是最后一次
+//      此种情况下,不能认为C该调用两次Djy_EventSessionComplete分别对应两
+//      次弹出,第二次弹出时才能激活B.因为,关联型事件所完成的,总是最后一次
 //      弹出,因为前后弹出是有关联的.
 //
 //参数：result，事件处理结果，这个结果将返回给弹出该事件的事件(如果设定了同步)
@@ -3049,61 +2838,6 @@ void Djy_EventComplete(ptu32_t result)
         __asm_turnto_context(g_ptEventRunning->vm);
     }
 }
-
-//----应答参数-----------------------------------------------------------------
-//功能：向操作系统报告参数已经已经使用完毕,操作系统接到报告后,完成清理工作.
-//      1、如果任务控制块的同步队列非空，把所有事件取出并ready之
-//      2、释放任务控制块。
-//      3、把pg_event_running->task_current置空，再次调用djy_get_event_para时，
-//         将取到下一个任务控制块中的参数
-//参数：result，任务处理结果，这个结果将返回给弹出该事件的事件(如果设定了同步)
-//返回：无
-//备注: 调用本函数的必定是running事件,在running事件上下文中执行，不可以调用
-//-----------------------------------------------------------------------------
-//void Djy_ParaUsed(ptu32_t result)
-//{
-//    struct ThreadVm;
-//    struct EventECB *pl_ecb,*event_temp;
-//    struct ParaPCB *cur_para;
-//
-//    Int_SaveAsynSignal();
-//
-//    cur_para = g_ptEventRunning->para_current;
-//    if(cur_para != NULL)
-//    {
-//        pl_ecb = cur_para->sync;
-//        if(pl_ecb != NULL)
-//        {
-//            pl_ecb->multi_previous->multi_next = NULL;
-//            do{
-//                pl_ecb->sync_head = NULL;
-//                pl_ecb->event_result = result;
-//                if(pl_ecb->event_status & CN_STS_SYNC_TIMEOUT)   //是否在超时队列中
-//                {
-//                    __Djy_ResumeDelay(pl_ecb);               //结束超时等待
-//                }
-//                pl_ecb->event_status = CN_STS_EVENT_READY;
-//                pl_ecb->wakeup_from = CN_STS_WAIT_PARA_USED;
-//                event_temp = pl_ecb->multi_next;
-//                __Djy_EventReady(pl_ecb);           //把事件加入到就绪队列中
-//                pl_ecb = event_temp;
-//            }while(pl_ecb != NULL);
-//        }
-//
-//        if(cur_para->dynamic_mem == true)
-//        {
-//            free(cur_para->event_para);
-//        }
-//        cur_para->next = s_ptParaFree;      //释放任务控制块
-//        s_ptParaFree = cur_para;
-//        cur_para->sync = NULL;
-//        //再次调用djy_get_event_para时，将取到下一个任务控制块中的参数
-//        g_ptEventRunning->para_current = NULL;
-//        if(g_ptEventRunning->paras != 0)
-//            g_ptEventRunning->paras--;
-//    }
-//    Int_RestoreAsynSignal( );
-//}
 
 //----查询唤醒原因-------------------------------------------------------------
 //功能: 查询正在执行的事件被执行的原因.

@@ -73,6 +73,8 @@ typedef struct  __WNDCLASS  //窗口类数据结构
 }WNDCLASS;
 */
 
+extern HWND g_CursorHwnd;         //光标窗口
+extern void GK_ApiSetVisible(struct GkWinRsc *gkwin, u32 visible,u32 SyncTime);
 
 /*============================================================================*/
 
@@ -606,7 +608,6 @@ bool_t    IsFocusWindow(HWND hwnd)
 
 }
 
-
 //----初始化窗口数据结构---------------------------------------------------------
 //描述: 该函数为内部调用.
 //参数：pwin:窗口数据结构指针.
@@ -673,6 +674,7 @@ static  void    __InitWindow(WINDOW *pwin,u32 Style,u32 WinId)
 
 }
 
+
 //桌面绘制函数
 bool_t DesktopPaint(struct WindowMsg *pMsg)
 {
@@ -689,10 +691,127 @@ bool_t DesktopPaint(struct WindowMsg *pMsg)
     EndPaint(hwnd,hdc);
     return true;
 }
+
+
+//----光标绘制函数-------------------------------------------------------------
+//功能：这是按钮控件的MSG_PAINT消息响应函数
+//参数：pMsg，消息指针
+//返回：固定true
+//-----------------------------------------------------------------------------
+static bool_t __Cursor_TmrHandle(struct WinTimer *pTmr)
+{
+    bool_t ret,bIsStart;
+    bIsStart=pTmr->Flag;
+    if(bIsStart&TMR_START)
+    {
+        ret=IsWindowVisible(g_CursorHwnd);
+        if(ret)
+        {
+             SetWindowHide(g_CursorHwnd);
+             UpdateDisplay(CN_TIMEOUT_FOREVER);
+        }
+        else
+        {
+             SetWindowShow(g_CursorHwnd);
+             UpdateDisplay(CN_TIMEOUT_FOREVER);
+        }
+    }
+    else
+    {
+        ret=IsWindowVisible(g_CursorHwnd);
+        if(ret)
+        {
+             SetWindowHide(g_CursorHwnd);
+             UpdateDisplay(CN_TIMEOUT_FOREVER);
+        }
+    }
+    return true;
+}
+
+//----光标绘制函数-------------------------------------------------------------
+//功能：这是按钮控件的MSG_PAINT消息响应函数
+//参数：pMsg，消息指针
+//返回：固定true
+//-----------------------------------------------------------------------------
+static bool_t DesktopTmrHandle(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    struct WinTimer *pTmr;
+    u16 TmrId;
+    if(pMsg==NULL)
+        return false;
+    hwnd=pMsg->hwnd;
+    if(hwnd==NULL)
+        return false;
+    TmrId=pMsg->Param1;
+    pTmr=GDD_FindTimer(hwnd,TmrId);
+    if(pTmr==NULL)
+        return false;
+    switch(TmrId)
+    {
+       case CN_CURSOR_TIMER_ID:
+           __Cursor_TmrHandle(pTmr);
+       break;
+       default:
+          break;
+    }
+
+    return true;
+}
+//----光标绘制函数-------------------------------------------------------------
+//功能：这是按钮控件的MSG_PAINT消息响应函数
+//参数：pMsg，消息指针
+//返回：固定true
+//-----------------------------------------------------------------------------
+static bool_t DesktopTmrStart(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    struct WinTimer *pTmr;
+    u16 TmrId;
+    if(pMsg==NULL)
+        return false;
+    hwnd=pMsg->hwnd;
+    if(hwnd==NULL)
+        return false;
+    TmrId=pMsg->Param1;
+    pTmr=GDD_FindTimer(hwnd,TmrId);
+    if(pTmr==NULL)
+        return false;
+    pTmr->Flag|=TMR_START;
+    return true;
+}
+
+//----光标绘制函数-------------------------------------------------------------
+//功能：这是按钮控件的MSG_PAINT消息响应函数
+//参数：pMsg，消息指针
+//返回：固定true
+//-----------------------------------------------------------------------------
+static bool_t DesktopTmrStop(struct WindowMsg *pMsg)
+{
+    HWND hwnd;
+    struct WinTimer *pTmr;
+    u16 TmrId;
+    if(pMsg==NULL)
+        return false;
+    hwnd=pMsg->hwnd;
+    if(hwnd==NULL)
+        return false;
+    TmrId=pMsg->Param1;
+    pTmr=GDD_FindTimer(hwnd,TmrId);
+    if(pTmr==NULL)
+        return false;
+    pTmr->Flag&=~TMR_START;
+    return true;
+}
+
+
 //桌面消息处理函数表，
 static struct MsgProcTable s_gDesktopMsgProcTable[] =
 {
     {MSG_PAINT,DesktopPaint},
+    {MSG_TIMER,DesktopTmrHandle},
+    {MSG_TIMER_START,DesktopTmrStart},
+    {MSG_TIMER_STOP,DesktopTmrStop}
 };
 
 static struct MsgTableLink  s_gDesktopMsgLink;
@@ -816,6 +935,7 @@ HWND    CreateWindow(const char *Text,u32 Style,
                         GUI_DeleteMsgQ(pGddWin->pMsgQ);
                         GK_ApiDestroyWin(pGkWin);
                         free(pGkWin);
+                        HWND_Unlock(hParent);
                         return NULL;
                     }
 
@@ -897,7 +1017,7 @@ void    DestroyWindow(HWND hwnd)
 {
     struct GkWinRsc *Ancestor, *Current;
 
-    ShowWindow(hwnd,FALSE);
+    SetWindowHide(hwnd);
 
     if(IsFocusWindow(hwnd))
     {
@@ -1111,28 +1231,34 @@ bool_t    InvalidateWindow(HWND hwnd,bool_t bErase)
     return FALSE;
 }
 
-//----显示/隐藏窗口-------------------------------------------------------------
-//描述: 设置窗口为显示或隐藏(包括子窗口)
+
+//----显示窗口-------------------------------------------------------------
+//描述: 设置窗口为显示(包括子窗口)
 //参数：hwnd:窗口句柄.
-//      bShow: TURE:显示窗口; FALSE:隐藏窗口.
 //返回：TRUE:成功;FALSE:失败.
 //------------------------------------------------------------------------------
-bool_t ShowWindow(HWND hwnd,bool_t bShow)
+bool_t SetWindowShow(HWND hwnd)
 {
     if(HWND_Lock(hwnd))
     {
-        if(bShow)
-        {
-            hwnd->Style |= WS_VISIBLE;
-            GK_ApiSetVisible(hwnd->pGkWin,CN_GKWIN_VISIBLE,100*mS);
-
-        }
-        else
-        {
-            hwnd->Style &= ~WS_VISIBLE;
-            GK_ApiSetVisible(hwnd->pGkWin,CN_GKWIN_HIDE,100*mS);
-
-        }
+        hwnd->Style |= WS_VISIBLE;
+        GK_ApiSetVisible(hwnd->pGkWin,CN_GKWIN_VISIBLE,0);
+        HWND_Unlock(hwnd);
+        return TRUE;
+    }
+     return FALSE;
+}
+//----隐藏窗口-------------------------------------------------------------
+//描述: 设置窗口为隐藏(包括子窗口)
+//参数：hwnd:窗口句柄.
+//返回：TRUE:成功;FALSE:失败.
+//------------------------------------------------------------------------------
+bool_t SetWindowHide(HWND hwnd)
+{
+    if(HWND_Lock(hwnd))
+    {
+        hwnd->Style |=~ WS_VISIBLE;
+        GK_ApiSetVisible(hwnd->pGkWin,CN_GKWIN_HIDE,0);
         HWND_Unlock(hwnd);
         return TRUE;
     }

@@ -233,12 +233,56 @@ static void __IIC_SetClk(volatile tagI2CReg *reg,u32 i2cclk)
 	}
 }
 
+
+
+// =============================================================================
+// 功能: I/O模拟的方式 释放没有复位和使能引脚的IIC器件
+// 参数: port I/O口 如 CN_GPIO_B
+//      TS_SDA:引脚号
+//      TS_SCK:引脚号
+// 返回: true/false
+// =============================================================================
+static bool_t _IIC_BUSfree(u32 port,u32 sda_pin,u32 sck_pin)
+{
+	 u32 timeout=0;
+	 GPIO_CfgPinFunc(port,sda_pin,CN_GPIO_MODE_IN_FLOATING);//TS_SDA
+	 GPIO_CfgPinFunc(port,sck_pin,CN_GPIO_MODE_GPIO_OUT_OD_50Mhz);//TS_SCK
+
+	 while(1)
+	 {
+		  timeout++;
+		  GPIO_SettoLow(port,1<<sck_pin);
+		  Djy_DelayUs(10);
+
+		  GPIO_SettoHigh(port,1<<sck_pin);
+		  Djy_DelayUs(10);
+
+		  if(timeout>=CONFIG_I2C_TIMEOUT)
+			  return false;
+		  if( GPIO_GetData(port)&(1<<sda_pin))
+			  break;
+	}
+
+	GPIO_CfgPinFunc(port,sda_pin,CN_GPIO_MODE_GPIO_OUT_OD_50Mhz);//TS_SDA
+	//产生停止信号 iic总线释放
+	GPIO_SettoLow(port,1<<sck_pin);
+	Djy_DelayUs(10);
+	GPIO_SettoHigh(port,1<<sck_pin);
+	Djy_DelayUs(10);
+
+	return true;
+
+}
+
+
+
+
 // =============================================================================
 // 功能: 硬件GPIO初始化，包括电源等
 // 参数: IIC_NO,编号
 // 返回: 无
 // =============================================================================
-static void __IIC_GpioConfig(u8 IIC_NO)
+static bool_t __IIC_GpioConfig(u8 IIC_NO)
 {
     u8 tout;
 	pg_rcc_reg->APB2ENR |=(1<<3)|(1<<0);             //开时钟B和复用功能
@@ -246,9 +290,14 @@ static void __IIC_GpioConfig(u8 IIC_NO)
     {
     case CN_IIC1:
     	pg_rcc_reg->APB1ENR |=(1<<21);               //开时钟
-    	pg_iic1_reg->CR1     |=I2C_CR1_SWRST_MASK;               /* 复位IIC外设   */
+    	pg_iic1_reg->CR1     |=I2C_CR1_SWRST_MASK;       /* 复位IIC外设   */
     	for (tout = 100; tout; tout--);
     	pg_iic1_reg->CR1     = 0x0000;
+    	//对于一些 IIC器件它们没有复位或者使能管脚，像stmpe811 在工作过程中，如果在数据端口为低电平时发生cpu复位
+    	//将导致iic总线被从器件一直占用 在这里采用I/O模拟的方式产生停止信号释放IIC总线
+    	if(_IIC_BUSfree(CN_GPIO_B,9,8)==false)
+    		return false;
+
         GPIO_CfgPinFunc(CN_GPIO_B,9,CN_GPIO_MODE_PERI_OUT_OD_50Mhz);//TS_SDA
         GPIO_CfgPinFunc(CN_GPIO_B,8,CN_GPIO_MODE_PERI_OUT_OD_50Mhz);//TS_SCK
 
@@ -263,6 +312,10 @@ static void __IIC_GpioConfig(u8 IIC_NO)
         break;
     case CN_IIC2:
     	pg_rcc_reg->APB1ENR |=(1<<22);//开时钟
+
+    	if(_IIC_BUSfree(CN_GPIO_B,11,10)==false)
+    	    return false;
+
         GPIO_CfgPinFunc(CN_GPIO_B,11,CN_GPIO_MODE_PERI_OUT_OD_50Mhz);//TS_SDA
         GPIO_CfgPinFunc(CN_GPIO_B,10,CN_GPIO_MODE_PERI_OUT_OD_50Mhz);//TS_SCK
 
@@ -281,7 +334,7 @@ static void __IIC_GpioConfig(u8 IIC_NO)
     default:
         break;
     }
-
+	return true;
 }
 
 
@@ -346,7 +399,7 @@ static u16 __iic_read(volatile tagI2CReg *reg, u8 *buf, u32 len)
 static s32 __IIC_ReadPoll(volatile tagI2CReg *reg,u8 devaddr,u32 memaddr,
                         u8 maddrlen, u8 *buf, u32 len)
 {
-    u32 i;
+
     u8 mem_addr_buf[4];
     //将地址作大小端变换
     fill_little_32bit(mem_addr_buf,0,memaddr);
@@ -768,7 +821,8 @@ bool_t IIC2_Init(void)
     IIC2_Config.pBusCtrl            = (IICBusCtrlFunc)__IIC_BusCtrl;//控制函数
     IIC2_Config.pWriteReadPoll      = (WriteReadPoll)__IIC_WriteReadPoll;//轮询或中断未开时使用
 
-    __IIC_GpioConfig(CN_IIC2);
+    if(false==__IIC_GpioConfig(CN_IIC2))
+    	return 0;
     __IIC_IntConfig(CN_INT_LINE_I2C2_EV,__IIC_ISR);
 
     if(NULL == IIC_BusAdd_s(&s_IIC2_CB,&IIC2_Config))

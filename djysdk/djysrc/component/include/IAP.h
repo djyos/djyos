@@ -60,37 +60,19 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
+#include <stddef.h>
 
-#include "stdint.h"
-
-
-struct IbootCtrl
+enum _ENUM_RUN_MODE_
 {
-   u32 AppSize;
-   u32 Iap_crc;
-   u32 Reserved;
-   u32 flag;
-   char filename[240];
+	EN_LOAD_FORM_DATA=0,
+	EN_DIRECT_RUN,
 };
 
-struct AppInfo
+enum _ENUM_USE_CRC_
 {
-	u32 RomStartAddr;
-	u32 AppSize;
-};
-
-enum _IBOOT_ERR_STATUS_
-{
-	EN_NO_ERR=0,
-	EN_FORCE_IBOOT,
-	EN_RAM_IBOOT_FLAG,
-	EN_LOAD_FROM_DATA_MODE,
-	EN_CRC_ERR,
-	EN_APP_FLAG_ERR,
-	EN_FILE_NO_EXSIT_ERR,
-	EN_FILE_SIZE_INVALID_ERR,
-	EN_BIN_INCOMPLETED_ERR,
-	EN_lDS_MISMATCH,
+	EN_NO_USE_CRC=0,
+	EN_USE_CRC,
 };
 
 ptu32_t ModuleInstall_IAP(void);

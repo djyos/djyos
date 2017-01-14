@@ -75,11 +75,11 @@ int _EXFUN(getsubopt,(char **, char * const *, char **));
 #endif
 long    _EXFUN(labs,(long));
 ldiv_t  _EXFUN(ldiv,(long __numer, long __denom));
-int _EXFUN(mblen,(const char *, size_t));
-int _EXFUN(mbtowc,(wchar_t *__restrict, const char *__restrict, size_t));
-int _EXFUN(wctomb,(char *, wchar_t));
-size_t  _EXFUN(mbstowcs,(wchar_t *__restrict, const char *__restrict, size_t));
-size_t  _EXFUN(wcstombs,(char *__restrict, const wchar_t *__restrict, size_t));
+//int _EXFUN(mblen,(const char *, size_t));
+//int _EXFUN(mbtowc,(wchar_t *__restrict, const char *__restrict, size_t));
+//int _EXFUN(wctomb,(char *, wchar_t));
+//size_t  _EXFUN(mbstowcs,(wchar_t *__restrict, const char *__restrict, size_t));
+//size_t  _EXFUN(wcstombs,(char *__restrict, const wchar_t *__restrict, size_t));
 #ifndef __STRICT_ANSI__
 char *  _EXFUN(mkdtemp,(char *));
 int _EXFUN(mkostemp,(char *, int));

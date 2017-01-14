@@ -84,13 +84,15 @@ void LedTest(void)
 
     Djy_EventPop(evtt_led,NULL,0,NULL,0,0);
 }
-extern u32 g_bRunModeFlag;
+
 ptu32_t djy_main(void)
 {
     printf("%s:welcom to the djyos--k70\n\r",__FUNCTION__);
     LedTest();
-	g_bRunModeFlag=0x12345678;
-	printf("Run Mode:Iboot.\r\n");
+	extern void Sh_GetStatus(char *param);
+	extern void Sh_GetRunMode(char *param);
+	Sh_GetRunMode(NULL);
+	Sh_GetStatus(NULL);
     while(1)
     {
     	Djy_EventDelay(500*mS);

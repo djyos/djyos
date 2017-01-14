@@ -341,10 +341,10 @@ ptu32_t __FslPit_Alloc(fntTimerIsr timerisr)
     //设置定时器中断,先结束掉该中断所有的关联相关内容
     if(true == Int_Register(irqline))
     {
-		Int_CutLine(irqline);
-		Int_IsrDisConnect(irqline);
-		Int_EvttDisConnect(irqline);
-		Int_SettoAsynSignal(irqline);
+        Int_CutLine(irqline);
+        Int_IsrDisConnect(irqline);
+        Int_EvttDisConnect(irqline);
+        Int_SettoAsynSignal(irqline);
     }
 
     Int_IsrConnect(irqline, timerisr);
@@ -383,7 +383,7 @@ bool_t  __FslPit_Free(ptu32_t timerhandle)
             Int_CutLine(irqline);
             Int_IsrDisConnect(irqline);
             Int_EvttDisConnect(irqline);
-	        Int_UnRegister(irqline);
+            Int_UnRegister(irqline);
 
             Int_LowAtomEnd(timeratom);  //原子操作完毕
 
@@ -633,7 +633,7 @@ bool_t __FslPit_GetState(struct FslPitHandle   *timer, u32 *timerflag)
 // 说明    :
 // =============================================================================
 bool_t __FslPit_Ctrl(ptu32_t timerhandle, \
-                         enum TimerCmdCode ctrlcmd, \
+                         enum HardTimerCmdCode ctrlcmd, \
                          ptu32_t inoutpara)
 {
     bool_t result;
@@ -710,7 +710,7 @@ u32  __FslPit_GetFreq(ptu32_t timerhandle)
 // 返回值  :
 // 说明    :
 // =============================================================================
-void TimerHard_ModuleInit(void)
+void HardTimer_ModuleInit(void)
 {
     struct TimerChip  FslPittimer;
     u8 loop;
@@ -724,11 +724,11 @@ void TimerHard_ModuleInit(void)
     }
 
     FslPittimer.chipname = "FslPit";
-    FslPittimer.TimerHardAlloc = __FslPit_Alloc;
-    FslPittimer.TimerHardFree = __FslPit_Free;
-    FslPittimer.TimerHardCtrl = __FslPit_Ctrl;
-    FslPittimer.TimerHardGetFreq = __FslPit_GetFreq;
-    TimerHard_RegisterChip(&FslPittimer);
+    FslPittimer.HardTimerAlloc = __FslPit_Alloc;
+    FslPittimer.HardTimerFree = __FslPit_Free;
+    FslPittimer.HardTimerCtrl = __FslPit_Ctrl;
+    FslPittimer.HardTimerGetFreq = __FslPit_GetFreq;
+    HardTimer_RegisterChip(&FslPittimer);
 
     return ;
 }

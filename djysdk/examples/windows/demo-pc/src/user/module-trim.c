@@ -157,8 +157,8 @@ void Sys_ModuleInit(void)
 //    ModuleInstall_RTC(0);
 
     //定时器组件
-    extern ptu32_t ModuleInstall_TimerSoft(ptu32_t para);
-    ModuleInstall_TimerSoft(CN_TIMER_SOURCE_TICK);
+    extern ptu32_t ModuleInstall_Timer(ptu32_t para);
+    ModuleInstall_Timer(CN_TIMER_SOURCE_TICK);
 
    //网络协议栈组件
     extern  ptu32_t ModuleInstall_DjyIp(ptu32_t para);
@@ -211,7 +211,7 @@ void Sys_ModuleInit(void)
 
     //依赖:触摸屏模块,宿主显示器驱动,以及所依赖的硬件,例如qh_1的IIC驱动.
     //     如果矫正数据存在文件中,还依赖文件系统.
-    ModuleInstall_TouchWindows("sim touch");
+    ModuleInstall_TouchWindows(&desktop,"sim touch");
 
     //看门狗模块,如果启动了加载时喂狗,看门狗软件模块从此开始接管硬件狗.
     extern ptu32_t ModuleInstall_Wdt(ptu32_t para);

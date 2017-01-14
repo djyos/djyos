@@ -4,7 +4,7 @@
 #include    "stdio.h"
 #include    "djyos.h"
 #include    "gdd.h"
-#include  <widget.h>
+#include <gdd_widget.h>
 
 
 /*============================================================================*/
@@ -175,13 +175,13 @@ static ptu32_t HmiNotifyMove(struct WindowMsg  *pMsg)
     id =LO16(pMsg->Param1);
     switch(event)
     {
-        case BTN_DOWN:  //按钮按下
+        case MSG_BTN_DOWN:  //按钮按下
             if(id==ID_MOVE_1)
             {
                 bMoveMainWin=TRUE;
             }
             break;
-        case BTN_UP:    //按钮弹起
+        case MSG_BTN_UP:    //按钮弹起
             if(id==ID_CLOSE)
             {
                 PostMessage(hwnd,MSG_CLOSE,0,0);
@@ -249,7 +249,8 @@ void    GDD_Demo_MoveWindow(void)
                               rc.left,rc.top,RectW(&rc),RectH(&rc),
                               NULL,0x0000, CN_WINBUF_PARENT,NULL,&s_gHmiMsgLink);
     SetFocusWindow(hwnd);
-    ShowWindow(hwnd,TRUE);  //显示窗口
+   
+    SetWindowShow(hwnd);
 
     while(GetMessage(&msg,hwnd))
     {

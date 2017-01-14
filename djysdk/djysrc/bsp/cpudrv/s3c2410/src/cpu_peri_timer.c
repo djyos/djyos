@@ -362,7 +362,7 @@ static ptu32_t __timer_alloc(u32 cycle,fntTimerIsr timerisr)
 
     if(tmr_ctx!=NULL)
     {
-    	 Int_Register(tmr_ctx->intr_line);
+         Int_Register(tmr_ctx->intr_line);
         Int_CutLine(tmr_ctx->intr_line);
         Int_IsrConnect(tmr_ctx->intr_line,timerisr);
         Int_SettoAsynSignal(tmr_ctx->intr_line);
@@ -495,7 +495,7 @@ static bool_t  Timer_SETINTPRO(tagTIMER_CTX *timer, bool_t en)
 // 返回值  :true成功  false失败
 // 说明    :
 // =============================================================================
-static bool_t __timer_ctrl(ptu32_t timerhandle, enum TimerCmdCode ctrlcmd,ptu32_t inoutpara)
+static bool_t __timer_ctrl(ptu32_t timerhandle, enum HardTimerCmdCode ctrlcmd,ptu32_t inoutpara)
 {
 
     bool_t result = false;
@@ -624,10 +624,10 @@ void ModuleInstall_HardTimer(void)
     }
 
     s3c_timer.chipname = "S3C_TIMER";
-    s3c_timer.TimerHardAlloc   = __timer_alloc;
-    s3c_timer.TimerHardFree    = __timer_free;
-    s3c_timer.TimerHardCtrl    = __timer_ctrl;
-    s3c_timer.TimerHardGetFreq = __timer_get_freq;
-    TimerHard_RegisterChip(&s3c_timer);
+    s3c_timer.HardTimerAlloc   = __timer_alloc;
+    s3c_timer.HardTimerFree    = __timer_free;
+    s3c_timer.HardTimerCtrl    = __timer_ctrl;
+    s3c_timer.HardTimerGetFreq = __timer_get_freq;
+    HardTimer_RegisterChip(&s3c_timer);
 
 }

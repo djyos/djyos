@@ -64,30 +64,24 @@
 #include "string.h"
 #include "cpu_peri.h"
 #include "cpu-optional.h"
+#include "IAP_Inner.h"
+
 #if(CN_CPU_OPTIONAL_CACHE==1)
 #include "set-cache.h"
 #endif
 
-#define CN_IBOOT_FLAG               "RunIboot"
-#define CN_APP_CTRL_APP_FLAG        0x61707000     //字符串"app"
-#define CN_APP_CTRL_DBG_FLAG        0x00676264    //字符串"dbg"
-#define CN_APP_CTRL_RELEASE_FLAG    0x72656173    //字符串"reas"
-extern void __AppPreLoad(void);
+extern void __AppStart(void);
 extern struct IbootCtrl gc_ptIbootCtrl;
 extern struct AppInfo   gc_ptAppInfo;
 extern const u8 g_IbootCRC;
 extern u32 gc_AppAddr;
 
 extern void Load_Preload(void);
-extern bool_t IAP_IsRamIbootFlag(void);
 extern bool_t IAP_IsForceIboot(void);
-extern void IAP_GpioPinInit(void);
-extern const u8 g_IbootType;
-#define CN_APP_CTRL_APP_FLAG        0x61707000     //字符串"app"
-#define CN_APP_CTRL_DBG_FLAG        0x00676264    //字符串"dbg"
-#define CN_APP_CTRL_RELEASE_FLAG    0x72656173    //字符串"reas"
 
-u8 g_IbootStaus;
+extern const u8 g_IbootType;
+tagIapVar pg_IapVar __attribute__ ((section(".IapBootFlgRam")));
+
 
 static const u32 g_CRC32_tab[] = {
  0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
@@ -167,12 +161,26 @@ static u32 __IAP_GetAPPStartAddr(void)
     return (gc_ptIbootCtrl.AppSize);
 }
 
+ const char bootflag[]="RunIboot";//要弄成const，若是局部变量，编译器将其放在ROM
 //-----------------------------------------------------------------
-//功能：获取APP的CRC
+//功能：检查该跑Iboot还是APP。设备运行APP还是Iboot，可以通过shell切换，切换的方
+//      法是，在内存特定位置做标志，然后重启。
 //参数：无
-//返回：32位CRC值.
-//------------------------------------------------------------------
-
+//返回：无。
+//说明：TRUE = run APP，false = run Iboot。
+//-----------------------------------------------------------------
+ bool_t IAP_IsRamIbootFlag(void)
+ {
+ 	u8 i;
+ 	for(i=0;i<8;i++)
+ 	{
+ 		if(pg_IapVar.IbootFlag[i]!=bootflag[i])
+ 		{
+ 			return false;
+ 		}
+ 	}
+ 	return true;
+ }
 
 //----选择加载项目代码-----------------------------------------------------------
 //功能：选择加载存储存储器中哪个项目代码,Iboot或APP。
@@ -182,15 +190,15 @@ static u32 __IAP_GetAPPStartAddr(void)
 void IAP_SelectLoadProgam(void)
 {
 	bool_t result=true;
-	u32 crc,len,count;
+	u32 crc,len;
 	u32 addr;
-	u32 *paddr;
-	g_IbootStaus=EN_NO_ERR;
-	IAP_GpioPinInit();
-	result=IAP_IsForceIboot();
+	pg_IapVar.IbootStatus=EN_NO_ERR;
+
+	result = IAP_IsForceIboot();
 	if(result)
 	{
-		g_IbootStaus=EN_FORCE_IBOOT;
+		pg_IapVar.IbootStatus=EN_FORCE_IBOOT;
+		pg_IapVar.RunMode = CN_IAP_MODE_IBOOT;
 		Load_Preload();   //运行Iboot
 	}
 	else
@@ -198,86 +206,92 @@ void IAP_SelectLoadProgam(void)
 		result=IAP_IsRamIbootFlag();
 		if(result)
 		{
-			g_IbootStaus=EN_RAM_IBOOT_FLAG;
+			pg_IapVar.IbootStatus=EN_RAM_IBOOT_FLAG;
+			pg_IapVar.RunMode = CN_IAP_MODE_IBOOT;
 			Load_Preload();   //运行Iboot
 		}
 		else
 	    {
     	     //如果是运行APP且为DirectRun模式,则
-    	     if(g_IbootType==1)
+    	     if(g_IbootType==EN_DIRECT_RUN)
     	     {
+                 //gc_AppAddr的地址是lds中直接赋值的
+                 //RomStartAddr是在app.bin中的
+                 //如果iboot的memory.lds中和APP的memory.lds中IbootSize定义不一致，
+                 //将直接运行Iboot，并且在Iboot启动后，shell中输出相应信息
 				if((u32)(&gc_AppAddr)==gc_ptAppInfo.RomStartAddr)
 				{
 					if(gc_ptIbootCtrl.flag==CN_APP_CTRL_APP_FLAG)
 					{
+                        //len是IAP下载后写入的。
+                        //AppSize是包含在APP.bin中的
+                        //如果下载文件不完整，if将不成立，强制运行Iboot
 						len=__IAP_GetAPPSize();
 						if(gc_ptAppInfo.AppSize==len)
 						{
-							if(g_IbootCRC==1)   //配置为需要校验
+                            //有些高可靠性特别是航天应用中，需要校验flash中的代码
+                            //是否被篡改。不要以为flash绝对安全，宇宙射线无处不在。
+                            //但是，校验需要消耗很多时间，对于需要快速启动的应用，
+                            //或者可靠性要求不那么高的应用，可以在Iboot_Config.c
+                            //中关闭CRC校验。
+							if(g_IbootCRC==EN_USE_CRC)   //配置为需要校验
 							{
 								addr=__IAP_GetAPPStartAddr();
-								len=__IAP_GetAPPSize();
 								char *buf;
 								buf=(char *)addr;
 								crc=__IAP_crc32(buf,len);
 								if(crc==gc_ptIbootCtrl.Iap_crc)
 								{
-#if(CN_CPU_OPTIONAL_CACHE==1)
-									Cache_InvalidInst();
-									Cache_CleanData();
-#endif
-									__AppPreLoad();
+									pg_IapVar.RunMode = CN_IAP_MODE_APP;
+									__AppStart();
 								}
 								else
 								{
-									g_IbootStaus=EN_CRC_ERR;
+									pg_IapVar.IbootStatus=EN_CRC_ERR;
+									pg_IapVar.RunMode = CN_IAP_MODE_IBOOT;
 									Load_Preload();
 								}
 							}
 							else
 							{
-#if(CN_CPU_OPTIONAL_CACHE==1)
-								 Cache_InvalidInst();
-								 Cache_CleanData();
-#endif
-								 __AppPreLoad();
+								pg_IapVar.RunMode = CN_IAP_MODE_APP;
+								__AppStart();
 							}
 						}
 						else
 						{
-							g_IbootStaus=EN_BIN_INCOMPLETED_ERR;
+							pg_IapVar.IbootStatus=EN_BIN_INCOMPLETED_ERR;
+							pg_IapVar.RunMode = CN_IAP_MODE_IBOOT;
 							Load_Preload();
 						}
 					}
 					else if(gc_ptIbootCtrl.flag==CN_APP_CTRL_DBG_FLAG)
 					{
-#if(CN_CPU_OPTIONAL_CACHE==1)
-						Cache_InvalidInst();
-						Cache_CleanData();
-#endif
-						__AppPreLoad();
-					}
-					else if(gc_ptIbootCtrl.flag==CN_APP_CTRL_RELEASE_FLAG)
-					{
-			//				SCB_CleanDCache();
-			//				SCB_CleanInvalidateDCache();
-			//				__AppPreLoad();
+						pg_IapVar.RunMode = CN_IAP_MODE_APP;
+						__AppStart();
 					}
 					else
 					{
-						g_IbootStaus=EN_APP_FLAG_ERR;
+						pg_IapVar.IbootStatus=EN_APP_FLAG_ERR;
+						pg_IapVar.RunMode = CN_IAP_MODE_IBOOT;
 						Load_Preload();
 					}
 				}
 				else
 				{
-					g_IbootStaus=EN_lDS_MISMATCH;
+					if( (gc_ptAppInfo.RomStartAddr == 0) ||
+							(gc_ptAppInfo.RomStartAddr == 0xFFFFFFFF))
+						pg_IapVar.IbootStatus=EN_FILE_NO_EXSIT_ERR;
+					else
+						pg_IapVar.IbootStatus=EN_lDS_MISMATCH;
+					pg_IapVar.RunMode = CN_IAP_MODE_IBOOT;
 					Load_Preload();
 				}
 			}
 			else
 			{
-				g_IbootStaus=EN_LOAD_FROM_DATA_MODE;
+				pg_IapVar.IbootStatus=EN_LOAD_FROM_DATA_MODE;
+				pg_IapVar.RunMode = CN_IAP_MODE_IBOOT;
 				Load_Preload();
 			}
 	    }

@@ -61,7 +61,7 @@
 //------------------------------------------------------
 #include    "gdd.h"
 #include    <gui/gdd/gdd_private.h>
-#include    <widget.h>
+#include    <gdd_widget.h>
 
 typedef struct  __LVCOLUM
 {

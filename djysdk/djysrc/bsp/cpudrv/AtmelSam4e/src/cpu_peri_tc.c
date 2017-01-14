@@ -356,7 +356,7 @@ bool_t  __AtTimer_Free(ptu32_t timerhandle)
             Int_CutLine(irqline);
             Int_IsrDisConnect(irqline);
             Int_EvttDisConnect(irqline);
-			Int_UnRegister(irqline);
+            Int_UnRegister(irqline);
             Int_LowAtomEnd(timeratom);  //原子操作完毕
 
             return true;
@@ -678,7 +678,7 @@ void ModuleInstall_Timer(void)
     LPCtimer.timerhardalloc = __AtTimer_Alloc;
     LPCtimer.timerhardfree = __AtTimer_Free;
     LPCtimer.timerhardctrl = __AtTimer_Ctrl;
-    TimerHard_RegisterChip(&LPCtimer);
+    HardTimer_RegisterChip(&LPCtimer);
 
     return ;
 }

@@ -103,7 +103,9 @@ void SysTimeConnect(fntSysTimeHard32 GetSysTime32,fntSysTimeHard64 GetSysTime64,
 s64 DjyGetSysTime(void)
 {
     u32 CurrentTime;
+    s64 s64sysTimeMajorBak;
     atom_low_t atom;
+
     if((fnSysTimeHard32 == NULL) && (fnSysTimeHard64 == NULL))
         return __DjyGetSysTime();
     else if(fnSysTimeHard32 != NULL)
@@ -113,9 +115,10 @@ s64 DjyGetSysTime(void)
         if(CurrentTime < s_u32BakCounter)
             s_s64sysTimeMajor += s_u32SysTimeCycle; //此处不需要原子操作
         s_u32BakCounter = CurrentTime;
+        s64sysTimeMajorBak = s_s64sysTimeMajor;
         Int_LowAtomEnd(atom);
         //从计数值计算uS数
-        return (s_s64sysTimeMajor+CurrentTime)*1000000/s_u32SysTimeFreq;
+        return (s64sysTimeMajorBak+CurrentTime)*1000000/s_u32SysTimeFreq;
     }
     else
     {
@@ -133,7 +136,9 @@ s64 DjyGetSysTime(void)
 s64 DjyGetSysTimeCycle(void)
 {
     u32 CurrentTime;
+    s64 s64sysTimeMajorBak;
     atom_low_t atom;
+
     if((fnSysTimeHard32 == NULL) && (fnSysTimeHard64 == NULL))
         return __DjyGetSysTime();
     else if(fnSysTimeHard32 != NULL)
@@ -143,8 +148,9 @@ s64 DjyGetSysTimeCycle(void)
         if(CurrentTime < s_u32BakCounter)
             s_s64sysTimeMajor += s_u32SysTimeCycle; //此处不需要原子操作
         s_u32BakCounter = CurrentTime;
+        s64sysTimeMajorBak = s_s64sysTimeMajor;
         Int_LowAtomEnd(atom);
-        return s_s64sysTimeMajor+CurrentTime;
+        return s64sysTimeMajorBak+CurrentTime;;
     }
     else
     {

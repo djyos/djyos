@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include <gkernel.h>
 #include <gdd.h>
-#include <widget.h>
+#include <gdd_widget.h>
 
 /*============================================================================*/
 #define ID_CLOSE    0x1000
@@ -101,7 +101,7 @@ static ptu32_t HmiNotify(struct WindowMsg *pMsg)
         switch (id)
         {
             case ID_CLOSE://关闭
-                    if(event==BTN_UP)
+                    if(event==MSG_BTN_UP)
                         {
                             PostMessage(hwnd,MSG_CLOSE,0,0);
                         }
@@ -262,7 +262,8 @@ void    GDD_Demo_DrawText(void)
    SetFocusWindow(g_ptMainHwnd);
 
     //创建主窗口
-    ShowWindow(g_ptMainHwnd,TRUE);  //显示窗口
+   
+    SetWindowShow(g_ptMainHwnd);    //显示窗口
 
     while(GetMessage(&msg,g_ptMainHwnd))
     {

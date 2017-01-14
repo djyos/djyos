@@ -62,6 +62,7 @@
 #include "lock.h"
 #include "stdlib.h"
 #include "pool.h"
+#include <djyos.h>
 #include "core_config.h"
 
 static struct MemCellPool *s_ptPooCtrl;  //管理内存池控制块本身的内存池
@@ -87,7 +88,7 @@ ptu32_t Mb_ModuleInit(ptu32_t para)
     OBJ_AddTree(&cell_pool.memb_node,sizeof(struct MemCellPool),RSC_MEMPOOL,
                     "固定块分配池");
     Lock_SempCreate_s(&cell_pool.memb_semp,gc_u32CfgMemPoolLimit,
-                      gc_u32CfgMemPoolLimit,CN_SEMP_BLOCK_FIFO,"固定块分配池");
+                      gc_u32CfgMemPoolLimit,CN_BLOCK_FIFO,"固定块分配池");
     return 1;
 }
 
@@ -156,7 +157,7 @@ struct MemCellPool *Mb_CreatePool(void *pool_original,u32 init_capacital,
                 RSC_MEMPOOL,name);
     //init_capacital有可能是0
     Lock_SempCreate_s(&pool->memb_semp,init_capacital,init_capacital,
-                        CN_SEMP_BLOCK_FIFO,name);
+                        CN_BLOCK_FIFO,name);
     return pool;
 }
 
@@ -196,7 +197,7 @@ struct MemCellPool *Mb_CreatePool_s(struct MemCellPool *pool,
                 sizeof(struct MemCellPool),
                 RSC_MEMPOOL,name);
     Lock_SempCreate_s(&pool->memb_semp,init_capacital,init_capacital,
-                            CN_SEMP_BLOCK_FIFO,name);
+                            CN_BLOCK_FIFO,name);
     return pool;
 }
 
@@ -252,8 +253,8 @@ bool_t Mb_DeletePool_r(struct MemCellPool *pool)
 //功能: 从制定内存池中分配一块内存,只能分配一块,而且不能保证连续两次分配的内存
 //      地址是连续的.
 //参数: pool，内存池指针
-//      timeout，超时设置,单位是微秒，cn_timeout_forever=无限等待，0则立即按
-//      超时返回。非0值将被向上调整为cn_tick_us的整数倍
+//      timeout，超时设置,单位是微秒，CN_TIMEOUT_FOREVER=无限等待，0则立即按
+//      超时返回。非0值将被向上调整为CN_CFG_TICK_US的整数倍
 //返回: 申请成功返回内存地址,否则返回NULL.
 //-----------------------------------------------------------------------------
 void *Mb_Malloc(struct MemCellPool *pool,u32 timeout)
@@ -289,7 +290,7 @@ void *Mb_Malloc(struct MemCellPool *pool,u32 timeout)
                 Lock_SempDelete_s(&pool->memb_semp);      //删除原信号量
                 //按扩容后的容量重新申请信号量。
                 Lock_SempCreate_s(&pool->memb_semp,limit,frees+inc_cell-1,
-                                    CN_SEMP_BLOCK_FIFO,name);
+                                    CN_BLOCK_FIFO,name);
                 pool->continue_pool = (void*)((ptu32_t)inc + align_up_sys(1));
                 pool->pool_offset = (ptu32_t)pool->continue_pool + inc_cell*pool->cell_size;
                 //以下初始化增量表，该表用于标记动态增加的内存块，利于删除内存池

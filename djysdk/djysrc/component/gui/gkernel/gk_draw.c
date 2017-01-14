@@ -3882,7 +3882,7 @@ void GK_DrawBitMap(struct GkscParaDrawBitmapRop *para)
                                        SrcBitmap,&SrcRect,
                                        para->RopCode,para->HyalineColor))
         {
-            //驱动部支持 BltBitmapToBitmap 绘制，改由代码实现
+            //驱动不支持 BltBitmapToBitmap 绘制，改由代码实现
             y_dst= DstRect.top;
             for(y_src= 0;
                 y_src < DstRect.bottom-DstRect.top;

@@ -51,6 +51,7 @@
 #include "rout.h"
 #include "arp.h"
 #include "ip.h"
+#include "tcpipconfig.h"
 
 #pragma pack(1)
 typedef struct EthernetHdr
@@ -65,6 +66,235 @@ typedef struct EthernetHdr
 //the internet proto deal function we need implement
 extern bool_t IpPushPkg(tagNetDev *netdev, tagNetPkg *pkg);
 extern bool_t ArpPushPkg(tagNetDev *netdev, tagNetPkg *pkg);
+
+typedef struct __LinkRcvHookItem
+{
+	struct __LinkRcvHookItem *nxt;  //used to do the queue
+	const char *      name;         //may be you want to specify an name here
+	u16               proto;        //the listen  protocol you have set
+	fnLinkProtoDealer hook;         //the listen hook you have set
+	ptu32_t           devhandle;    //the listen device you have set
+	s64               framenum;     //how many frames has listen
+}tagLinkRcvHookItem;
+
+typedef struct
+{
+	u32 itemtotal;
+	s64 framenum;
+	s64 frameunknown;
+	tagLinkRcvHookItem *list;
+	struct MutexLCB    *mutex;
+}tagLinkRcvHookModule;
+static tagLinkRcvHookModule  gLinkRcvHookModule;
+//if you specified the special device, only the same device and the same proto frame
+//will passed into the hook;if the devhandler is NULL,then any proto with the same proto
+//will passed into the hook.
+//you could use this function to register some link protocol to do the functions
+bool_t LinkRegisterRcvHook(fnLinkProtoDealer hook, ptu32_t devhandle,u16 proto,const char *hookname)
+{
+	bool_t result = false;
+	tagLinkRcvHookItem *item;
+
+	if(NULL == hook)
+	{
+		return result;
+	}
+	item = malloc(sizeof(tagLinkRcvHookItem));
+	if(NULL == item)
+	{
+		return result;
+	}
+	memset((void *)item,0,sizeof(tagLinkRcvHookItem));
+	item->devhandle = devhandle;
+	item->hook = hook;
+	item->proto = proto;
+	item->name = hookname;
+
+	if(Lock_MutexPend(gLinkRcvHookModule.mutex,CN_TIMEOUT_FOREVER))
+	{
+		item->nxt = gLinkRcvHookModule.list;
+		gLinkRcvHookModule.list = item;
+		TCPIP_DEBUG_INC(gLinkRcvHookModule.itemtotal);
+		result = true;
+
+		Lock_MutexPost(gLinkRcvHookModule.mutex);
+	}
+	else
+	{
+		free(item);
+	}
+	return result;
+}
+
+//you could use this function to unregister the hook you got last time
+bool_t LinkUnRegisterRcvHook(fnLinkProtoDealer hook, ptu32_t devhandle,u16 proto,const char *hookname)
+{
+	bool_t result = false;
+	tagLinkRcvHookItem *item;
+	tagLinkRcvHookItem *nxt;
+
+	if(Lock_MutexPend(gLinkRcvHookModule.mutex,CN_TIMEOUT_FOREVER))
+	{
+		item = gLinkRcvHookModule.list;
+		if((item->hook == hook)&&\
+			(item->devhandle == devhandle)&&\
+			(item->proto == proto)&&\
+			(item->name == hookname))
+		{
+			//the first match
+			gLinkRcvHookModule.list = item->nxt;
+			free(item);
+			TCPIP_DEBUG_DEC(gLinkRcvHookModule.itemtotal);
+			result= true;
+		}
+		else
+		{
+			while(NULL != item->nxt)
+			{
+				nxt = item->nxt;
+				if((nxt->hook == hook)&&\
+					(nxt->devhandle == devhandle)&&\
+					(nxt->proto == proto)&&\
+					(nxt->name == hookname))
+				{
+
+					item->nxt = nxt->nxt;
+					free(nxt);
+					TCPIP_DEBUG_DEC(gLinkRcvHookModule.itemtotal);
+					result= true;
+					break;
+				}
+				else
+				{
+					item = nxt;
+				}
+			}
+		}
+		Lock_MutexPost(gLinkRcvHookModule.mutex);
+	}
+
+	return result;
+}
+//use this function to do hook protocol deal
+bool_t __LinkHookPost(tagNetDev  *dev,tagNetPkg *pkg,u16 proto)
+{
+	bool_t  result = false;
+	fnLinkProtoDealer hook = NULL;
+	tagLinkRcvHookItem *item;
+
+	//find the hook first
+	if(Lock_MutexPend(gLinkRcvHookModule.mutex,CN_TIMEOUT_FOREVER))
+	{
+		item = gLinkRcvHookModule.list;
+		while(NULL != item)
+		{
+			if((proto == item->proto)&&\
+			  ((dev == (tagNetDev *)item->devhandle)||\
+			   (NULL == (tagNetDev *)item->devhandle)))
+			{
+				hook = item->hook;
+				TCPIP_DEBUG_INC(item->framenum);
+				break;
+			}
+			item = item->nxt;
+		}
+		Lock_MutexPost(gLinkRcvHookModule.mutex);
+	}
+
+	if(NULL != hook)
+	{
+		result = hook((ptu32_t)dev,proto,pkg);
+		TCPIP_DEBUG_INC(gLinkRcvHookModule.framenum);
+	}
+	else
+	{
+		TCPIP_DEBUG_INC(gLinkRcvHookModule.frameunknown);
+	}
+	return result;
+}
+
+//use this function to send the raw package for the device
+//the handle is got by the install device or by name got
+bool_t LinkSendRaw(ptu32_t devhandle,tagNetPkg *pkg,u32 framlen,u32 devtask)
+{
+    bool_t result = false;
+    tagNetDev *dev;
+
+    dev = (tagNetDev *)devhandle;
+    if((NULL != dev) &&(NULL != dev->ifsend)&&(NULL != pkg))
+    {
+    	result = dev->ifsend((ptu32_t)dev,pkg,framlen,devtask);
+        TCPIP_DEBUG_INC(dev->fsnd);
+        if(result == false)
+        {
+            TCPIP_DEBUG_INC(dev->fsnderr);
+        }
+    }
+    return result;
+}
+//-----------------------------------------------------------------------------
+//功能:use this function to send data in buffer to the specified net device
+//参数:devhandle, the net device;
+//     buf, the data buffer
+//     len, the data len
+//返回:true success while false failed
+//备注:
+//-----------------------------------------------------------------------------
+bool_t LinkSendBufRaw(ptu32_t devhandle,u8 *buf, u32 len)
+{
+    bool_t result = false;
+    tagNetDev *dev;
+    tagNetPkg *pkg;
+
+    pkg = PkgMalloc(len,CN_PKLGLST_END);
+    if(NULL != pkg)
+    {
+        dev = (tagNetDev *)devhandle;
+        if((NULL != dev) &&(NULL != dev->ifsend)&&(NULL != pkg))
+        {
+        	memcpy(pkg->buf+pkg->offset,buf,len);
+        	pkg->datalen = len;
+        	result = dev->ifsend((ptu32_t)dev,pkg,len,CN_IPDEV_NONE);
+            TCPIP_DEBUG_INC(dev->fsnd);
+            if(result == false)
+            {
+                TCPIP_DEBUG_INC(dev->fsnderr);
+            }
+        }
+        PkgTryFreeLst(pkg);
+    }
+    return result;
+}
+//do the hook debug module
+bool_t LinkHookShell(char *param)
+{
+	int i = 0;
+	tagLinkRcvHookItem *item;
+
+	printf("LinkHookModule\n\r");
+	if(Lock_MutexPend(gLinkRcvHookModule.mutex,CN_TIMEOUT_FOREVER))
+	{
+
+		printf("Item:Total:%d  FrameRcvTotal:%lld FrameRcvUnknown:%lld\n\r",\
+				gLinkRcvHookModule.itemtotal,gLinkRcvHookModule.framenum,gLinkRcvHookModule.frameunknown);
+
+		printf("%-10s%-10s%-10s%-10s%-10s%-10s\n\r",\
+				"Number","HookName","Protocol","Function","DevHandle","FrameNum");
+
+		item = gLinkRcvHookModule.list;
+		while(NULL != item)
+		{
+			printf("No.%-4d   %-8s  %-8x  %-8x  %-8x  %llx\n\r",\
+					i++,item->name?item->name:"NULL",\
+					item->proto,item->hook,\
+					item->devhandle,item->framenum);
+			item = item->nxt;
+		}
+		Lock_MutexPost(gLinkRcvHookModule.mutex);
+	}
+	return true;
+}
+
 
 //use this function to make an ethernet package and send it to the netdev
 bool_t __EthernetSend(tagNetDev *dev,tagNetPkg *pkg,u32 framlen,u32 devtask,u16 proto,\
@@ -105,6 +335,46 @@ bool_t __EthernetSend(tagNetDev *dev,tagNetPkg *pkg,u32 framlen,u32 devtask,u16 
     return result;
 }
 
+
+//use this function to do the ethernetII frames
+bool_t __LinkEthernetIIPost( tagNetDev  *dev,tagNetPkg *pkg)
+{
+    bool_t          result=false;
+    tagEthernetHdr *hdr;
+    u16             proto;
+    //we analyze the ethernet header first, which type it has
+    hdr = (tagEthernetHdr *)(pkg->buf + pkg->offset);
+    memcpy(&proto,&hdr->type,sizeof(proto));
+    proto = ntohs(proto);
+    switch(proto)
+    {
+     //uptil now, we support the ipv4
+        case EN_NET_PROTO_IP:
+            pkg->offset += CN_ETHERNET_HEADLEN;
+            pkg->datalen -= CN_ETHERNET_HEADLEN;
+            result = IpPushPkg(dev,pkg);
+            break;
+        case EN_NET_PROTO_ARP:
+            pkg->offset += CN_ETHERNET_HEADLEN;
+            pkg->datalen -= CN_ETHERNET_HEADLEN;
+            result = ArpPushPkg(dev,pkg);
+            break;
+        default:
+        	result = __LinkHookPost(dev,pkg,proto);
+            break;
+    }
+    return result;
+}
+//use this function to do the SNAP frames
+bool_t __LinkSnapPost( tagNetDev  *dev,tagNetPkg *pkg)
+{
+	return false;
+}
+//use this function to do the wireless frames
+bool_t __Link80211Post( tagNetDev  *dev,tagNetPkg *pkg)
+{
+	return false;
+}
 // =============================================================================
 // FUNCTION   :the driver should call this function to post the package here
 // PARAMS IN  :
@@ -116,8 +386,6 @@ bool_t LinkPost(ptu32_t devhandle,tagNetPkg *pkg)
 {
     bool_t          result=false;
     tagNetDev      *dev;
-    tagEthernetHdr *hdr;
-    u16             proto;
 
     dev = (tagNetDev *)devhandle;
     if((NULL != dev)&&(NULL != pkg)&&(pkg->datalen > 0))
@@ -125,27 +393,11 @@ bool_t LinkPost(ptu32_t devhandle,tagNetPkg *pkg)
         switch(dev->iftype)
         {
             case EN_LINK_ETHERNET:
-                //we analyze the ethernet header first, which type it has
-                hdr = (tagEthernetHdr *)(pkg->buf + pkg->offset);
-                pkg->offset += CN_ETHERNET_HEADLEN;
-                pkg->datalen -= CN_ETHERNET_HEADLEN;
-                proto = ntohs(hdr->type);
-                switch(proto)
-                {
-                 //uptil now, we support the ipv4
-                    case EN_NET_PROTO_IP:
-                        result = IpPushPkg((tagNetDev *)devhandle,pkg);
-                        break;
-                    case EN_NET_PROTO_ARP:
-                        result = ArpPushPkg((tagNetDev *)devhandle,pkg);
-                        break;
-                    default:
-                        break;
-                }
+            	result = __LinkEthernetIIPost(dev,pkg);
                 break;
             case EN_LINK_RAW:      //we could send the package to the net device directly
                 //this only support the ip frame,for the raw type, no mac need
-                result = IpPushPkg((tagNetDev *)devhandle,pkg);
+                result = IpPushPkg(dev,pkg);
                 break;
             default:
                 break;
@@ -197,23 +449,6 @@ bool_t LinkSend(tagRout *rout,tagNetPkg *pkg,u32 framlen,u32 devtask,u16 proto,\
     return result;
 }
 
-bool_t LinkSendRaw(tagRout *rout,tagNetPkg *pkg,u32 framlen,u32 devtask)
-{
-    bool_t result = false;
-    tagNetDev *dev;
-
-    if((NULL != rout) &&(NULL != rout->dev))
-    {
-        dev = rout->dev;
-    	result = dev->ifsend((ptu32_t)dev,pkg,framlen,devtask);
-        TCPIP_DEBUG_INC(dev->fsnd);
-        if(result == false)
-        {
-            TCPIP_DEBUG_INC(dev->fsnderr);
-        }
-    }
-    return result;
-}
 
 // =============================================================================
 // FUNCTION   :this is the link module initialize function
@@ -224,7 +459,21 @@ bool_t LinkSendRaw(tagRout *rout,tagNetPkg *pkg,u32 framlen,u32 devtask)
 // =============================================================================
 bool_t LinkInit(void)
 {
-    return true;
+	bool_t result = false;
+	//the gLinkHook module must be initialized
+	memset((void *)&gLinkRcvHookModule,0,sizeof(gLinkRcvHookModule));
+
+	gLinkRcvHookModule.mutex = Lock_MutexCreate(NULL);
+	if(NULL == gLinkRcvHookModule.mutex)
+	{
+		goto EXIT_MUTEX;
+	}
+	gLinkRcvHookModule.itemtotal = 0;
+	result = true;
+	return result;
+
+EXIT_MUTEX:
+    return result;
 }
 
 

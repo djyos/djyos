@@ -63,15 +63,6 @@ extern "C" {
 #endif
 struct UartCB;
 
-// 串口传输参数结构体
-struct COMParam
-{
-    enum tagUartBaud       BaudRate;
-    enum tagUartDataBits   DataBits;
-    enum tagUartParity     Parity;
-    enum tagUartStopBits   StopBits;
-};
-
 typedef u32 (* UartStartSend)(ptu32_t PrivateTag,u32 timeout);
 //typedef u32 (* UartDirectSend)(ptu32_t PrivateTag,u8 *send_buf,u32 len,u32 timeout);
 typedef ptu32_t (*UartControl)(ptu32_t PrivateTag,u32 cmd, u32 data1,u32 data2);

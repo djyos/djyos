@@ -64,13 +64,14 @@ extern "C" {
 struct MsgQueue
 {
     struct Object MsgNode;
-    struct SemaphoreLCB MsgSendSemp;   //发送端控制信号量
-    struct SemaphoreLCB MsgRecvSemp;   //接收端控制信号量
+    struct SemaphoreLCB MsgSendSemp;    //发送端控制信号量
+    struct SemaphoreLCB MsgRecvSemp;    //接收端控制信号量
 
-    u32    MsgSize;                     //
-    u32    MsgUsed;                     //
-    u32    ReadOffset;                  //
-    u8     *buf;                        //
+    u32    MsgSize;         //单条消息最大尺寸。
+    u32    MsgUsed;         //队列中的消息数量
+    u32    ReadOffset;      //当前读位置（从缓冲区起始地址算偏移消息条数）
+                            //当前写位置是计算出来的
+    u8     *buf;            //消息缓冲区
 };
 typedef struct MsgQueue tagMsgQueue;
 

@@ -62,6 +62,9 @@
 #include "arch_feature.h"
 #include <samv7/samv71.h>
 #include "core_cmFunc.h"
+#include "IAP.h"
+#include "cfg/Iboot_config.h"
+#include "cpu_peri.h"
 
 #ifndef __CHECK_DEVICE_DEFINES
 #define __CHECK_DEVICE_DEFINES
@@ -74,13 +77,12 @@ extern void __set_PSP(uint32_t topOfProcStack);
 extern void __set_PRIMASK(uint32_t priMask);
 extern void __set_FAULTMASK(uint32_t faultMask);
 extern void __set_CONTROL(uint32_t control);
+
 extern void SysClk_Init(void);
-extern void Load_Preload(void);
-extern void SDRAM_Init( void );
+extern void IAP_SelectLoadProgam(void);
 
 struct ScbReg volatile * const startup_scb_reg
                         = (struct ScbReg *)0xe000ed00;
-
 void Startup_NMI(void)
 {
     while(1);
@@ -90,23 +92,19 @@ void Startup_Hardfault(void)
     while(1);
 }
 void Init_Cpu(void);
-//初始化异常向量表，此时所有中断以及可屏蔽异常都是关闭的，故只需要提供4个向量：
-// 栈顶、复位、NMI、hard fault。而且均给空函数即可。
-//系统运行时使用的异常表，在异常模块处加载，在ram中。
-const u32 gc_u32StartupExpTable[4] =
+const u32 gc_u32StartupExpTable[4] __attribute__ ((section(".StartupExpTbl"))) =
 {
     (u32)msp_top,
     (u32)Init_Cpu,
     (u32) Startup_NMI,
     (u32) Startup_Hardfault
 };
-
 void Init_Cpu(void)
 {
-    __set_PSP((uint32_t)msp_top);
-    __set_PRIMASK(1);
-    __set_FAULTMASK(1);
-    __set_CONTROL(0);
+	__set_PSP((uint32_t)msp_top);
+	__set_PRIMASK(1);
+	__set_FAULTMASK(1);
+	__set_CONTROL(0);
 
     #if (CN_CPU_OPTIONAL_FPU == 1)
         startup_scb_reg->CPACR = (3UL << 20)|(3UL << 22);    //使能FPU
@@ -118,7 +116,7 @@ void Init_Cpu(void)
     //关狗
     WDT->WDT_MR = (1<<15);
 
-    SysClk_Init();              //系统主时钟、外设时钟、PLL初始化
+    SysClk_Init();				//系统主时钟、外设时钟、PLL初始化
 
 	SDRAM_Init();
 //    MPU_MemoryRegionSetUp();    //cache地址边界的MPU配置
@@ -128,7 +126,86 @@ void Init_Cpu(void)
     SCB_EnableDCache();
 #endif
 
-    Load_Preload();
+	IAP_SelectLoadProgam();
+}
+
+extern void Load_Preload(void);
+//-----------------------------------------------------------------
+//功能：APP应用程序的入口函数，iboot程序中不调用，app的lds文件中，须将该函数
+//     的链接地址放在IbootSize + 512的起始位置。该函数配置栈指针并加载程序
+//参数：无
+//返回：无。
+//-----------------------------------------------------------------
+void AppStart(void)
+{
+	__set_MSP((uint32_t)msp_top);
+	__set_PSP((uint32_t)msp_top);
+	Load_Preload();
 }
 
 
+//-----------------------------------------------------------------
+//功能：IAP组件控制运行模式所需的GPIO引脚初始化，由于此时系统还没有加载，只能使
+//      用直接地址操作，不能调用gpio相关的库函数。
+//      如果不是使用gpio做标志，本函数不是必须，可删掉。
+//参数：无
+//返回：无。
+//-----------------------------------------------------------------
+
+void IAP_GpioPinInit(void)
+{
+	u32 count;
+	const Pin sw0_pin={PIO_PA9,PIOA,ID_PIOA,PIO_INPUT,PIO_DEFAULT};
+	if ( (PMC->PMC_PCSR0 & ((uint32_t)1 << ID_PIOA)) != ((uint32_t)1 << ID_PIOA) )
+	{
+		PMC->PMC_PCER0 = 1 << ID_PIOA ;
+	}
+	Pio *Iap_pin=((Pio    *)0x400E0E00U);   //PIOA
+	Iap_pin->PIO_IDR = PIO_PA9;
+	Iap_pin->PIO_PUDR = PIO_PA9;
+	Iap_pin->PIO_IFDR=PIO_PA9;
+	Iap_pin->PIO_ODR=PIO_PA9;
+	Iap_pin->PIO_PER=PIO_PA9;
+	for(count=0;count<16000000;count++)
+	{
+	}
+}
+
+//-----------------------------------------------------------------
+//功能：由硬件决定是否强制进入Iboot，若此函数返回TRUE，则强制运行Iboot。通常会使
+//      用一个gpio，通过跳线决定。
+//      正常情况下，如果正在运行APP，是可以用runiboot命令切换到Iboot状态的，设置
+//      此硬件的目的有二：
+//     1、在严重异常错误，不能用shell切换时，提供一个补救措施。
+//     2、出于安全考虑，APP中没有包含切换代码，或者由于资源的关系，裁掉了shell。
+//参数：无
+//返回：无。
+//说明：本函数所涉及到的硬件，须在本文件中初始化，特别需要注意的是，不允许调用未
+//      加载的函数，特别是库函数。
+//      本函数必须提供，如果没有设置相应硬件，可以简单返回false。
+//-----------------------------------------------------------------
+
+bool_t IAP_IsForceIboot(void)
+{
+	const Pin sw0_pin={PIO_PA9,PIOA,ID_PIOA,PIO_INPUT,PIO_DEFAULT};
+	unsigned int reg ;
+
+	IAP_GpioPinInit();
+
+	if ( (sw0_pin.type == PIO_OUTPUT_0) || (sw0_pin.type == PIO_OUTPUT_1) )
+	{
+		reg = sw0_pin.pio->PIO_ODSR ;
+	}
+	else
+	{
+		reg = sw0_pin.pio->PIO_PDSR ;
+	}
+	if ( (reg & ((1u << 28))) == 0 )
+	{
+		return false ;
+	}
+	else
+	{
+		return true ;
+	}
+}

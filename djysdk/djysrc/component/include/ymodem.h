@@ -117,7 +117,7 @@ typedef struct __Ymodem
 	u32 	PkgBufCnt;					//PKG大小计数
 }tagYmodem;
 
-ptu32_t ModuleInstall_Ymodem(struct DjyDevice *para);
+ptu32_t ModuleInstall_Ymodem(ptu32_t Param);
 bool_t Ymodem_UploadFile(char *Param);
 bool_t Ymodem_DownloadFile(char *Param);
 bool_t Ymodem_PathSet(const char *Path);

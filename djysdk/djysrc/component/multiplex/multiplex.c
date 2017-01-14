@@ -60,6 +60,7 @@
 #include "object.h"
 #include "pool.h"
 #include "lock.h"
+#include <djyos.h>
 #include "multiplex.h"
 #define CN_MULTIPLEX_ACTIVED   (1<<31)  //MultiplexSets是否已经触发，只有type设置
 //为CN_MULTIPLEX_OBJECT_AND有效，在OR模式
@@ -158,7 +159,7 @@ struct MultiplexSetsCB* Multiplex_Creat(u32 ActiveLevel)
         SetsQ->ActiveLevel = ActiveLevel;
         SetsQ->Actived = 0;
         SetsQ->SetsActived = false;
-        Lock_SempCreate_s(&SetsQ->Lock, 1, 0, CN_SEMP_BLOCK_FIFO, NULL);
+        Lock_SempCreate_s(&SetsQ->Lock, 1, 0, CN_BLOCK_FIFO, NULL);
         return SetsQ;
     } else
         return NULL;

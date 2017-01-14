@@ -56,24 +56,6 @@
 .fpu    softvfp
 .file   "exceptions.S"
 
-.section        .stack.usr, "aw", %nobits
-.align  3
-    .space      0x1000
-.section        .stack.svc, "aw", %nobits
-.align  3
-        .space  0x10000
-.section        .stack.irq, "aw", %nobits
-.align  3
-        .space  0x1000
-.section        .stack.fiq, "aw", %nobits
-.align  3
-        .space  0x1000
-.section        .stack.undef, "aw", %nobits
-.align  3
-        .space  0x1000
-.section        .stack.abort, "aw", %nobits
-.align  3
-        .space  0x1000
 
 /* 异常向量表 */
 .section    .isr_vector, "ax", %progbits

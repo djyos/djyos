@@ -556,11 +556,11 @@ ufast_t read_touch_windows(struct SingleTouchMsg *touch_data)
 //参数: display_name,本触摸屏对应的显示器名(资源名)
 //返回: 无
 //-----------------------------------------------------------------------------
-ptu32_t ModuleInstall_TouchWindows(char * TouchName)
+ptu32_t ModuleInstall_TouchWindows(struct GkWinRsc *desktop,char * TouchName)
 {
     static struct SingleTouchPrivate windows_touch;
     windows_touch.read_touch = read_touch_windows;
-    windows_touch.touch_loc.display = NULL;
+    windows_touch.touch_loc.display = NULL;     //NULL表示用默认桌面
     Touch_InstallDevice(TouchName,&windows_touch);
     return 1;
 }

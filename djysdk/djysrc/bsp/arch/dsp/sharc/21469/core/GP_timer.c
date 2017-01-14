@@ -769,10 +769,10 @@ void GPTimer_ModuleInit(void)
 
 
     Sharc21469GPtimer.chipname = "SHARC21469GPTimer";
-    Sharc21469GPtimer.TimerHardAlloc = __GPTimer_Alloc;
-    Sharc21469GPtimer.TimerHardFree = __GPTimer_Free;
-    Sharc21469GPtimer.TimerHardCtrl = __GPTimer_Ctrl;
-    TimerHard_RegisterChip(&Sharc21469GPtimer);
+    Sharc21469GPtimer.HardTimerAlloc = __GPTimer_Alloc;
+    Sharc21469GPtimer.HardTimerFree = __GPTimer_Free;
+    Sharc21469GPtimer.HardTimerCtrl = __GPTimer_Ctrl;
+    HardTimer_RegisterChip(&Sharc21469GPtimer);
 
 
     // =============下面代码仅做测试使用===================================

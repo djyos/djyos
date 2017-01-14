@@ -62,7 +62,7 @@
 
 #include    "gdd.h"
 #include    <gui/gdd/gdd_private.h>
-#include    <widget.h>
+#include    <gdd_widget.h>
 
 /*============================================================================*/
 
@@ -76,11 +76,11 @@ typedef struct{
 
 typedef struct{
     list_t list;
-    s32 ItemNum;
-    s32 TopIndex;
-    s32 CurSel;
-    s32 ItemHeight;
-    s32 xpos,ypos;
+    u32 ItemNum;
+    u32 TopIndex;
+    u32 CurSel;
+    u32 ItemHeight;
+    u32 xpos,ypos;
 }LISTBOX_DATA;
 //---------------创建列表-------------------------------------------------------
 //功能：略
@@ -97,14 +97,14 @@ static bool_t ListBox_Create(struct WindowMsg *pMsg)
          pLB =(LISTBOX_DATA*)malloc(sizeof(LISTBOX_DATA));
          if(pLB==NULL)
               return false;
-         pMsg->Param1=(ptu32_t*)pLB;
+         pMsg->Param1=(ptu32_t)pLB;
          dListInit(&pLB->list);
          pLB->ItemNum =0;
          pLB->TopIndex =0;//表头是链表第几项
          pLB->CurSel =-1;
          pLB->ItemHeight =20;//行高
      }
-     SetWindowPrivateData(hwnd,pMsg->Param1);
+     SetWindowPrivateData(hwnd,(void*)pMsg->Param1);
      return true;
 }
 
@@ -353,7 +353,7 @@ static u32 ListBox_GetCurSel(struct WindowMsg *pMsg)
 
 
 //获取列表数
-static s32 ListBox_GetCount(struct WindowMsg *pMsg)
+static u32 ListBox_GetCount(struct WindowMsg *pMsg)
 {
     HWND hwnd;
     LISTBOX_DATA *pLB;

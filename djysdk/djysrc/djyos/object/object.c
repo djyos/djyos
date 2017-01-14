@@ -600,8 +600,8 @@ bool_t OBJ_MoveToHead(struct Object *Obj)
 
 //----移动节点到某节点next位置-------------------------------------------------
 //功能: 移动资源队列中的一个节点NewNext到另一个节点Obj的next位置
-//参数: node,被移动的节点指针
-//      elder,目标节点,node移动到本节点后面
+//参数: Obj,被移动的节点指针
+//      NewNext,目标节点,Obj移动到本节点后面
 //返回: TRUE = 成功执行，FALSE = 失败
 //------------------------------------------------------------------------------
 bool_t OBJ_MoveToNext(struct Object *Obj, struct Object *NewNext)
@@ -629,7 +629,7 @@ bool_t OBJ_MoveToNext(struct Object *Obj, struct Object *NewNext)
 //----移动节点到某节点previous位置---------------------------------------------
 //功能: 移动资源队列中的一个节点NewPre到另一个节点Obj的previous位置
 //参数: Obj,被移动的节点指针
-//      NewPre,目标节点,node移动到本节点前面
+//      NewPre,目标节点,obj移动到本节点前面
 //返回: TRUE = 成功执行，FALSE = 失败
 //------------------------------------------------------------------------------
 bool_t OBJ_MoveToPrevious(struct Object *Obj, struct Object *NewPre)

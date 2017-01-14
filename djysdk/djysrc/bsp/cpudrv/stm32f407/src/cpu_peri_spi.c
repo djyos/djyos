@@ -369,29 +369,30 @@ static s32 __SPI_Write( tagSpiReg * Reg,uint16_t wData )
 static bool_t __SPI_TxRxPoll(tagSpiReg *Reg,u8 *srcAddr,u32 wrSize,
         u8 *destAddr, u32 rdSize,u32 recvoff,u8 cs)
 {
-    u32 i;
+    u32 i,len_limit;
     u8 data;
     if( (!srcAddr) || ((rdSize != 0) && (!destAddr)))
         return false;
 
     Reg->CR1 |= SPI_CR1_SPE;
-    for (i=0;i<(wrSize+rdSize);i++)
+    len_limit = MAX(wrSize, rdSize + recvoff);
+    for (i=0;i<len_limit;i++)
     {
         if (i<wrSize)
         {
-            if(-1 == __SPI_Write(Reg,srcAddr[i]))
-                return false;
-            if(-1 ==__SPI_Read(Reg))
-                return false;
+            __SPI_Write(Reg,srcAddr[i]);
         }
-        else if(i<(wrSize+rdSize))
+        else if((i>=wrSize)&&(i<len_limit))
         {
-          if(-1 == __SPI_Write(Reg,0))
-              return false;
-          data = __SPI_Read(Reg);
-          if(-1 == data)
-              return false;
-          destAddr[i-wrSize] = data;
+          __SPI_Write(Reg,0);
+        }
+        if((destAddr) && (i>=recvoff) )
+        {
+            destAddr[i-recvoff] = __SPI_Read(Reg);
+        }
+        else
+        {
+            __SPI_Read(Reg);
         }
     }
 

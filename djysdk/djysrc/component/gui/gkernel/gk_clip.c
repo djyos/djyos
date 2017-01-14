@@ -528,8 +528,6 @@ bool_t __GK_ScanNewVisibleClip(struct DisplayRsc *display)
             }
             __GK_CombineClip_s(tempwin->visible_clip);//合并clip,按先x后y的顺序合并
         }
-        if(tempwin->visible_clip == 0xa0a0a0a)
-            tempwin = NULL;
         if(tempwin != display->desktop)
             tempwin = tempwin->z_back;
         else

@@ -198,61 +198,62 @@
     <CustomFolders>
         <Folder
             Name="Source Files"
-            Filters="*.c;*.C;*.cc;*.cpp;*.cp;*.cxx;*.c++;*.prg;*.pas;*.dpr;*.asm;*.s;*.bas;*.java;*.cs;*.sc;*.e;*.cob;*.html;*.rc;*.tcl;*.py;*.pl;*.d;*.m;*.mm;*.go"/>
+            Filters="*.c;*.C;*.cc;*.cpp;*.cp;*.cxx;*.c++;*.prg;*.pas;*.dpr;*.asm;*.s;*.bas;*.java;*.cs;*.sc;*.e;*.cob;*.html;*.rc;*.tcl;*.py;*.pl;*.d;*.m;*.mm;*.go"
+            GUID="{4B262563-C942-4AEE-00B1-DA4118047AA2}"></Folder>
         <Folder
             Name="Header Files"
-            Filters="*.h;*.H;*.hh;*.hpp;*.hxx;*.inc;*.sh;*.cpy;*.if"/>
+            Filters="*.h;*.H;*.hh;*.hpp;*.hxx;*.inc;*.sh;*.cpy;*.if"
+            GUID="{C4469E3D-3DA4-46E7-0424-C6AAC62E1681}"></Folder>
         <Folder
             Name="Resource Files"
-            Filters="*.ico;*.cur;*.dlg"/>
+            Filters="*.ico;*.cur;*.dlg"
+            GUID="{BB921ACB-1A7D-4E32-321C-DAB862563AAC}"/>
         <Folder
             Name="Bitmaps"
-            Filters="*.bmp"/>
+            Filters="*.bmp"
+            GUID="{8F2B48AF-BBE8-4783-9F17-50DA60A70F83}"/>
         <Folder
             Name="Other Files"
-            Filters=""/>
+            Filters=""
+            GUID="{7DAB3FC0-6A38-46EC-DE53-22A34DCE0E80}"/>
         <Folder
             Name="src"
-            Filters=""></Folder>
+            Filters=""
+            GUID="{8E3801BF-21FB-416D-9770-2F5D0E7B7985}"></Folder>
         <Folder
             Name="config"
-            Filters=""></Folder>
+            Filters=""
+            GUID="{1FD20479-AC30-4215-5D33-5EE0D71F488B}"></Folder>
     </CustomFolders>
     <Files AutoFolders="DirectoryView">
-        <Folder
-            Name="config"
-            GUID="{2AF93261-26EB-4741-6C6B-EB26C150B7AF}">
-            <F N="config/Debug.lds"/>
-            <F N="config/Release.lds"/>
+        <Folder Name="lds">
+            <F N="lds/Debug.lds"/>
+            <F N="lds/memory.lds"/>
+            <F N="lds/Release.lds"/>
         </Folder>
-        <Folder
-            Name="src"
-            GUID="{8B40D5F2-0062-4914-AA2C-3D2FF4A48C84}">
-            <Folder
-                Name="OS_prjcfg"
-                GUID="{3C835095-BFE2-4483-44B1-3EC9A64D939B}">
-                <Folder
-                    Name="config"
-                    GUID="{53B342CA-FCF8-4EFD-B556-8DB7C68562B2}">
-                    <F N="src/OS_prjcfg/config/int-config.c"/>
-                </Folder>
-                <Folder
-                    Name="include"
-                    GUID="{D8AD0D34-40C5-461D-E45C-7D2007B0068D}">
-                    <F N="src/OS_prjcfg/include/config-prj.h"/>
-                </Folder>
+        <Folder Name="src">
+            <Folder Name="critical">
+                <F N="src/critical/critical.c"/>
             </Folder>
-            <Folder
-                Name="user"
-                GUID="{E7D4F994-A667-4FD6-1C1B-95C95CE319A4}">
-                <Folder
-                    Name="critical"
-                    GUID="{4AF19747-5833-42EB-8FA0-9785B6434FAF}">
-                    <F N="src/user/critical/critical.c"/>
+            <Folder Name="OS_prjcfg">
+                <Folder Name="include">
+                    <F N="src/OS_prjcfg/include/gui_config.h"/>
+                    <F N="src/OS_prjcfg/include/IO_config.h"/>
+                    <F N="src/OS_prjcfg/include/local_config.h"/>
+                    <F N="src/OS_prjcfg/include/misc_config.h"/>
                 </Folder>
-                <F N="src/user/main.c"/>
-                <F N="src/user/module-trim.c"/>
+                <Folder Name="network">
+                    <F N="src/OS_prjcfg/network/boardnetcfg.c"/>
+                    <F N="src/OS_prjcfg/network/tcpipconfig.c"/>
+                </Folder>
+                <F N="src/OS_prjcfg/core_config.c"/>
+                <F N="src/OS_prjcfg/gui_config.c"/>
+                <F N="src/OS_prjcfg/IO_config.c"/>
+                <F N="src/OS_prjcfg/local_config.c"/>
+                <F N="src/OS_prjcfg/misc_config.c"/>
             </Folder>
+            <F N="src/main.c"/>
+            <F N="src/module-trim.c"/>
         </Folder>
     </Files>
 </Project>

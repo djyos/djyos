@@ -61,12 +61,12 @@
 
 struct FSL_PIT_REG
 {
-	vu32 PIT_MCR;
-	vu32 RESERVER[256];
-	vu32 PIT_LDVAL[3];
-	vu32 PIT_CVAL[3];
-	vu32 PIT_TCTRL[3];
-	vu32 PIT_TFLG[3];
+    vu32 PIT_MCR;
+    vu32 RESERVER[256];
+    vu32 PIT_LDVAL[3];
+    vu32 PIT_CVAL[3];
+    vu32 PIT_TCTRL[3];
+    vu32 PIT_TFLG[3];
 };
 
 #define PIT_MCR_MDIS           (0x01<<1)
@@ -75,5 +75,5 @@ struct FSL_PIT_REG
 #define PIT_TCTRL_TIE          (0x01<<1)
 #define PIT_TCTRL_TEN          (0x01<<0)
 
-void TimerHard_ModuleInit(void);
+void HardTimer_ModuleInit(void);
 #endif /* CPU_PERI_PIT_H_ */

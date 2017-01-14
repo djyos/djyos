@@ -62,7 +62,7 @@
 #include "cpu.h"
 #include "int_hard.h"
 
-extern const ufast_t tg_IntUsed[];          //save the int number used  
+extern const ufast_t tg_IntUsed[];          //save the int number used
 extern const ufast_t tg_IntUsedNum;         //本变量在int_config.c中定义
 extern struct IntLine *tg_pIntLineTable[];       //中断线查找表
 struct IntMasterCtrl  tg_int_global;     //定义并初始化总中断控制结构
@@ -216,13 +216,13 @@ void Int_Init(void)
     u32 addr;
     u32 len ;
     u8 *src;
-    
+
     Int_CutTrunk();//close the main int key
     __Int_RstPic();
     //初始化查找表
     for(i=0;i <= CN_INT_LINE_LAST;i++)
     {
-        tg_pIntLineTable[i] = (ufast_t)NULL;
+        tg_pIntLineTable[i] = NULL;
     }
 
     //将所有的中断进行初始化，记录其寄存器地址
@@ -256,7 +256,7 @@ void Int_Init(void)
 
     tg_int_global.en_asyn_signal_counter = 1;   //异步信号计数
     __Int_ClearAllLine();//clear all the suspend interrupt
-    
+
     Int_CutAsynSignal();
     //set the cpu ctpr to zero
     write32(cn_core_ctpr_addr,cn_prior_core_event);
@@ -268,8 +268,8 @@ void Int_Init(void)
     //set the pic to the mixed mode
     write32(cn_pic_gcr_addr,cn_pic_gcr_mode_m);
 //    tg_int_global.en_trunk = true;
-    tg_int_global.en_trunk_counter = 0;       //总中断计数  
-    Int_ContactTrunk(); //接通总中断开关   
+    tg_int_global.en_trunk_counter = 0;       //总中断计数
+    Int_ContactTrunk(); //接通总中断开关
 }
 
 
@@ -385,7 +385,7 @@ bool_t  Int_CutLine(ufast_t ufl_line)
     bool_t result = false;
     u32 addr;
     u32 value = 0;
-    
+
     if(__Int_ChkIntValid(ufl_line))
     {
         addr =sgPicIvprAddrTab[ufl_line];
@@ -418,7 +418,7 @@ ufast_t  Int_GetEIntNumber(void)
 {
     u32       addr;
     ufast_t   result;
-    
+
     addr = cn_core_iack_addr;
     result = read32(addr);
     return result;
@@ -437,7 +437,7 @@ ufast_t  Int_GetCIntNumber(void)
 {
     u32       addr;
     ufast_t   result;
-    
+
     addr = cn_core_iack_addr;
     result = read32(addr);
     return result;
@@ -459,8 +459,8 @@ bool_t Int_ClearLine(ufast_t ufl_line)
 {
     bool_t result = false;
     u32 value;
-    u32 addr; 
-    
+    u32 addr;
+
     if(__Int_ChkIntValid(ufl_line))
     {
        if(tg_pIntLineTable[ufl_line]->int_type == CN_ASYN_SIGNAL)
@@ -551,7 +551,7 @@ bool_t Int_SettoAsynSignal(ufast_t ufl_line)
         value &= (~CN_PIC_IDR_C0);
         value |= cn_pic_idr_p0;
         write32(addr,value);
-        
+
         Int_HighAtomEnd(high_atom);
         result = true;
     }
@@ -588,9 +588,9 @@ bool_t Int_SettoReal(ufast_t ufl_line)
             tg_int_global.property_bitmap[ufl_line/CN_CPU_BITS]
                     |= 1<<(ufl_line % CN_CPU_BITS);   //设置位图
             //set the ivpr
-            addr = sgPicIvprAddrTab[ufl_line];       
+            addr = sgPicIvprAddrTab[ufl_line];
             value = read32(addr);
-            value = value&cn_ivpr_trigertype_msk;  //save the trigger type 
+            value = value&cn_ivpr_trigertype_msk;  //save the trigger type
             value |= (cn_prior_asyn_signal<<16);
             write32(addr,value);
             //set the idr
@@ -599,7 +599,7 @@ bool_t Int_SettoReal(ufast_t ufl_line)
             value &= (~cn_pic_idr_p0);
             value |= CN_PIC_IDR_C0;
             write32(addr,value);
- 
+
             result = true;
         }
         Int_HighAtomEnd(high_atom);
@@ -685,7 +685,7 @@ bool_t Int_SetPrio(ufast_t ufl_line,u32 prior)
              write32(addr, value);
          }
          result = true;
-     
+
          Int_HighAtomEnd(high_atom);
     }
 
@@ -716,7 +716,7 @@ void Int_ContactTrunk(void)
 // =============================================================================
 void Int_CutTrunk(void)
 {
-    sgTrunkKey = Int_HighAtomStart();   
+    sgTrunkKey = Int_HighAtomStart();
 }
 
 

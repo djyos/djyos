@@ -157,7 +157,7 @@ static u32 __telnetRead(ptu32_t tag,u8 *buf,u32 len,u32 offset,u32 timeout)
 static bool_t __telnetConsoleInstall()
 {
 
-    if(NULL !=Driver_DeviceCreate(NULL,CN_TELNET_DEVNAME,NULL,NULL,__telnetWrite,__telnetRead,NULL,NULL,NULL))
+    if(NULL !=Driver_DeviceCreate(NULL,CN_TELNET_DEVNAME,NULL,NULL,__telnetWrite,__telnetRead,NULL,NULL,0))
     {
         return true;
     }

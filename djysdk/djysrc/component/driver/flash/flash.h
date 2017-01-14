@@ -84,6 +84,7 @@ struct FlashOps{
     s32 (*RdPage)(u32 PageNo, u8 *Data, u32 Flags); 			// 读页
     s32 (*WrPage)(u32 PageNo, u8 *Data, u32 Flags); 			// 写页,去掉const 因为存在ECC数据填充
     s32 (*ErsBlk)(u32 BlkNo);	 								// 擦除块
+    s32 (*PageToBlk)(u32 PageNo, u32 *Remains, u32 *BlkNo);			// 通过页
     union{
     	struct NandSpecialOps Nand;								// Nand器件特别操作
     	struct NorSpecialOps Nor;                               // Nor器件特别操作

@@ -64,11 +64,11 @@ extern "C" {
 #define CN_TIMER_SOURCE_TICK   0
 #define CN_TIMER_SOURCE_HARD   1
 
-struct TimerSoft;
-typedef struct TimerSoft tagTimerSoft;
-typedef void (*fnTimerSoftIsr)(struct TimerSoft *timer);
+struct Timer;
+typedef struct Timer tagTimer;
+typedef void (*fnTimerIsr)(struct Timer *timer);
 
-enum TimerSoftCmdCode
+enum TimerCmdCode
 {
     EN_TIMER_SOFT_START,     //使能计数，inoutpara无意义
     EN_TIMER_SOFT_PAUSE,     //停止计数，inoutpara无意义
@@ -76,15 +76,15 @@ enum TimerSoftCmdCode
     EN_TIMER_SOFT_SETRELOAD, //reload模式,true代表自动reload
 };
 
-tagTimerSoft*  TimerSoft_Create_s(tagTimerSoft *timer,const char *name, 
-                                  u32 cycle, fnTimerSoftIsr isr);
-tagTimerSoft*  TimerSoft_Delete_s(tagTimerSoft* timer);
-tagTimerSoft*  TimerSoft_Create(const char *name,u32 cycle,fnTimerSoftIsr isr);
-bool_t TimerSoft_Delete(tagTimerSoft* timer);
-bool_t TimerSoft_Ctrl(tagTimerSoft* timer,u32 opcode, ptu32_t para);
-char *TimerSoft_GetName(tagTimerSoft* timer);
-ptu32_t TimerSoft_GetTag(tagTimerSoft* timer);
-ptu32_t ModuleInstall_TimerSoft(ptu32_t para);
+tagTimer*  Timer_Create_s(tagTimer *timer,const char *name,
+                                  u32 cycle, fnTimerIsr isr);
+tagTimer*  Timer_Delete_s(tagTimer* timer);
+tagTimer*  Timer_Create(const char *name,u32 cycle,fnTimerIsr isr);
+bool_t Timer_Delete(tagTimer* timer);
+bool_t Timer_Ctrl(tagTimer* timer,u32 opcode, ptu32_t para);
+char *Timer_GetName(tagTimer* timer);
+ptu32_t Timer_GetTag(tagTimer* timer);
+ptu32_t ModuleInstall_Timer(ptu32_t para);
 
 #ifdef __cplusplus
 }

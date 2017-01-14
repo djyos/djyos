@@ -61,6 +61,7 @@ bool_t key_hard_init(void)
     WindowRect.bottom += (cn_key_board_height - ClientRect.bottom);
     MoveWindow(tg_keyboard_wnd, WindowRect.left, WindowRect.top, cn_key_board_width, cn_key_board_height, false);
 
+   
     ShowWindow(tg_keyboard_wnd, SW_SHOW);
     UpdateWindow(tg_keyboard_wnd);
     tg_key_hdc = GetDC (tg_keyboard_wnd) ;

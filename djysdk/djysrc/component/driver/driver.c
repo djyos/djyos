@@ -428,8 +428,8 @@ u32 Driver_FindScionDevice(struct DjyDevice * ancestor,const char * scion_name)
 //      D_WRONLY同上
 //参数: name,设备名字符串,包含路径名，但不必包含'dev\'这4个字符
 //      flags,设备打开模式,D_RDONLY,D_WRONLY,D_RDWR中的一个
-//      timeout，超时设置,单位是微秒，cn_timeout_forever=无限等待，0则立即按
-//          超时返回。非0值将被向上调整为cn_tick_us的整数倍
+//      timeout，超时设置,单位是微秒，CN_TIMEOUT_FOREVER=无限等待，0则立即按
+//          超时返回。非0值将被向上调整为CN_CFG_TICK_US的整数倍
 //返回: 成功打开设备(含经过等待后打开)返回设备句柄,否则返回NULL.
 //-----------------------------------------------------------------------------
 struct DjyDevice * Driver_OpenDevice(const char *name,u32 flags,u32 timeout)
@@ -476,8 +476,8 @@ struct DjyDevice * Driver_OpenDevice(const char *name,u32 flags,u32 timeout)
 //参数: ancestor，被打开设备的祖先设备。
 //      scion_name,设备名字符串,包含路径名,
 //      flags,设备打开模式,D_RDONLY,D_WRONLY,D_RDWR中的一个
-//      timeout，超时设置,单位是微秒，cn_timeout_forever=无限等待，0则立即按
-//          超时返回。非0值将被向上调整为cn_tick_us的整数倍
+//      timeout，超时设置,单位是微秒，CN_TIMEOUT_FOREVER=无限等待，0则立即按
+//          超时返回。非0值将被向上调整为CN_CFG_TICK_US的整数倍
 //返回: 成功打开设备(含经过阻塞后打开)返回设备句柄,否则返回NULL.
 //-----------------------------------------------------------------------------
 struct DjyDevice * Driver_OpenScionDevice(struct DjyDevice * ancestor,
@@ -530,8 +530,8 @@ struct DjyDevice * Driver_OpenScionDevice(struct DjyDevice * ancestor,
 //      D_WRONLY同上
 //参数: DevAlias,待打开的设备别名
 //      flags,设备打开模式,D_RDONLY,D_WRONLY,D_RDWR中的一个
-//      timeout，超时设置,单位是微秒，cn_timeout_forever=无限等待，0则立即按
-//          超时返回。非0值将被向上调整为cn_tick_us的整数倍
+//      timeout，超时设置,单位是微秒，CN_TIMEOUT_FOREVER=无限等待，0则立即按
+//          超时返回。非0值将被向上调整为CN_CFG_TICK_US的整数倍
 //返回: 成功打开设备则返回句柄,否则返回NULL.
 //-----------------------------------------------------------------------------
 struct DjyDevice * Driver_OpenDeviceAlias(u32 DevAlias,u32 flags,u32 timeout)
@@ -609,8 +609,8 @@ bool_t Driver_CloseDevice(struct DjyDevice * Dev)
 //      buf,用于接收数据的缓冲区，其容量必须不小于len。buf的容量无法检查。
 //      len,读取的数据量，须不大于buf的容量
 //      offset,读取位置在设备中的偏移，对于流设备(例如串口)来说，通常是0.
-//      timeout，超时设置,单位是微秒，cn_timeout_forever=无限等待，0则立即按
-//          超时返回。非0值将被向上调整为cn_tick_us的整数倍
+//      timeout，超时设置,单位是微秒，CN_TIMEOUT_FOREVER=无限等待，0则立即按
+//          超时返回。非0值将被向上调整为CN_CFG_TICK_US的整数倍
 //      以上参数，driver模型只是如实传送给具体设备，设备开发者也可以不遵守上述
 //      规定。
 //返回: -1表示参数检查出错，其他值为实际读取的数据长度.
@@ -636,7 +636,7 @@ u32 Driver_ReadDevice(struct DjyDevice * Dev,u8 *buf,u32 len,u32 offset,u32 time
 //      len,发送的数据量，须不大于buf的容量
 //      offset,写入位置在设备中的偏移，对于流设备(例如串口)来说，通常是0.
 //      timeout，超时设置,单位是微秒，CN_TIMEOUT_FOREVER=无限等待，0则立即按
-//          超时返回。非0值将被向上调整为cn_tick_us的整数倍
+//          超时返回。非0值将被向上调整为CN_CFG_TICK_US的整数倍
 //      BlockOption，阻塞选项，取值为CN_BLOCK_BUFFER或CN_BLOCK_COMPLETE。含义见
 //          此二常量定义处。
 //      以上参数，driver模型只是如实传送给具体设备，设备开发者也可以不遵守上述

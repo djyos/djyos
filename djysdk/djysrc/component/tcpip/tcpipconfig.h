@@ -54,7 +54,7 @@
 //*******************************PKGMEM***************************************//
 extern const u32 gNetPkgMemSize         ; //the stack package memory size
 
-//*******************************IP***************************************//
+//*******************************IP*******************************************//
 extern const u32    gIpRcvTaskPrior        ; //the ip processor task prior
 extern const u32    gIpRcvTaskStack        ; //ip receive task stack size
 extern const bool_t gEnableIpAssemble      ; //ipv4 could receive the fragment package

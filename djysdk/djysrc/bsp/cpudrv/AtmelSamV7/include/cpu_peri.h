@@ -71,6 +71,7 @@ extern "C" {
 #include "cpu_peri_spi.h"
 #include "cpu_peri_tc.h"
 #include "cpu_peri_gmac.h"
+#include "cpu_peri_mcan.h"
 #include <cpu_peri_bksram.h>
 #include "qspi.h"
 

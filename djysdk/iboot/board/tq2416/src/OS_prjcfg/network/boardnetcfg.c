@@ -53,7 +53,7 @@
 #include <sys/socket.h>
 #include "cpu_peri.h"     //for the k70 net device in the soc
 const char *gNetDevName = "TQ2416_DM9000A";
-const u8 cTq2416DM9000Mac[] = {0x00,0x01,0x02,0x03,0x04,0xaa};
+const u8 cTq2416DM9000Mac[] = {0x3C,0x97, 0x0E, 0x44, 0x07, 0XBD};
 
 //please refers the following function in the module-trim in proper place.
 //make sure that that os kernel has been initialize ok and the interrupt system intialize ok

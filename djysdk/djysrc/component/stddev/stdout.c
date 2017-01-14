@@ -331,7 +331,7 @@ static void forcdecpt(char *buffer)
   else
   {
     *buffer++ = '.';
-    *buffer = '/0';
+    *buffer = '\0';
   }
 }
 static void cropzeros(char *buffer)

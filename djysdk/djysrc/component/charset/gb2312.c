@@ -69,7 +69,7 @@
 
 s32 GB2312MbToUcs4 (u32 *pwc, const char *mbs, s32 n);
 s32 GB2312MbsToUcs4s(u32* pwcs, const char* mbs, s32 n);
-s32 GB2312Ucs4ToMb(char* s, s32 wc);
+s32 GB2312Ucs4ToMb(char* s, u32 wc);
 s32 GB2312Ucs4sToMbs(char* mbs, const u32* pwcs, s32 n);
 
 typedef struct {
@@ -1147,7 +1147,6 @@ s32 GB2312GetOneMb(const char* mbs,s32 n)
 {
     u8 c1,c2;
     u32 i;
-    u32 wc;
 
     if(mbs == NULL)
     {
@@ -2672,7 +2671,7 @@ static const Summary16 gb2312_uni2indx_pageff[15] = {
 };
 
 // ×¢ÊÍ²ÎÕÕ charset.h-> struct Charset -> Ucs4ToMb
-s32 GB2312Ucs4ToMb (char* mb, s32 wc)
+s32 GB2312Ucs4ToMb (char* mb, u32 wc)
 {
     u16 used;
     u16 i, c;

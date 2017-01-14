@@ -176,6 +176,8 @@ void Sys_ModuleInit(void)
     ModuleInstall_DjyBus(0);
     //IIC总线模块,依赖:djybus
     ModuleInstall_IICBus(0);
+    IIC1_Init();
+    IIC2_Init();
     //SPI总线模块,依赖:djybus
 //    ModuleInstall_SPIBus(0);
 
@@ -185,8 +187,8 @@ void Sys_ModuleInit(void)
     ModuleInstall_RTC(0);
 
     //定时器组件
-    extern ptu32_t ModuleInstall_TimerSoft(ptu32_t para);
-    ModuleInstall_TimerSoft(CN_TIMER_SOURCE_TICK);
+    extern ptu32_t ModuleInstall_Timer(ptu32_t para);
+    ModuleInstall_Timer(CN_TIMER_SOURCE_TICK);
 
    //网络协议栈组件
     extern  ptu32_t ModuleInstall_DjyIp(ptu32_t para);
@@ -199,22 +201,22 @@ void Sys_ModuleInit(void)
     ModuleInstall_KeyBoardHard(0);
 
     //字符集模块
-//    ModuleInstall_Charset(0);
+    ModuleInstall_Charset(0);
     //gb2312字符编码,依赖:字符集模块
-//    ModuleInstall_CharsetGb2312(0);
+    ModuleInstall_CharsetGb2312(0);
     //ascii字符集,注意,gb2312包含了ascii,初始化了gb2312后,无须本模块
     //依赖:字符集模块
 //    ModuleInstall_CharsetAscii(0);
     //初始化utf8字符集
-//    ModuleInstall_CharsetUtf8(0);
+    ModuleInstall_CharsetUtf8(0);
     //国际化字符集支持,依赖所有字符集模块以及具体字符集初始化
-//    ModuleInstall_CharsetNls("C");
+    ModuleInstall_CharsetNls("C");
 
 
-//    ModuleInstall_Font(0);                 //字体模块
+    ModuleInstall_Font(0);                 //字体模块
 
     //8*8点阵的ascii字体依赖:字体模块
-//  ModuleInstall_FontAscii8x8Font(0);
+    ModuleInstall_FontAscii8x8Font(0);
     //6*12点阵的ascii字体依赖:字体模块
 //  ModuleInstall_FontAscii6x12Font(0);
     //从数组安装GB2312点阵字体,包含了8*16的ascii字体.依赖:字体模块
@@ -222,7 +224,7 @@ void Sys_ModuleInit(void)
 //    ModuleInstall_FontGb2312_816_1616_Array(0);
 
     //从文件安装GB2312点阵字体,包含了8*16的ascii字体.依赖:字体模块,文件系统
-//    ModuleInstall_FontGb2312_816_1616_File("sys:\\gb2312_1616");
+    ModuleInstall_FontGb2312_816_1616_File("sys:\\gb2312_1616");
     //8*16 ascii字体初始化,包含高128字节,依赖:字体模块
     //注:如果安装了GB2312,无须再安装
 //    ModuleInstall_FonAscii8x16Font(0);
@@ -232,25 +234,25 @@ void Sys_ModuleInit(void)
     static struct GkWinRsc desktop;
     struct DisplayRsc *ili9325;
 
-//    ModuleInstall_GK(0);           //gkernel模块
+    ModuleInstall_GK(0);           //gkernel模块
     //lcd驱动初始化,如果用系统堆的话,第二个参数用NULL
     //堆的名字,是在lds文件中命名的,注意不要搞错.
     //依赖: gkernel模块
-//    ili9325 = (struct DisplayRsc*)ModuleInstall_ili9325("ili9325","extram");
+    ili9325 = (struct DisplayRsc*)ModuleInstall_ili9325("ili9325","extram");
 
     //创建桌面,依赖:显示器驱动
-//    GK_ApiCreateDesktop(ili9325,&desktop,0,0,
-//                        CN_COLOR_RED+CN_COLOR_GREEN,CN_WINBUF_BUF,0,0);
+    GK_ApiCreateDesktop(ili9325,&desktop,0,0,
+                        CN_COLOR_RED+CN_COLOR_GREEN,CN_WINBUF_BUF,0,0);
 
     //触摸屏模块,依赖:gkernel模块和显示器驱动
-//    ModuleInstall_Touch(0);
+    ModuleInstall_Touch(0);
     //触摸屏驱动,
     //依赖:触摸屏模块,宿主显示器驱动,以及所依赖的硬件,例如qh_1的IIC驱动.
     //     如果矫正数据存在文件中,还依赖文件系统.
-//    ModuleInstall_Touch_Stmpe811(20);
+    ModuleInstall_Touch_Stmpe811(&desktop, TOUCH_DEV_NAME);
 
     //GDD组件初始化
-//     ModuleInstall_GDD(&desktop,gdd_input_dev);
+     ModuleInstall_GDD(&desktop,gdd_input_dev);
 
     //看门狗模块,如果启动了加载时喂狗,看门狗软件模块从此开始接管硬件狗.
     extern ptu32_t ModuleInstall_Wdt(ptu32_t para);

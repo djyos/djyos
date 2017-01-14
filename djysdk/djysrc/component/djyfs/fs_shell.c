@@ -81,57 +81,57 @@ static struct ShellCmdTab const FsCmdTable[] =
         "文件系统格式化",
         "格式: format 挂载点目录(路径)"
     },
-	{
-		"pwd",
-		SH_PrintWorkingPath,
-		"显示用户当前工作路径",
-		"\r\n"
-	},
-	{
-		"mkdir",
-		SH_MkDir,
-		"创建目录",
-		"\r\n"
-	},
-	{
-		"ls",
-		SH_List,
-		"显示目录项",
-		"\r\n"
-	},
-	{
-		"cd",
-		SH_ChangeDir,
-		"更改当前工作路径",
-		"\r\n"
-	},
-	{
-		"rm",
-		SH_Remove,
-		"删除文件或者目录",
-		"\r\n"
-	},
-	{
-		"cat",
-		SH_Cat,
-		"删除文件或者目录",
-		"\r\n"
-	},
-#if 0	
-	{
-		"mount",
+    {
+        "pwd",
+        SH_PrintWorkingPath,
+        "显示用户当前工作路径",
+        "\r\n"
+    },
+    {
+        "mkdir",
+        SH_MkDir,
+        "创建目录",
+        "\r\n"
+    },
+    {
+        "ls",
+        SH_List,
+        "显示目录项",
+        "\r\n"
+    },
+    {
+        "cd",
+        SH_ChangeDir,
+        "更改当前工作路径",
+        "\r\n"
+    },
+    {
+        "rm",
+        SH_Remove,
+        "删除文件或者目录",
+        "\r\n"
+    },
+    {
+        "cat",
+        SH_Cat,
+        "读文件并打印",
+        "\r\n"
+    },
+#if 0
+    {
+        "mount",
         Sh_Mount,
         "挂载文件系统",
         "todo: "
-	},
-	{
+    },
+    {
         "fstell",
         SH_FsTell,
         "已安装文件系统信息",
         "todo:"
     },
-#endif	
-};	
+#endif
+};
 
 //-----------------------------------------------------------------------------
 //功能:
@@ -145,153 +145,153 @@ const char *s_cDIR = "目录";
 const char *s_cUNKNOW = "未知";
 static const char *PropertyToStr(u32 Mode)
 {
-	if(((S_ISREG(Mode)) && (S_ISLNK(Mode))) ||
-		((S_ISREG(Mode)) && (S_ISDIR(Mode))) ||
-		((S_ISDIR(Mode)) && (S_ISLNK(Mode))))
-		return (s_cUNKNOW);
+    if(((S_ISREG(Mode)) && (S_ISLNK(Mode))) ||
+        ((S_ISREG(Mode)) && (S_ISDIR(Mode))) ||
+        ((S_ISDIR(Mode)) && (S_ISLNK(Mode))))
+        return (s_cUNKNOW);
 
-	if(S_ISREG(Mode))
-		return (s_cREG);
+    if(S_ISREG(Mode))
+        return (s_cREG);
 
-	if(S_ISLNK(Mode))
-		return (s_cLINK);
+    if(S_ISLNK(Mode))
+        return (s_cLINK);
 
-	if(S_ISDIR(Mode))
-		return (s_cDIR);
+    if(S_ISDIR(Mode))
+        return (s_cDIR);
 
-	return (s_cUNKNOW);
+    return (s_cUNKNOW);
 }
 
 //-----------------------------------------------------------------------------
 //功能: 文件系统格式化
-//参数: 
-//返回: 
+//参数:
+//返回:
 //备注: todo: 逻辑待完善
 //-----------------------------------------------------------------------------
 static bool_t SH_Format(const char *Param)
 {
-	if(NULL == Param)
-	    return (FALSE);
-	
-	printf("文件系统格式化 ----");
-	if(Format(Param))
-		printf("失败!");
-	else
-		printf("成功!");
+    if(NULL == Param)
+        return (FALSE);
 
-	printf("\r\n");
-	return (TRUE);	
+    printf("文件系统格式化 ----");
+    if(Format(Param))
+        printf("失败!");
+    else
+        printf("成功!");
+
+    printf("\r\n");
+    return (TRUE);
 }
 //-----------------------------------------------------------------------------
 //功能: 显示用户当前工作路径
-//参数: 
-//返回: 
+//参数:
+//返回:
 //备注:
 //-----------------------------------------------------------------------------
 static bool_t SH_PrintWorkingPath(const char *Param)
 {
-	s32 Len;
-	bool_t Ret;
-	char *PWD;
-	
-	Len = CurWorkPathLen();
-	if(0 == Len)
-	{
-		printf("用户当前工作路径未设置\r\n");
-		return (TRUE);
-	}	
-	
-	PWD = malloc(Len);
-	if(NULL == PWD)
-	{
-		return (FALSE);
-	}
-	
-	if(0 == CurWorkPath(PWD, Len))
-	{
-		printf("用户当前工作路径：\"%s\"", PWD);
-		Ret = TRUE;
-	}
-	else
-	{
-		printf("未知错误\r\n");
-		Ret = TRUE;
-	}
-	
-	free(PWD);
-	return (Ret);
-	
+    s32 Len;
+    bool_t Ret;
+    char *PWD;
+
+    Len = CurWorkPathLen();
+    if(0 == Len)
+    {
+        printf("用户当前工作路径未设置\r\n");
+        return (TRUE);
+    }
+
+    PWD = malloc(Len);
+    if(NULL == PWD)
+    {
+        return (FALSE);
+    }
+
+    if(0 == CurWorkPath(PWD, Len))
+    {
+        printf("用户当前工作路径：\"%s\"", PWD);
+        Ret = TRUE;
+    }
+    else
+    {
+        printf("未知错误\r\n");
+        Ret = TRUE;
+    }
+
+    free(PWD);
+    return (Ret);
+
 }
 //-----------------------------------------------------------------------------
 //功能: 创建目录
 //参数: -p -- 试图创建路径中所有不存在的目录项
-//返回: 
+//返回:
 //备注:
 //-----------------------------------------------------------------------------
 static bool_t  SH_MkDir(const char *Param)
 {
-	char *Temp, *SlashPos, *Path, *FullPath;
-	int Fd;
-	u32 PathLen;
-	u8 Changed;
-	u8 JustLast = 0;
-	
-	if(NULL == Param)
-		return (FALSE);
-	
-	Temp = strstr(Param, "-p ");
-	if(Temp)
-		Path = (char*)Temp + 3; // 去除"-p"参数项
-	else
-	{
-		Path = (char*)Param;
-		JustLast = 1;
-	}
-	
-	while(*Path == ' ')
-		Path = Path + 1; // 去除多余的空格符,对于文件系统路径而言,是不可能以空格开始的
+    char *Temp, *SlashPos, *Path, *FullPath;
+    int Fd;
+    u32 PathLen;
+    u8 Changed;
+    u8 JustLast = 0;
 
-	FullPath = malloc(strlen(Path)+1);
-	strcpy(FullPath, Path);
-	if(JustLast)
-	{	
-		Fd = open(FullPath, O_DIRECTORY | O_CREAT | O_EXCL |O_RDWR, 0);
-		if(-1 != Fd)
-			close(Fd);
-	}
-	else
-	{
-		// 获取路径的每个节点,例如/aa/bb/cc的路径，分别会获取/aa、/aa/bb、/aa//bb/cc并试图创建
-		SlashPos = FullPath;
-		do
-		{
-			while(*SlashPos == '/')
-				SlashPos = SlashPos + 1; // 去除多余'/'
+    if(NULL == Param)
+        return (FALSE);
 
-			while((*SlashPos != '/') && (*SlashPos != '\0'))
-				SlashPos = SlashPos + 1; // 获取一个segment
+    Temp = strstr(Param, "-p ");
+    if(Temp)
+        Path = (char*)Temp + 3; // 去除"-p"参数项
+    else
+    {
+        Path = (char*)Param;
+        JustLast = 1;
+    }
 
-			PathLen = SlashPos - FullPath;
-			if('/' == FullPath[PathLen])
-			{
-				FullPath[PathLen] = '\0';
-				Changed = 1;
-			}
+    while(*Path == ' ')
+        Path = Path + 1; // 去除多余的空格符,对于文件系统路径而言,是不可能以空格开始的
 
-			Fd = open(FullPath, O_DIRECTORY | O_CREAT | O_EXCL | O_RDWR, 0);
-			if(-1 != Fd)
-				close(Fd);
+    FullPath = malloc(strlen(Path)+1);
+    strcpy(FullPath, Path);
+    if(JustLast)
+    {
+        Fd = open(FullPath, O_DIRECTORY | O_CREAT | O_EXCL |O_RDWR, 0);
+        if(-1 != Fd)
+            close(Fd);
+    }
+    else
+    {
+        // 获取路径的每个节点,例如/aa/bb/cc的路径，分别会获取/aa、/aa/bb、/aa//bb/cc并试图创建
+        SlashPos = FullPath;
+        do
+        {
+            while(*SlashPos == '/')
+                SlashPos = SlashPos + 1; // 去除多余'/'
 
-			if(Changed)
-				FullPath[PathLen] = '/';
-		}while(*SlashPos != '\0');
-	}
-		
-	if(-1 == Fd)
-		printf("创建失败或目录已存在\r\n");
+            while((*SlashPos != '/') && (*SlashPos != '\0'))
+                SlashPos = SlashPos + 1; // 获取一个segment
 
-	free(FullPath);
-	return (TRUE);
+            PathLen = SlashPos - FullPath;
+            if('/' == FullPath[PathLen])
+            {
+                FullPath[PathLen] = '\0';
+                Changed = 1;
+            }
+
+            Fd = open(FullPath, O_DIRECTORY | O_CREAT | O_EXCL | O_RDWR, 0);
+            if(-1 != Fd)
+                close(Fd);
+
+            if(Changed)
+                FullPath[PathLen] = '/';
+        }while(*SlashPos != '\0');
+    }
+
+    if(-1 == Fd)
+        printf("创建失败或目录已存在\r\n");
+
+    free(FullPath);
+    return (TRUE);
 }
 //-----------------------------------------------------------------------------
 //功能: 显示目录项
@@ -301,69 +301,69 @@ static bool_t  SH_MkDir(const char *Param)
 //-----------------------------------------------------------------------------
 static bool_t SH_List(const char *Param)
 {
-	DIR *Dir;
-	s32 Len;
-	char *CWP;
-	struct dirent *DirentInfo;
-	struct stat DirentStat;
-	u8 Flags = 0;
+    DIR *Dir;
+    s32 Len;
+    char *CWP;
+    struct dirent *DirentInfo;
+    struct stat DirentStat;
+    u8 Flags = 0;
 
- 	if(Param && strstr(Param, "-l"))
-		Flags = 1; // 显示完整信息
+    if(Param && strstr(Param, "-l"))
+        Flags = 1; // 显示完整信息
 
-	Len = CurWorkPathLen();
-	if(0 == Len)
-	{
-		printf("用户当前工作路径未设置\r\n");
-		return (TRUE);
-	}
+    Len = CurWorkPathLen();
+    if(0 == Len)
+    {
+        printf("用户当前工作路径未设置\r\n");
+        return (TRUE);
+    }
 
-	CWP = malloc(257);
-	if(NULL == CWP)
-	{
-		printf("内存不足\r\n");
-		return (TRUE);
-	}
+    CWP = malloc(257);
+    if(NULL == CWP)
+    {
+        printf("内存不足\r\n");
+        return (TRUE);
+    }
 
-	if(0 == CurWorkPath(CWP, Len))
-	{
-		Dir = opendir(CWP);
-		if(Dir)
-		{
-			CWP[Len-1] = '/';
-			while((DirentInfo = readdir(Dir)) != NULL)
-			{
-				if(1 == Flags)
-				{
-					strcpy(CWP+Len, DirentInfo->d_name);
-					if(stat(CWP, &DirentStat))
-						printf("%s -- 该目录项无法解析\r\n", DirentInfo->d_name);
-					else
-					{
-						printf("%s", PropertyToStr(DirentStat.st_mode));
-						printf("\t");
-						printf("%d", (u32)(DirentStat.st_size));// todo: 64位逻辑还在处理中
-						printf("\t");
-						printf("%s", DirentInfo->d_name);
-						printf("\r\n");
-					}
-				}
-				else
-				{
-					printf("%s", DirentInfo->d_name);
-					printf("    ");
-				}
-			}
+    if(0 == CurWorkPath(CWP, Len))
+    {
+        Dir = opendir(CWP);
+        if(Dir)
+        {
+            CWP[Len-1] = '/';
+            while((DirentInfo = readdir(Dir)) != NULL)
+            {
+                if(1 == Flags)
+                {
+                    strcpy(CWP+Len, DirentInfo->d_name);
+                    if(stat(CWP, &DirentStat))
+                        printf("%s -- 该目录项无法解析\r\n", DirentInfo->d_name);
+                    else
+                    {
+                        printf("%s", PropertyToStr(DirentStat.st_mode));
+                        printf("\t");
+                        printf("%d", (u32)(DirentStat.st_size));// todo: 64位逻辑还在处理中
+                        printf("\t");
+                        printf("%s", DirentInfo->d_name);
+                        printf("\r\n");
+                    }
+                }
+                else
+                {
+                    printf("%s", DirentInfo->d_name);
+                    printf("    ");
+                }
+            }
 
-			if(0 == Flags)
-				printf("\r\n");
+            if(0 == Flags)
+                printf("\r\n");
 
-			closedir(Dir);
-		}
-	}
+            closedir(Dir);
+        }
+    }
 
-	free(CWP);
-	return (TRUE);
+    free(CWP);
+    return (TRUE);
 }
 //-----------------------------------------------------------------------------
 //功能: 更改当前工作路径
@@ -373,28 +373,28 @@ static bool_t SH_List(const char *Param)
 //-----------------------------------------------------------------------------
 static bool_t SH_ChangeDir(const char *Param)
 {
-	s32 Ret;
-	char *Path = (char *)Param;
+    s32 Ret;
+    char *Path = (char *)Param;
 
-	if(NULL == Path)
-		return (FALSE);
+    if(NULL == Path)
+        return (FALSE);
 
-	while(*Path == ' ')
-		Path = Path + 1; // 去除多余的空格符
+    while(*Path == ' ')
+        Path = Path + 1; // 去除多余的空格符
 
-	Ret = SetPWD(Path);
-	if(Ret)
-	{
-		printf("错误：当前工作路径变更失败");
-		if(-1 == Ret)
-			printf("-- 目录不存在或无法进入");
-		else if(-2 == Ret)
-			printf("-- 目录无法进入");
-		printf("\r\n");
-		return (TRUE);
-	}
+    Ret = SetPWD(Path);
+    if(Ret)
+    {
+        printf("错误：当前工作路径变更失败");
+        if(-1 == Ret)
+            printf("-- 目录不存在或无法进入");
+        else if(-2 == Ret)
+            printf("-- 目录无法进入");
+        printf("\r\n");
+        return (TRUE);
+    }
 
-	return (TRUE);
+    return (TRUE);
 }
 
 //-----------------------------------------------------------------------------
@@ -405,8 +405,8 @@ static bool_t SH_ChangeDir(const char *Param)
 //-----------------------------------------------------------------------------
 bool_t Sh_PrintWorkPath(void)
 {
-	printf("%s", g_pWokingPath);
-	return (TRUE);
+    printf("%s", g_pWokingPath);
+    return (TRUE);
 }
 //-----------------------------------------------------------------------------
 //功能: 删除文件或目录
@@ -417,80 +417,80 @@ bool_t Sh_PrintWorkPath(void)
 static bool_t SH_Remove(const char *Param)
 {
 
-	u16 Offset;
-	char *PathParam, *Temp, *Path;
-	s32 Ret = 0;
-	u8 RemoveAll = 0;
+    u16 Offset;
+    char *PathParam, *Temp, *Path;
+    s32 Ret = 0;
+    u8 RemoveAll = 0;
 
-	PathParam = (char*)Param;
-	if(NULL == PathParam)
-		return (FALSE);
+    PathParam = (char*)Param;
+    if(NULL == PathParam)
+        return (FALSE);
 
-	Temp = strstr(PathParam, "-r");
-	if(Temp)
-	{
-		PathParam = (char*)Temp + 2; // 去除"-p"参数项
-		RemoveAll = 1;
-	}
+    Temp = strstr(PathParam, "-r");
+    if(Temp)
+    {
+        PathParam = (char*)Temp + 2; // 去除"-p"参数项
+        RemoveAll = 1;
+    }
 
-	while(*PathParam == ' ')
-		PathParam = PathParam + 1; // 去除多余的空格符
+    while(*PathParam == ' ')
+        PathParam = PathParam + 1; // 去除多余的空格符
 
-	Path = malloc(257);
-	if(NULL == Path)
-	{
-		printf("内存不足\r\n");
-		return (TRUE);
-	}
+    Path = malloc(257);
+    if(NULL == Path)
+    {
+        printf("内存不足\r\n");
+        return (TRUE);
+    }
 
-	memset(Path, 0, 257);
-	Offset = strlen(PathParam);
-	if(Offset < 257)
-	{
-		memcpy(Path, PathParam, Offset);
-		if((RemoveAll) && ('/' !=Path[Offset-1]))
-			Path[Offset++] = '/';
-		Path[Offset] = '\0';
+    memset(Path, 0, 257);
+    Offset = strlen(PathParam);
+    if(Offset < 257)
+    {
+        memcpy(Path, PathParam, Offset);
+        if((RemoveAll) && ('/' !=Path[Offset-1]))
+            Path[Offset++] = '/';
+        Path[Offset] = '\0';
 
-		if(RemoveAll)
-		{
-			struct stat Info;
-			DIR *Dir;
-			struct dirent *Dirent;
+        if(RemoveAll)
+        {
+            struct stat Info;
+            DIR *Dir;
+            struct dirent *Dirent;
 
-			Ret = stat(Path, &Info);
-			if(Ret)
-				printf("格式错误\r\n");
+            Ret = stat(Path, &Info);
+            if(Ret)
+                printf("格式错误\r\n");
 
-			if((!Ret) && S_ISDIR(Info.st_mode))
-			{
-				Dir = opendir(Path);
-				if(Dir)
-				{
-					while((Dirent = readdir(Dir)) != NULL)
-					{
-						strcpy(Path+Offset, Dirent->d_name);
-						Ret = remove(Path);
-						if(Ret)
-						{
-							printf("文件\"%s\"无法删除(文件使用中)\r\n", Dirent->d_name);
-							break;
-						}
-					}
-					closedir(Dir);
-				}
-			}
-		}
+            if((!Ret) && S_ISDIR(Info.st_mode))
+            {
+                Dir = opendir(Path);
+                if(Dir)
+                {
+                    while((Dirent = readdir(Dir)) != NULL)
+                    {
+                        strcpy(Path+Offset, Dirent->d_name);
+                        Ret = remove(Path);
+                        if(Ret)
+                        {
+                            printf("文件\"%s\"无法删除(文件使用中)\r\n", Dirent->d_name);
+                            break;
+                        }
+                    }
+                    closedir(Dir);
+                }
+            }
+        }
 
-		if(!Ret)
-		{
-			Ret = remove(Path);
-			if(Ret)
-				printf("文件无法删除(文件使用中)\r\n");
-		}
-	}
-	free(Path);
-	return (TRUE);
+        if(!Ret)
+        {
+            Ret = remove(Path);
+            if(Ret)
+                printf("文件无法删除(文件使用中)\r\n");
+        }
+    }
+    free(Path);
+    return (TRUE);
 }
 
 //-----------------------------------------------------------------------------
@@ -501,36 +501,36 @@ static bool_t SH_Remove(const char *Param)
 //-----------------------------------------------------------------------------
 static bool_t SH_Cat(const char *Param)
 {
-	char *Path = (char *)Param;
-	int Fd;
-	char Buf[64];
-	s32 Ret;
-	u8 i;
+    char *Path = (char *)Param;
+    int Fd;
+    char Buf[64];
+    s32 Ret;
+    u8 i;
 
-	if(NULL == Path)
-		return (FALSE);
+    if(NULL == Path)
+        return (FALSE);
 
-	while(*Path == ' ')
-		Path = Path + 1; // 去除多余的空格符,对于文件系统路径而言,是不可能以空格开始的
+    while(*Path == ' ')
+        Path = Path + 1; // 去除多余的空格符,对于文件系统路径而言,是不可能以空格开始的
 
 
-	Fd = open(Param, O_RDONLY, 0);
-	if(NULL == Fd)
-	{
-		printf("文件无法打开");
-		return (FALSE);
-	}
+    Fd = open(Param, O_RDONLY, 0);
+    if(NULL == Fd)
+    {
+        printf("文件无法打开");
+        return (FALSE);
+    }
 
-	printf("16进制显示模式:\r\n");
-	do{
-		Ret = read(Fd, Buf, 64);
-		for(i = 0; i < Ret; i++)
-			printf("%02x", Buf[i]);
-	}while(Ret == 64);
+    printf("16进制显示模式:\r\n");
+    do{
+        Ret = read(Fd, Buf, 64);
+        for(i = 0; i < Ret; i++)
+            printf("%02x", Buf[i]);
+    }while(Ret == 64);
 
-	close(Fd);
+    close(Fd);
 
-	return (TRUE);
+    return (TRUE);
 }
 
 //-----------------------------------------------------------------------------
@@ -541,22 +541,22 @@ static bool_t SH_Cat(const char *Param)
 //-----------------------------------------------------------------------------
 void FsShellInstall(void)
 {
-	u32 CmdNums;
+    u32 CmdNums;
 
-	CmdNums = sizeof(FsCmdTable) / sizeof(struct ShellCmdTab);
+    CmdNums = sizeof(FsCmdTable) / sizeof(struct ShellCmdTab);
 
-	s_pCmdRsc = malloc(CmdNums * sizeof(*s_pCmdRsc));
-	if(NULL == s_pCmdRsc)
-		return ;
+    s_pCmdRsc = malloc(CmdNums * sizeof(*s_pCmdRsc));
+    if(NULL == s_pCmdRsc)
+        return ;
 
-	Sh_InstallCmd(FsCmdTable, s_pCmdRsc, CmdNums);
+    Sh_InstallCmd(FsCmdTable, s_pCmdRsc, CmdNums);
 
-	g_pWokingPath = malloc(257);
-	if(NULL == g_pWokingPath)
-		return ;
+    g_pWokingPath = malloc(257);
+    if(NULL == g_pWokingPath)
+        return ;
 
-	memset(g_pWokingPath, '\0', 257);
-	g_pWokingPath[0] = '/';
+    memset(g_pWokingPath, '\0', 257);
+    g_pWokingPath[0] = '/';
 
-	Sh_PrintWorkPathSet(); // 开启当前工作路径
+    Sh_PrintWorkPathSet(); // 开启当前工作路径
 }

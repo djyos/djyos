@@ -98,7 +98,7 @@ bool_t ServiceInit(void)
     }
     if((gUseTftp)&&(false == ServiceTftpInit(0)))
     {
-        printk("###err: service dns failed\n\r");
+        printk("###err: service tftp failed\n\r");
         result = false;
     }
     return result;

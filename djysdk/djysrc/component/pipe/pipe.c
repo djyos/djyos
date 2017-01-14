@@ -128,17 +128,17 @@ struct DjyDevice * Pipe_Create(u8* buf,u32 size,bool_t whole,
     if(pipe == NULL)
         goto exit_from_malloc_PCB;
     //初始处于无信号状态，须读操作释放才处于有信号状态
-    pipe->pipe_write_semp = Lock_SempCreate(1,0,CN_SEMP_BLOCK_FIFO,name);
+    pipe->pipe_write_semp = Lock_SempCreate(1,0,CN_BLOCK_FIFO,name);
     if(pipe->pipe_write_semp == NULL)
         goto exit_from_pipe_write_semp;
     //初始处于无信号状态，须写操作释放才处于有信号状态
-    pipe->pipe_read_semp = Lock_SempCreate(1,0,CN_SEMP_BLOCK_FIFO,name);
+    pipe->pipe_read_semp = Lock_SempCreate(1,0,CN_BLOCK_FIFO,name);
     if(pipe->pipe_read_semp == NULL)
         goto exit_from_pipe_read_semp;
-    read_dev_semp = Lock_SempCreate(1,1,CN_SEMP_BLOCK_FIFO,NULL);
+    read_dev_semp = Lock_SempCreate(1,1,CN_BLOCK_FIFO,NULL);
     if(read_dev_semp == NULL)
         goto exit_from_dev_read_semp;
-    write_dev_semp = Lock_SempCreate(1,1,CN_SEMP_BLOCK_FIFO,NULL);
+    write_dev_semp = Lock_SempCreate(1,1,CN_BLOCK_FIFO,NULL);
     if(write_dev_semp == NULL)
         goto exit_from_dev_write_semp;
     pipe_device = Driver_DevAddDevice(s_pPipeParentDevice,

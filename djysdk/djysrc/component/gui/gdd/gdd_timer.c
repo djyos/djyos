@@ -68,11 +68,11 @@ static  list_t  list_system_timer;
 //参数：无
 //返回：定时器内存指针
 //------------------------------------------------------------------------------
-static  TIMER*  TMR_Alloc(void)
+static  struct WinTimer*  TMR_Alloc(void)
 {
-    TIMER *tmr;
+    struct WinTimer *tmr;
 
-    tmr =malloc(sizeof(TIMER));
+    tmr =malloc(sizeof(struct WinTimer));
     return tmr;
 }
 
@@ -81,7 +81,7 @@ static  TIMER*  TMR_Alloc(void)
 //参数：定时器内存指针
 //返回：无
 //------------------------------------------------------------------------------
-static  void    TMR_Free(TIMER *ptmr)
+static  void    TMR_Free(struct WinTimer *ptmr)
 {
     free(ptmr);
 }
@@ -92,7 +92,7 @@ static  void    TMR_Free(TIMER *ptmr)
 //参数：定时器对象指针
 //返回：成功:TRUE; 失败:FLASE;
 //------------------------------------------------------------------------------
-bool_t    TMR_Lock(TIMER *ptmr)
+bool_t    TMR_Lock(struct WinTimer *ptmr)
 {
     if(NULL == ptmr)
         return FALSE;
@@ -108,7 +108,7 @@ bool_t    TMR_Lock(TIMER *ptmr)
 //参数：定时器对象指针
 //返回：无
 //------------------------------------------------------------------------------
-void    TMR_Unlock(TIMER *ptmr)
+void    TMR_Unlock(struct WinTimer *ptmr)
 {
     GDD_Unlock();
 }
@@ -131,9 +131,9 @@ void    GDD_TimerInit(void)
 //      IntervalMS: 定时间隔时间(毫秒数).
 //返回：定时器对象指针
 //------------------------------------------------------------------------------
-TIMER*  GDD_CreateTimer(HWND hwnd,u16 Id,u32 IntervalMS,u16 Flag)
+struct WinTimer*  GDD_CreateTimer(HWND hwnd,u16 Id,u32 IntervalMS,u16 Flag)
 {
-    TIMER *ptmr=NULL;
+    struct WinTimer *ptmr=NULL;
 
     if(HWND_Lock(hwnd))
     {
@@ -168,10 +168,10 @@ TIMER*  GDD_CreateTimer(HWND hwnd,u16 Id,u32 IntervalMS,u16 Flag)
 //      Id: 要查找的定时器Id
 //返回：成功返回定时器对象指定,否则返回NULL
 //------------------------------------------------------------------------------
-TIMER*  GDD_FindTimer(HWND hwnd,u16 Id)
+struct WinTimer*  GDD_FindTimer(HWND hwnd,u16 Id)
 {
     list_t *lst,*n;
-    TIMER *ptmr=NULL;
+    struct WinTimer *ptmr=NULL;
 
     if(GDD_Lock())
     {
@@ -181,7 +181,7 @@ TIMER*  GDD_FindTimer(HWND hwnd,u16 Id)
             n   =lst->next;
             while(n!=lst)
             {
-                ptmr =(TIMER*)dListEntry(n,TIMER,node_hwnd);
+                ptmr =(struct WinTimer*)dListEntry(n,struct WinTimer,node_hwnd);
                 if(NULL!=ptmr)
                 {
                     if(ptmr->Id==Id)
@@ -205,7 +205,7 @@ TIMER*  GDD_FindTimer(HWND hwnd,u16 Id)
 //      IntervalMS: 定时间隔时间(毫秒数).
 //返回：TRUE:成功; FALSE:失败;
 //------------------------------------------------------------------------------
-bool_t    GDD_ResetTimer(TIMER *ptmr,u32 IntervalMS,u32 Flag)
+bool_t    GDD_ResetTimer(struct WinTimer *ptmr,u32 IntervalMS,u32 Flag)
 {
     bool_t res=FALSE;
 
@@ -233,7 +233,7 @@ bool_t    GDD_ResetTimer(TIMER *ptmr,u32 IntervalMS,u32 Flag)
 //参数：ptmr: 定时器对象.
 //返回：无
 //------------------------------------------------------------------------------
-static void __DeleteTimer(TIMER*ptmr)
+static void __DeleteTimer(struct WinTimer*ptmr)
 {
 
     dListRemove(&ptmr->node_hwnd);
@@ -249,7 +249,7 @@ static void __DeleteTimer(TIMER*ptmr)
 //参数：ptmr: 定时器对象.
 //返回：TRUE:成功; FALSE:失败;
 //------------------------------------------------------------------------------
-bool_t    GDD_DeleteTimer(TIMER *ptmr)
+bool_t    GDD_DeleteTimer(struct WinTimer *ptmr)
 {
     HWND hwnd;
 
@@ -276,7 +276,7 @@ bool_t    GDD_DeleteTimer(TIMER *ptmr)
 void __RemoveWindowTimer(HWND hwnd)
 {
     list_t *lst,*n,*next;
-    TIMER *ptmr;
+    struct WinTimer *ptmr;
 
     lst =&hwnd->list_timer;
     n   =lst->next;
@@ -284,7 +284,7 @@ void __RemoveWindowTimer(HWND hwnd)
     while(!dListIsEmpty(n))
     {
         next =n->next;
-        ptmr =(TIMER*)dListEntry(n,TIMER,node_hwnd);
+        ptmr =(struct WinTimer*)dListEntry(n,struct WinTimer,node_hwnd);
         if(NULL!=ptmr)
         {
             if(TMR_Lock(ptmr))
@@ -304,7 +304,7 @@ void __RemoveWindowTimer(HWND hwnd)
 //     tick_time_ms: 当前tick时间,这个必须由GUI_GetTickMS提供.
 //返回：TRUE:定时器超时; FALSE:定时器未超时.
 //------------------------------------------------------------------------------
-bool_t    _TimerHandler(TIMER *ptmr,u32 tick_time_ms)
+bool_t    __TimerHandler(struct WinTimer *ptmr,u32 tick_time_ms)
 {
     u32 time;
 
@@ -347,7 +347,7 @@ bool_t    _TimerHandler(TIMER *ptmr,u32 tick_time_ms)
 void    GDD_TimerExecu(u32 tick_time_ms)
 {
     list_t *lst,*n;
-    TIMER *ptmr;
+    struct WinTimer *ptmr;
 
     if(GDD_Lock())
     {
@@ -355,10 +355,10 @@ void    GDD_TimerExecu(u32 tick_time_ms)
         n =lst->next;
         while(n!=lst)
         {
-            ptmr =(TIMER*)dListEntry(n,TIMER,node_sys);
+            ptmr =(struct WinTimer*)dListEntry(n,struct WinTimer,node_sys);
             if(TMR_Lock(ptmr))
             {
-                if(_TimerHandler(ptmr,tick_time_ms))
+                if(__TimerHandler(ptmr,tick_time_ms))
                 {
                     __PostTimerMessage(ptmr);
                 }

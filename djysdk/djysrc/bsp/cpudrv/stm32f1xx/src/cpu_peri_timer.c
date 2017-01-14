@@ -617,7 +617,7 @@ bool_t __STM32Timer_GetState(struct STM32TimerHandle   *timer, u32 *timerflag)
 // หตร๗    :
 // =============================================================================
 bool_t __STM32Timer_Ctrl(ptu32_t timerhandle, \
-                         enum TimerCmdCode ctrlcmd, \
+                         enum HardTimerCmdCode ctrlcmd, \
                          ptu32_t inoutpara)
 {
     bool_t result = false;
@@ -706,11 +706,11 @@ void ModuleInstall_HardTimer(void)
     }
 
     STM32timer.chipname = "STM32TIMER";
-    STM32timer.TimerHardAlloc = __STM32Timer_Alloc;
-    STM32timer.TimerHardFree = __STM32Timer_Free;
-    STM32timer.TimerHardCtrl = __STM32Timer_Ctrl;
-    STM32timer.TimerHardGetFreq = __STM32Timer_GetFreq;
-    TimerHard_RegisterChip(&STM32timer);
+    STM32timer.HardTimerAlloc = __STM32Timer_Alloc;
+    STM32timer.HardTimerFree = __STM32Timer_Free;
+    STM32timer.HardTimerCtrl = __STM32Timer_Ctrl;
+    STM32timer.HardTimerGetFreq = __STM32Timer_GetFreq;
+    HardTimer_RegisterChip(&STM32timer);
 
     return ;
 }

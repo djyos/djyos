@@ -477,7 +477,7 @@ void __M_StaticFreeHeap(void * pl_mem,struct HeapCB *Heap)
     atom_m = Int_LowAtomStart();
     while(Cession != NULL)
     {
-        if((pl_mem >=Cession->static_bottom) && (pl_mem <= Cession->heap_bottom))
+        if((pl_mem >=(void*)Cession->static_bottom) && (pl_mem <= (void*)Cession->heap_bottom))
         {
             pStaticList = (list_t*)pl_mem;
             pStaticList--;
@@ -712,10 +712,10 @@ ptu32_t __M_StaticCheckSize(void * pl_mem)
     atom_m = Int_LowAtomStart();
     do
     {
-    	Cession = Work->Cession;
+        Cession = Work->Cession;
         while(Cession != NULL)
         {
-            if((pl_mem >=Cession->static_bottom) && (pl_mem <= Cession->heap_bottom))
+            if((pl_mem >=(void*)Cession->static_bottom) && (pl_mem <= (void*)Cession->heap_bottom))
             {
                 LocMem = (list_t*)pl_mem;
                 LocMem--;
@@ -730,11 +730,13 @@ ptu32_t __M_StaticCheckSize(void * pl_mem)
             }
             Cession = Cession->Next;
         }
-    	Work = Work->NextHeap;
+        if(result != 0)
+            break;
+        Work = Work->NextHeap;
     }while(Work != tg_pHeapList);
 
     if(result != 0)
-    	result -= sizeof(list_t);
+        result -= sizeof(list_t);
     Int_LowAtomEnd(atom_m);
     return result;
 }

@@ -44,6 +44,9 @@
 //-----------------------------------------------------------------------------
 
 #include <stdint.h>
+#include <stddef.h>
+
+const char *gYmodemDevName    = NULL;            //NULL表示stdin
 
 const u32 gYmodemBufPkgNum    = 32;					//缓存ymodem包数量
 

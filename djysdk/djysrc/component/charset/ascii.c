@@ -67,7 +67,7 @@
 #include "gkernel.h"
 s32 AsciiMbToUcs4(u32* pwc, const char* s, s32 n);
 s32 AsciiMbsToUcs4s(u32* pwcs, const char* mbs, s32 n);
-s32 AsciiUcs4ToMb(char* s, s32 wc);
+s32 AsciiUcs4ToMb(char* s, u32 wc);
 s32 AsciiUcs4sToMbs(char* mbs, const u32* pwcs, s32 n);
 
 // ×¢ÊÍ²ÎÕÕ charset.h-> struct Charset -> GetOneMb
@@ -137,7 +137,7 @@ s32 AsciiMbsToUcs4s(u32* pwcs, const char* mbs, s32 n)
 }
 
 // ×¢ÊÍ²ÎÕÕ charset.h-> struct Charset -> Ucs4ToMb
-s32 AsciiUcs4ToMb(char* mbs, s32 wc)
+s32 AsciiUcs4ToMb(char* mbs, u32 wc)
 {
 
     if(wc < 0x80){

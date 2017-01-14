@@ -864,7 +864,7 @@ static bool_t GMAC_RcvTask(tagNetDev *NetCard)
         if(eventID != CN_EVENT_ID_INVALID)
         {
             result = true;
-            Lock_SempCreate_s(&GMAC_RcvSemp,1,0,CN_SEMP_BLOCK_FIFO,NULL);
+            Lock_SempCreate_s(&GMAC_RcvSemp,1,0,CN_BLOCK_FIFO,NULL);
         }
         else
         {
@@ -1166,7 +1166,7 @@ bool_t ModuleInstall_GMAC(ptu32_t para)
     __GMAC_IntInit();                               // INT SYS≥ı ºªØ
 
     sGmacIsInited = true;
-    Lock_SempCreate_s(&GMAC_RcvSemp,1,0,CN_SEMP_BLOCK_FIFO,NULL);
+    Lock_SempCreate_s(&GMAC_RcvSemp,1,0,CN_BLOCK_FIFO,NULL);
     return result;
 }
 

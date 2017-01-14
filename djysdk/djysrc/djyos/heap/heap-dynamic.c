@@ -157,12 +157,6 @@
 #define CN_LOW_30BIT_1     (0x3fffffff)
 #define CN_LOW_31BIT_1     (0x7fffffff)
 
-#define CN_MEM_DOUBLE_PAGE_LOCAL    0xffff
-#define CN_MEM_MANY_PAGE_LOCAL      0xfffe
-#define CN_MEM_SINGLE_PAGE_GLOBAL   0xfffd
-#define CN_MEM_MANY_PAGE_GLOBAL     0xfffc
-#define CN_MEM_FREE_PAGE            0xfffb
-
 //字节数据前导0个数表,256字节,用于快速查寻首个非0位的位置
 u8 const cn_leading_zero[]=
 {
@@ -290,7 +284,7 @@ void *__M_MallocBlock(ufast_t grade,struct HeapCession *Cession);
 extern void __Djy_EventReady(struct EventECB *event_ready);
 extern void __Djy_CutReadyEvent(struct EventECB *event);
 extern void __Djy_ResumeDelay(struct EventECB *delay_event);
-extern void ___Djy_AddToDelay(u32 u32l_uS);
+extern void __Djy_AddToDelay(u32 u32l_uS);
 extern void __Djy_CutEventFromEvttMarked(struct EventECB *event);
 
 //----查找堆-------------------------------------------------------------------
@@ -764,8 +758,8 @@ ufast_t __M_GetFreeGrade(ptu32_t size,struct HeapCB *Heap,
 //      堆有空闲内存,就返回true.
 //参数：size，需要申请的内存尺寸
 //      Heap，目标heap
-//      timeout，超时设置,单位是微秒，cn_timeout_forever=无限等待，
-//      非0值将被向上调整为cn_tick_us的整数倍
+//      timeout，超时设置,单位是微秒，CN_TIMEOUT_FOREVER=无限等待，
+//      非0值将被向上调整为CN_CFG_TICK_US的整数倍
 //返回: true = 有空闲内存供分配，false = 无内存可分配
 //备注: 本函数由操作系统调用,用户不能调用.
 //更新记录:
@@ -836,7 +830,7 @@ bool_t __M_CheckMemory(ptu32_t size,struct HeapCB *Heap,u32 timeout)
                 g_ptEventRunning->event_status= CN_STS_WAIT_MEMORY
                                                 + CN_STS_SYNC_TIMEOUT;
                 u32l_rest_time = timeout-((u32)(u32)DjyGetSysTime() - u32l_start_time);
-                ___Djy_AddToDelay(timeout-u32l_rest_time);
+                __Djy_AddToDelay(timeout-u32l_rest_time);
             }else
             {
                 g_ptEventRunning->event_status = CN_STS_WAIT_MEMORY;
@@ -1136,8 +1130,8 @@ ptu32_t Heap_DynamicModuleInit(ptu32_t para)
 //      5.如果内存不足，则把事件挂在tg_mem_global.event_wait下,并引发事件切换.
 //参数：size,欲分配的内存块尺寸
 //      Heap, 目标堆,如果这是个专用堆,则限定从这个堆分配,否则从所有通用堆分配
-//      timeout，超时设置,单位是微秒，cn_timeout_forever=无限等待，0则立即按
-//      超时返回。非0值将被向上调整为cn_tick_us的整数倍
+//      timeout，超时设置,单位是微秒，CN_TIMEOUT_FOREVER=无限等待，0则立即按
+//      超时返回。非0值将被向上调整为CN_CFG_TICK_US的整数倍
 //返回：分配的内存指针，NULL表示没有内存可以分配
 //备注: 如果在多事件调度启动前调用本函数，记录拥有者时全部算在系统服务事件中。
 //      系统服务事件永不结束，故等同于全局分配。
@@ -1156,7 +1150,7 @@ void *__M_MallocLcHeap(ptu32_t size,struct HeapCB *Heap,u32 timeout)
         return NULL;
 
     //不能在此直接判断size是否满足,因为取得互斥量前可能重入而判断无效.
-    if(Lock_MutexPend(&Heap->HeapMutex,timeout) == false)
+    if(Lock_MutexPend(&Heap->HeapMutex, CN_TIMEOUT_FOREVER) == false)
         return NULL;
     en_scheduler = Djy_QuerySch( );
     //禁止调度条件下，如果当前没有足够的空闲内存，乖乖的走吧。
@@ -1211,8 +1205,8 @@ void *__M_MallocLc(ptu32_t size,u32 timeout)
 //      4.如果内存不足，则把事件挂在tg_mem_global.event_wait下,并引发事件切换.
 //参数：size,欲分配的内存块尺寸
 //      Heap, 目标堆,如果这是个专用堆,则限定从这个堆分配,否则从所有通用堆分配
-//      timeout，超时设置,单位是微秒，cn_timeout_forever=无限等待，0则立即按
-//      超时返回。非0值将被向上调整为cn_tick_us的整数倍
+//      timeout，超时设置,单位是微秒，CN_TIMEOUT_FOREVER=无限等待，0则立即按
+//      超时返回。非0值将被向上调整为CN_CFG_TICK_US的整数倍
 //返回：分配的内存指针，NULL表示没有内存可以分配
 //备注: 用此函数分配的内存,并不会在事件完成时被收回.
 //-----------------------------------------------------------------------------
@@ -1228,7 +1222,7 @@ void *__M_MallocHeap(ptu32_t size,struct HeapCB *Heap, u32 timeout)
     if( (size == 0) || (Heap == NULL) )
         return NULL;
     //不能在此直接判断size是否满足,因为关取得互斥量前可能发生切换而判断无效.
-    if(Lock_MutexPend(&Heap->HeapMutex,timeout) == false)
+    if(Lock_MutexPend(&Heap->HeapMutex,CN_TIMEOUT_FOREVER) == false)
         return NULL;
     en_scheduler = Djy_QuerySch();
     //禁止调度条件下，如果当前没有足够的空闲内存，乖乖的走吧。
@@ -1634,9 +1628,9 @@ void __M_FreeHeap(void * pl_mem,struct HeapCB *Heap)
                 }
             }
             if(Cession == NULL)
-            	CurHeap = CurHeap->NextHeap;
+                CurHeap = CurHeap->NextHeap;
             else
-            	break;
+                break;
         }while(CurHeap != Heap);
     }
 

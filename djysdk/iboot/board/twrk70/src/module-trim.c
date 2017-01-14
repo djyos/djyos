@@ -59,6 +59,7 @@
 
 #include "../../twrk70/src/OS_prjcfg/include/IO_config.h"
 #include "..\heap\heap-in.h"
+#include "ymodem.h"
 
 extern ptu32_t ModuleInstall_DebugInfo(ptu32_t para);
 
@@ -144,7 +145,6 @@ void Sys_ModuleInit(void)
     ModuleInstall_FileSystem();
 //    ModuleInstall_YAFFS2("/dev/nand", 1);
     //ModuleInstall_FAT();
-    ModuleInstall_BootFS();
 #endif
 //    ModuleInstall_UART(CN_UART0);
 //    ModuleInstall_UART(CN_UART1);
@@ -183,14 +183,13 @@ void Sys_ModuleInit(void)
     ModuleInstall_TM(0);
     //使用硬件RTC,注释掉则使用tick做RTC计时,依赖:日历时钟模块
     ModuleInstall_RTC(0);
-    extern ptu32_t ModuleInstall_Ymodem(struct DjyDevice *para);
-    ModuleInstall_Ymodem(NULL);
+    ModuleInstall_Ymodem(0);
 	Ymodem_PathSet("/iboot");
     ModuleInstall_IAP();
 
     //定时器组件
-//    extern ptu32_t ModuleInstall_TimerSoft(ptu32_t para);
-//    ModuleInstall_TimerSoft(CN_TIMER_SOURCE_TICK);
+//    extern ptu32_t ModuleInstall_Timer(ptu32_t para);
+//    ModuleInstall_Timer(CN_TIMER_SOURCE_TICK);
 
     //install the system net
 //    extern ptu32_t ModuleInstall_BoardNetDynamic(ptu32_t para) ; //dynamic ip

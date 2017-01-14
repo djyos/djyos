@@ -82,7 +82,6 @@ typedef const WCHAR* LPCWSTR;
 typedef struct WINDOW*  HWND;
 typedef struct DC*      HDC;
 typedef struct FontRsc*     HFONT;
-typedef struct TIMER    TIMER;
 
 typedef struct PointCdn      POINT;
 typedef struct Rectangle     RECT;
@@ -131,6 +130,8 @@ typedef struct
 #pragma pack()
 
 
+
+
 /*============================================================================*/
 //// 消息数据结构
 struct WindowMsg
@@ -159,6 +160,9 @@ struct MsgTableLink
     u32 MsgNum;
 };
 
+
+
+
 /*============================================================================*/
 //// DrawText flag
 #define DT_VCENTER      (0<<0)  //正文垂直居中.
@@ -170,6 +174,10 @@ struct MsgTableLink
 #define DT_LEFT         (1<<2)  //正文左对齐.
 #define DT_RIGHT        (2<<2)  //正文右对齐.
 #define DT_ALIGN_H_MASK (3<<2)
+
+
+
+
 
 #define DT_BORDER       (1<<4)  //绘制边框(使用DrawColor)
 #define DT_BKGND        (1<<5)  //填充背景(使用FillColor)
@@ -190,8 +198,7 @@ typedef enum{
     KEY_EVENT_UP   =2,  //按键弹起.
 }EN_GDD_KEY_EVENT;
 
-/*============================================================================*/
-//// 通用窗口消息定义
+// 通用窗口消息定义
 #define MSG_CREATE              0x0001  //窗口创建消息; Param1:由WindowCreate的pdata传入;Param2:忽略.
 #define MSG_ERASEBKGND          0x0002  //窗口背景擦除; Param1:绘图上下文; Param2:忽略.
 #define MSG_NCPAINT             0x0003  //窗口非客户区绘制; Param1:忽略; Param2:忽略.
@@ -220,10 +227,23 @@ typedef enum{
 #define MSG_NCMBUTTON_DOWN      0x010B  //非客户区鼠标中键按下; Param1:忽略; Param2:x坐标(L16),y坐标(H16).
 #define MSG_NCMBUTTON_UP        0x010C  //非客户区鼠标中键弹起; Param1:忽略; Param2:x坐标(L16),y坐标(H16).
 #define MSG_NCMOUSE_MOVE        0x010D  //非客户区鼠标移动; Param1:鼠标按键状态; Param2:x坐标(L16),y坐标(H16).
+#define MSG_SETATTR             0x010E  //窗口属性设置；
 
-#define MSG_KEY_DOWN            0x0120  //键盘按下; Param1:按键值(L16); Param2:事件产生的时间(毫秒单位).
+#define MSG_KEY_DOWN            0x0120  //键盘按下; 高16位(H16)WinID,Param1:按键值(L16); Param2:事件产生的时间(毫秒单位).
 #define MSG_KEY_UP              0x0121  //键盘弹起; Param1:按键值(L16); Param2:事件产生的时间(毫秒单位).
+#define MSG_KEY_PRESS           0x0122
 
+
+
+#define MSG_TOUCH_DOWN          0x0130   //触摸屏触摸下触摸点
+#define MSG_TOUCH_UP            0x0131   //触摸屏离开触摸点
+#define MSG_TOUCH_MOVE          0x0132
+#define MSG_NCTOUCH_DOWN        0x0133
+#define MSG_NCTOUCH_UP          0x0134
+#define MSG_NCTOUCH_MOVE        0x0135
+
+#define MSG_TIMER_START         0x0140  //定时器消息: Param1:定时Id; Param2:定时器对象.
+#define MSG_TIMER_STOP          0x0141  //定时器消息: Param1:定时Id; Param2:定时器对象.
 //#define   MSG_GET_POS         0xF000
 
 //// 进度条消息
@@ -255,8 +275,8 @@ typedef enum{
 //// 控件通知码
 
 //Button
-#define BTN_DOWN    1    //按下
-#define BTN_UP      2    //弹起
+#define MSG_BTN_DOWN    1    //按下
+#define MSG_BTN_UP      2    //弹起
 
 //ListBox
 //#define LBN_SELCHANGE   1   //当前选择项目补改变
@@ -265,7 +285,8 @@ typedef enum{
 #define LVN_CLICK   1   //被"点击"
 
 /*============================================================================*/
-//// 窗口公共风格，与控件风格组合成32位字，使用高16位
+//// 窗口公共风格，与控件风格以及控件类型组合成32位字，其中窗口公共风格使用高16位
+//   控件风格使用剩下16位中的高8位，控件类型使用剩下16位中的低8位。
 #define WS_CHILD    (1<<16) //子窗口标志,控件窗口必须指定该标志.
 #define WS_VISIBLE  (1<<17) //窗口是否可见
 #define WS_DISABLE  (1<<18) //窗口是否为禁止状态,如果指定该标志,窗口将不响应输入消息
@@ -290,7 +311,26 @@ typedef enum{
 
 /*============================================================================*/
 
+////定义控件类型
+#define BUTTON              0x1
+#define CHECKBOX            0x2
+#define LABEL               0x3
+#define TEXTBOX             0x4
+#define RICHTEXTBOX         0x5
+#define LISTBOX             0x6
+#define LISTVIEW            0x7
+#define PROGRESSBAR         0x8
+#define KEYBOARD            0x9
+
+
+
+
+
 #define CN_WINDOW_ZPRIO_MOUSE       (-100)
+#define CN_WINDOW_ZPRIO_CURSOR      (-101)
+
+
+
 
 HDC     CreateDC(struct GkWinRsc *gk_win,const RECT *prc);
 bool_t    DeleteDC(HDC hdc);
@@ -388,7 +428,8 @@ bool_t    MoveWindow(HWND hwnd,s32 x,s32 y);
 bool_t    OffsetWindow(HWND hwnd,s32 dx,s32 dy);
 bool_t    IsWindowVisible(HWND hwnd);
 bool_t    InvalidateWindow(HWND hwnd,bool_t bErase);
-bool_t    ShowWindow(HWND hwnd,bool_t bShow);
+bool_t    SetWindowShow(HWND hwnd);
+bool_t    SetWindowHide(HWND hwnd);
 bool_t    EnableWindow(HWND hwnd,bool_t bEnable);
 HWND    Gdd_GetWindowParent(HWND hwnd);
 HWND    GetWindow(HWND hwnd,s32 nCmd);
@@ -398,14 +439,18 @@ void    SetWindowText(HWND hwnd,const char *text,s32 max_len);
 HWND    GetWindowFromPoint(struct GkWinRsc *desktop, POINT *pt);
 HWND    SetFocusWindow(HWND hwnd);
 HWND    GetFocusWindow(void);
-bool_t    IsFocusWindow(HWND hwnd);
+bool_t  IsFocusWindow(HWND hwnd);
+bool_t  SetWindowShow(HWND hwnd);
+bool_t SetWindowHide(HWND hwnd);
+
+
 
 s32 GetWinMsgProc(struct WindowMsg *pMsg,struct MsgProcTable *MsgTable);
 
-TIMER*  GDD_CreateTimer(HWND hwnd,u16 Id,u32 IntervalMS,u16 Flag);
-TIMER*  GDD_FindTimer(HWND hwnd,u16 Id);
-bool_t    GDD_ResetTimer(TIMER *ptmr,u32 IntervalMS,u32 Flag);
-bool_t    GDD_DeleteTimer(TIMER *ptmr);
+struct WinTimer*  GDD_CreateTimer(HWND hwnd,u16 Id,u32 IntervalMS,u16 Flag);
+struct WinTimer*  GDD_FindTimer(HWND hwnd,u16 Id);
+bool_t    GDD_ResetTimer(struct WinTimer *ptmr,u32 IntervalMS,u32 Flag);
+bool_t    GDD_DeleteTimer(struct WinTimer *ptmr);
 
 s32     RectW(const RECT *prc);
 s32     RectH(const RECT *prc);

@@ -47,6 +47,8 @@
 #ifndef __YMODEM_CONFIG_H__
 #define __YMODEM_CONFIG_H__
 
+extern const char *gYmodemDevName;		//ymodem通信方式
+
 extern const u32 gYmodemBufPkgNum ;		//缓存ymodem包数量
 
 extern const u32 gYmodemPkgTimeOut;		//包间隔超时时间，微秒

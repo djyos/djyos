@@ -68,9 +68,6 @@
 #include "ymodem.h"
 #include <cfg/ymodemcfg.h>
 
-//#define CN_MAX_PACKNUM    32            //定义最大包个数，超过该数，则需要写入文件
-//#define CN_YMODEM_FILEBUF_SIZE   ((CN_MAX_PACKNUM + 1)*1024) //定义缓冲区大小，由函数动态分配
-
 #define CN_YMODEM_PKGBUF_SIZE         	(1029)
 #define CN_YMODEM_NAME_LENGTH  			(256)
 
@@ -100,12 +97,16 @@ static tagYmodem *pYmodem = NULL;
 //参数: 无
 //返回: 无
 //-----------------------------------------------------------
-ptu32_t ModuleInstall_Ymodem(struct DjyDevice *para)
+ptu32_t ModuleInstall_Ymodem(ptu32_t Param)
 {
-    if(para == NULL)
+    if(gYmodemDevName == NULL)
         s_ptYmodemDevice = ToDev(stdin);
     else
-        s_ptYmodemDevice = para;
+    {
+        s_ptYmodemDevice = Driver_OpenDevice(gYmodemDevName,O_RDWR,0);
+        if(NULL == s_ptYmodemDevice)
+        	return false;
+    }
 
     pYmodem = (tagYmodem *)malloc(sizeof(tagYmodem));
     if(NULL != pYmodem)
@@ -591,8 +592,8 @@ bool_t Ymodem_DownloadFile(char *Param)
 
     if(NULL == pYmodem)
     {
-    	Ret = YMODEM_MEM_ERR;
-    	goto YMODEM_EXIT;
+    	printf("\r\nYMODEM IS NOT INSTALLED !\r\n");
+    	return false;
     }
     Lock_MutexPend(pYmodem->pYmodemMutex,CN_TIMEOUT_FOREVER);
 
@@ -814,8 +815,8 @@ bool_t Ymodem_UploadFile(char *Param)
 
     if(NULL == pYmodem)
     {
-    	Ret = YMODEM_MEM_ERR;
-    	goto YMODEM_EXIT;
+    	printf("\r\nYMODEM IS NOT INSTALLED !\r\n");
+    	return false;
     }
     Lock_MutexPend(pYmodem->pYmodemMutex,CN_TIMEOUT_FOREVER);
 

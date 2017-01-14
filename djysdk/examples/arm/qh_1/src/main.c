@@ -44,6 +44,7 @@ ptu32_t djy_main(void)
 	printf("Run Mode:APP.\r\n");
 
 	led_init();
+	gdd_test();
 	while(1)
 	{
 		Djy_EventDelay(500*mS);

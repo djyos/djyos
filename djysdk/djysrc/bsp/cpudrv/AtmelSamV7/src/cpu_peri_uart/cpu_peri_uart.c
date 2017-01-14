@@ -224,11 +224,14 @@ static bool_t __UART_RxHadChar(tagUartReg volatile *reg)
 //-----------------------------------------------------------------------------
 static void __UART_SetBaud(tagUartReg volatile *reg,u32 baud)
 {
-    reg->UART_BRGR = ((CN_CFG_MCLK/2)/baud)/16;
-    if(tg_UART_Reg[TxDirectPort] == reg)
-    {
-        TxByteTime = 11000000/baud;     //1个字节传输时间，按10bit，+10%计算
-    }
+	if(baud != 0)
+	{
+		reg->UART_BRGR = ((CN_CFG_MCLK/2)/baud)/16;
+		if(tg_UART_Reg[TxDirectPort] == reg)
+		{
+			TxByteTime = 11000000/baud;     //1个字节传输时间，按10bit，+10%计算
+		}
+	}
 }
 
 //----设置COM-----------------------------------------------------------------

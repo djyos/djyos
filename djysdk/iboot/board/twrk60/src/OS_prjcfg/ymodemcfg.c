@@ -44,7 +44,9 @@
 //-----------------------------------------------------------------------------
 
 #include <stdint.h>
+#include <stddef.h>
 
+const char *gYmodemDevName    = NULL;            //NULL表示stdin
 const u32 gYmodemBufPkgNum    = 16;					//缓存ymodem包数量
 
 const u32 gYmodemPkgTimeOut   = 15*1000*1000;		//包间隔超时时间，微秒

@@ -405,7 +405,7 @@ ptu32_t __P1020PicTimer_Alloc(fntTimerIsr timerisr)
     __P1020PicTimer_PauseCount(timer);
 //    __P1020PicTimer_SetCycle(timer,cycle);
     //设置定时器中断,先结束掉该中断所有的关联相关内容
-    Int_Register(irqline); 
+    Int_Register(irqline);
     Int_CutLine(irqline);
     Int_IsrDisConnect(irqline);
     Int_EvttDisConnect(irqline);
@@ -789,7 +789,7 @@ bool_t __P1020PicTimer_Ctrl(ptu32_t timerhandle, \
 // =============================================================================
 u32  __P1020PicTimer_GetFreq(ptu32_t timerhandle)
 {
-    
+
     return cfg_core_tb_clk;
 }
 
@@ -830,12 +830,12 @@ void module_init_pictimer(void)
          *((u32 *)(cn_pic_timer_gtbcrb_base + temp * cn_pic_timer_gt_step)) = cn_pic_timer_msk;
     }
     p1020pictimer.chipname = "P1020PICTIMER";
-    p1020pictimer.TimerHardAlloc = __P1020PicTimer_Alloc;
-    p1020pictimer.TimerHardFree = __P1020PicTimer_Free;
-    p1020pictimer.TimerHardCtrl = __P1020PicTimer_Ctrl;
-    p1020pictimer.TimerHardGetFreq = __P1020PicTimer_GetFreq;
+    p1020pictimer.HardTimerAlloc = __P1020PicTimer_Alloc;
+    p1020pictimer.HardTimerFree = __P1020PicTimer_Free;
+    p1020pictimer.HardTimerCtrl = __P1020PicTimer_Ctrl;
+    p1020pictimer.HardTimerGetFreq = __P1020PicTimer_GetFreq;
 
-    TimerHard_RegisterChip(&p1020pictimer);
+    HardTimer_RegisterChip(&p1020pictimer);
 
     return ;
 }

@@ -4,7 +4,7 @@
 #include    "stdio.h"
 #include    "djyos.h"
 #include    "gdd.h"
-#include  <widget.h>
+#include <gdd_widget.h>
 
 /*============================================================================*/
 #define ID_CLOSE    0x1000
@@ -113,7 +113,7 @@ static ptu32_t HmiNotify(struct WindowMsg *pMsg)
 
     switch(event)
     {
-        case BTN_DOWN:  //按钮按下
+        case MSG_BTN_DOWN:  //按钮按下
             if(id>=ID_START_1 && id<=ID_START_4)
             {
                 i =id&0xF;
@@ -130,7 +130,7 @@ static ptu32_t HmiNotify(struct WindowMsg *pMsg)
             break;
             ////
 
-        case BTN_UP:    //按钮弹起
+        case MSG_BTN_UP:    //按钮弹起
             if(id==ID_CLOSE)
             {
                 PostMessage(hwnd,MSG_CLOSE,0,0);
@@ -233,7 +233,8 @@ void    GDD_Demo_Timer(void)
                                 rc.left,rc.top,RectW(&rc),RectH(&rc),
                                 NULL,0x0000, CN_WINBUF_PARENT,NULL,&s_gHmiMsgLink);
     SetFocusWindow(g_ptMainHwnd);
-    ShowWindow(g_ptMainHwnd,TRUE);  //显示窗口
+     //显示窗口
+    SetWindowShow(g_ptMainHwnd);
 
     while(GetMessage(&msg,g_ptMainHwnd))
     {

@@ -108,6 +108,15 @@ enum tagUartStopBits
     CN_UART_STOPBITS_2
 };
 
+// 串口传输参数结构体
+struct COMParam
+{
+    enum tagUartBaud       BaudRate;
+    enum tagUartDataBits   DataBits;
+    enum tagUartParity     Parity;
+    enum tagUartStopBits   StopBits;
+}tagComParam;
+
 //串口错误类型,使用MULPLEX的SENSINGBIT第4个比特到第31个比特
 #define CN_UART_FIFO_OVER_ERR    (1<<3) //硬件缓冲区溢出错误
 #define CN_UART_BUF_OVER_ERR     (1<<4) //接收缓冲区溢出错误

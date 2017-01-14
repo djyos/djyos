@@ -219,25 +219,35 @@
             Filters=""></Folder>
     </CustomFolders>
     <Files AutoFolders="DirectoryView">
-        <Folder Name="config">
-            <F N="config/Debug.lds"/>
-            <F N="config/Release.lds"/>
+        <Folder Name="lds">
+            <F N="lds/Debug.lds"/>
+            <F N="lds/memory.lds"/>
+            <F N="lds/Release.lds"/>
         </Folder>
         <Folder Name="src">
             <Folder Name="OS_prjcfg">
                 <Folder Name="include">
-                    <F N="src/OS_prjcfg/include/config-prj.h"/>
+                    <F N="src/OS_prjcfg/include/gui_config.h"/>
+                    <F N="src/OS_prjcfg/include/IO_config.h"/>
+                    <F N="src/OS_prjcfg/include/local_config.h"/>
+                    <F N="src/OS_prjcfg/include/misc_config.h"/>
                 </Folder>
+                <Folder Name="network">
+                    <F N="src/OS_prjcfg/network/boardnetcfg.c"/>
+                    <F N="src/OS_prjcfg/network/tcpipconfig.c"/>
+                </Folder>
+                <F N="src/OS_prjcfg/core_config.c"/>
+                <F N="src/OS_prjcfg/gui_config.c"/>
+                <F N="src/OS_prjcfg/IO_config.c"/>
+                <F N="src/OS_prjcfg/local_config.c"/>
+                <F N="src/OS_prjcfg/misc_config.c"/>
             </Folder>
             <Folder Name="user">
                 <Folder Name="critical">
                     <F N="src/user/critical/critical.c"/>
                 </Folder>
-                <F N="src/user/gui_app.c"/>
                 <F N="src/user/main.c"/>
-                <F N="src/user/main_test.c"/>
                 <F N="src/user/module-trim.c"/>
-                <F N="src/user/u_main.c"/>
             </Folder>
         </Folder>
     </Files>

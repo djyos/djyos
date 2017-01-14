@@ -60,8 +60,8 @@
 #include "stm32f10x.h"
 #include "Touch.h"
 #include "string.h"
-#include "stmpe811.h"
 #include "gkernel.h"
+#include "stmpe811.h"
 #include "cpu_peri_iic.h"
 #include "iicbus.h"
 
@@ -90,7 +90,7 @@ static bool_t STMPE811_Init(void)
     {
         ps_CRT_Dev = &s_CRT_Dev;
         IIC_BusCtrl(ps_CRT_Dev,CN_IIC_SET_CLK,CRT_CLK_FRE,0);//设置时钟大小
-        IIC_BusCtrl(ps_CRT_Dev,CN_IIC_SET_UNPOLL,0,0);       //使用中断方式发送
+        IIC_BusCtrl(ps_CRT_Dev,CN_IIC_SET_INT,0,0);       //使用中断方式发送
         return true;
     }
 
@@ -106,19 +106,19 @@ static u32 TS_Read ( u8 RegAddr, u8 num)
 
    static u8 buf[4];
    num = IIC_Read(ps_CRT_Dev,RegAddr,buf,num,0xffffffff);
-	switch (num)
-	{   case 1:
-			return buf[0];
+    switch (num)
+    {   case 1:
+            return buf[0];
 
-		case 2:
-			return ((buf[1]) | buf[0]<<8);
+        case 2:
+            return ((buf[1]) | buf[0]<<8);
 
-		case 3:
-			return (buf[2]|(buf[1]<<8)|(buf[0]<<16));
+        case 3:
+            return (buf[2]|(buf[1]<<8)|(buf[0]<<16));
 
-		default:
-			return(buf[3]|(buf[2]<<8)|(buf[1]<<16)|(buf[0]<<24));
-	}
+        default:
+            return(buf[3]|(buf[2]<<8)|(buf[1]<<16)|(buf[0]<<24));
+    }
 
 }
 // =============================================================================
@@ -132,9 +132,9 @@ static u32 TS_Read ( u8 RegAddr, u8 num)
 // =============================================================================
 static  void TS_Write (u8 reg, u8 num, u32 val)
 {
-	u8 buf[4];
-	buf[0]=(u8)(val & 0x000000ff);
-	IIC_Write( ps_CRT_Dev , reg,buf,num, true,0xffffffff );
+    u8 buf[4];
+    buf[0]=(u8)(val & 0x000000ff);
+    IIC_Write( ps_CRT_Dev , reg,buf,num, true,0xffffffff );
 
 }
 //---------------------------------------------------------------------------
@@ -286,10 +286,10 @@ static ufast_t read_touch_stmpe811(struct SingleTouchMsg *touch_data)
         touch_data->z = tch_z;
         if (TS_Read(FIFO_SIZE, 1))
         {
-			TS_Write(INT_STA, 1, 0xFF);                //清除所有中断
-			Djy_EventDelay(100);
-			TS_Write(FIFO_STA, 1, 0x01);                //FIFO复位
-			Djy_EventDelay(100);
+            TS_Write(INT_STA, 1, 0xFF);                //清除所有中断
+            Djy_EventDelay(100);
+            TS_Write(FIFO_STA, 1, 0x01);                //FIFO复位
+            Djy_EventDelay(100);
             TS_Write(FIFO_STA, 1, 0x00);
             Djy_EventDelay(100);
         }
@@ -307,12 +307,13 @@ static ufast_t read_touch_stmpe811(struct SingleTouchMsg *touch_data)
 //参数: display_name,本触摸屏对应的显示器名(资源名)//用静态变量存储每次开机校准一次//
 //返回: 无
 //-----------------------------------------------------------------------------
-static void touch_ratio_adjust(char *display_name)
+static void touch_ratio_adjust(struct GkWinRsc *desktop)
 {
-    struct GkWinRsc *desktop;
-    struct SingleTouchMsg touch_xyz0,touch_xyz1;
+    struct SingleTouchMsg touch_xyz0,touch_xyz1,touch_xyz2;
     FILE *touch_init;
     s32 limit_left,limit_top,limit_right,limit_bottom;
+
+    u8 sta;
 
     if((touch_init = fopen("sys:\\touch_init.dat","r")) != NULL)
     {
@@ -322,8 +323,6 @@ static void touch_ratio_adjust(char *display_name)
     }
     else
     {
-        desktop = GK_ApiGetDesktop(display_name);
-
         limit_left = desktop->limit_left;
         limit_top = desktop->limit_top;
         limit_right = desktop->limit_right;
@@ -335,17 +334,36 @@ static void touch_ratio_adjust(char *display_name)
         GK_ApiDrawText(desktop,NULL,NULL,limit_left+10,limit_top+50,
                        "触摸屏矫正", 21, CN_COLOR_BLACK, CN_R2_COPYPEN, 0);
         GK_ApiDrawText(desktop,NULL,NULL,limit_left+10,limit_top+70,
-                       "请准确点击十字交叉点", 21, CN_COLOR_BLACK, CN_R2_COPYPEN, 0); 
+                       "请准确点击十字交叉点", 21, CN_COLOR_BLACK, CN_R2_COPYPEN, 0);
         GK_ApiLineto(desktop,0,20,40,20,CN_COLOR_RED,CN_R2_COPYPEN,0);
         GK_ApiLineto(desktop,20,0,20,40,CN_COLOR_RED,CN_R2_COPYPEN,CN_TIMEOUT_FOREVER);
         GK_ApiSyncShow(CN_TIMEOUT_FOREVER);
         while(!read_touch_stmpe811(&touch_xyz0));           //记录触摸屏第一点校正值
+        Djy_DelayUs(300);
+//这里的松手检测是通过读检查fifo中是否有坐标点数据来实现的，
+//有数据清空并延时0.1s再检测，软件可以不用考虑防抖。
+        do
+        {
+            if (TS_Read(FIFO_SIZE, 1))
+            {
+                TS_Write(INT_STA, 1, 0xFF);                //清除所有中断
+                Djy_DelayUs(100);
+                TS_Write(FIFO_STA, 1, 0x01);                //FIFO复位
+                Djy_DelayUs(100);
+                TS_Write(FIFO_STA, 1, 0x00);
+                Djy_DelayUs(100);
+            }
+
+            Djy_DelayUs(1000*100);
+            sta=TS_Read (INT_STA, 1);
+        }while(sta&2);//fifo中有数据则重读，无数据则认为松手
+
 
         GK_ApiFillWin(desktop,CN_COLOR_WHITE,0);
         GK_ApiDrawText(desktop,NULL,NULL,limit_left+10,limit_top+50,
-                       "触摸屏矫正", 21, CN_COLOR_BLACK, CN_R2_COPYPEN, 0); 
+                       "触摸屏矫正", 21, CN_COLOR_BLACK, CN_R2_COPYPEN, 0);
         GK_ApiDrawText(desktop,NULL,NULL,limit_left+10,limit_top+70,
-                       "再次准确点击十字交叉点", 21, CN_COLOR_BLACK, CN_R2_COPYPEN, 0); 
+                       "再次准确点击十字交叉点", 21, CN_COLOR_BLACK, CN_R2_COPYPEN, 0);
         GK_ApiLineto(desktop,limit_right-40,limit_bottom-20,
                       limit_right,limit_bottom-20,
                       CN_COLOR_RED,CN_R2_COPYPEN,0);
@@ -356,15 +374,33 @@ static void touch_ratio_adjust(char *display_name)
 
         if (TS_Read(FIFO_SIZE, 1))
         {
-			TS_Write(INT_STA, 1, 0xFF);                //清除所有中断
-			Djy_DelayUs(100);
-			TS_Write(FIFO_STA, 1, 0x01);                //FIFO复位
-			Djy_DelayUs(100);
+            TS_Write(INT_STA, 1, 0xFF);                //清除所有中断
+            Djy_DelayUs(100);
+            TS_Write(FIFO_STA, 1, 0x01);                //FIFO复位
+            Djy_DelayUs(100);
             TS_Write(FIFO_STA, 1, 0x00);
             Djy_DelayUs(100);
         }
 
         while(!read_touch_stmpe811(&touch_xyz1));           //记录触摸屏第二点校正值
+
+        do
+        {
+            if (TS_Read(FIFO_SIZE, 1))
+            {
+                TS_Write(INT_STA, 1, 0xFF);                //清除所有中断
+                Djy_DelayUs(100);
+                TS_Write(FIFO_STA, 1, 0x01);                //FIFO复位
+                Djy_DelayUs(100);
+                TS_Write(FIFO_STA, 1, 0x00);
+                Djy_DelayUs(100);
+            }
+
+            Djy_DelayUs(1000*100);
+            sta=TS_Read (INT_STA, 1);
+        }while(sta&2);//等待松手
+
+
         GK_ApiFillWin(desktop,CN_COLOR_WHITE,0);
         tg_touch_adjust.ratio_x = ((touch_xyz1.x - touch_xyz0.x)<<16)
                         /(limit_right - limit_left -40);
@@ -377,7 +413,7 @@ static void touch_ratio_adjust(char *display_name)
     //    GK_DestroyWin(desktop);
         touch_init = fopen("sys:\\touch_init.dat","w+");
         if(touch_init)
-        	fwrite(&tg_touch_adjust,sizeof(struct ST_TouchAdjust),1,touch_init);
+            fwrite(&tg_touch_adjust,sizeof(struct ST_TouchAdjust),1,touch_init);
     }
     fclose(touch_init);
 
@@ -387,17 +423,18 @@ static void touch_ratio_adjust(char *display_name)
 //参数: display_name,本触摸屏对应的显示器名(资源名)
 //返回: true,成功;false,失败
 //-----------------------------------------------------------------------------
-ptu32_t ModuleInstall_Touch_Stmpe811(void)
+ptu32_t ModuleInstall_Touch_Stmpe811(struct GkWinRsc *desktop,const char *touch_dev_name)
 {
     static struct SingleTouchPrivate stmpe811;
 
     if(!STMPE811_Init( ))//将器件挂到IIC2总线上
         return false;
     if(!touch_hard_init())//触摸屏初始化
-    	 return false;
-    touch_ratio_adjust("ili9325");          //屏幕校准
+         return false;
+    touch_ratio_adjust(desktop);          //屏幕校准
     stmpe811.read_touch = read_touch_stmpe811;//读触摸点的坐标函数
-    Touch_InstallDevice("stmpe811",&stmpe811);//添加驱动到Touch
+    stmpe811.touch_loc.display = NULL;     //NULL表示用默认桌面
+    Touch_InstallDevice(touch_dev_name,&stmpe811);//添加驱动到Touch
     return true;
 }
 

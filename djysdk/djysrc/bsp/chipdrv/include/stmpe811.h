@@ -80,7 +80,7 @@ extern "C" {
 
 
 #define stmpe811_opmode 1
-ptu32_t ModuleInstall_Touch_Stmpe811(void);
+ptu32_t ModuleInstall_Touch_Stmpe811(struct GkWinRsc *desktop,const char *touch_dev_name);
 
 #ifdef __cplusplus
 }

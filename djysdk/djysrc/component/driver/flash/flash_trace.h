@@ -64,13 +64,12 @@ extern "C" {
 #define FLASH_TRACE_ERROR        0x40000000
 #define FLASH_TRACE_DEBUG        0x80000000
 #define FLASH_TRACE_ALWAYS       0xf0000000
-#define Print					 printf
 
 extern u32 FlashTraceConfig;
 
 #define TraceDrv(config, fmt, ...) do { \
     if (FlashTraceConfig & (config)) \
-		Print("\r\nFlash_DRV:  " fmt "", ##__VA_ARGS__); \
+		printf("\r\nFlash_DRV:  " fmt "", ##__VA_ARGS__); \
 } while (0)
 
 

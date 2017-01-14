@@ -1,4 +1,5 @@
 #include "os.h"
+#include "stddef.h"
 #include "cpu_peri.h"
 #include "string.h"
 #include "glcd.h"
@@ -49,14 +50,15 @@ void LED_Init(void)
 	create_led_task();
 }
 
-extern u32 g_bRunModeFlag;
 void djy_main(void)
 {
 	GLCD_Init();
 	LED_Init();
 
-	g_bRunModeFlag=0x12345678;
-	printf("Run Mode:Iboot.\r\n");
+	extern void Sh_GetStatus(char *param);
+	extern void Sh_GetRunMode(char *param);
+	Sh_GetRunMode(NULL);
+	Sh_GetStatus(NULL);
     while(1)
     {
     	GLCD_Clear(White);                         /* Clear graphical LCD display   */

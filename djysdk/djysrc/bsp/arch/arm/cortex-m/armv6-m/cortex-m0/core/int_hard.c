@@ -490,7 +490,7 @@ void Int_Init(void)
     __Int_ClearAllLine();
     for(ufl_line=0;ufl_line <= CN_INT_LINE_LAST;ufl_line++)
     {
-        tg_pIntLineTable[ufl_line] = (ufast_t)NULL;
+        tg_pIntLineTable[ufl_line] = NULL;
         vector_table[ufl_line] = __start_int;       //全部初始化为异步信号
     }
 

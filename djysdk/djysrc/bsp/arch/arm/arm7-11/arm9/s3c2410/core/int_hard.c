@@ -468,7 +468,7 @@ void Int_Init(void)
     __Int_ClearAllLine();
     for(ufl_line=0;ufl_line <= CN_INT_LINE_LAST;ufl_line++)
     {
-        tg_pIntLineTable[ufl_line] = (ufast_t)NULL;
+        tg_pIntLineTable[ufl_line] = NULL;
     }
 
     for(ufl_line=0; ufl_line < CN_INT_BITS_WORDS; ufl_line++)
@@ -571,9 +571,9 @@ void __Int_EngineAsynSignal(ufast_t ufl_line)
         Int_CutAsynSignal();
     if(ptIntLine->clear_type == CN_INT_CLEAR_AUTO)
         Int_ClearLine(ufl_line);        //中断应答,
-    //此处务必清除已经发生的中断，否则当trunk打开之后，还会进入中断--zqf 
+    //此处务必清除已经发生的中断，否则当trunk打开之后，还会进入中断--zqf
     pg_int_reg->INTPND = 1<<ufl_line;
-    
+
     Int_ContactTrunk();
     if(ptIntLine->ISR != NULL)
         isr_result = ptIntLine->ISR(ptIntLine->para);

@@ -242,29 +242,11 @@ struct RopGroup
     u32 AlphaEn:1;      //使能alpha运算运算，Rop2En自动被禁止。
     u32 HyalineEn:1;    //使能透明色
     u32 Res:2;          //保留
-
 };
 //绘制函数中，支持rop2、alpha、HyalineColor透明
 //窗口属性中，alpha>HyalineColor透明>Rop2，alpha公式不允许需要dst alpha参与运算。
-//byte0: Src Alpha(As),byte1: Dst Alpha(Ad)，
-//byte2: alpha混合公式定义
-//byte3: bit31=1表示支持alpha，bit30=1表示支持KeyColor透明,
-//bit29=1表示支持rop2运算，bit24~27表示rop运算码
 //特别注意，这里所说的alpha，针对常量alpha的，bitmap中的alpha通道不受影响
-#define CN_ROP_ALPHA_SRC_MSK        0x000000ff  //Src Alpha(As)
-#define CN_ROP_ALPHA_SRC_OFF        0
-#define CN_ROP_ALPHA_DST_MSK        0x0000ff00  //Dst Alpha(Ad)
-#define CN_ROP_ALPHA_DST_OFF        8
-#define CN_ROP_ALPHA_MODE_MSK       0x00ff0000  //alpha混合运算公式，取值：
-                                                //CN_ALPHA_MODE_AsN 4个之一
-#define CN_ROP_ALPHA_MODE_OFF       16
-#define CN_ROP_ROP2_MSK             0x0f000000  //ROP2运算公式,参看CN_R2_BLACK族常数
-#define CN_ROP_ROP2_OFF             24
 
-//注:rop2和alpha不能同时支持，若使能了alpha，rop2将自动忽略
-#define CN_ROP_ALPHA_EN             0x80000000  //1=使能alpha运算
-#define CN_ROP_KEYCOLOR_EN          0x40000000  //1=使能KeyColor透明
-#define CN_ROP_ROP2_EN              0x20000000  //1=使能rop2运算
 //以下定义alpha运算公式
 //定义规则:bit7=1表示运算时需dst像素参与；bit6=1表示运算时需Ad参与
 #define CN_ALPHA_MODE_AsN           0x00    //dst = S*As+D*(1-As)
@@ -313,8 +295,8 @@ struct GkWinRsc                  //窗口资源定义
 {
     struct Object node;       //资源结点
     void *UserTag;            //用户设置的标识，通常指向一个数据结构,
-                                //如果=NULL，则指向gkwin自身
-    struct GkWinRsc *z_back;   //窗口Z序链表，从最前端往回看
+                              //如果=NULL，则指向gkwin自身
+    struct GkWinRsc *z_back;  //窗口Z序链表，从最前端往回看
     struct GkWinRsc *z_top;
     char win_name[CN_GKWIN_NAME_LIMIT+1];         //窗口名字(标题)
 //可视域队列，每个窗口的可视域通过此队列连接

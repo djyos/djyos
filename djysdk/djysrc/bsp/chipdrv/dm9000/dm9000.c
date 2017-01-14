@@ -527,7 +527,7 @@ bool_t Dm9000RcvTask()
         {
             result = true;
             sgDm9000RcvTaskID = evttID;
-            pDm9000RcvSync = Lock_SempCreate(1,0,CN_SEMP_BLOCK_FIFO,NULL);
+            pDm9000RcvSync = Lock_SempCreate(1,0,CN_BLOCK_FIFO,NULL);
         }
         else
         {

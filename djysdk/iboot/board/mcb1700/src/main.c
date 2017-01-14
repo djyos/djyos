@@ -54,6 +54,7 @@
 #include "gkernel.h"
 #include "cpu_peri.h"
 #include "systime.h"
+#include "stddef.h"
 
 const unsigned long led_mask[] = { 1UL<<28, 1UL<<29, 1UL<<31, 1UL<< 2,
                                    1UL<< 3, 1UL<< 4, 1UL<< 5, 1UL<< 6 };
@@ -138,12 +139,15 @@ void Led_Task(void)
     Djy_EventPop(ledontask,NULL,0,NULL,0,200);
 
 }
-extern u32 g_bRunModeFlag;
+
 void djy_main(void)
 {
 	Led_Task();
-	g_bRunModeFlag=0x12345678;
-	printf("Run Mode:Iboot.\r\n");
+
+	extern void Sh_GetStatus(char *param);
+	extern void Sh_GetRunMode(char *param);
+	Sh_GetRunMode(NULL);
+	Sh_GetStatus(NULL);
 //	Timer_Test();
 //	mcb1700_display();
     while(1)

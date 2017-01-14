@@ -182,7 +182,7 @@ void Sys_ModuleInit(void)
     //设置串口波特率为115200，
     Driver_CtrlDevice(ToDev(stdin),CN_UART_SET_BAUD,115200,0);
 
-    ModuleInstall_Ymodem(NULL);
+    ModuleInstall_Ymodem(0);
 
     //安装人机交互输入模块，例如键盘、鼠标等
     ModuleInstall_HmiIn( 0 );
@@ -202,8 +202,8 @@ void Sys_ModuleInit(void)
     ModuleInstall_IAP();
 
     //定时器组件
-    extern ptu32_t ModuleInstall_TimerSoft(ptu32_t para);
-    ModuleInstall_TimerSoft(CN_TIMER_SOURCE_TICK);
+    extern ptu32_t ModuleInstall_Timer(ptu32_t para);
+    ModuleInstall_Timer(CN_TIMER_SOURCE_TICK);
 
    //网络协议栈组件，请参考tcpip目录下的boardnetcfg.cfg文件来实现下述函数
    //来配置该板件的网络，如果你想使用网络的话 

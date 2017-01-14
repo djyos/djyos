@@ -61,8 +61,6 @@
 #include "driver.h"
 //#include "hard-exp.h"
 
-extern void prj_module_init(void);
-extern ptu32_t ModuleInstall_FsNandFlash(ptu32_t para);
 extern void __DjySetDelay(void);
 extern void __Djy_InitSys(void);
 extern void __Djy_StartOs(void);

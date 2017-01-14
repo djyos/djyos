@@ -43,18 +43,17 @@
 // 不负任何责任，即在该种使用已获事前告知可能会造成此类损害的情形下亦然。
 //-----------------------------------------------------------------------------
 #include "os.h"
+#include "stddef.h"
 #include "cpu_peri.h"
 #include "string.h"
 #include "driver.h"
 #include "uartctrl.h"
 #include "ymodem.h"
-#include "flashdrv.h"
 #include "driver/include/uart.h"
 #include "driver.h"
 #include "IAP.h"
 #include <cfg/iboot_config.h>
 static struct DjyDevice * YmodemDev;
-extern struct IbootCtrl gc_ptIbootCtrl;
 
 extern bool_t Ymodem_PathSet(const char *Path);
 bool_t Ymodem_UpdateProgram(void)
@@ -79,7 +78,7 @@ bool_t Ymodem_UpdateProgram(void)
 			if(true == Ymodem_DownloadFile(NULL))
 			{
 				//作CRC校验
-				crc=gc_ptIbootCtrl.Iap_crc;
+				crc=IAP_GetAPPCRC();
 			}
 			else
 			{
@@ -130,7 +129,6 @@ void LED_Init(void)
 //系统升级用
 ptu32_t djy_main(void)
 {
-	bool_t result;
 	while(1)
 	{
 	   LED_On();

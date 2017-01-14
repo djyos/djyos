@@ -71,6 +71,9 @@ struct ThreadVm;
 struct EventECB;
 struct EventType;
 
+#define CN_BLOCK_FIFO          0       //按进入阻塞队列的先后顺序排队
+#define CN_BLOCK_PRIO          1       //按阻塞队列中事件的优先级排队
+
 // todo:这里命名为ContainerOf就报错
 #define Container(Ptr, Type, Member)  ((Type *)((char *)(Ptr)-(unsigned long)(&((Type *)0)->Member)))/* 引自Linux */
 
@@ -146,12 +149,12 @@ struct ProcessVm       //进程
 //事件进入运行态的原因.
 //事件应该是内闭的,djyos不提供查询任意事件当前状态的功能.查询别人的状态,有干涉
 //内政之嫌.
-//使用方法:当事件进入运行态时,根据进入前状态设置事件的last_status.
+//使用方法:当事件进入运行态时,根据进入前状态设置事件的wakeup_from.
 //查询函数根据wakeup_from值判断事件从何种状态进入运行态.
 //因优先级低而等待的不予考虑,例如,某事件延时结束后因为优先级低而等待一定时间后
 //才运行,查询结果为"闹铃响"
 #define CN_STS_EVENT_READY      (u32)0
-#define CN_STS_EVENT_DELAY      (u32)(1<<0)     //闹钟同步
+#define CN_STS_EVENT_DELAY      (u32)(1<<0)     //延时到，不包括Djy_DelayUs
 #define CN_STS_SYNC_TIMEOUT     (u32)(1<<1)     //超时
 #define CN_STS_WAIT_EVENT_DONE  (u32)(1<<2)     //事件同步
 #define CN_STS_EVENT_EXP_EXIT   (u32)(1<<3) //事件同步中被同步的目标事件异常退出
@@ -169,6 +172,8 @@ struct ProcessVm       //进程
                                                 //被删除而解除同步。
 #define CN_WF_EVENT_RESET       (u32)(1<<15)    //复位后首次切入运行
 #define CN_WF_EVENT_NORUN       (u32)(1<<16)    //事件还未开始处理
+
+#define CN_BLOCK_PRIO_SORT      (u32)(1<<17)    //是否在优先级排序的阻塞队列中
 
 #define CN_DB_INFO_EVENT        0
 #define CN_DB_INFO_EVTT         1
@@ -244,11 +249,13 @@ struct EventECB
                                 //(即调用pop函数时，timeout !=0)，且正常返回，这
                                 //里保存该事件处理结果。
     u32    wait_mem_size;       //等待分配的内存数量.
+    //以下两行参见CN_STS_EVENT_READY系列定义
     u32 wakeup_from;            //用于查询事件进入就绪态的原因,todo,直接返回状态
     u32 event_status;           //当前状态,本变量由操作系统内部使用,
-    ufast_t     prio;           //事件优先级，0~255,在弹出后可能会改变
-//    ufast_t     prio_bak;     //优先级备份，用于优先级继承中备份被提升优先级
-                                //的事件的优先级。
+    ufast_t  prio_base;         //临时调整优先级时，将不改变prio_base
+    ufast_t  prio;              //事件优先级
+//  ufast_t  prio_new;       //优先级备份，用于修改处于阻塞态的事件优先级时，
+                                //暂存新优先级。
 
     u16    evtt_id;             //事件类型id，0~32767
     u16    sync_counter;        //同步计数
@@ -357,7 +364,9 @@ u16 Djy_GetEvttId(char *evtt_name);
 bool_t Djy_EvttUnregist(u16 evtt_id);
 bool_t Djy_QuerySch(void);
 bool_t Djy_IsMultiEventStarted(void);
-bool_t Djy_SetEventPrio(ufast_t new_prio);
+bool_t Djy_SetEventPrio(u16 event_id,ufast_t new_prio);
+bool_t Djy_RaiseTempPrio(u16 event_id);
+bool_t Djy_RestorePrio(void);
 u32 Djy_EventDelay(u32 u32l_uS);
 u32 Djy_EventDelayTo(s64 s64l_uS);
 u32 Djy_WaitEventCompleted(u16 event_id,u32 timeout);
@@ -368,9 +377,6 @@ u16 Djy_EventPop(  u16  evtt_id,
                     u32 timeout,
                     ptu32_t PopPrarm1,
                     ptu32_t PopPrarm2,
-//                  void *para,
-//                  u32 para_size,
-//                  ufast_t para_options,
                     ufast_t prio);
 u32 Djy_GetEvttPopTimes(u16 evtt_id);
 ptu32_t Djy_GetEventResult(void);

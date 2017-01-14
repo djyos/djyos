@@ -67,43 +67,39 @@
 #include "version.h"
 #include "cpu_peri.h"
 #include "cpu-optional.h"
+#include "IAP_Inner.h"
 #if(CN_CPU_OPTIONAL_CACHE==1)
 #include "set-cache.h"
 #endif
-#define CN_IBOOT_FLAG               "RunIboot"
-#define CN_APP_CTRL_APP_FLAG        0x61707000     //字符串"app"
-#define CN_APP_CTRL_DBG_FLAG        0x00676264    //字符串"dbg"
-#define CN_APP_CTRL_RELEASE_FLAG    0x72656173    //字符串"reas"
-extern char g_cIbootFlag[];
+
 extern struct IbootCtrl gc_ptIbootCtrl;
 extern void reset(void);
 
 extern const char *g_pcIbootDir;
+extern bool_t IAP_IsRamIbootFlag(void);
 
+bool_t Sh_RunIBoot(char *param);
+bool_t Sh_RunAPP(char *param);
+bool_t Sh_RunReleaseAPP(char *param);
+bool_t Sh_GetAPPInfor(char *param);
+bool_t Sh_GetStatus(char *param);
+bool_t Sh_GetIAPVersion(char *param);
+bool_t Sh_GetRunMode(char *param);
 
-void  Sh_RunIBoot(char *param);
-void  Sh_RunAPP(char *param);
-void Sh_RunReleaseAPP(char *param);
-void Sh_GetAPPInfor(char *param);
-void Sh_GetStatus(char *param);
-void Sh_GetIAPVersion(char *param);
-void Sh_GetRunMode(char *param);
-
-
-extern u8 g_IbootStaus;
-u32 g_bRunModeFlag;
+extern tagIapVar pg_IapVar;
+extern bool_t IAP_IsForceIboot(void);
 
 extern struct AppInfo   gc_ptAppInfo;
 extern u32 g_pAppCodeStartRamAddr;
 extern u32 g_pAppCodeEndRamAddr;
 
 
-extern void __AppPreLoad(void);
+extern void __AppStart(void);
 
 
 u32 IAP_GetAPPStartCodeRamAddr(void)
 {
-	return ((u32)&g_pAppCodeStartRamAddr);
+    return ((u32)&g_pAppCodeStartRamAddr);
 }
 u32 IAP_GetAPPCodeRamSize(void)
 {
@@ -111,19 +107,19 @@ u32 IAP_GetAPPCodeRamSize(void)
 }
 u32 IAP_GetAPPStartAddr(void)
 {
-	return (u32)(&gc_ptAppInfo.RomStartAddr);
+    return (u32)(&gc_ptAppInfo.RomStartAddr);
 }
 
 bool_t IAP_APPIsDebug(void)
 {
-	u8 *dbgflg;
+    u8 *dbgflg;
 
-	dbgflg = (u8*)&gc_ptIbootCtrl.flag;
-	if( (dbgflg[0] == 'd') && (dbgflg[1] == 'b') && (dbgflg[2] == 'g') )
-	{
-		return true;
-	}
-	return false;
+    dbgflg = (u8*)&gc_ptIbootCtrl.flag;
+    if( (dbgflg[0] == 'd') && (dbgflg[1] == 'b') && (dbgflg[2] == 'g') )
+    {
+        return true;
+    }
+    return false;
 }
 u32 IAP_GetAPPSize(void)
 {
@@ -134,170 +130,188 @@ u32 IAP_GetAPPCRC(void)
     return (gc_ptIbootCtrl.Iap_crc);
 }
 
-void  Sh_RunIBoot(char *param)
+bool_t  Sh_RunIBoot(char *param)
 {
-	 g_cIbootFlag[0]=0x52;   //R
-	 g_cIbootFlag[1]=0x75;   //u
-	 g_cIbootFlag[2]=0x6E;   //n
-	 g_cIbootFlag[3]=0x49;   //i
-	 g_cIbootFlag[4]=0x62;   //b
-	 g_cIbootFlag[5]=0x6F;   //o
-	 g_cIbootFlag[6]=0x6F;   //o
-	 g_cIbootFlag[7]=0x74;   //t
-	 g_cIbootFlag[8]=0x0;    // \0
+    pg_IapVar.IbootFlag[0]=0x52;   //R
+     pg_IapVar.IbootFlag[1]=0x75;   //u
+     pg_IapVar.IbootFlag[2]=0x6E;   //n
+     pg_IapVar.IbootFlag[3]=0x49;   //i
+     pg_IapVar.IbootFlag[4]=0x62;   //b
+     pg_IapVar.IbootFlag[5]=0x6F;   //o
+     pg_IapVar.IbootFlag[6]=0x6F;   //o
+     pg_IapVar.IbootFlag[7]=0x74;   //t
+     pg_IapVar.IbootFlag[8]=0x0;    // \0
 #if(CN_CPU_OPTIONAL_CACHE==1)
-	 Cache_CleanData();
-	 Cache_InvalidInst();
+     Cache_CleanData();
+     Cache_InvalidInst();
 #endif
-	 reset();
+     reset();
+     return true;
 }
 
-void  Sh_RunAPP(char *param)
+bool_t  Sh_RunAPP(char *param)
 {
-	g_cIbootFlag[0]=0x52;   //R
-	g_cIbootFlag[1]=0x75;   //u
-	g_cIbootFlag[2]=0x6E;   //n
-	g_cIbootFlag[3]=0x41;   //a
-	g_cIbootFlag[4]=0x50;   //p
-	g_cIbootFlag[5]=0x50;   //p
-	g_cIbootFlag[6]=0x00;   // \0
-	g_cIbootFlag[7]=0x00;
+    pg_IapVar.IbootFlag[0]=0x52;   //R
+    pg_IapVar.IbootFlag[1]=0x75;   //u
+    pg_IapVar.IbootFlag[2]=0x6E;   //n
+    pg_IapVar.IbootFlag[3]=0x41;   //a
+    pg_IapVar.IbootFlag[4]=0x50;   //p
+    pg_IapVar.IbootFlag[5]=0x50;   //p
+    pg_IapVar.IbootFlag[6]=0x00;   // \0
+    pg_IapVar.IbootFlag[7]=0x00;
 #if(CN_CPU_OPTIONAL_CACHE==1)
-	 Cache_CleanData();
-	 Cache_InvalidInst();
+     Cache_CleanData();
+     Cache_InvalidInst();
 #endif
-	reset();
+    reset();
+    return true;
 }
-void Sh_RunReleaseAPP(char *param)
+bool_t Sh_RunReleaseAPP(char *param)
 {
-//	gc_ptIbootCtrl.flag=CN_APP_CTRL_RELEASE_FLAG;
+//  gc_ptIbootCtrl.flag=CN_APP_CTRL_RELEASE_FLAG;
 //#if(CN_CPU_OPTIONAL_CACHE==1)
-//	 Cache_CleanData();
-//	 Cache_InvalidInst();
+//   Cache_CleanData();
+//   Cache_InvalidInst();
 //#endif
-//	reset();
+//  reset();
+    return true;
 }
 
-void Sh_GetAPPInfor(char *param)
+bool_t Sh_GetAPPInfor(char *param)
 {
     u32 size,crc32;
     char *filename;
-	size=gc_ptIbootCtrl.AppSize;
-	crc32=gc_ptIbootCtrl.Iap_crc;
+    size=gc_ptIbootCtrl.AppSize;
+    crc32=gc_ptIbootCtrl.Iap_crc;
     filename=gc_ptIbootCtrl.filename;
     printf("size:0x%08x,crc32:0x%08x,filename:%s.\r\n",size,crc32,filename);
+    return true;
 }
 //-----------------------------------------------------------------
-void Sh_GetStatus(char *param)
+bool_t Sh_GetStatus(char *param)
 {
-	switch (g_IbootStaus)
-	{
-		case 0:
-			printf("IAP status:No Err.\r\n");
-			break;
-		case 1:
-			printf("IAP status:Force Run Iboot.\r\n");
-			break;
-		case 2:
-			printf("IAP status:RAM Iboot flag.\r\n");
-			break;
-		case 3:
-			printf("IAP status:Load from data mode.\r\n");
-			break;
-		case 4:
-			printf("IAP status:Ecc Err.\r\n");
-			break;
-		case 5:
-			printf("IAP status:APP Flag Err.\r\n");
-			break;
-		case 6:
-			printf("IAP Err:APP File Not Exist Err.\r\n");
-			break;
-		case 7:
-			printf("IAP Err:APP File Size Invalid.\r\n");
-			break;
-		case 8:
-			printf("IAP Err:Iboot/App Ids MisMatch..\r\n");
-			break;
-		default:
-			break;
-	}
+    switch (pg_IapVar.IbootStatus)
+    {
+        case EN_NO_ERR:
+            printf("IAP status:No Err.\r\n");
+            break;
+        case EN_FORCE_IBOOT:
+            printf("IAP status:Force Run Iboot.\r\n");
+            break;
+        case EN_RAM_IBOOT_FLAG:
+            printf("IAP status:RAM Iboot flag.\r\n");
+            break;
+        case EN_LOAD_FROM_DATA_MODE:
+            printf("IAP status:Load from data mode.\r\n");
+            break;
+        case EN_CRC_ERR:
+            printf("IAP status:CRC Err.\r\n");
+            break;
+        case EN_APP_FLAG_ERR:
+            printf("IAP status:APP Flag Err.\r\n");
+            break;
+        case EN_FILE_NO_EXSIT_ERR:
+            printf("IAP Err:APP File Not Exist Err.\r\n");
+            break;
+        case EN_FILE_SIZE_INVALID_ERR:
+            printf("IAP Err:APP File Size Invalid.\r\n");
+            break;
+        case EN_BIN_INCOMPLETED_ERR:
+            printf("IAP Err:APP File Not Completed.\r\n");
+            break;
+        case EN_lDS_MISMATCH:
+            printf("IAP Err:Iboot/App Ids MisMatch，即gc_AppAddr 不等于RomStartAddr\r\n");
+            printf("可能的原因是iboot和APP的memory.lds中IbootSize定义不一致!\r\n");
+            break;
+        default:
+            break;
+    }
+    return true;
 }
 
 #define CN_VERSION_CHAR_LEN   100
-void Sh_GetIAPVersion(char *param)
+bool_t Sh_GetIAPVersion(char *param)
 {
    char *str;
    str=malloc(CN_VERSION_CHAR_LEN);
    if(str!=NULL)
    {
-	   str=djyos_kernel_version;
-	   printf("Version:%s.\r\n",str);
+       str=djyos_kernel_version;
+       printf("Version:%s.\r\n",str);
    }
+   return true;
 }
-void Sh_GetRunMode(char *param)
+
+bool_t Sh_GetRunMode(char *param)
 {
-	if(g_bRunModeFlag==0x12345678)
-   {
-		   printf("Run Mode:Iboot.\r\n");
-   }
-	else
-		printf("Run Mode:APP.\r\n");
+    if(pg_IapVar.RunMode==CN_IAP_MODE_IBOOT)
+    {
+           printf("Run Mode:Iboot.\r\n");
+    }
+    else
+    {
+#if (DEBUG == 1)
+        printf("Run Mode:APP(debug).\r\n");
+#else
+        printf("Run Mode:APP(release).\r\n");
+#endif
+    }
+    return true;
 }
 
 
 struct ShellCmdTab const shell_cmd_iap_table[]=
     {
-		{
-			"runiboot",
-			Sh_RunIBoot,
+        {
+            "runiboot",
+            Sh_RunIBoot,
         "切换到Iboot(仅在采取内存标示确定加载项目且APP有加载DJYOS shell模块时有效)",
         "COMMAND:runiboot+enter"
-		},
+        },
 
-		{
+        {
            "runapp",
-		   Sh_RunAPP,
+           Sh_RunAPP,
        "直接运行APP(仅在采取内存标示确定加载项目时有效)",
-		   "COMMAND:runapp+enter"
+           "COMMAND:runapp+enter"
     },
     {
-    	"runreapp",
-		Sh_RunReleaseAPP,
-		"运行ReleaseAPP",
-		"COMMAND:runreapp+enter"
+        "runreapp",
+        Sh_RunReleaseAPP,
+        "运行ReleaseAPP",
+        "COMMAND:runreapp+enter"
     },
-	{
-    	"appinfo",
-		Sh_GetAPPInfor,
-		"获取升级bin文件信息",
-		"COMMAND:appinfor+enter"
+    {
+        "appinfo",
+        Sh_GetAPPInfor,
+        "获取升级bin文件信息",
+        "COMMAND:appinfor+enter"
     },
-	{
-		"iapstatus",
-		Sh_GetStatus,
-		"获取Iboot状态信息",
-		"COMMAND:iaperr+enter"
-	},
-	{
-		 "iapver",
-			  Sh_GetIAPVersion,
-			  "获取IAP版本信息",
-			  "COMMAND:iapversion+enter"
-		},
-		{
+    {
+        "iapstatus",
+        Sh_GetStatus,
+        "获取Iboot状态信息",
+        "COMMAND:iaperr+enter"
+    },
+    {
+         "iapver",
+              Sh_GetIAPVersion,
+              "获取IAP版本信息",
+              "COMMAND:iapversion+enter"
+        },
+        {
       "iapmode",
-	  Sh_GetRunMode,
-	  "获取当前运行模式(Iboot or APP)",
-	  "COMMAND:iapsta+enter"
-	}
+      Sh_GetRunMode,
+      "获取当前运行模式(Iboot or APP)",
+      "COMMAND:iapsta+enter"
+    }
 };
 #define CN_IAP_SHELL_NUM  sizeof(shell_cmd_iap_table)/sizeof(struct ShellCmdTab)
 static struct ShellCmdRsc tg_iap_shell_cmd_rsc[CN_IAP_SHELL_NUM];
 ptu32_t IAP_Shell_Module_Install(void)
 {
-	Sh_InstallCmd(shell_cmd_iap_table,tg_iap_shell_cmd_rsc,CN_IAP_SHELL_NUM);
-	return 1;
+    Sh_InstallCmd(shell_cmd_iap_table,tg_iap_shell_cmd_rsc,CN_IAP_SHELL_NUM);
+    return 1;
 }
 
 //----安装IAP组件-----------------------------------------------------------
@@ -307,9 +321,14 @@ ptu32_t IAP_Shell_Module_Install(void)
 //----------------------------------------------------------------------------
 ptu32_t ModuleInstall_IAP(void)
 {
-	IAP_Shell_Module_Install();
-	printf("IAP ModuleInstall success.\r\n");
-	return 0;
+    s32 Res;
+    extern s32 ModuleInstall_IAP_FS(const char *Dir);
+    Res = ModuleInstall_IAP_FS(NULL);
+    if(Res)
+        printf("\r\nerror: IAP file system is not installed!\r\n");
+    IAP_Shell_Module_Install();
+    printf("IAP ModuleInstall success.\r\n");
+    return 0;
 }
 
 
@@ -322,79 +341,89 @@ ptu32_t ModuleInstall_IAP(void)
 //----------------------------------------------------------------------------
 bool_t IAP_LoadAPPFromFile(void)
 {
-	bool_t result;
-	char *Buf;
-	u32 crc,len,addr;
-	FILE *fp;
+    bool_t result = true;
+    char *Buf;
+    u32 crc,len,addr;
+    FILE *fp;
     struct stat FpInfo;
 
-	//首先判断是否需要进入APP状态
-	result=IAP_IsForceIboot();
-	if(result)
-	{
-		g_IbootStaus=EN_FORCE_IBOOT;
-		result = false;  //运行Iboot
-	}
-	else
-	{
-		result=IAP_IsRamIbootFlag();
-		if(result)
-		{
-			g_IbootStaus=EN_RAM_IBOOT_FLAG;
-			result = false;   //运行Iboot
-		}
-		else
-		{
-			if(g_IbootType==0)
-			{
-			   fp=fopen(g_pcIbootDir,"r");
-			   if(fp==NULL)
-			   {
-				   result = false;
-				   goto LOAD_FILE_EXIT;
-			   }
+    //首先判断是否需要进入APP状态
+    result = IAP_IsForceIboot();
+    if(result)
+    {
+        pg_IapVar.IbootStatus=EN_FORCE_IBOOT;
+        result = false;  //运行Iboot
+    }
+    else
+    {
+        result=IAP_IsRamIbootFlag();
+        if(result)
+        {
+            pg_IapVar.IbootStatus=EN_RAM_IBOOT_FLAG;
+            result = false;   //运行Iboot
+        }
+        else
+        {
+            if(g_IbootType==EN_LOAD_FORM_DATA)
+            {
+               fp=fopen(g_pcIbootDir,"r");
+               if(fp==NULL)
+               {
+                   result = false;
+                   pg_IapVar.IbootStatus = EN_FILE_NO_EXSIT_ERR;
+                   goto LOAD_FILE_EXIT;
+               }
 
-			   addr=IAP_GetAPPStartAddr() - 0x100;
-			   Buf=(char *)addr;
+               addr=IAP_GetAPPStartAddr() - 0x100;
+               Buf=(char *)addr;
 
-			   fread(Buf,0x100,1,fp);			//read the 256 byte file info
+               fread(Buf,0x100,1,fp);           //read the 256 byte file info
 
-			   fseek(fp,0,0);
+               fseek(fp,0,0);
 
-			   if(IAP_APPIsDebug())				//dbg not need crc
-			   {
-					if(0 == stat(g_pcIbootDir,&FpInfo))
-					{
-						len = (u32)FpInfo.st_size;
-					}
-					else
-					{
-						fclose(fp);
-						result = false;
-						goto LOAD_FILE_EXIT;
-					}
-					fread(Buf,len,1,fp);
-			   }
-			   else
-			   {
-				   len=IAP_GetAPPSize();
-				   fread(Buf,len,1,fp);
-				   crc=crc32(Buf,len);
-				   if(crc!=gc_ptIbootCtrl.Iap_crc)
-				   {
-					   fclose(fp);
-					   result = false;
-					   goto LOAD_FILE_EXIT;
-				   }
-			   }
-				__AppPreLoad();
-				return true;		//clear compile warning
-			}
-		}
+               if(IAP_APPIsDebug())             //dbg not need crc
+               {
+                    if(0 == stat(g_pcIbootDir,&FpInfo))
+                    {
+                        len = (u32)FpInfo.st_size;
+                    }
+                    else
+                    {
+                        fclose(fp);
+                        result = false;
+                        pg_IapVar.IbootStatus = EN_BIN_INCOMPLETED_ERR;
+                        goto LOAD_FILE_EXIT;
+                    }
+                    fread(Buf,len,1,fp);
+               }
+               else
+               {
+                   len=IAP_GetAPPSize();
+                   fread(Buf,len,1,fp);
+                   crc=crc32(Buf,len);
+                   if(crc!=gc_ptIbootCtrl.Iap_crc)
+                   {
+                       fclose(fp);
+                       result = false;
+                       pg_IapVar.IbootStatus = EN_CRC_ERR;
+                       goto LOAD_FILE_EXIT;
+                   }
+               }
+               pg_IapVar.IbootStatus = EN_LOAD_FROM_DATA_MODE;
+               pg_IapVar.RunMode = CN_IAP_MODE_APP;
+#if(CN_CPU_OPTIONAL_CACHE==1)
+     Cache_CleanData();
+     Cache_InvalidInst();
+#endif
+                __AppStart();
+                return true;        //clear compile warning
+            }
+        }
 
-	}
+    }
 LOAD_FILE_EXIT:
-	return result;
+    pg_IapVar.RunMode = CN_IAP_MODE_IBOOT;
+    return result;
 }
 
 

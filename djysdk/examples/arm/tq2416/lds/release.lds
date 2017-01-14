@@ -6,56 +6,57 @@ INCLUDE  ..\lds\memory.lds
 /*正确的写法，可参看console中输出的命令行*/
 SECTIONS
 {
-    Iboot_RevRam :
+    /*地址填充区域，Release版本下载起始地址实质上是0x0040 0000 + IbootSize + 256*/
+    /*因此在此处填充section内，将InnerFlash地址偏移，使生成的bin文件起始地址为0x00440100*/
+    /*切勿在填充section内填写数据（例如LONG( . + 256)），否则生成的bin文件中会包含此段*/
+    Iboot_IbootFill :        
     {
-      g_cIbootFlag = .;      /*字符串变量，c中可用，用于判断进入APP还是Iboot*/
-    }>BootFlagRAM1
+        gc_IbootStart = .;
+        . += IbootSize;  
+    }>ROM
     
-    Iboot_AppCtrl :
+     Iboot_AppInfo :
     {
-       gc_ptIbootCtrl = .;   /*结构变量，c中可用，用于检查APP正确性*/
-    }>AppCtlRom
-   
-   cdata_AppCtrl :
-    {
-       LONG(0xffffffff) /*APP size*/
-       LONG(0xffffffff) /*CRC32 of APP*/
-       LONG(0xffffffff) /*rev*/
-       LONG(0x00676264) /* "dbg",调试标志，Iboot遇到此标志不检查APP正确性*/
-    }>AppCtlRom
-   
-    Iboot_AppInfo :
-    {
+        gc_ptIbootCtrl = .;         /*结构变量，c中可用，用于检查APP正确性*/
+        LONG(0xffffffff)            /*APP size*/
+        LONG(0xffffffff)            /*CRC32 of APP*/
+        LONG(0xffffffff)            /*rev*/
+        LONG(0x00676264)            /* "dbg",调试标志，Iboot遇到此标志不检查APP正确性*/
+
+        . = ALIGN(256);
         gc_ptAppInfo = .;   
         LONG( . + 256);
-        gc_AppSize = .;          /*ROM区 存储APP的bin文件大小 */
+        gc_AppSize = .;             /*ROM区 存储APP的bin文件大小 */
         LONG(pProgRomEnd - gc_AppSize + 4); /* APP的bin文件大小 */
-    }>AppVerfyRom
-    
-    Iboot_AppStart :
+        . = ALIGN(256);
+        gc_AppAddr = .;             /*函数指针变量，指向APP的起始地址*/
+    }>ROM
+   
+    /*RevRam是Ram保留区域，用于存储preload前使用或保存的内在数据,只有IAP_pload.c*/
+    /*的pg_IapVar变量从该段内分配，且该段在iboot.lds和debug/release.lds保持一致*/
+    Iboot_RevRam (NOLOAD):
     {
-        gc_AppAddr = .;         /*函数指针变量，指向APP的起始地址*/
-    }>AppRom
-    
+        . = ALIGN(0x08);
+        KEEP(*(.IapBootFlgRam .IapBootFlgRam.*))    
+    }>RAM1
+        
     text_startup_rROM1_lROM1 :
     {
-        . = ALIGN(0x08);   
+        . = ALIGN(0x08);          
+        KEEP(*liblibOS_tq2416_o2.a:initcpu.o (.text.AppStart))
+        KEEP(*liblibOS_tq2416_o2.a:pre_loader.o (.text .text.* .rodata .rodata.*))
+        . = ALIGN(0x08);
         KEEP(*(.isr_vector .isr_vector.*))
-        KEEP(*liblibOS_tq2416_o2.a:initcpu.o (.text .text.* .rodata .rodata.*))
-        KEEP(*liblibOS_tq2416_o2.a:initcpuc.o (.text .text.* .rodata .rodata.*))
-        KEEP(*liblibOS_tq2416_o2.a:hard-exps.o (.text .text.* .rodata .rodata.*))
-        KEEP(*liblibOS_tq2416_o2.a:hard-exp.o (.text .text.* .rodata .rodata.*))
-        KEEP(*liblibOS_tq2416_o2.a:mmu.o (.text .text.* .rodata .rodata.*))
-        KEEP(*liblibOS_tq2416_o2.a:set-cache.o (.text .text.* .rodata .rodata.*))
-        KEEP(*liblibOS_tq2416_o2.a:pre_loader.o (.text .text.* .rodata .rodata.*))  
-    } >AppRom 
+    } >ROM 
  
     text_preload_rROM1_lROM1 :
     {
         . = ALIGN(0x08);
         
         KEEP(src/critical/critical.o (.text .text.* .rodata .rodata.*))
-
+        KEEP(*liblibOS_tq2416_o2.a:hard-exps.o (.text .text.* .rodata .rodata.*))
+        KEEP(*liblibOS_tq2416_o2.a:hard-exp.o (.text .text.* .rodata .rodata.*))
+        KEEP(*liblibOS_tq2416_o2.a:set-cache.o (.text .text.* .rodata .rodata.*))
         *liblibOS_tq2416_o2.a:loader.o (.text .text.* .rodata .rodata.*)
         *liblibOS_tq2416_o2.a:int_hard.o (.text .text.* .rodata .rodata.*)
         *liblibOS_tq2416_o2.a:int.o (.text .text.* .rodata .rodata.*)
@@ -64,7 +65,7 @@ SECTIONS
         *liblibOS_tq2416_o2.a:cpu_peri.o (.text .text.* .rodata .rodata.*)
         *liblibOS_tq2416_o2.a:heap-static.o (.text .text.* .rodata .rodata.*)
         *liblibOS_tq2416_o2.a:list.o (.text .text.* .rodata .rodata.*)
-    }>RAM1 AT>AppRom
+    }>RAM1 AT>ROM
     
     rw_preload_rRAM1_lROM1 :
     {
@@ -81,7 +82,7 @@ SECTIONS
         *liblibOS_tq2416_o2.a:cpu_peri.o (.data .data.*)
         *liblibOS_tq2416_o2.a:heap-static.o (.data .data.*)
         *liblibOS_tq2416_o2.a:list.o (.data .data.*)
-    }>RAM1 AT>AppRom
+    }>RAM1 AT>ROM
     
     zi_preload_rRAM1_lRAM1 (NOLOAD) :
     {
@@ -99,24 +100,16 @@ SECTIONS
     }>RAM1 
      
     text_sysload_rROM1_lROM1 :
-    {
+    {        
         . = ALIGN(0x08);
         * (.text .text.* .rodata .rodata.*)
-    }>RAM1 AT>AppRom 
-    
-    stack_rRAM1_lRAM1 (NOLOAD) :
-    {
-        . = ALIGN(0x08);
-        msp_bottom = .;
-        KEEP(* (.data.InitStack))
-        msp_top = ALIGN(0x08);
-    }>RAM1
+    }>RAM1 AT>ROM 
     
     rw_sysload_rRAM1_lROM1 :
     {
         . = ALIGN(0x08);
         * (.data .data.*)
-    }>RAM1 AT>AppRom
+    }>RAM1 AT>ROM
     
     
     zi_sysload_rRAM1_lRAM1 (NOLOAD) :
@@ -184,7 +177,7 @@ SECTIONS
         LONG(ADDR(zi_preload_rRAM1_lRAM1))
         LONG(SIZEOF(zi_preload_rRAM1_lRAM1))
         LONG(0)
-    }>AppRom 
+    }>ROM 
     
     sysload_cp_table :
     {
@@ -208,7 +201,7 @@ SECTIONS
         LONG(ADDR(zi_sysload_rRAM1_lRAM1))
         LONG(SIZEOF(zi_sysload_rRAM1_lRAM1))
         LONG(0)
-    }>AppRom 
+    }>ROM 
             
     heap_rRAM1_lRAM1 (NOLOAD) :
     {
@@ -222,7 +215,7 @@ SECTIONS
     {
         . = ALIGN(0x08);
         extram_heap_bottom = .;
-        . += 16M-16;
+        . += RAM2Size;
         extram_heap_top = .;
         
     }>RAM2 
@@ -260,7 +253,7 @@ SECTIONS
         BYTE(0)                     /*串结束，"extram"是堆的名字*/
         . = ALIGN(0x04);
         LONG(0)                     /*结束标志*/
-    }>AppRom 
+    }>ROM 
     
     zi_startup_rRAM_nocache_lRAM_nocache (NOLOAD) :
     {
@@ -285,10 +278,16 @@ SECTIONS
 
     } >RAM_nocache
     
+    Iboot_Info :
+    {
+        gc_ptIbootSize = .;
+        LONG(IbootSize)
+    }>ROM
+    
     rom_prog_end :
     {
        . = ALIGN(0x04);
         pProgRomEnd = .;
-    }>AppRom 
+    }>ROM 
 }
 /**** The End ****/

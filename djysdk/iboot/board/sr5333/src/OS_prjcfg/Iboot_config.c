@@ -58,24 +58,9 @@
 #include "cpu_peri.h"
 #include "IAP.h"
 
-enum _ENUM_RUN_MODE_
-{
-	EN_LOAD_FORM_DATA=0,   //
-	EN_DIRECT_RUN,
-};
 
-
-enum _ENUM_USE_CRC_
-{
-	EN_NO_USE_CRC=0,
-	EN_USE_CRC,
-};
-
-
-
-
-const u8 g_IbootType           =EN_DIRECT_RUN;
-const u8 g_IbootCRC            =EN_USE_CRC;
+const u8 g_IbootType  =EN_DIRECT_RUN;	//是否直接从程序存储器中加载（即Mcu模式）
+const u8 g_IbootCRC   =EN_USE_CRC;	//是否对APP程序进行CRC校验，需要极快速启动才不需要CRC校验
 const char *g_pcIbootDir       ="";
 
 

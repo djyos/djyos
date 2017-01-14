@@ -401,7 +401,7 @@ static void __UART_HardInit(u8 SerialNo)
     __UART_GpioConfig(SerialNo);
     //系统初始化时已经使中断处于禁止状态，无需再禁止和清除中断。
    //初始化uart硬件控制数据结构
-    tg_UART_Reg[SerialNo]->CR1 = 0x20bc;
+    tg_UART_Reg[SerialNo]->CR1 = 0x20ac;
     tg_UART_Reg[SerialNo]->CR2 = 0x0;
     tg_UART_Reg[SerialNo]->CR3 = 0x0000;
     __UART_BaudSet(tg_UART_Reg[SerialNo],SerialNo,115200);
@@ -882,7 +882,7 @@ u32 UART_ISR(ptu32_t IntLine)
         num = Reg->SR;     //读一下sr寄存器
         UART_ErrHandle(UCB,CN_UART_FIFO_OVER_ERR);
     }
-    if(Reg->SR & (1<<4))
+    if((Reg->SR & (1<<4)) && (Reg->CR1 & (1<<4)))
     {
         Reg->DR;
         Int_TapLine(UartDmaRxInt[port]);

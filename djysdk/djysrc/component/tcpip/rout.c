@@ -102,6 +102,12 @@ tagNetDev  *NetDevGet(const char  *name)
     }
     return result;
 }
+
+ptu32_t NetDevHandle(const char *name)
+{
+	return (ptu32_t)NetDevGet(name);
+}
+
 // =============================================================================
 // FUNCTION   :install an net device to the stack
 // PARAMS IN  :para, the net device function paras as tagNetDevPara defined
@@ -421,30 +427,6 @@ const char *pFilterItemName[EN_NETDEV_FRAME_LAST]=
 	"MULTI",
 };
 //we use this function to show the net device filter state
-static bool_t NetDevFilterStat_Old(char *name)
-{
-    bool_t      result = false;
-    tagNetDev  *dev;
-	tagNetDevRcvFilter *filter;
-	u32                 type;
-
-    dev = NetDevGet((const char *)name);
-    if(NULL != dev)
-    {
-    	for(type =0; type < EN_NETDEV_FRAME_LAST;type++)
-    	{
-    		filter = &dev->rfilter[type];
-    		printf("%s:stat       :%s\n\r",pFilterItemName[type],filter->enable==true?"enable":"disable");
-    		printf("%s:action     :%s\n\r",pFilterItemName[type],filter->action?"start":"stop");
-    		printf("%s:command    :0x%08x  measuretime:0x%08x(us) \n\r",pFilterItemName[type],filter->cmd,filter->measuretime);
-    		printf("%s:actiontimes:0x%08x  actiontime :0x%08x(us) \n\r",pFilterItemName[type],filter->actiontimes,filter->actiontime);
-    		printf("%s:framcounter:0x%08x  framlimit  :0x%08x(f/u)\n\r",pFilterItemName[type],filter->framcounter,filter->framlimit);
-    		printf("%s:frametotal :0x%08llx  starttime  :0x%08llx   \n\r",pFilterItemName[type],filter->framtotal,filter->starttime);
-    	}
-    	result =true;
-    }
-    return result;
-}
 static bool_t NetDevFilterStat(char *name)
 {
     bool_t      result = false;
@@ -1201,7 +1183,7 @@ static  ptu32_t __NetDevMonitor(void)
 	return 0;
 }
 
-
+extern bool_t LinkHookShell(char *param);
 
 struct ShellCmdTab  gRoutDebug[] =
 {
@@ -1225,9 +1207,15 @@ struct ShellCmdTab  gRoutDebug[] =
     },
     {
         "netdevfilter",
-        NetDevFilterStat,
+		NetDevFilterStat,
         "usage:netdevfilter",
         "usage:netdevfilter",
+    },
+    {
+        "linkhook",
+		LinkHookShell,
+        "usage:linkhook",
+        "usage:linkhook",
     },
 };
 #define CN_ROUTDEBUG_NUM  ((sizeof(gRoutDebug))/(sizeof(struct ShellCmdTab)))

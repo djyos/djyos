@@ -303,7 +303,6 @@ bool_t pasteDhcpRequestMsg(tagDhcpRequestPara *para,tagDhcpMsg *msg)
     if((0 != memcmp(p,CN_DHCP_MAGICCOOKIE,4))||(para->optype != DHCP_BOOTREQUEST))
     {
     	result = false;
-    	printf("%s:dhcp magic cookie error or opcode error\n\r",__FUNCTION__);
     	return result;
     }
 

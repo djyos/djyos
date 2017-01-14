@@ -189,8 +189,8 @@ void Sys_ModuleInit(void)
     ModuleInstall_IAP();
 
     //定时器组件
-//    extern ptu32_t ModuleInstall_TimerSoft(ptu32_t para);
-//    ModuleInstall_TimerSoft(CN_TIMER_SOURCE_TICK);
+//    extern ptu32_t ModuleInstall_Timer(ptu32_t para);
+//    ModuleInstall_Timer(CN_TIMER_SOURCE_TICK);
 
     //install the system net
 //    extern ptu32_t ModuleInstall_BoardNetDynamic(ptu32_t para) ; //dynamic ip

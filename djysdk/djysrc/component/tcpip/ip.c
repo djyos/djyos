@@ -187,7 +187,7 @@ bool_t IpRegisterTplHandler(u8 proto,fnIpTpl handler )
     bool_t  result;
     if((proto < CN_TPLPROTO_NUM)&&(NULL == gIpTplDealFun[proto]))
     {
-    	gIpTplDealFun[proto] = handler;
+        gIpTplDealFun[proto] = handler;
         result =  true;
     }
     else
@@ -239,28 +239,28 @@ int IpChksumSoft16_old(void *buf,short len,int chksum, bool_t done)
     sum = chksum;
     if(((u32)buf)&0x01)  //never should not aligned
     {
-    	while(1);
+        while(1);
     }
 
     buf16 = (u16 *)buf;
     for(;len>1;len-=2)
     {
-    	sum+=*buf16++;
+        sum+=*buf16++;
     }
     if(len ==1)
     {
-    	left[0] = *(u8 *)buf16;
-    	left[1] = 0;
-    	memcpy(&leftvalue,left,2);
-    	sum += leftvalue;
+        left[0] = *(u8 *)buf16;
+        left[1] = 0;
+        memcpy(&leftvalue,left,2);
+        sum += leftvalue;
     }
     while((sum>>16))
     {
-    	sum = (sum>>16) + (sum&0xFFFF);//将高16bit与低16bit相加
+        sum = (sum>>16) + (sum&0xFFFF);//将高16bit与低16bit相加
     }
     if(done)
     {
-    	sum = ~sum;
+        sum = ~sum;
     }
 
     return sum;
@@ -312,7 +312,7 @@ u16 IpChksumSoft16(void *dataptr, int len,u16 chksum,bool_t done)
 
   if(done)
   {
-  	data16 = ~data16;
+    data16 = ~data16;
   }
 
   return data16;
@@ -464,7 +464,7 @@ bool_t IpInit(void)
 
     Ipv4Init();
     memset((void *)gIpTplDealFun,0,sizeof(gIpTplDealFun));
-    pIpEngineSync = Lock_SempCreate(1,0,CN_SEMP_BLOCK_FIFO,NULL);
+    pIpEngineSync = Lock_SempCreate(1,0,CN_BLOCK_FIFO,NULL);
     if(NULL == pIpEngineSync)
     {
         goto EXIT_ENGINESYNC;
