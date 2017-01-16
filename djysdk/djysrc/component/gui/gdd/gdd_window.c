@@ -1257,7 +1257,7 @@ bool_t SetWindowHide(HWND hwnd)
 {
     if(HWND_Lock(hwnd))
     {
-        hwnd->Style |=~ WS_VISIBLE;
+        hwnd->Style &= ~ WS_VISIBLE;
         GK_ApiSetVisible(hwnd->pGkWin,CN_GKWIN_HIDE,0);
         HWND_Unlock(hwnd);
         return TRUE;
