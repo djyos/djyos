@@ -68,6 +68,7 @@ static bool_t SH_List(const char *Param);
 static bool_t SH_ChangeDir(const char *Param);
 static bool_t SH_Remove(const char *Param);
 static bool_t SH_Cat(const char *Param);
+static bool_t SH_Copy(const char *Param);
 //
 //
 //
@@ -117,6 +118,12 @@ static struct ShellCmdTab const FsCmdTable[] =
         "读文件并打印",
         "\r\n"
     },
+	{
+		"cp",
+		SH_Copy,
+		"拷贝文件",
+		"example: cp /fat/abc /yaffs/abc\r\n"
+	},
 #if 0
     {
         "mount",
@@ -502,7 +509,7 @@ static bool_t SH_Remove(const char *Param)
 static bool_t SH_Cat(const char *Param)
 {
     char *Path = (char *)Param;
-    int Fd;
+    int FH;
     char Buf[64];
     s32 Ret;
     u8 i;
@@ -514,25 +521,110 @@ static bool_t SH_Cat(const char *Param)
         Path = Path + 1; // 去除多余的空格符,对于文件系统路径而言,是不可能以空格开始的
 
 
-    Fd = open(Param, O_RDONLY, 0);
-    if(NULL == Fd)
+    FH = open(Param, O_RDONLY, 0);
+    if(-1 == FH)
     {
-        printf("文件无法打开");
+        printf("\"cat\": 文件无法打开");
         return (FALSE);
     }
 
     printf("16进制显示模式:\r\n");
     do{
-        Ret = read(Fd, Buf, 64);
+        Ret = read(FH, Buf, 64);
         for(i = 0; i < Ret; i++)
             printf("%02x", Buf[i]);
     }while(Ret == 64);
 
-    close(Fd);
+    close(FH);
 
     return (TRUE);
 }
 
+//-----------------------------------------------------------------------------
+//功能: 拷贝文件
+//参数: "cp /fat/abc /yaffs/abc"
+//返回:
+//备注:
+//-----------------------------------------------------------------------------
+#define RW_SIZE  256
+static bool_t SH_Copy(const char *Param)
+{
+
+	char *PathTemp;
+	char *PathSrc;
+    char *PathDes;
+    u16 Length;
+    s32 HandleSrc;
+    s32 HandleDes;
+    u8 Buf[RW_SIZE];
+    s32 Res;
+
+    PathTemp = (char*)Param;
+    if(NULL == PathTemp)
+    {
+    	printf("\"cp\": no parameters!\r\n");
+    	return (FALSE);
+    }
+
+    while(*PathTemp == ' ')
+    	PathTemp = PathTemp + 1; // 去除多余的空格符,对于文件系统路径而言,是不可能以空格开始的
+
+    PathDes = PathTemp; // 临时保存头位置
+    PathSrc = PathTemp;
+    while(*PathTemp != ' ')
+    	PathTemp = PathTemp + 1; // 找到空格
+
+    Length = PathTemp - PathSrc;
+    PathSrc = malloc(Length + 1); // 含结束符
+    if(!PathSrc)
+    {
+    	printf("\"cp\": memory out!\r\n");
+    	return (FALSE);
+    }
+
+    memcpy(PathSrc, (PathTemp - Length), Length);
+    PathSrc[Length] = '\0';
+    PathDes = PathTemp + 1;
+    HandleSrc = open(PathSrc, O_RDONLY);
+    if(-1 == HandleSrc)
+    {
+        printf("\"cp\": cannot open source file!\r\n");
+        return (FALSE);
+    }
+
+    HandleDes = open(PathDes, O_RDWR | O_CREAT);
+	if(-1 == HandleDes)
+	{
+		printf("\"cp\": cannot open destination file!\r\n");
+		return (FALSE);
+	}
+
+	while(1)
+	{
+		Res = read(HandleSrc, Buf, RW_SIZE);
+		if(!Res)
+			break; // 全部读完
+
+		if(Res != write(HandleDes, Buf, Res))
+		{
+			printf("\"cp\": write destination file error.\r\n");
+			break;
+		}
+
+		if(Res != RW_SIZE)
+			break; // 全部读完
+	}
+
+	Res = close(HandleDes);
+	if(Res)
+		printf("\"cp\": close destination file error.\r\n");
+
+	Res = close(HandleSrc);
+    if(Res)
+    	printf("\"cp\": close source file error.\r\n");
+
+    return (TRUE);
+}
 //-----------------------------------------------------------------------------
 //功能: 文件系统相关shell命令安装
 //参数:

@@ -1,34 +1,34 @@
 //----------------------------------------------------
 // Copyright (c) 2014, SHENZHEN PENGRUI SOFT CO LTD. All rights reserved.
 
-// Redistribution and use in source and binary forms, with or without
+// Redistribution and use in source and binary forms, with or without 
 // modification, are permitted provided that the following conditions are met:
 
-// 1. Redistributions of source code must retain the above copyright notice,
+// 1. Redistributions of source code must retain the above copyright notice, 
 //    this list of conditions and the following disclaimer.
-// 2. Redistributions in binary form must reproduce the above copyright notice,
-//    this list of conditions and the following disclaimer in the documentation
+// 2. Redistributions in binary form must reproduce the above copyright notice, 
+//    this list of conditions and the following disclaimer in the documentation 
 //    and/or other materials provided with the distribution.
 // 3. As a constituent part of djyos,do not transplant it to other software
 //    without specific prior written permission.
 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
 // LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 // CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 // SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 // Copyright (c) 2014 著作权由深圳鹏瑞软件有限公司所有。著作权人保留一切权利。
-//
+// 
 // 这份授权条款，在使用者符合以下三条件的情形下，授予使用者使用及再散播本
 // 软件包装原始码及二进位可执行形式的权利，无论此包装是否经改作皆然：
-//
+// 
 // 1. 对于本软件源代码的再散播，必须保留上述的版权宣告、本条件列表，以
 //    及下述的免责声明。
 // 2. 对于本套件二进位可执行形式的再散播，必须连带以文件以及／或者其他附
@@ -276,7 +276,7 @@ static  bool_t  __UdpCbInit(int len)
     pUcbFreeLstSync = Lock_MutexCreate(NULL);
     if(NULL == pUcbFreeLstSync)
     {
-        return result;
+    	return result;
     }
 
     pUcbFreeLst = malloc(len *sizeof(tagUdpCB));
@@ -522,10 +522,10 @@ static int __msgsnd(tagSocket *sock, const void *msg, int len, int flags,\
         pkg = PkgMalloc(sizeof(tagUdpHdr),0);
         if(NULL != pkg)
         {
-            pkgdata = PkgMalloc(sizeof(tagNetPkg),CN_PKLGLST_END);
-            if(NULL != pkgdata)
-            {
-                //compute the ip and port
+        	pkgdata = PkgMalloc(sizeof(tagNetPkg),CN_PKLGLST_END);
+        	if(NULL != pkgdata)
+        	{
+        		//compute the ip and port
                 iplocal = sock->element.v4.iplocal;
                 portlocal =  sock->element.v4.portlocal;
 
@@ -563,11 +563,11 @@ static int __msgsnd(tagSocket *sock, const void *msg, int len, int flags,\
                 PkgTryFreePart(pkg);
                 PkgTryFreePart(pkgdata);
                 TCPIP_DEBUG_INC(ucb->framsnd);
-            }
-            else
-            {
+        	}
+        	else
+        	{
                 PkgTryFreePart(pkg);
-            }
+        	}
         }
     }
     return result;
@@ -703,7 +703,7 @@ static int __recv(tagSocket *sock, void *buf,int len, unsigned int flags)
                 }
                 else
                 {
-                    result = -1;
+                	result = -1;
                 }
             }
             else
@@ -723,12 +723,12 @@ static int __recv(tagSocket *sock, void *buf,int len, unsigned int flags)
                 sock->iostat &= (~CN_SOCKET_IOREAD);
                 Multiplex_Set(sock->ioselect, sock->iostat);
             }
-            Lock_MutexPost(sock->sync);
+        	Lock_MutexPost(sock->sync);
         }
     }
     else
     {
-        result = -1;//maybe timeout ;need more try
+    	result = -1;//maybe timeout ;need more try
     }
     return  result;
 }
@@ -798,7 +798,7 @@ static int __recvfrom(tagSocket *sock,void *buf, int len, unsigned int flags,\
                 }
                 else
                 {
-                    result = -1;
+                	result = -1;
                 }
             }
             else
@@ -818,12 +818,12 @@ static int __recvfrom(tagSocket *sock,void *buf, int len, unsigned int flags,\
                 sock->iostat &= (~CN_SOCKET_IOREAD);
                 Multiplex_Set(sock->ioselect, sock->iostat);
             }
-            Lock_MutexPost(sock->sync);
+        	Lock_MutexPost(sock->sync);
         }
     }
     else
     {
-        result = -1;//maybe timeout ;need more try
+    	result = -1;//maybe timeout ;need more try
     }
     return  result;
 }
@@ -1006,7 +1006,7 @@ static int __sol_socket(tagSocket *sock,int optname,const void *optval, int optl
         case SO_SNDLOWAT:
             break;
         case SO_RCVTIMEO:
-            sock->sockstat |=CN_SOCKET_PROBLOCK;
+        	sock->sockstat |=CN_SOCKET_PROBLOCK;
             ucb->rbuf.timeout = *(u32 *)optval;
             result = 0;
             break;
@@ -1136,7 +1136,7 @@ static void __addpkg2rbuf(tagUdpCB *ucb, tagNetPkg *pkg)
 // RETURN  :
 // INSTRUCT:
 // =============================================================================
-static bool_t __UdpRcvV4(u32 ipsrc, u32 ipdst, tagNetPkg *pkg, tagRout *rout)
+static bool_t __UdpRcvV4(u32 ipsrc, u32 ipdst, tagNetPkg *pkg, tagNetDev *dev)
 {
     bool_t              result ;
     u16                 portdst;
@@ -1146,9 +1146,9 @@ static bool_t __UdpRcvV4(u32 ipsrc, u32 ipdst, tagNetPkg *pkg, tagRout *rout)
     tagSocket          *sock;
     struct  sockaddr_in addrin;
     u32                 devfunc;
-
+    
     result  = true;
-    devfunc = NetDevGetFunc(rout->dev);
+    devfunc = NetDevGetFunc(dev);
     if((NULL == pkg)||(pkg->datalen <= sizeof(tagUdpHdr)))
     {
         goto EXIT_RCVEND;  //para error
@@ -1177,10 +1177,6 @@ static bool_t __UdpRcvV4(u32 ipsrc, u32 ipdst, tagNetPkg *pkg, tagRout *rout)
     sock = __hashSocketSearch(ipdst,portdst);
     if(NULL == sock)
     {
-        sock =__hashSocketSearch(rout->ipaddr.ipv4.ip,portdst); //if rout ip match
-    }
-    if(NULL == sock)
-    {
         sock =__hashSocketSearch(INADDR_ANY,portdst); //if INADDR_ANY match
     }
 
@@ -1200,7 +1196,7 @@ static bool_t __UdpRcvV4(u32 ipsrc, u32 ipdst, tagNetPkg *pkg, tagRout *rout)
         }
         if(ucb->rbuf.buflen >= ucb->rbuf.buflenlimit)
         {
-            result = false;
+        	result = false;
         }
 
         if(result)
@@ -1231,12 +1227,12 @@ EXIT_RCVEND:
     return true;
 }
 
-static bool_t __recvProcess(enum_ipv_t  ver, ptu32_t ipsrc, ptu32_t ipdst, tagNetPkg *pkg, tagRout *rout)
+static bool_t __recvProcess(enum_ipv_t  ver, ptu32_t ipsrc, ptu32_t ipdst, tagNetPkg *pkg, tagNetDev *dev)
 {
     bool_t result =false;
     if(EN_IPV_4 == ver)
     {
-        result = __UdpRcvV4((u32)ipsrc, (u32)ipdst,pkg,rout);
+        result = __UdpRcvV4((u32)ipsrc, (u32)ipdst,pkg,dev);
     }
 
     return result;

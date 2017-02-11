@@ -1,65 +1,52 @@
 //----------------------------------------------------
 // Copyright (c) 2014, SHENZHEN PENGRUI SOFT CO LTD. All rights reserved.
 
-// Redistribution and use in source and binary forms, with or without
+// Redistribution and use in source and binary forms, with or without 
 // modification, are permitted provided that the following conditions are met:
 
-// 1. Redistributions of source code must retain the above copyright notice,
+// 1. Redistributions of source code must retain the above copyright notice, 
 //    this list of conditions and the following disclaimer.
-// 2. Redistributions in binary form must reproduce the above copyright notice,
-//    this list of conditions and the following disclaimer in the documentation
+// 2. Redistributions in binary form must reproduce the above copyright notice, 
+//    this list of conditions and the following disclaimer in the documentation 
 //    and/or other materials provided with the distribution.
 // 3. As a constituent part of djyos,do not transplant it to other software
 //    without specific prior written permission.
 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
 // LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 // CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 // SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
-// Copyright (c) 2014 著作权由深圳鹏瑞软件有限公司所有。著作权人保留一切权利。
+// Copyright (c) 2014 闂備焦鍨濋悞锕傚Φ閻愮數绀婇柡鍐ㄧ墕缁狙囨煕閹板吀绨奸柡鍡欏У缁绘盯鏁愰崨顓″煘濠电媴鎷烽弨閬嶅Χ閿濆牏鐤?闁哄洨鍠庨弸鏃堟煛婢跺苯鍓遍柛顭戝灠閳诲酣濮?閵堝懎鐝樻繝銏ｅ煐閸旀牠顢撳▎鎾寸厱闊浄绲芥晶顔撅拷閺夊灝鏆ｆ鐐茬Ч閺佹捇鎳為妷褏鏆㈤梻渚?娼уΛ妤呭磹娴犲绠熼柛娆忣樇婵瓨绻濇繝鍌氼仾缂傚稄鎷烽湁婵犲﹤妫欓妴鍐磼缂佹ê鍝洪柟顔藉劤閳诲孩鎯旈敐搴濈礃闂備礁鎲＄敮鎺懨洪敃锟界劷闁割偁鍎辩粈鍡涙煃閻熸澘鐨￠柟鍑ゆ嫹
 //
-// 这份授权条款，在使用者符合以下三条件的情形下，授予使用者使用及再散播本
-// 软件包装原始码及二进位可执行形式的权利，无论此包装是否经改作皆然：
-//
-// 1. 对于本软件源代码的再散播，必须保留上述的版权宣告、本条件列表，以
-//    及下述的免责声明。
-// 2. 对于本套件二进位可执行形式的再散播，必须连带以文件以及／或者其他附
-//    于散播包装中的媒介方式，重制上述之版权宣告、本条件列表，以及下述
-//    的免责声明。
-// 3. 本软件作为都江堰操作系统的组成部分，未获事前取得书面许可，不允许移植到非
-//    都江堰操作系统环境下运行。
-
-// 免责声明：本软件是本软件版权持有人以及贡献者以现状（"as is"）提供，
-// 本软件包装不负任何明示或默示之担保责任，包括但不限于就适售性以及特定目
-// 的的适用性为默示性担保。版权持有人及本软件之贡献者，无论任何条件、
-// 无论成因或任何责任主义、无论此责任为因合约关系、无过失责任主义或因非违
-// 约之侵权（包括过失或其他原因等）而起，对于任何因使用本软件包装所产生的
-// 任何直接性、间接性、偶发性、特殊性、惩罚性或任何结果的损害（包括但不限
-// 于替代商品或劳务之购用、使用损失、资料损失、利益损失、业务中断等等），
-// 不负任何责任，即在该种使用已获事前告知可能会造成此类损害的情形下亦然。
-//-----------------------------------------------------------------------------
+// 闂佸搫顦烽弲婊堟偡閵堝鑸归柕鍫濐樆缁犳娊鏌涢銈呮瀾缂傚稄鎷烽弻鈩冨緞閸℃鈷夊銈嗗灦閻熲晠寮鍥︽勃闁兼亽鍎撮崥顐ｇ箾鏉堝墽绉繛澶嬫礋瀵偊濡舵径瀣畬闂佸憡渚楅崹濂稿磿婵犲洦鐓曟慨姗嗗墰婢ф柨霉濠婂嫬绗氱紒瀣樈閿熶粙鍩￠崘顏呭暔闂備礁鎼ˇ鐑芥晸閽樺鏋庨柕蹇嬪?栭崕宥夋煕閺囥劌澧柛鎾村閹叉悂鏌囬敂鐣岋拷缂備焦顨滈幊姗?寮鍥︽勃闁诡垎鍕叄濠电偛鐡ㄧ划宀勬偋閸涱喚绠鹃柛銉墯閸嬨劑鏌曟繝搴ｅ帨闁瑰嘲鍢查湁闁挎繂鐗婄涵鍫曟煛娴ｉ潧锟界?规洩绲剧换婵嬪磼濮橆厽鐝掗梻浣芥〃缁躲倗寰婃ィ鍐ㄧ闂侇剙绉寸?氬鏌ㄩ悤鍌涘// 闂佸搫顦介崕鎰板垂椤栨埃鏋庨柕蹇嬪?曠粈宀勬煕濞戙垹浜版俊顐ｇ墵閺屾稑螣閻撳孩鐎诲銈庡墮閿曨亪骞嗗鍡樺缂佸瀵х亸瀣箾鐎涙鐭婇柣顓濊兌閹广垹螣缂佹ê顎撻悗骞垮劚閹冲海鎷嬮弻銉︾厵缂佹绋戝Λ顓㈠绩閻ｅ本鍠愰柤鍓插墮閻忊晝绱掗幉瀣瘈闁诡垰鍟村畷鐔碱敆娴ｈ櫣袣闂備礁鎲″濠氬疾椤忓棙顬忔繝闈涱儏缁秹鏌ｅΟ纭咁劅闁哥喎鐗婇幈銊モ攽閸曨偓鎷烽柣搴＄仛椤洭骞夊Δ鍛窛妞ゆ柨褰ㄩ敃鍌涚厱婵ɑ鍎抽—瀣磼椤曞棛绡?鐎殿喓鍔戦弻鍛槈濮樻墎鏋欓梻浣圭湽閸斿苯螞濞戙垹绀夌憸鏃堝极瀹ュ鏅搁柨鐕傛嫹/
+// 1. 闂佽娴烽弫濠氭晸閻ｅ矁濮虫い鎺戝鐎氬銇勯幒鎴濇殺闁瑰鍋勯湁闁绘ê鎼悡鎰磼椤垵鏋熺紒鍌涘浮閺佹劙宕堕埡浣轰化闂備焦鐪归崝宀?锟介鍕柈闁跨喕妫勯弸渚?鏌ㄥ┑鍡橆棯閻忓骏绻濋弻銊モ槈濡灝顏紓浣风串閹风兘濡甸崟顓熷鐎规洖娲ㄩ鏃堟⒑娴兼瑧绋婚柣鐔村?楃划顓㈠磼濞戞瑤姘﹂梺瑙勵問閸犳鎮鹃柆宥嗙厽婵°倧鎷锋晶娑欑箾閻撳海澧㈤柨鐔剁矙閺佹劙宕ㄩ鍏兼畼闂備線娼уΛ鏃堟倿閿曪拷鑰垮ù鍏兼綑缁狙囨煃閵夈儱绾фい鎰矙閺屾盯骞掗幙鍐╊啅闂侀潧妫楅崯鎾极瀹ュ洣娌梻鍌氼嚟闂夛拷
+//    闂備礁鎲￠悷銉╂晝閿濆洨绠旈柛娑卞枟娴溿倝鏌熷▓鍨灍闁伙綁浜堕弻娑滅疀閹剧紟銉╂煟椤撶噥娈辩紒鏃傚枛閹囧醇閻曚胶锟介梻渚?娼уΛ鎾箯閿燂拷/ 2. 闂佽娴烽弫濠氭晸閻ｅ矁濮虫い鎺戝鐎氬銇勯幒鐐村婵絾锚闇夐柣妯挎珪閺嬪嫮绱掗妸銏℃珕婵炶壈顕ч埥澶娢旈崘顎垽姊洪崨濠勬噽闁搞劏椴搁弲鍫曟偩鐏炴儳浠掗柣蹇曞仜閿熶粙宕哄畝锟芥嫹妞ゆ棁鍋愮粻铏箾閸喎鐏寸?规洘锚椤撳ジ宕卞Ο鑽ゆ瀮闂備礁婀遍搹搴ㄥ矗韫囨洘顬忔繝闈涳功閻わ拷鏌涘☉娆戞殬闁跨喍绮欏鍫曞煛閸愩劋绮堕梺姹囧焺閸嬪懐绮嬮幒妤?唯闁挎梻鏅敓鑺ョ箾鐎电ǹ校婵狅拷顬冪粋宥夊箳濡わ拷鐓戞繝鐢靛Т缁绘帞娑甸敓鑺ョ厵閻庢稒顭囨晶鎶芥煥閻斿墎鐭欑?规洘顨″鐢告偨閻㈠憡鎯冮梻鍌氬?哥?氭悂骞忛敓锟?/    濠电偛鐡ㄧ划宀?锟介埡鍛辈閹兼番鍔岀粻缁樸亜閹捐泛浠滈柣锕?鐖奸幃閿嬫媴閸涘﹤娅㈤梺鐓庣仛閸ㄥ潡骞嗛崘顔肩妞ゆ劑鍊曢悿顔界箾鐎电ǹ孝妞ゆ垵妫濆濠氭偄婵傚娈ㄩ棅顐㈡储閸庡磭绮堟径鎰拺闁圭粯甯炲瓭闂佺硶鏅滈〃婵堢矙婢跺绡?闁告侗鍘炬晶顖涚箾閹寸偞鐓ユい鎴濇处閺呰泛螖閸涱厾楠囬梺鍛婂姦閻撳牓宕ラ崨瀛樼厱婵炴垶锕╅悞楣冩煥閻斿墎鐭欑?殿喚鏁婚、妤佹媴绾懏瀚┑鐐差嚟婵儳鈻斿☉銏犲瀭妞ゅ繐妫欓崑妯汇亜椤撶喎绗х紒锟筋樆闇夐柣姗嗗枛閸旀氨锟介锟芥暠缂佸顦介敓浠嬵敇閻愰潧顤?
+//    闂備焦鐪归崝宀?锟介鍕偍闁靛牆娲︾?氬鏌ㄥ┑鍡樺珔缂佹唻缍侀弻锟犲礋椤愩倖妲?闂佽法鍣﹂幏锟?// 3. 闂備礁鎼悧婊堝礈濠靛瀚冮悗锝庡亞椤牠鏌￠崼銏℃毄缂佸锕ら埥澶愬箻鐎涙ǜ浠㈤梺绋跨箲閿氶弫鍫ユ煟閺冨牜妫㈠褎妞介弻鐔煎垂椤旀嫎锛勭磽瀹ュ棙鈷掗柛鏍ㄧ墵閹筹繝濡堕崶褏鍘烽梻浣圭湽閸斿瞼锟介鎯у灊鐎广儱顦荤粻锝夋煙閻楀牊绶查柛鏂诲劦閺屾盯骞掗幋鐑囩川缂備浇椴哥换鍫濐嚕閻㈠壊鏁傞柛銉戝拋鍞靛┑鐐茬摠缁矂顢栭崨顔芥珷闁绘ǹ顕ч惌妤呮煛瀹擃喖鎳愮粻鎺撶箾閹寸偞顥㈢紒鐘虫尭椤洭骞嶉钘夘?涚紓浣割儏閻忔繄鎷嬮弻銉︾叆婵炴垶锚椤ㄦ壆绱掑Δ锟芥鐎规洘顨濋幏鍛驳鐎ｎ亝娅婄紓鍌欑椤︾晫鍒掗鐐堝洦銈ｉ崘銊ь樂婵炲鍘ч悺銊︽叏閿燂拷//    闂傚倷绶￠崰娑欐叏閵堝鍎撴繛鍡樻尭闁卞洭鏌ｅΔ锟藉闁诡垱鐟ラ湁闁挎繂妫涢惌宀勬⒑椤旂⒈鍤熺紒杈ㄥ浮閹垽宕崟顓犳毎濠电姭鎷冮崘銊︽缂備焦顨滈幊蹇擃焽婵犳艾绠涙い鏍电稻閺傦拷姊洪棃娑欙紨闁瑰嚖鎷?
+// 闂備胶顭堢换鎰矓閻戣姤鍎楁俊銈勮兌閻濆爼鏌ｅΔ锟藉妞ゎ剚鍔欓弻銊モ槈濞嗘埈鏆″┑鐙呮嫹婢ф顭囬鍫晬婵炲棙鍔﹂崑銊╂⒑閸濆嫬顏撮柛銊ュ船閿曘垽鎮ч崼鐔奉灈濡炪倖鐗楅悷锕傤敃娴犲鐓熸俊銈忔嫹婢ф稒绻涢悡搴ｅⅵ妤犵偞鍔栭幏鍛喆閸曨厾鏆㈠┑鐐茬摠缁繐顪涢妸锔绢湋闁圭儤顨滈惌妤?鈹戦悩鍙夊櫧妞ゃ垹鎳橀弻锝咁灄閻撳孩鐏曢梺璺ㄥ枙婵倗绮嬮幒妤?唯鐟滃秶绮诲☉銏＄厽婵☆垱顑欓崯鍥╃磼閹插瀚筧s is"闂備焦瀵х粙鎴λ囬懝鑸汗濞达絽婀遍悷瑙勭箾閹存繄锛嶇紒锟芥嫹
+// 闂備礁鎼悧婊堝礈濠靛瀚冮悗锝庡亞椤牠鎮归崫鍕儓闁伙箑鐖奸幃閿嬫媴閸涘﹤娅㈢紓浣诡殰椤︿粙骞忚ぐ鎺撳亜闁兼悂娼ф惔濠冪箾鏉堝墽绋绘繛鍙壝嵄闁瑰濮烽惌鍡涙煟閹寸伝顏堟倶濡わ拷鐎炬繛鎴炵懐閻掍粙鏌曢崶銊ь暡缂佸锕﹂敓浠嬵敃閵忊晪鎷峰┑鐑囩到濞诧妇鎹㈤崱娑欏剹婵°倓鑳堕—鏍归崗鑲╂噮缂侊拷顧侀弻娑㈠冀瑜庨崳娲倵濮樼厧骞楅柟宄版嚇瀹曢亶寮撮悩鍨枓闂傚倸鍊哥?氼參宕濋幒鏃囧С妞ゆ帒鍊烽悞濠囨⒑椤掞拷鈻岄柟椋庡厴閺屾盯鎮滈崱妤佺亶闂佽法鍠曟慨銈囩矉閹烘唯闁靛鍎茬亸瀣⒑缂佹﹩娈堕柟铏崌閹偓銈ｉ崘鈺佸壆闂佽法鍣﹂幏锟?/ 闂備焦鐪归崝宀?锟介灏栨灁闁硅揪闄勯悞濠氭煕鐏炲墽鐭嬮柡鍡楃箻閺岀喖顢栭锟斤拷缂侊拷顑呴‖鎴濃槈濞嗘鍔烽梺闈涙处瀹?鎼佺嵁閿熺瓔妯嬫繝娈垮灠閻°劎绮氶崡鐐╂斀闁告洝鍩栫?氬綊姊虹紒姗嗘闁绘锕ら…鍥醇閵夈儳顔囨繛杈剧秬椤啰绮婚幒鎳ㄧ懓顭ㄩ崘鈺傚創閻庢鍠氶崗妯侯嚕閻㈠壊鏁嗛柛鎰靛幗鐎氼剚绻涚?电ǹ校婵狅拷婀辩划濠氭晲閸ャ劌顏搁梺鎸庣☉鐎氼剟鎯勯敓鑺ョ厾闁哄瀵х?氬懐绱掓潏銊х疄鐎殿噮鍣ｉ幃鈺傜瑹椤栨碍娅忓┑鐐差嚟婵箖顢欐繝鍕鐎广儱顦荤痪褔鏌嶉妷銉ョ骇妞ゆ劒绮欓弻鏇㈠幢椤撶喎顏?
+// 闂備礁鎼崯鐗堟叏妤ｅ喚鏁婇柟杈剧畱缁狅綁鏌熼柇锕?澧紒锟界墦閺岀喓锟藉Ο鐓庘叾闂佺懓绠嶉崹娲箯閸涙潙鍗抽柨娑樺閸橆剚绻涚?电ǹ鞋妞ゆ柨锕﹂敓鐣屼沪閸撗?鏋欐繝銏ｆ硾閻楃偤骞忛悜鑺ョ厸闁告劦浜滈瀷濡炪倖姊归崹鐢糕?栧⿰鍫澪ч柛顐犲灮閸橆剚绻涚?电ǹ鞋妞ゆ柨锕﹂幏褰掓偄閻撳海鍊為梺缁樏鍫曞磹閵堝洨纾奸柟鎯ф噽閻ｉ亶鏌涘▍璇叉噹鐎靛弶鎱ㄩ悷鐗堢カ闁归鍏橀弻锟犲礃椤忓嫅顒傜磼鐠囨彃鏆炵?垫澘瀚蹇涱敃閵堝洤骞?濠电偛顕慨楣冾敊婵犲嫸鎷烽悘鐐插⒔閳绘洖顭跨捄渚剰闁诲繑顨￠弻娑㈠Ψ瑜嶉埢鍫熺箾绾板彉绨兼繛鐓庮煼閺佹捇鏁撻敓锟? 缂傚倷鐒﹂幏婵堢磽濮樿京涓嶉柨婵嗘閻熷綊鏌涢…鎴濅簼缂傚稄鎷烽弻銊モ槈濡厧顣洪柣搴＄仛閿曘垽鐛箛娑辨晢闁告劦浜為悾鐑樼節閵忊?冲姸濡炲瓨鎮傚畷褰掑Ω閳轰胶顦抽梺鍝勭墢閺佹悂鏌ч崒鐐寸厱婵☆垳鍘ч弸搴㈢箾閸欏鐭岀紒顔肩仛瀵板嫬鈽夊槌栨▊闂備礁鍚嬪姗?鎯屾笟锟界闁挎繂顦奸弲顒勬倶閻愮數鎽傞柛銈囧Т闇夋繝濠傚暟閸戝綊鏌熼獮鍨仾闁瑰嘲鎳樺鎾倷鐎靛壊妯勫┑鐐舵彧缂嶏拷鈻旈弴銏犳瀬闁靛牆顦荤?氬銇勯幒鎴濇殺闁瑰鍋勯湁闁绘鍎ょ涵楣冩倵閸偒鐒介柟鍙夘殹瀹曘劑顢欑喊杈ㄦ濠电偛鐡ㄧ猾鍌炲川椤旇姤顏熼梻浣规た閻撳骞忛敓锟?/ 濠电偛顕慨楣冾敊婵犲嫮绀婄?广儱顦奸崕搴ㄦ倵濞戞顏呭緞瀹ュ鐓欐い鎴厸缁躲倝骞忛悜鑺モ拻闁稿本姘ㄩ幗鐘绘偨椤栨稒灏︽鐑囨嫹椤﹀ジ鏌ㄩ悢鍓佺煓鐎规洘鍨归幑鍕传閸曨厼鐭濋梻浣筋嚃閸庡憡绗熸繝鍐伓闂備胶绮〃鐘烩?栭崘顔藉仼闁冲搫鎳庣粻鎴犳喐鐎ｎ喗鏅稿ù鐘差儏缁犳岸鏌嶉崫鍕殶缂佸鐗撻弻鐔碱敄椤掞拷顏╅柣蹇旑殰闇夐柣妯硅閸炶櫣绱撳鍛ょ紒杈ㄥ浮楠炴锟介梹鎰毐闂備焦鐪归崝宀?锟介鐐垫殾妞ゆ牗绮ｉ幏椋庣磼濞戞ɑ璐＄紒锟藉閺屾盯寮借閸ｆ椽鎮楀鐓庡箺闁瑰嘲鎳樺畷閬嶅即閻樺灚鍠掗梻鍌氬?哥?氭悂骞忛敓锟?/ 濠电偛鐡ㄧ划宀?锟介埡浼辩懓鈽夊▎鎴箳闂佹寧绻傞幊蹇撯枍瀹?鍕厱婵犻潧鎳愰崝宥夋煕閵婏絽濮傜?规洘绻堝畷姗?骞撻幒婵堜罕濠电偞鍨堕弻銊╊敄閸儱绐楁慨妤嬫嫹閸嬨劑鏌曟繝蹇曠Ф闁瑰嘲鍢查湁闁挎繂鐗婄涵鍫曟煛娴ｉ潧锟芥鐐村灴閹垽寮搁鈩冩線闂備線娼уΛ鏂棵归崶鈺冪焾妞ゆ劧绠戝Λ妯荤箾閸℃ê濮囬柣銈庡枛椤潡寮甸悽纰樻晙闂佽法鍠嶇划娆忕暦濮樿泛鐓涢柛鎰ㄦ櫆婵￠亶姊洪悷鐗堣础闁哥姴閰ｆ俊鐢稿箣閿曪拷銉ッ归敐澶樻＂闁荤喎缍婇弻娑㈠棘閻氬瓨瀚归梺鐓庣仛閸ㄥ灝顕ｉ鍕垫晣闁绘ê鐏氶幆锝囩磽娴ｅ湱鈽夋い褍鐬煎Σ鎰灄閼稿灚娅栭梺璺ㄥ櫐閹凤拷/ 濠电偞鍨堕幐鍝ョ矓妞嬪海鐭嗛悗锝庡亞椤牠鎮规担鍝ワ紞缂佸娼￠幃褰掑箛閸撲礁顕遍梺鐟扮畭閸ㄤ粙寮鍥︽勃闁芥ê顦介妶顕?姊洪棃鈺勭闁告柨绻橀、姘灄鏉堚晝鐓嬮悗骞垮劚鐎氼剟鍩㈣箛娑欑厽妞ゃ倕鑻俊濂告煕閹搭垳绡?闁圭偨鍨介幗搴ㄥ磼濠婂懏顓婚梻浣告啞閹稿摜绮旈幘顔肩疅闁跨喓濮甸崕妤呮煏婢跺牆鍔氶悹浣圭叀閺屻倝鎼归銏喊缂備礁褰夐崡鎶藉蓟閸涘瓨鍋愰柛鎰皺娴滐絽鈹戦鐣岀細闁稿﹥顨熼幃顕?顢曢敃锟筋唹闂佺粯鏌ㄩ〃銉╁船濞差亝鐓熼柕濞垮劚椤忣亪鏌涙惔锛勭闁靛洦鍔欒矾鐎广儱娲ㄩ幉顔界箾鐎涙鐜诲┑鈥虫喘瀹曟繆顧呭┑鈩冩尦閺佹捇鏁撻敓锟?-----------------------------------------------------------------------------
 #include <sys/socket.h>
 
 #include "rout.h"
-#include "link.h"
 #include "tcpipconfig.h"
-
 #include "arp.h"
+#include "linkhal.h"
 
-//arp的数据报
+//arp闂備焦鐪归崝宀?锟介銏犳辈闁绘梻鍘х粻鍙夈亜閺冨洦顥曠悮锟?
 #pragma pack(1)
 typedef struct
 {
 #define CN_ARP_HW_TYPE_ETHERNET        0x01
     u16 hwtype;
+#define CN_ARP_FINDIP                     0X0800
     u16 protype;
     u8  hwaddrlen;
     u8  proaddrlen;
@@ -70,20 +57,11 @@ typedef struct
     u8  senproaddr[CN_IPADDR_LEN_V4];
     u8  tarhwaddr[CN_MACADDR_LEN];
     u8  tarproaddr[CN_IPADDR_LEN_V4];
-    u8  rev_blank[18];  // 以太网上要求上层数据包至少有46字节，这18字节用于填充
+    u8  rev_blank[18];  // 婵炲濮伴崕閬嶅Φ婵犲嫮纾鹃柟瀛樼矌閻熸劙鎮烽弴姘卞妽闁活亞澧楃粙澶嬬節閸屾粍鍕鹃梺杞拌兌婢ф鐣垫笟锟界闁告稒婢樺▓楣冩倶韫囨柨鐏︽繝锟芥嫹6闁诲孩绋掗〃鐘充繆椤撱垺鏅?癸拷鍟扮粻锟?8闁诲孩绋掗〃鐘充繆椤撱垺鍋ㄩ柕濞垮?楅懝鎯р攽婢舵ê浜滈柛姗堟嫹
 }tagArpHdr;
-
-typedef struct
-{
-    u8 macdst[CN_MACADDR_LEN];
-    u8 macsrc[CN_MACADDR_LEN];
-    u8 proto[2];
-    tagArpHdr arp;
-}tagArpFrame;
 #pragma pack()
 
-#define CN_ARP_HDRLEN          (sizeof(tagArpHdr))
-#define CN_ARP_FRAMELEN        (sizeof(tagArpFrame))
+#define CN_ARP_MSGLEN          (sizeof(tagArpHdr))
 #define CN_ARPITEM_SCANCYCLE   (60*1000*mS)   //(30 seconds)
 #define CN_ARPITEM_LIFE        (20)           //20 UNIT(20 minute)
 #define CN_ARPITEM_LIFE_TRIG   (10)           //if life less than this, we will give the arp request
@@ -113,9 +91,12 @@ typedef struct
    u32 rcvres;
    u32 rcverr;
    u32 rcvcached;
-}tagArpStatistics;
 
-static tagArpStatistics ArpStatistics;
+   u64 resolvenum;
+   u64 resolveerr;
+}taggArpDebugs;
+
+static taggArpDebugs gArpDebugs;
 //use this function to match an item in the arp tab with specified ip address
 static tagArpItem *__ArpMatchItem(u32 ip)
 {
@@ -192,130 +173,119 @@ static bool_t __ArpDeleteItem(u32 ip)
     return result;
 }
 
-
 //use this function to do the arp request
 static bool_t __ArpSndRequest(u32 ip)
 {
     bool_t             result;
-    enum_ip_class      ipclass;
     tagNetPkg         *pkg;
     tagRout           *rout;
     u32                ipsrc;
     u32                ipdst;
-    u16                proto;
     u8                *macsrc;
-    u8                *macdst;
     tagArpHdr         *hdr;
-    tagArpFrame       *frame;
 
     result = false;
     ipdst = ip;
-    TCPIP_DEBUG_INC(ArpStatistics.sndnum);
+    TCPIP_DEBUG_INC(gArpDebugs.sndnum);
     //if the src is in the sub net, we will response it, else do nothing
-    ipclass = RoutIpClass(EN_IPV_4,ipdst,&rout);
-    if(ipclass == EN_IPV4_INSUBNET)  //same subnet, we will do the request
+    rout = RoutMatch(EN_IPV_4,ip);
+    if(NULL == rout)
     {
-        //we will create an item for this ip
-        pkg = PkgMalloc(CN_ARP_FRAMELEN, CN_PKLGLST_END);
-        if(NULL != pkg)
-        {
-            //LEAVE SOME SPACE FOR THE LINK
-            frame = (tagArpFrame*)(pkg->buf + pkg->offset);
-            memset((void *)frame,0,sizeof(tagArpFrame));
-
-            hdr = &frame->arp;
-            ipdst = ip;
-            ipsrc = rout->ipaddr.ipv4.ip;
-            macdst = (u8 *)(CN_MAC_BROAD);
-            macsrc = NetDevGetMac(rout->dev);
-            proto = htons(EN_NET_PROTO_ARP);
-
-            memcpy(frame->macdst,macdst,CN_MACADDR_LEN);
-            memcpy(frame->macsrc,macsrc,CN_MACADDR_LEN);
-            memcpy(frame->proto,&proto,2);
-            memcpy(hdr->tarproaddr ,&ipdst,CN_IPADDR_LEN_V4);
-            memcpy(hdr->senproaddr ,&ipsrc,CN_IPADDR_LEN_V4);
-            memset(hdr->tarhwaddr,0,CN_MACADDR_LEN);
-            memcpy(hdr->senhwaddr,macsrc,CN_MACADDR_LEN);
-            hdr->hwtype = htons(CN_ARP_HW_TYPE_ETHERNET);
-            hdr->protype = htons(EN_NET_PROTO_IP);
-            hdr->hwaddrlen = CN_MACADDR_LEN;
-            hdr->proaddrlen = CN_IPADDR_LEN_V4;
-            hdr->opcode = htons(CN_ARP_OP_REQUEST);
-            pkg->datalen = CN_ARP_FRAMELEN;
-            result = LinkSendRaw((ptu32_t)rout->dev,pkg,CN_ARP_FRAMELEN,CN_IPDEV_NONE);
-            PkgTryFreePart(pkg);
-            result = true;
-        }
+    	return result; //NO ROUT FOR THIS IP TO FIND
     }
-
+    //we will create an item for this ip
+    pkg = PkgMalloc(CN_ARP_MSGLEN, CN_PKLGLST_END);
+    if(NULL != pkg)
+    {
+    	macsrc = NetDevGetMac(rout->dev);
+        hdr = (tagArpHdr *)(pkg->buf + pkg->offset);
+        memcpy(hdr->tarproaddr ,&ipdst,CN_IPADDR_LEN_V4);
+        memcpy(hdr->senproaddr ,&ipsrc,CN_IPADDR_LEN_V4);
+        memset(hdr->tarhwaddr,0,CN_MACADDR_LEN);
+        memcpy(hdr->senhwaddr,macsrc,CN_MACADDR_LEN);
+        hdr->hwtype = htons(CN_ARP_HW_TYPE_ETHERNET);
+        hdr->protype = htons(CN_ARP_FINDIP);
+        hdr->hwaddrlen = CN_MACADDR_LEN;
+        hdr->proaddrlen = CN_IPADDR_LEN_V4;
+        hdr->opcode = htons(CN_ARP_OP_REQUEST);
+        pkg->datalen = CN_ARP_MSGLEN;
+        result = LinkSend(rout,pkg,CN_ARP_MSGLEN,CN_IPDEV_NONE,\
+        		EN_LINKPROTO_ARP,EN_IPV_4,INADDR_BROADCAST);
+        PkgTryFreePart(pkg);
+        result = true;
+    }
     if(result == false)
     {
-        TCPIP_DEBUG_DEC(ArpStatistics.snderr);
+        TCPIP_DEBUG_DEC(gArpDebugs.snderr);
     }
 
     return result;
 }
 
-//i want send a arp response to (ip,mac) through (rout) with the
-//ip and mac inside rout
+
+//-----------------------------------------------------------------------------
+//功能://i want send a arp response to (ip,mac) through (rout) with the ip and mac inside rout
+//参数:
+//返回:
+//备注:
+//作者:zhangqf@下午2:51:14/2016年12月29日
+//-----------------------------------------------------------------------------
 static bool_t __ArpSndResponse(u32 ip,u8 *mac,tagRout *rout)
 {
 
     bool_t             result;
     u32                ipsrc;
     u32                ipdst;
-    u16                proto;
     u8                *macsrc;
     u8                *macdst;
     tagArpHdr         *hdr;
     tagNetPkg         *pkg;
-    tagArpFrame       *frame;
 
     result = false;
     //we will create an item for this ip
-    pkg = PkgMalloc(CN_ARP_FRAMELEN, CN_PKLGLST_END);
+    pkg = PkgMalloc(CN_ARP_MSGLEN, CN_PKLGLST_END);
     if(NULL != pkg)
     {
         //LEAVE SOME SPACE FOR THE LINK
-        frame = (tagArpFrame*)(pkg->buf + pkg->offset);
-        memset((void *)frame,0,sizeof(tagArpFrame));
+    	hdr = (tagArpHdr*)(pkg->buf + pkg->offset);
+        memset((void *)hdr,0,CN_ARP_MSGLEN);
 
-        hdr = &frame->arp;
         ipdst = ip;
         ipsrc = rout->ipaddr.ipv4.ip;
         macdst = mac;
         macsrc = NetDevGetMac(rout->dev);
-        proto = htons(EN_NET_PROTO_ARP);
 
-        memcpy(frame->macdst,macdst,CN_MACADDR_LEN);
-        memcpy(frame->macsrc,macsrc,CN_MACADDR_LEN);
-        memcpy(frame->proto,&proto,2);
         memcpy(hdr->tarproaddr ,&ipdst,CN_IPADDR_LEN_V4);
         memcpy(hdr->senproaddr ,&ipsrc,CN_IPADDR_LEN_V4);
         memcpy(hdr->tarhwaddr, macdst, CN_MACADDR_LEN);
         memcpy(hdr->senhwaddr,macsrc,CN_MACADDR_LEN);
         hdr->hwtype = htons(CN_ARP_HW_TYPE_ETHERNET);
-        hdr->protype = htons(EN_NET_PROTO_IP);
+        hdr->protype = htons(CN_ARP_FINDIP);
         hdr->hwaddrlen = CN_MACADDR_LEN;
         hdr->proaddrlen = CN_IPADDR_LEN_V4;
         hdr->opcode = htons(CN_ARP_OP_RESPONSE);
-        pkg->datalen = CN_ARP_FRAMELEN;
-        result = LinkSendRaw((ptu32_t)rout->dev,pkg,CN_ARP_FRAMELEN,CN_IPDEV_NONE);
+        pkg->datalen = CN_ARP_MSGLEN;
+        result = LinkSend(rout,pkg,CN_ARP_MSGLEN,CN_IPDEV_NONE,\
+        		EN_LINKPROTO_ARP,EN_IPV_4,ip);
         PkgTryFreePart(pkg);
         result = true;
     }
     return result;
 }
 
-
+//-----------------------------------------------------------------------------
+//功能:here we process the arp request
+//参数:
+//返回:
+//备注:
+//作者:zhangqf@下午3:02:23/2016年12月29日
+//-----------------------------------------------------------------------------
 //use this function to deal with the arp request
-bool_t __Arp_Process_Request(tagNetDev *netdev,tagArpHdr *arp)
+bool_t __Arp_Process_Request(tagNetDev *dev,tagArpHdr *arp)
 {
     bool_t             result;
     u32                ipdst;
     u32                ipsrc;
-    enum_ip_class      ipclass;
     u8                *macsrc;
     tagRout           *rout;
 
@@ -324,40 +294,43 @@ bool_t __Arp_Process_Request(tagNetDev *netdev,tagArpHdr *arp)
     memcpy(&ipsrc,arp->senproaddr,CN_IPADDR_LEN_V4);
     macsrc = arp->senhwaddr;
 
-    ipclass = RoutIpClass(EN_IPV_4,ipdst,&rout);
-    if(ipclass == EN_IPV4_HOSTTARGET)
+	//create the item or update it if the ipsrc is in the subnet
+    if(RoutSubNet(dev,EN_IPV_4,ipsrc))
     {
-        //if the src is in the sub net, we will response it, else do nothing
-        ipclass = RoutIpClass(EN_IPV_4,ipsrc,&rout);
-        if(ipclass == EN_IPV4_INSUBNET)  //same subnet, so could response now
+    	ArpItemCreate(ipsrc,macsrc,CN_ARPITEM_PRO_STABLE);
+    }
+    //if we are the destination ip host, then we will send a response to it
+    if(RoutHostIp(EN_IPV_4,ipdst))
+    {
+        rout = RoutMatch(EN_IPV_4,ipsrc);
+        if(NULL != rout)
         {
-            //create the item or update it
-            ArpItemCreate(ipsrc,macsrc,CN_ARPITEM_PRO_STABLE);
-            //we will create an item for this ip
             __ArpSndResponse(ipsrc,macsrc,rout);
         }
     }
     return result;
 }
-
-//use this function to deal with the response
+//-----------------------------------------------------------------------------
+//功能:here we process the arp response
+//参数:
+//返回:
+//备注:
+//作者:zhangqf@下午3:02:55/2016年12月29日
+//-----------------------------------------------------------------------------
 bool_t __Arp_Process_Response(tagNetDev *netdev,tagArpHdr *arp)
 {
     bool_t             result;
     u32                ipsrc;
-    enum_ip_class      ipclass;
+    u32                ipdst;
     u8                *macsrc;
-    tagRout           *rout;
-
     result = false;
     memcpy(&ipsrc,arp->senproaddr,CN_IPADDR_LEN_V4);
     macsrc = arp->senhwaddr;
+    memcpy(&ipdst,arp->tarproaddr,CN_IPADDR_LEN_V4);
     //if the src is in the sub net, update the item
-    ipclass = RoutIpClass(EN_IPV_4,ipsrc,&rout);
-    if(ipclass == EN_IPV4_INSUBNET)  //same subnet,
+    if(RoutSubNet(netdev,EN_IPV_4,ipsrc))
     {
-        //do the arp item update
-        ArpItemUpdate(ipsrc,macsrc);
+    	result = ArpItemUpdate(ipsrc,macsrc);
     }
     return result;
 }
@@ -373,7 +346,7 @@ static tagNetPkg* __ArpPkgPop(void)
         {
             pArpPkgQH = result->partnext;
             result->partnext = NULL;
-            TCPIP_DEBUG_DEC(ArpStatistics.rcvcached);
+            TCPIP_DEBUG_DEC(gArpDebugs.rcvcached);
         }
         Lock_MutexPost(pArpPkgMutex);
     }
@@ -401,14 +374,14 @@ static void __ArpPkgDeal(void)
             {
                 case CN_ARP_OP_REQUEST:
                     __Arp_Process_Request(dev,hdr);
-                    TCPIP_DEBUG_INC(ArpStatistics.rcvreq);
+                    TCPIP_DEBUG_INC(gArpDebugs.rcvreq);
                     break;
                 case CN_ARP_OP_RESPONSE:
                     __Arp_Process_Response(dev,hdr);
-                    TCPIP_DEBUG_INC(ArpStatistics.rcvres);
+                    TCPIP_DEBUG_INC(gArpDebugs.rcvres);
                     break;
                 default:
-                    TCPIP_DEBUG_INC(ArpStatistics.rcverr);
+                    TCPIP_DEBUG_INC(gArpDebugs.rcverr);
                     break;
             }
         }
@@ -428,7 +401,7 @@ bool_t  ArpPushPkg(tagNetDev *dev,tagNetPkg *pkg)
 {
     bool_t result = false;
 
-    TCPIP_DEBUG_INC(ArpStatistics.rcvnum);
+    TCPIP_DEBUG_INC(gArpDebugs.rcvnum);
 
     if(Lock_MutexPend(pArpPkgMutex,CN_TIMEOUT_FOREVER))
     {
@@ -436,7 +409,7 @@ bool_t  ArpPushPkg(tagNetDev *dev,tagNetPkg *pkg)
         pkg->partnext = pArpPkgQH;
         pArpPkgQH = pkg;
         PkgCachedPart(pkg);
-        TCPIP_DEBUG_INC(ArpStatistics.rcvcached);
+        TCPIP_DEBUG_INC(gArpDebugs.rcvcached);
         Lock_MutexPost(pArpPkgMutex);
 
         Lock_SempPost(pArpEngineSync);
@@ -601,44 +574,40 @@ bool_t ArpFindMac(u32 ip,u8 *mac)
 {
     bool_t      result = false;
     tagArpItem *tmp;
-    if(ip == INADDR_BROAD)
+
+    if(Lock_MutexPend(pArpItemMutex,CN_TIMEOUT_FOREVER))
     {
-        memcpy(mac,CN_MAC_BROAD,CN_MACADDR_LEN);
-        result = true;
-    }
-    else
-    {
-        if(Lock_MutexPend(pArpItemMutex,CN_TIMEOUT_FOREVER))
+        TCPIP_DEBUG_DEC(gArpDebugs.resolvenum);
+        tmp = __ArpMatchItem(ip);
+        if(NULL == tmp)
         {
-            tmp = __ArpMatchItem(ip);
-            if(NULL == tmp)
+            //which means no item matches, so we should build a item and send the
+            //arp request
+            tmp =__ArpCreateItem(ip);
+            if(NULL != tmp)
             {
-                //which means no item matches, so we should build a item and send the
-                //arp request
-                tmp =__ArpCreateItem(ip);
-                if(NULL != tmp)
-                {
-                    tmp->pro = CN_ARPITEM_PRO_DYNAMIC;
-                    tmp->timeout = CN_ARPITEM_LIFE_TRIG;
-                    __ArpSndRequest(ip);
-                }
+                tmp->pro = CN_ARPITEM_PRO_DYNAMIC;
+                tmp->timeout = CN_ARPITEM_LIFE_TRIG;
+                __ArpSndRequest(ip);
+            }
+            TCPIP_DEBUG_DEC(gArpDebugs.resolveerr);
+        }
+        else
+        {
+            if(tmp->pro &CN_ARPITEM_PRO_STABLE)
+            {
+                memcpy(mac,tmp->mac,CN_MACADDR_LEN);
+                tmp->reffers++;
+                result = true;
             }
             else
             {
-                if(tmp->pro &CN_ARPITEM_PRO_STABLE)
-                {
-                    memcpy(mac,tmp->mac,CN_MACADDR_LEN);
-                    tmp->reffers++;
-                    result = true;
-                }
-                else
-                {
-                    __ArpSndRequest(ip);  //do an arp request
-                }
+                __ArpSndRequest(ip);  //do an arp request
             }
-            Lock_MutexPost(pArpItemMutex);
         }
+        Lock_MutexPost(pArpItemMutex);
     }
+
     return result;
 }
 // =============================================================================
@@ -679,7 +648,7 @@ bool_t ArpTabClean()
 bool_t ArpInformAll(tagRout *rout)
 {
     bool_t      result = false;
-    u32         offset;
+	u32         offset;
     tagArpItem *tmp;
     u32         ip;
     u8         *mac;
@@ -697,9 +666,9 @@ bool_t ArpInformAll(tagRout *rout)
                     //we need do nothing here
                     if(tmp->pro & CN_ARPITEM_PRO_STABLE)
                     {
-                        ip = tmp->ip;
-                        mac = tmp->mac;
-                        __ArpSndResponse(ip,mac,rout);
+                    	ip = tmp->ip;
+                    	mac = tmp->mac;
+                    	__ArpSndResponse(ip,mac,rout);
                     }
                     tmp = tmp->nxt;
                 }
@@ -708,7 +677,7 @@ bool_t ArpInformAll(tagRout *rout)
         }
         result = true;
     }
-    return result;
+	return result;
 }
 bool_t ArpInform(char *param)
 {
@@ -727,9 +696,9 @@ bool_t ArpInform(char *param)
     rout = dev->routq;
     while(NULL != rout)
     {
-        ArpInformAll(rout);
+    	ArpInformAll(rout);
 
-        rout = rout->nxt;
+    	rout = rout->nxt;
     }
     return true;
 }
@@ -746,7 +715,7 @@ static bool_t ArpShow(char *param)
     {
         printf("ArpItem:\r\n");
         printf("%-6s%-18s%-18s%-8s%-6s%-10s%-10s\n\r",\
-                "Item","IpAddress","MacAddress","Type","Life","Refers","Property");
+        		"Item","IpAddress","MacAddress","Type","Life","Refers","Property");
         for(offset =0;offset < gArpItemHashLen;offset++)
         {
             tmp = pArpItemTab[offset];
@@ -764,13 +733,15 @@ static bool_t ArpShow(char *param)
 
         printf("ArpTotal:%d :hashlen:%d\n\r",num,gArpItemHashLen);
         printf("ARP STATISTICS:\n\r");
-        printf("ARP STATISTICS:SND         :%d\n\r",ArpStatistics.sndnum);
-        printf("ARP STATISTICS:SND  ERR    :%d\n\r",ArpStatistics.snderr);
-        printf("ARP STATISTICS:RCV         :%d\n\r",ArpStatistics.rcvnum);
-        printf("ARP STATISTICS:RCV  REQ    :%d\n\r",ArpStatistics.rcvreq);
-        printf("ARP STATISTICS:RCV  RES    :%d\n\r",ArpStatistics.rcvres);
-        printf("ARP STATISTICS:RCV  ERR    :%d\n\r",ArpStatistics.rcverr);
-        printf("ARP STATISTICS:RCV  CACHED :%d\n\r",ArpStatistics.rcvcached);
+        printf("ARP STATISTICS:SND         :%d\n\r",gArpDebugs.sndnum);
+        printf("ARP STATISTICS:SND  ERR    :%d\n\r",gArpDebugs.snderr);
+        printf("ARP STATISTICS:RCV         :%d\n\r",gArpDebugs.rcvnum);
+        printf("ARP STATISTICS:RCV  REQ    :%d\n\r",gArpDebugs.rcvreq);
+        printf("ARP STATISTICS:RCV  RES    :%d\n\r",gArpDebugs.rcvres);
+        printf("ARP STATISTICS:RCV  ERR    :%d\n\r",gArpDebugs.rcverr);
+        printf("ARP STATISTICS:RCV  CACHED :%d\n\r",gArpDebugs.rcvcached);
+        printf("ARP STATISTICS:RESOLVE     :0x%llx\n\r",gArpDebugs.resolvenum);
+        printf("ARP STATISTICS:RESOLVE ERR :0x%llx\n\r",gArpDebugs.resolveerr);
 
         result = true;
     }

@@ -212,6 +212,8 @@ ptu32_t ModuleInstall_TcpIp(ptu32_t para)
 	{
 		printk("%s:#LOOP Module-------------------OK\n\r",__FUNCTION__);
 	}
+
+
     //add the tcpip service
     extern bool_t ServiceInit(void);
     if(false == ServiceInit())

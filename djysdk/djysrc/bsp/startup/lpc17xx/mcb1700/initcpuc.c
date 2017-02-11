@@ -68,6 +68,7 @@ const u32 gc_u32StartupExpTable[4] __attribute__ ((section(".StartupExpTbl")))=
 //       CPU的时钟计算公式（PLL0）：CCLK = FCCO0/DIV = 400M/4 = 100M
 //       USB的时钟输出：USBCLK = M * F_osc or F_usb = F_cco1 / (2 * P) = 48M
 //                     F_cco1 = F_osc * M * 2 * P (156 MHz to 320 MHz)
+//      本函数的时钟设置，必须与board-config.h中的CN_CFG_MCLK等常量定义一致。
 // 参数：无
 // 返回：无
 // =============================================================================
@@ -153,10 +154,10 @@ void Init_Cpu(void)
         case CN_M3_REVISION_R0P0:
             break;                              //市场没有版本0的芯片
         case CN_M3_REVISION_R1P0:
-        	startup_scb_reg->CCR |= 1<<bo_scb_ccr_stkalign;
+            startup_scb_reg->CCR |= 1<<bo_scb_ccr_stkalign;
             break;
         case CN_M3_REVISION_R1P1:
-        	startup_scb_reg->CCR |= 1<<bo_scb_ccr_stkalign;
+            startup_scb_reg->CCR |= 1<<bo_scb_ccr_stkalign;
             break;
         case CN_M3_REVISION_R2P0:break;            //好像没什么要做的
     }
@@ -174,9 +175,9 @@ extern void Load_Preload(void);
 //-----------------------------------------------------------------
 void AppStart(void)
 {
-	__set_MSP((uint32_t)msp_top);
-	__set_PSP((uint32_t)msp_top);
-	Load_Preload();
+    __set_MSP((uint32_t)msp_top);
+    __set_PSP((uint32_t)msp_top);
+    Load_Preload();
 }
 
 //-----------------------------------------------------------------

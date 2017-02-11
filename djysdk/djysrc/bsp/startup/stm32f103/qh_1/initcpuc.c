@@ -121,6 +121,7 @@ void Init_Cpu(void)
                 || ((RCC->CFGR & cn_cfgr_check_mask) != cn_cfgr_check))
     {
         //开始初始化时钟
+//      时钟设置，必须与board-config.h中的CN_CFG_MCLK等常量定义一致。
         //step1:复位时钟控制寄存器
         RCC->CR |= (uint32_t)0x00000001;
         // 复位 SW[1:0], HPRE[3:0], PPRE1[2:0], PPRE2[2:0], ADCPRE[1:0] MCO[2:0] 位
@@ -164,9 +165,9 @@ void Init_Cpu(void)
 extern void Load_Preload(void);
 void AppStart(void)
 {
-	__set_MSP((uint32_t)msp_top);
-	__set_PSP((uint32_t)msp_top);
-	Load_Preload();
+    __set_MSP((uint32_t)msp_top);
+    __set_PSP((uint32_t)msp_top);
+    Load_Preload();
 }
 
 

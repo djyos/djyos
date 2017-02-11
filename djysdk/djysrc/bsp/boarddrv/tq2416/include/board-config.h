@@ -73,10 +73,10 @@ extern "C" {
 #define CN_CFG_TIMER_CLK CN_CFG_PCLK  //定时器时钟源
 
 /*____以下定义tick参数____*/
-#define CN_CFG_TICK_US 1000  //操作系统内核时钟脉冲长度，以毫秒为单位。
+#define CN_CFG_TICK_US 1000  //tick间隔，以毫秒为单位。
 #define CN_CFG_TICK_HZ 1000  //内核时钟频率，单位为hz。
-#define CN_CFG_FINE_US 0x00000a3d  //40nS,精密时钟脉冲长度，以uS为单位，32位定点数整数、小数各占16位，这也限制了ticks最长不超过65535uS
-#define CN_CFG_FINE_HZ (25*Mhz)  //内核精密时钟频率，是cn_fine_ns的倒数。
+#define CN_CFG_FINE_US 0x00000a3d  //40nS,tick输入时钟周期，以uS为单位，32位定点数整数、小数各占16位，这也限制了ticks最长不超过65535uS
+#define CN_CFG_FINE_HZ (25*Mhz)  //tick输入时钟频率，是CN_CFG_FINE_US的倒数。
 
 //内核相关配置
 #define CN_CFG_SYSSVC_STACK 1024  //系统服务事件栈容量

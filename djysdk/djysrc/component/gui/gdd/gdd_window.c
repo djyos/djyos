@@ -870,7 +870,8 @@ HWND    InitGddDesktop(struct GkWinRsc *desktop)
 
 //----创建窗口-----------------------------------------------------------------
 //描述: 该函数可以创建主窗口和子窗口(控件)
-//参数：proc: 窗口过程回调函数
+//参数：Text: 窗口名字，将copy到gkwin的name成员，长度限CN_GKWIN_NAME_LIMIT，
+//              （字节数），TODO：待改为字符数。
 //      Style: 窗口风格(参考 WS_CHILD 族常量)
 //      x,y,w,h: 窗口位置和大小,相对于父窗口
 //      hParent: 父窗口句柄.如果是NULL,则默认桌面为父窗口.

@@ -176,23 +176,11 @@ static void __SPI_GpioInit(u32 BaseAddr)
     switch (SPIPort)
     {
         case CN_SPI1:
-            GPIO_PowerOn(GPIO_B); // 使能PORTB时钟
+
             RCC->APB2ENR |= RCC_APB2ENR_SPI1EN; // 使能SPI1时钟
 
             RCC->APB2RSTR |= RCC_APB2RSTR_SPI1RST; // 复位SPI1
             RCC->APB2RSTR &= ~RCC_APB2RSTR_SPI1RST; // 停止复位SPI1
-
-            GPIO_CfgPinFunc(GPIO_B, PIN3|PIN4|PIN5, GPIO_MODE_AF, GPIO_OTYPE_PP,
-                            GPIO_SPEED_50M, GPIO_PUPD_PU); // GPB3、4和5为SCK、MISO和MOSI
-            GPIO_AFSet(GPIO_B, PIN4|PIN5|PIN3, AF5);
-
-
-//          GPIO_CfgPinFunc(GPIO_A, PIN5|PIN6|PIN7, GPIO_MODE_AF, GPIO_OTYPE_PP,
-//                                  GPIO_SPEED_50M, GPIO_PUPD_PU); // GPB3、4和5为SCK、MISO和MOSI
-//                  GPIO_AFSet(GPIO_A, PIN5|PIN6|PIN7, AF5);
-
-            GPIO_PowerOn(GPIO_F);//cs
-            GPIO_CfgPinFunc(GPIO_F,PIN14,GPIO_MODE_OUT,GPIO_OTYPE_PP,GPIO_SPEED_100M,GPIO_PUPD_NONE);
             break;
 
         case CN_SPI2:
@@ -201,9 +189,6 @@ static void __SPI_GpioInit(u32 BaseAddr)
 
             RCC->APB1RSTR |= RCC_APB1RSTR_SPI2RST; // 复位SPI1
             RCC->APB1RSTR &= ~RCC_APB1RSTR_SPI2RST; // 停止复位SPI1
-//          GPIO_CfgPinFunc(GPIO_B, PIN4|PIN5|PIN3, GPIO_MODE_AF, GPIO_OTYPE_PP,
-//                          GPIO_SPEED_50M, GPIO_PUPD_PU); // GPB3、4和5为SCK、MISO和MOSI
-//          GPIO_AFSet(GPIO_B, PIN4|PIN5|PIN3, AF5);
             break;
 
         case CN_SPI3:
@@ -211,9 +196,6 @@ static void __SPI_GpioInit(u32 BaseAddr)
 
             RCC->APB1RSTR |= RCC_APB1RSTR_SPI3RST; // 复位SPI1
             RCC->APB1RSTR &= ~RCC_APB1RSTR_SPI3RST; // 停止复位SPI1
-//          GPIO_CfgPinFunc(GPIO_B, PIN4|PIN5|PIN3, GPIO_MODE_AF, GPIO_OTYPE_PP,
-//                          GPIO_SPEED_50M, GPIO_PUPD_PU); // GPB3、4和5为SCK、MISO和MOSI
-//          GPIO_AFSet(GPIO_B, PIN4|PIN5|PIN3, AF5);
             break;
 
         case CN_SPI4:
@@ -221,9 +203,6 @@ static void __SPI_GpioInit(u32 BaseAddr)
 
             RCC->APB2RSTR |= RCC_APB2RSTR_SPI4RST; // 复位SPI1
             RCC->APB2RSTR &= ~RCC_APB2RSTR_SPI4RST; // 停止复位SPI1
-//          GPIO_CfgPinFunc(GPIO_B, PIN4|PIN5|PIN3, GPIO_MODE_AF, GPIO_OTYPE_PP,
-//                          GPIO_SPEED_50M, GPIO_PUPD_PU); // GPB3、4和5为SCK、MISO和MOSI
-//          GPIO_AFSet(GPIO_B, PIN4|PIN5|PIN3, AF5);
             break;
 
         case CN_SPI5:
@@ -231,9 +210,6 @@ static void __SPI_GpioInit(u32 BaseAddr)
 
             RCC->APB2RSTR |= RCC_APB2RSTR_SPI5RST; // 复位SPI1
             RCC->APB2RSTR &= ~RCC_APB2RSTR_SPI5RST; // 停止复位SPI1
-//          GPIO_CfgPinFunc(GPIO_B, PIN4|PIN5|PIN3, GPIO_MODE_AF, GPIO_OTYPE_PP,
-//                          GPIO_SPEED_50M, GPIO_PUPD_PU); // GPB3、4和5为SCK、MISO和MOSI
-//          GPIO_AFSet(GPIO_B, PIN4|PIN5|PIN3, AF5);
             break;
 
         case CN_SPI6:
@@ -241,9 +217,6 @@ static void __SPI_GpioInit(u32 BaseAddr)
 
             RCC->APB2RSTR |= RCC_APB2RSTR_SPI6RST; // 复位SPI1
             RCC->APB2RSTR &= ~RCC_APB2RSTR_SPI6RST; // 停止复位SPI1
-//          GPIO_CfgPinFunc(GPIO_B, PIN4|PIN5|PIN3, GPIO_MODE_AF, GPIO_OTYPE_PP,
-//                          GPIO_SPEED_50M, GPIO_PUPD_PU); // GPB3、4和5为SCK、MISO和MOSI
-//          GPIO_AFSet(GPIO_B, PIN4|PIN5|PIN3, AF5);
             break;
 
         default:
@@ -348,32 +321,32 @@ static bool_t __SPI_BusCsActive(tagSpiReg *Reg, u8 cs)
         if(Reg == (u32)tg_SpiReg[SPIPort])
             break;
     }
-    switch(SPIPort)
-    {
-        case CN_SPI1:
-            GPIO_SettoLow(GPIO_F, PIN14);
-            break;
-        case CN_SPI2:
-
-            break;
-        case CN_SPI3:
-
-            break;
-        case CN_SPI4:
-
-            break;
-        case CN_SPI5:
-
-            break;
-        case CN_SPI6:
-
-            break;
-        default:
-            return false;
-    }
-    return true;
+//    switch(SPIPort)
+//    {
+//        case CN_SPI1:
+//            GPIO_SettoLow(GPIO_F, PIN14);
+//            break;
+//        case CN_SPI2:
+//
+//            break;
+//        case CN_SPI3:
+//
+//            break;
+//        case CN_SPI4:
+//
+//            break;
+//        case CN_SPI5:
+//
+//            break;
+//        case CN_SPI6:
+//
+//            break;
+//        default:
+//            return false;
+//    }
+//    return true;
+    return Board_SpiCsCtrl(SPIPort,cs,0);
 }
-
 // =============================================================================
 // 功能：SPI片选失能，使片选无效
 // 参数：Reg，本模块内即SPI寄存器基址
@@ -388,30 +361,31 @@ static bool_t __SPI_BusCsInActive(tagSpiReg *Reg, u8 cs)
         if(Reg == (u32)tg_SpiReg[SPIPort])
             break;
     }
-    switch(SPIPort)
-    {
-        case CN_SPI1:
-            GPIO_SettoHigh(GPIO_F, PIN14);
-            break;
-        case CN_SPI2:
-
-            break;
-        case CN_SPI3:
-
-            break;
-        case CN_SPI4:
-
-            break;
-        case CN_SPI5:
-
-            break;
-        case CN_SPI6:
-
-            break;
-        default:
-            return false;
-    }
-    return true;
+//    switch(SPIPort)
+//    {
+//        case CN_SPI1:
+//            GPIO_SettoHigh(GPIO_F, PIN14);
+//            break;
+//        case CN_SPI2:
+//
+//            break;
+//        case CN_SPI3:
+//
+//            break;
+//        case CN_SPI4:
+//
+//            break;
+//        case CN_SPI5:
+//
+//            break;
+//        case CN_SPI6:
+//
+//            break;
+//        default:
+//            return false;
+//    }
+//    return true;
+    return Board_SpiCsCtrl(SPIPort,cs,1);
 }
 
 // =============================================================================
@@ -817,7 +791,7 @@ bool_t SPI_Initialize(u8 port)
 //返回: -1 -- 失败; 0 -- 成功;
 //备注:
 //-----------------------------------------------------------------------------
-s32 ModuleInstall_SPIPort(u8 Port)
+s32 ModuleInstall_SPI(u8 Port)
 {
     if(CN_SPI1 != Port) // 板件只支持到SPI1
         return (-1);

@@ -598,16 +598,23 @@ typedef enum
 	EN_NETDEV_CMDLAST,           //which means the max command
 }enNetDevCmd;
 
-enum _EN_LINK_INTERFACE_TYPE
+typedef enum _EN_LINK_INTERFACE_TYPE
 {
     EN_LINK_ETHERNET = 0,  //ethenet net device,ethernetII
-    EN_LINK_RAW,           //raw device without mac
-	EN_LINK_NOVEL,
-	EN_LINK_80203,
-	EN_LINK_SNAP,
+	EN_LINK_RAW,           //raw,just do the ip frames,no other link
 	EN_LINK_80211,
     EN_LINK_LAST,
-};
+}enLinkType;
+
+typedef enum
+{
+	EN_LINKPROTO_IPV4 = 0x0800,
+	EN_LINKPROTO_IPV6 = 0x86dd,
+	EN_LINKPROTO_ARP = 0x0806,
+	EN_LINKPROTO_RARP = 0x8035,
+	EN_LINKPROTO_RESBASE = 0x1000,
+}enLinkProto;
+
 //net device type
 //netdev snd module function
 //return means the data has put out or put into the net card buffer
@@ -647,7 +654,6 @@ bool_t NetDevFilterCheck(ptu32_t handle);
 typedef bool_t (*fnLinkProtoDealer)(ptu32_t devhandle,u16 proto,tagNetPkg *pkg);
 bool_t LinkRegisterRcvHook(fnLinkProtoDealer hook, ptu32_t devhandle,u16 proto,const char *hookname);
 bool_t LinkUnRegisterRcvHook(fnLinkProtoDealer hook, ptu32_t devhandle,u16 proto,const char *hookname);
-bool_t LinkSendRaw(ptu32_t devhandle,tagNetPkg *pkg,u32 framlen,u32 devtask);
 bool_t LinkSendBufRaw(ptu32_t devhandle,u8 *buf,u32 len);
 
 //the user could use these function to create delete modify the rout
@@ -661,6 +667,8 @@ typedef struct
     u32 gatway;
     u32 submask;
     u32 broad;
+    u32 multi;
+    u32 dnsbak;
 }tagHostAddrV4;
 typedef struct
 {
@@ -677,6 +685,7 @@ bool_t RoutDelete(const char *name,enum_ipv_t ver,ipaddr_t addr);
 bool_t RoutSet(const char *name,enum_ipv_t ver,ipaddr_t ipold,void *newaddr);
 bool_t RoutSetDefault(enum_ipv_t ver,ipaddr_t ip);
 bool_t RoutDns(enum_ipv_t ver, ipaddr_t ip);
+bool_t *RoutSetDefaultAddr(enum_ipv_t ver,ipaddr_t ip,ipaddr_t mask,ipaddr_t gateway,ipaddr_t dns);
 //this function use to alloc an ip from the dhcp dynamicly
 bool_t DhcpAddClientTask(const char *name);
 //this is the tcpip stack main entry

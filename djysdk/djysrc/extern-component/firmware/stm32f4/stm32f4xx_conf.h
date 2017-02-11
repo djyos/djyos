@@ -31,25 +31,25 @@
 
 /* Includes ------------------------------------------------------------------*/
 /* Uncomment the line below to enable peripheral header file inclusion */
-#include "STM32F4_FWLIB\inc\stm32f4xx_adc.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_crc.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_dbgmcu.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_dma.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_exti.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_flash.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_gpio.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_i2c.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_iwdg.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_pwr.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_rcc.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_rtc.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_sdio.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_spi.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_syscfg.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_tim.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_usart.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_wwdg.h"
-#include "STM32F4_FWLIB\inc\misc.h" /* High level functions for NVIC and SysTick (add-on to CMSIS functions) */
+#include "inc\stm32f4xx_adc.h"
+#include "inc\stm32f4xx_crc.h"
+#include "inc\stm32f4xx_dbgmcu.h"
+#include "inc\stm32f4xx_dma.h"
+#include "inc\stm32f4xx_exti.h"
+#include "inc\stm32f4xx_flash.h"
+#include "inc\stm32f4xx_gpio.h"
+#include "inc\stm32f4xx_i2c.h"
+#include "inc\stm32f4xx_iwdg.h"
+#include "inc\stm32f4xx_pwr.h"
+#include "inc\stm32f4xx_rcc.h"
+#include "inc\stm32f4xx_rtc.h"
+#include "inc\stm32f4xx_sdio.h"
+#include "inc\stm32f4xx_spi.h"
+#include "inc\stm32f4xx_syscfg.h"
+#include "inc\stm32f4xx_tim.h"
+#include "inc\stm32f4xx_usart.h"
+#include "inc\stm32f4xx_wwdg.h"
+#include "inc\misc.h" /* High level functions for NVIC and SysTick (add-on to CMSIS functions) */
 
 #if defined (STM32F429_439xx)
 #include "stm32f4xx_cryp.h"
@@ -77,13 +77,13 @@
 #endif /* STM32F427_437xx */
 
 #if defined (STM32F40_41xxx)
-#include "STM32F4_FWLIB\inc\stm32f4xx_cryp.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_hash.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_rng.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_can.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_dac.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_dcmi.h"
-#include "STM32F4_FWLIB\inc\stm32f4xx_fsmc.h"
+#include "inc\stm32f4xx_cryp.h"
+#include "inc\stm32f4xx_hash.h"
+#include "inc\stm32f4xx_rng.h"
+#include "inc\stm32f4xx_can.h"
+#include "inc\stm32f4xx_dac.h"
+#include "inc\stm32f4xx_dcmi.h"
+#include "inc\stm32f4xx_fsmc.h"
 #endif /* STM32F40_41xxx */
 
 #if defined (STM32F411xE)

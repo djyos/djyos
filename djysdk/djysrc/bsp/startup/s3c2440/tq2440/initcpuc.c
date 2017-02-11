@@ -148,6 +148,7 @@ void MMU_Init(void)
 #define PLL_532MHZ  (125<<12)|(1<<4)|(1<<0)
 
 //此时内存未初始化好，不能使用局部变量
+//      本函数的时钟设置，必须与board-config.h中的CN_CFG_MCLK等常量定义一致。
 void Init_CpuClk(void)
 {
     volatile register int i;

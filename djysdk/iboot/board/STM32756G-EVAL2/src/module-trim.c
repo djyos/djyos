@@ -57,7 +57,7 @@
 #include <gdd.h>
 #include <gkernel.h>
 #include <iicbus.h>
-#include <IO_config.h>
+#include <cfg/IO_config.h>
 #include <msgqueue.h>
 #include <multiplex.h>
 #include <shell.h>
@@ -122,6 +122,9 @@ void Sys_ModuleInit(void)
     uint16_t evtt_main;
 
 //    HAL_Init();
+
+    extern bool_t Board_GpioInit(void);
+    Board_GpioInit();
     //初始化直接输入和输出的硬件，为stdio.c中定义的 PutStrDirect、GetCharDirect
     //两个指针赋值，也可以只为PutStrDirect赋值，以支持printk。
     //这是来自bsp的函数，一般是串口驱动,BSP没提供的话，就不要调用，会导致应用程序编译不通过。
@@ -155,12 +158,12 @@ void Sys_ModuleInit(void)
 //      Djyfs_SetWorkPath(gc_pCfgWorkPath);
 		ModuleInstall_UART(CN_UART1);
 //		ModuleInstall_UART(CN_UART2);
-//		ModuleInstall_UART(CN_UART3);
+		ModuleInstall_UART(CN_UART3);   //232TXD/232RXD
 //		ModuleInstall_UART(CN_UART4);
 //		ModuleInstall_UART(CN_UART5);
 //		ModuleInstall_UART(CN_UART6);
 //		ModuleInstall_UART(CN_UART7);
-//		ModuleInstall_UART(CN_UART8);
+		ModuleInstall_UART(CN_UART8);   //DEBUG串口
     //打开IO设备,不同的板件,这部分可能区别比较大,不影响printk函数。
     //此后,printf和scanf将使用stdin/out输出和输入。
     //依赖: 若stdin/out/err是文件,则依赖文件系统
@@ -181,6 +184,7 @@ void Sys_ModuleInit(void)
 	//  Dev = Driver_OpenDevice("UART3",D_RDONLY,CN_TIMEOUT_FOREVER);
 	ModuleInstall_Ymodem(0);
 	Ymodem_PathSet("/iboot");
+	ModuleInstall_IAP_FS(NULL);
 	ModuleInstall_IAP();
 //
 //    //安装人机交互输入模块，例如键盘、鼠标等

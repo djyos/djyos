@@ -148,6 +148,7 @@ void MMU_Init(void)
 #endif
 
 
+//      本函数的时钟设置，必须与board-config.h中的CN_CFG_MCLK等常量定义一致。
 void CPU_CLKInit(void)
 {
     volatile register int i;

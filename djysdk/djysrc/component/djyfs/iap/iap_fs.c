@@ -188,35 +188,35 @@ static struct IAP_File *__FileDecode(struct HeadFormat *FileHead)
 	
 	if(i == FILE_HEAD_SIZE)
 	{
-		printf("\r\nfile head all 0xFF. no files\r\n");
+		printf("IAP: file head all 0xFF. no files\r\n");
 		return (NULL); // 全FF数据，无效
 	}
 	
 	if((S_APP_UPDATE_DONE != FileHead->Signature) &&
 	   (S_APP_DEBUG != FileHead->Signature))
 	{
-		printf("\r\nfile is bad.\r\n");
+		printf("IAP: file is bad.\r\n");
 		return (NULL); // 格式错误
 	}
 	
 	IFile = malloc(sizeof(struct IAP_File));
 	if(!IFile)
 	{
-		printf("\r\nmemory out.\r\n");
+		printf("IAP: memory out.\r\n");
 		return (NULL);
 	}	
 	
 	NameLen = strlen(FileHead->Name) + 1; // 1是结束符
 	if(FILE_NAME_MAX_LEN < NameLen)
 	{
-		printf("\r\ntoo long file name: %d .\r\n", NameLen);
+		printf("IAP: too long file name: %d .\r\n", NameLen);
 		goto FAILURE;
 	}
 	
 	IFile->Name = malloc(NameLen);
 	if(!IFile->Name)
 	{
-		printf("\r\nmemory out.\r\n");
+		printf("IAP: memory out.\r\n");
 		goto FAILURE;
 	}
 	
@@ -305,7 +305,9 @@ s32 __ScanFiles(struct IAP_FS_Manager * Core)
 	IFile = __FileDecode(&FileHead);
 	if(!IFile)
 	{
+		printf("IAP: format the disk, please wait ... ");
 		Res = LowLevelFormat(s_ptIAP_Core->Vol); // 不存在有效文件，为保险起见，格式化整个vol
+		printf("done\r\n");
 		if(Res)
 			return (-1);
 		return (0); // 当前系统无文件，后续逻辑不执行
@@ -386,19 +388,13 @@ static struct IAP_File *__NewFile(const char *FileName)
 	}	
 	else
 	{
-		IFile = malloc(sizeof(struct IAP_File));
+		IFile = malloc(sizeof(struct IAP_File) + NameLen);
 		if(!IFile)
 		{
-			printf("\r\nmemery out.\r\n");
+			printf("IAP: memery out.\r\n");
 			return (NULL);
 		}
-		IFile->Name = malloc(NameLen);
-		if(!IFile->Name)
-		{
-			printf("\r\nmemery out.\r\n");
-			free(IFile);
-			return (NULL);
-		}
+		IFile->Name = ((char*)IFile) + sizeof(struct IAP_File);
 		IFile->ID = 0;
 		s_ptIAP_Core->Files[IFile->ID] = IFile;
 	}
@@ -669,14 +665,14 @@ static s32 IAP_FS_Install(struct MountInfo *Info, void *Private)
 
     if((s_ptIAP_Core) || (!Info))
 	{
-        printf("\r\niap has been installed.\r\n");
+        printf("\r\nIAP: has been installed.\r\n");
 		return (-1);
 	}
 	
     s_ptIAP_Core = malloc(sizeof(*s_ptIAP_Core));
     if(!s_ptIAP_Core)
 	{
-        printf("\r\nmemory out.\r\n");
+        printf("\r\nIAP: nmemory out.\r\n");
 		return (-1);
 	}	
 	
@@ -737,21 +733,21 @@ s32 ModuleInstall_IAP_FS(const char *Dir)
     Ret = open(Path, O_DIRECTORY | O_CREAT | O_RDWR, 0); // 创建/iboot目录 
     if(-1 == Ret)
     {
-        printf("\r\ncreate diretionay \"/iboot\" error\r\n");
+        printf("\r\nIAP: create diretionay \"/iboot\" error\r\n");
         return (-1);
     }
 
     Ret = ModuleInstall_EmbededFlash("embedded flash", FLASH_BUFFERED, 0);
     if(Ret)
     {
-        printf("install \"embedded flash\" error\r\n");
+        printf("\r\nIAP: install \"embedded flash\" error\r\n");
         return (-1);
     }
 
     Ret = Mount(Path, "/dev/embedded flash", "IAP", NULL);
     if(Ret < 0)
     {
-        printf("mount \"IAP\" file system error\r\n");
+        printf("\r\nIAP: mount \"IAP\" file system error\r\n");
         return (-1);
     }
 

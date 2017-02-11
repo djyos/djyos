@@ -99,7 +99,7 @@ struct ThreadVm *__CreateThread(struct EventType *evtt,u32 *stack_size)
     __asm_reset_thread(evtt->thread_routine,result);
     return result;
 }
- 
+
 //----静态创建线程-------------------------------------------------------------
 //功能：为事件类型创建线程，初始化上下文环境，安装执行函数，构成完整线程
 //参数：evtt_id，待创建的线程所服务的事件类型id
@@ -182,8 +182,8 @@ uint32_t __DjyIsrTick(ptu32_t line)
 //-----------------------------------------------------------------------------
 void __DjyInitTick(void)
 {
-    //以下设置定时器参数，需与port_config.h中cn_tick_ms、cn_tick_hz和
-    //cn_fine_us、cn_fine_hz的定义一致
+    //以下设置定时器参数，需与board-config.h中cn_tick_ms、CN_CFG_TICK_HZ和
+    //cn_fine_us、CN_CFG_FINE_HZ的定义一致
     Timer_Stop(0,0);                    //停止定时器0
     timer_clear(0,0);                   //清除当前计数值
     timer_set_clksrc(0,0,0);            //设置晶振时钟作为定时器时钟

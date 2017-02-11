@@ -52,11 +52,10 @@
 #include <sys/socket.h>
 #include "rout.h"
 
-
-typedef bool_t (*fnIpTpl)(enum_ipv_t ver,ptu32_t ipsrc, ptu32_t ipdst, tagNetPkg *pkglst, tagRout *rout);
+typedef bool_t (*fnIpTpl)(enum_ipv_t ver,ptu32_t ipsrc, ptu32_t ipdst, tagNetPkg *pkglst, tagNetDev *dev);
 bool_t IpRegisterTplHandler(u8 proto,fnIpTpl handler );
 bool_t IpTplHandler(u8 proto ,enum_ipv_t ver,ptu32_t ipsrc, ptu32_t ipdst, \
-		            tagNetPkg *pkglst, tagRout *rout);
+		            tagNetPkg *pkglst, tagNetDev *dev);
 
 u16    IpChksumSoft16(void *buf,int len,u16 chksum, bool_t done);
 void   IpPkgChkSum(tagNetPkg *pkg,u16 *chksum,u16 sum);
@@ -64,6 +63,5 @@ void   IpPkgLstChkSum(tagNetPkg *pkg,u16 *chksum,u16 sum);
 
 bool_t IpSend(enum_ipv_t ver,ptu32_t ipsrc, ptu32_t ipdst, tagNetPkg *pkg,\
 		      u16 translen,u8 proto,u32  devtask, u16 *chksum);
-bool_t  IpPushPkg(tagNetDev *dev,tagNetPkg *pkg);
 
 #endif

@@ -64,7 +64,7 @@
 extern "C" {
 #endif
 
-#define CN_CFG_TICK_US 1000  //操作系统内核时钟脉冲长度，以us为单位。*
+#define CN_CFG_TICK_US 1000  //tick间隔，以us为单位。*
 #define CN_CFG_TICK_HZ 1000  //内核时钟频率，单位为hz。
 #define CN_CFG_MCLK    1000  //windows版本并不能使用硬件定时，此定义纯粹为了让定时器组件编译通过
 

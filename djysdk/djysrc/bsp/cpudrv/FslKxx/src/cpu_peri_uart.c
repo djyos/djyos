@@ -302,11 +302,11 @@ static void __UART_IntInit(u32 SerialNo)
 
     if(true == Int_Register(IntLine))
     {
-		Int_IsrConnect(IntLine,UART_ISR);
-		Int_SetClearType(IntLine,CN_INT_CLEAR_AUTO);
-		Int_SettoAsynSignal(IntLine);
-		Int_ClearLine(IntLine);
-		Int_RestoreAsynLine(IntLine);
+        Int_IsrConnect(IntLine,UART_ISR);
+        Int_SetClearType(IntLine,CN_INT_CLEAR_AUTO);
+        Int_SettoAsynSignal(IntLine);
+        Int_ClearLine(IntLine);
+        Int_RestoreAsynLine(IntLine);
     }
 }
 

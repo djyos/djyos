@@ -691,7 +691,7 @@ bool_t ModuleInstall_HardTimer(void)
 
     RCC->APB1ENR |=RCC_APB1ENR_TIM2EN|RCC_APB1ENR_TIM5EN;
 
-    //定时器TIM23 时钟源为低速外设时钟PCLK1，速度为108M
+    //定时器TIM25 时钟源为低速外设时钟PCLK1，速度为108M
     u8 i;
 
     for(i=0;i<CN_STM32TIMER_NUM;i++)

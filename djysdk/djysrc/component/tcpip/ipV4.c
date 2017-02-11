@@ -50,8 +50,8 @@
 
 #include "ip.h"
 #include "ipV4.h"
-#include "link.h"
 #include "rout.h"
+#include "linkhal.h"
 #include "tcpipconfig.h"
 
 #define CN_IP_DF_MSK        0x4000      // dont fragment flag
@@ -84,20 +84,11 @@ typedef struct
      u32 sndnoroutnum;
      u32 sndwan;
      u32 sndbroad;
-     u32 sndmulti;
      u32 sndsubnet;
-     u32 sndsubbroad;
-     u32 sndhost;
      u32 rcvnum;
-     u32 rcvwan;
-     u32 rcvbroad;
-     u32 rcvmulti;
-     u32 rcvsubnet;
-     u32 rcvsubbroad;
      u32 rcvhost;
      u32 rcvforward;
      u32 rcvdrop;
-     u32 rcvdfnum;
      u32 rcvfragment;   //which means the frame is fragment by more than one
 }tagIpv4Statistics;
 static tagIpv4Statistics gIpv4Statistics;
@@ -113,7 +104,7 @@ typedef struct AssembleNode
 	tagNetPkg             *pkgq;    //this is the assemble queue
 	u32                    ipsrc;   //this is the ip source
 	u32                    ipdst;   //this is the ip destination
-	tagRout               *rout; //which is the dev func
+	tagNetDev             *dev;    //which is the dev func
 	u16                    datalen; //the fram len
 	u16                    id;      //this is the ip frame id
 	u8                     lastbit; //which means it is the last one
@@ -196,7 +187,7 @@ static void __assembletimeoutcheck(void)
 	}
 }
 //we use this function to do an assemble here
-static bool_t assemblepkg(u32 ipsrc,u32 ipdst,u16 id,u16 fragment,u8 proto,tagRout *rout,tagNetPkg *pkg)
+static bool_t assemblepkg(u32 ipsrc,u32 ipdst,u16 id,u16 fragment,u8 proto,tagNetDev *dev,tagNetPkg *pkg)
 {
 	tagAssembleNode  *assemble,*pre;
 	u16        offset;
@@ -238,7 +229,7 @@ static bool_t assemblepkg(u32 ipsrc,u32 ipdst,u16 id,u16 fragment,u8 proto,tagRo
 				assemble->ipdst = ipdst;
 				assemble->proto = proto;
 				assemble->id = id;
-				assemble->rout = rout;
+				assemble->dev = dev;
 				assemble->timeout = DjyGetSysTime() + CN_ASSEMBLE_LIFE;
 				if(0 == (fragment & CN_IP_MF_MSK))
 				{
@@ -320,7 +311,7 @@ static bool_t assemblepkg(u32 ipsrc,u32 ipdst,u16 id,u16 fragment,u8 proto,tagRo
 					else
 					{
 						//ok, the frame is ok, so put it to the upper
-						IpTplHandler(proto,EN_IPV_4,(ptu32_t)ipsrc, (ptu32_t)ipdst,pkgassemble,rout);
+						IpTplHandler(proto,EN_IPV_4,(ptu32_t)ipsrc, (ptu32_t)ipdst,pkgassemble,dev);
 						PkgTryFreePart(pkgassemble);
 					}
 				}
@@ -450,7 +441,7 @@ tagNetPkg *__Ipv4MakeHdr(u32 ipsrc,u32 ipdst,u8 proto,u32 translen,bool_t chksum
 }
 
 static bool_t Ipv4Snd2Rout(u32 ipsrc, u32 ipdst, tagNetPkg *pkg,u16 translen,u8 proto,\
-                           u32 devtask, u16 *chksum,u32 iphop,tagRout *rout)
+                           u32 devtask, u16 *chksum,tagRout *rout)
 {
 
     bool_t                          result;
@@ -496,141 +487,67 @@ static bool_t Ipv4Snd2Rout(u32 ipsrc, u32 ipdst, tagNetPkg *pkg,u16 translen,u8 
     ippkg = __Ipv4MakeHdr(ipsrc,ipdst,proto,translen,ipchksum);
     ippkg->partnext = pkg;
     framlen = ippkg->datalen + translen;
-    result = LinkSend(rout,ippkg,framlen,devtask,EN_NET_PROTO_IP,EN_IPV_4,iphop);
+    result = LinkSend(rout,ippkg,framlen,devtask,EN_LINKPROTO_IPV4,EN_IPV_4,ipdst);
     PkgTryFreePart(ippkg);
 
     return result;
 }
 
 bool_t IpV4Send(u32 ipsrc, u32 ipdst, tagNetPkg *pkg,u16 translen,u8 proto,\
-                       u32 devtask, u16 *chksum)
+                u32 devtask, u16 *chksum)
 {
     bool_t                          result;
-    u32                             iphop;       //the next hop
     tagRout                        *rout;        //rout to send
-    enum_ip_class                   ipclass;
     result = false;
 
     TCPIP_DEBUG_INC(gIpv4Statistics.sndnum);
-    ipclass = RoutIpClass(EN_IPV_4,ipdst,&rout);
-    switch(ipclass)
+    if(ipdst == INADDR_BROADCAST)
     {
-        case EN_IPV4_WAN: //you'd better to send this frame to the gatway
+        TCPIP_DEBUG_INC(gIpv4Statistics.sndbroad);
+    	//this is a broadcast send,so send it to each rout
+    	tagNetDev *dev;
+        dev = NetDevGet(NULL);
+        while(NULL != dev)
+        {
+            rout = dev->routq;
+            if(NULL != rout)
+            {
+                result = Ipv4Snd2Rout(ipsrc,ipdst,pkg,translen,proto,devtask,chksum,rout);
+                if(false == result)
+                {
+                    TCPIP_DEBUG_INC(gIpv4Statistics.snderrnum);
+                }
+            }
+            dev = dev->nxt;
+        }
+    }
+    else
+    {
+        rout = RoutMatch(EN_IPV_4,ipdst);
+        if(NULL == rout)
+        {
             TCPIP_DEBUG_INC(gIpv4Statistics.sndwan);
-            if(NULL != rout)
-            {
-                iphop = rout->ipaddr.ipv4.gatway;
-                result = Ipv4Snd2Rout(ipsrc,ipdst,pkg,translen,proto,devtask,chksum,iphop,rout);
-                if(false == result)
-                {
-                    TCPIP_DEBUG_INC(gIpv4Statistics.snderrnum);
-                }
-            }
-            else
-            {
-                //no rout to get out
-                TCPIP_DEBUG_INC(gIpv4Statistics.sndnoroutnum);
-            }
-            break;
-        case EN_IPV4_BROAD:
-            TCPIP_DEBUG_INC(gIpv4Statistics.sndbroad);
-            iphop = ipdst;
-            tagNetDev *dev;
-            dev = NetDevGet(NULL);
-            while(NULL != dev)
-            {
-                rout = dev->routq;
-                if(NULL != rout)
-                {
-                    result = Ipv4Snd2Rout(ipsrc,ipdst,pkg,translen,proto,devtask,chksum,iphop,rout);
-                    if(false == result)
-                    {
-                        TCPIP_DEBUG_INC(gIpv4Statistics.snderrnum);
-                    }
-                }
-                else
-                {
-                    //no rout to get out
-                    TCPIP_DEBUG_INC(gIpv4Statistics.sndnoroutnum);
-                }
-                dev = dev->nxt;
-            }
-            break;
-        case EN_IPV4_INSUBNET:
+        	rout = RoutGetDefault(EN_IPV_4);
+        }
+        else
+        {
             TCPIP_DEBUG_INC(gIpv4Statistics.sndsubnet);
-            if(NULL != rout)
+        }
+        if(NULL != rout)  //find a rout to send the frame
+        {
+            result = Ipv4Snd2Rout(ipsrc,ipdst,pkg,translen,proto,devtask,chksum,rout);
+            if(result == false)
             {
-                iphop = ipdst;
-                result = Ipv4Snd2Rout(ipsrc,ipdst,pkg,translen,proto,devtask,chksum,iphop,rout);
-                if(false == result)
-                {
-                    TCPIP_DEBUG_INC(gIpv4Statistics.snderrnum);
-                }
+                TCPIP_DEBUG_INC(gIpv4Statistics.snderrnum);
             }
-            else
-            {
-                //no rout to get out
-                TCPIP_DEBUG_INC(gIpv4Statistics.sndnoroutnum);
-            }
-            break;
-        case EN_IPV4_SUBBROAD:
-            TCPIP_DEBUG_INC(gIpv4Statistics.sndsubbroad);
-            if(NULL != rout)
-            {
-                iphop = ipdst;
-                result = Ipv4Snd2Rout(ipsrc,ipdst,pkg,translen,proto,devtask,chksum,iphop,rout);
-                if(false == result)
-                {
-                    TCPIP_DEBUG_INC(gIpv4Statistics.snderrnum);
-                }
-            }
-            else
-            {
-                //no rout to get out
-                TCPIP_DEBUG_INC(gIpv4Statistics.sndnoroutnum);
-            }
-            break;
-        case EN_IPV4_MULTI:
-            TCPIP_DEBUG_INC(gIpv4Statistics.sndmulti);
-            if(NULL != rout)
-            {
-                iphop = ipdst;
-                result = Ipv4Snd2Rout(ipsrc,ipdst,pkg,translen,proto,devtask,chksum,iphop,rout);
-                if(false == result)
-                {
-                    TCPIP_DEBUG_INC(gIpv4Statistics.snderrnum);
-                }
-            }
-            else
-            {
-                //no rout to get out
-                TCPIP_DEBUG_INC(gIpv4Statistics.sndnoroutnum);
-            }
-            break;
-        case EN_IPV4_HOSTTARGET:
-            TCPIP_DEBUG_INC(gIpv4Statistics.sndhost);
-            if(NULL != rout)
-            {
-                iphop = ipdst;
-                result = Ipv4Snd2Rout(ipsrc,ipdst,pkg,translen,proto,devtask,chksum,iphop,rout);
-                if(false == result)
-                {
-                    TCPIP_DEBUG_INC(gIpv4Statistics.sndhost);
-                }
-            }
-            else
-            {
-                //no rout to get out
-                TCPIP_DEBUG_INC(gIpv4Statistics.sndnoroutnum);
-            }
-            break;
-        default:
-            TCPIP_DEBUG_INC(gIpv4Statistics.snderrnum);
-            break;
+        }
+        else
+        {
+            TCPIP_DEBUG_INC(gIpv4Statistics.sndnoroutnum);
+        }
     }
     return result;
 }
-
 
 // =============================================================================
 // FUNCTION£ºThis function is used to deal the ip mail,especially the ipv4
@@ -640,7 +557,7 @@ bool_t IpV4Send(u32 ipsrc, u32 ipdst, tagNetPkg *pkg,u16 translen,u8 proto,\
 // RETURN  £º
 // INSTRUCT:
 // =============================================================================
-static bool_t rcvlocal(tagNetPkg *pkg,tagRout *rout)
+static bool_t rcvlocal(tagNetPkg *pkg,tagNetDev *dev)
 {
     bool_t                      result;
     u8                          proto;
@@ -656,7 +573,7 @@ static bool_t rcvlocal(tagNetPkg *pkg,tagRout *rout)
     result = true;
     hdr = (tagIpHdrV4 *)(pkg->buf + pkg->offset);
     hdrlen = (hdr->ver_len&0x0f)*4;
-    devfunc = NetDevGetFunc(rout->dev);
+    devfunc = NetDevGetFunc(dev);
     if((0 ==(devfunc &CN_IPDEV_IPICHKSUM))&&\
        (0 != IpChksumSoft16((void *)(pkg->buf + pkg->offset),hdrlen,0,true)))
     {
@@ -690,7 +607,7 @@ static bool_t rcvlocal(tagNetPkg *pkg,tagRout *rout)
         ((0== (fragment&CN_IP_MF_MSK))&&(0 == (fragment&CN_IP_OFFMASK))))
     {
         //OK, this mail could go upper now, so remove the ip message
-        result = IpTplHandler(proto,EN_IPV_4,(ptu32_t)ipsrc, (ptu32_t)ipdst,pkg,rout);
+        result = IpTplHandler(proto,EN_IPV_4,(ptu32_t)ipsrc, (ptu32_t)ipdst,pkg,dev);
     }
     else
     {
@@ -698,62 +615,37 @@ static bool_t rcvlocal(tagNetPkg *pkg,tagRout *rout)
         TCPIP_DEBUG_INC(gIpv4Statistics.rcvfragment);
         if(gEnableIpAssemble)
         {
-            result = assemblepkg(ipsrc,ipdst,id,fragment,proto,rout,pkg);
+            result = assemblepkg(ipsrc,ipdst,id,fragment,proto,dev,pkg);
         }
     }
     return result;
 }
-static bool_t rcvforward(tagNetPkg *pkg,tagRout *rout)
+static bool_t rcvforward(tagNetPkg *pkg,tagNetDev *dev)
 {
-    TCPIP_DEBUG_INC(gIpv4Statistics.rcvforward);
     return true;
 }
+
 //use this to deal with the ipv4 package
 bool_t IpV4Process(tagNetPkg *pkg,tagNetDev *dev)
 {
     bool_t                      result;
-    enum_ip_class               ipclass;
-    tagRout                    *rout;
     u32                         ipdst;
 
     result = true;
     TCPIP_DEBUG_INC(gIpv4Statistics.rcvnum);
     memcpy(&ipdst,&((tagIpHdrV4 *)(pkg->buf + pkg->offset))->ipdst,sizeof(ipdst));
-    //let me see if the destination is to the host
-    ipclass = RoutTargetClass(dev,EN_IPV_4,ipdst,&rout);
-    switch(ipclass)
+
+    if(RoutHostTarget(EN_IPV_4,ipdst))
     {
-        case EN_IPV4_BROAD: //THIS IS PUSH UPPER
-            TCPIP_DEBUG_INC(gIpv4Statistics.rcvbroad);
-            result = rcvlocal(pkg,rout);
-            break;
-        case EN_IPV4_SUBBROAD://THIS COULD ALSO PUSH UPPER
-            TCPIP_DEBUG_INC(gIpv4Statistics.rcvsubbroad);
-            result = rcvlocal(pkg,rout);
-            break;
-        case EN_IPV4_HOSTTARGET://THIS COULD ALSO PUSH UPPER
-            TCPIP_DEBUG_INC(gIpv4Statistics.rcvhost);
-            result = rcvlocal(pkg,rout);
-            break;
-        case EN_IPV4_MULTI://THIS COULD ALSO PUSH UPPER
-            TCPIP_DEBUG_INC(gIpv4Statistics.rcvmulti);
-            result = rcvlocal(pkg,rout);
-            break;
-        case EN_IPV4_INSUBNET://MAY BE NEED TO FORWARD
-            TCPIP_DEBUG_INC(gIpv4Statistics.rcvsubnet);
-            result = rcvforward(pkg,rout);
-            break;
-        case EN_IPV4_WAN:     //MAY BENEED TO FORWARD
-            TCPIP_DEBUG_INC(gIpv4Statistics.rcvwan);
-            result = rcvforward(pkg,rout);
-            break;
-        default:              //DROPS
-            TCPIP_DEBUG_INC(gIpv4Statistics.rcvdrop);
-            break;
+        result = rcvlocal(pkg,dev);
+    }
+    else
+    {
+        TCPIP_DEBUG_INC(gIpv4Statistics.rcvforward);
+        result = rcvforward(pkg,dev);
     }
     return result;
 }
-
 bool_t Ipv4Show(char *param)
 {
     printf("IPV4 STATISTICS:\n\r");
@@ -763,16 +655,7 @@ bool_t Ipv4Show(char *param)
     printf("IPV4 STATISTICS:SND  BROAD  :%d\n\r",gIpv4Statistics.sndbroad);
     printf("IPV4 STATISTICS:SND  WAN    :%d\n\r",gIpv4Statistics.sndwan);
     printf("IPV4 STATISTICS:SND  SUBNET :%d\n\r",gIpv4Statistics.sndsubnet);
-    printf("IPV4 STATISTICS:SND  SUBBRO :%d\n\r",gIpv4Statistics.sndsubbroad);
-    printf("IPV4 STATISTICS:SND  MULTI  :%d\n\r",gIpv4Statistics.sndmulti);
-    printf("IPV4 STATISTICS:SND  HOST   :%d\n\r",gIpv4Statistics.sndhost);
-
     printf("IPV4 STATISTICS:RCV         :%d\n\r",gIpv4Statistics.rcvnum);
-    printf("IPV4 STATISTICS:RCV  BROAD  :%d\n\r",gIpv4Statistics.rcvbroad);
-    printf("IPV4 STATISTICS:RCV  WAN    :%d\n\r",gIpv4Statistics.rcvwan);
-    printf("IPV4 STATISTICS:RCV  SUBNET :%d\n\r",gIpv4Statistics.rcvsubnet);
-    printf("IPV4 STATISTICS:RCV  SUBBRO :%d\n\r",gIpv4Statistics.rcvsubbroad);
-    printf("IPV4 STATISTICS:RCV  MULTI  :%d\n\r",gIpv4Statistics.rcvmulti);
     printf("IPV4 STATISTICS:RCV  HOST   :%d\n\r",gIpv4Statistics.rcvhost);
     printf("IPV4 STATISTICS:RCV  DROPS  :%d\n\r",gIpv4Statistics.rcvdrop);
     printf("IPV4 STATISTICS:RCV  FORWARD:%d\n\r",gIpv4Statistics.rcvforward);

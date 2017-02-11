@@ -5,19 +5,19 @@ INCLUDE  ..\board\explorer\lds\memory.lds
 /*不同的make程序，文件路径表示方式，是不同的，输入段中文件名写法要相应修改*/
 /*正确的写法，可参看console中输出的命令行*/
 SECTIONS
-{	
-	Rom_Start :
-	{
-	    restore = .; 
-	}>InnerFlash
-	
+{
+        Rom_Start :
+        {
+            restore = .;
+        }>InnerFlash
+
     /*RevRam是Ram保留区域，用于存储preload前使用或保存的内在数据,只有IAP_pload.c*/
     /*的pg_IapVar变量从该段内分配，且该段在iboot.lds和debug/release.lds保持一致*/
     Iboot_RevRam (NOLOAD):
     {
         . = ALIGN(0x08);
-        KEEP(*(.IapBootFlgRam .IapBootFlgRam.*))  
-    }>RAM1	
+        KEEP(*(.IapBootFlgRam .IapBootFlgRam.*))
+    }>RAM1
 
     stack_rRAM1_lRAM1 (NOLOAD) :
     {
@@ -26,11 +26,11 @@ SECTIONS
         KEEP(* (.data.InitStack))
         msp_top = ALIGN(0x08);
     }>RAM1
-       
+
     text_startup_rIbootRom_lIbootRom :
     {
        . = ALIGN(0x08);
-        KEEP(*(.StartupExpTbl .StartupExpTbl.*)) 
+        KEEP(*(.StartupExpTbl .StartupExpTbl.*))
         KEEP(*liblibOS_explorerstm32f4_o0.a:initcpuc.o (.text .text.* .rodata .rodata.*))
         KEEP(*liblibOS_explorerstm32f4_o0.a:sysinit.o (.text .text.* .rodata .rodata.*))
         KEEP(*liblibOS_explorerstm32f4_o0.a:pre_loader.o (.text .text.* .rodata .rodata.*))
@@ -44,7 +44,7 @@ SECTIONS
         g_pAppCodeStartRamAddr = .;
         *liblibOS_explorerstm32f4_o0.a:loader.o (.text .text.* .rodata .rodata.*)
         *liblibOS_explorerstm32f4_o0.a:int_hard.o (.text .text.* .rodata .rodata.*)
-         KEEP(*liblibOS_explorerstm32f4_o0.a:hard-exps.o (.text .text.* .rodata .rodata.*)) 
+         KEEP(*liblibOS_explorerstm32f4_o0.a:hard-exps.o (.text .text.* .rodata .rodata.*))
         *liblibOS_explorerstm32f4_o0.a:hard-exp.o (.text .text.* .rodata .rodata.*)
         *liblibOS_explorerstm32f4_o0.a:int.o (.text .text.* .rodata .rodata.*)
         *liblibOS_explorerstm32f4_o0.a:ints.o (.text .text.* .rodata .rodata.*)
@@ -52,9 +52,9 @@ SECTIONS
         *liblibOS_explorerstm32f4_o0.a:heap-static.o (.text .text.* .rodata .rodata.*)
         *liblibOS_explorerstm32f4_o0.a:list.o (.text .text.* .rodata .rodata.*)
     }>InnerFlash
-    
+
     text_sysload_rIbootRom_lIbootRom :
-    {       
+    {
        . = ALIGN(0x08);
         * (.text .text.* .rodata .rodata.*)
         g_pAppCodeEndRamAddr = .;
@@ -157,7 +157,7 @@ SECTIONS
         sys_heap_bottom = .;
     }>RAM1
     sys_heap_top = InnerRamStart + InnerRamSize;
-    
+
     heap_rextram_lextram (NOLOAD) :
     {
         . = ALIGN(0x08);
@@ -202,34 +202,34 @@ SECTIONS
         . = ALIGN(0x04);
         LONG(0)                     /*结束标志*/
     }>InnerFlash
-    
+
     Iboot_Info :
     {
         . = ALIGN(0x08);
         gc_ptIbootSize = .;
         LONG(IbootSize)
     }>InnerFlash
-    
+
     App_Info :
     {
         . = ALIGN(0x08);
-        gc_pAppOffset = .; 			/* APP空间偏置 */
+        gc_pAppOffset = .;                      /* APP空间偏置 */
         LONG(InnerFlashOffset + IbootSize)
-        gc_pAppRange = .; 			/* APP空间范围 */
+        gc_pAppRange = .;                       /* APP空间范围 */
         LONG(InnerFlashRange - IbootSize)
-        
+
     }>InnerFlash
-    
+
     Iboot_AppInfo :
     {
         . = restore + IbootSize;
         gc_ptIbootCtrl = .;         /*结构变量，c中可用，用于检查APP正确性*/
         . += 256;
-        gc_ptAppInfo = .;           /*ROM区 存储APP的起始地址及大小 */ 
+        gc_ptAppInfo = .;           /*ROM区 存储APP的起始地址及大小 */
         . += 256;
         gc_AppAddr = .;             /*函数指针变量，指向APP的起始地址*/
-        __AppStart = .;           /*函数指针变量，指向APP的Preload函数*/
+        __AppStart = .;             /*函数指针变量，指向APP的Preload函数*/
     }>InnerFlash
-    
+
 }
 /**** The End ****/

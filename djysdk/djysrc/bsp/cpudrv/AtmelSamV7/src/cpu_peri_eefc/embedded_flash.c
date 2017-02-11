@@ -52,12 +52,24 @@
 #include <mpu.h>
 #include <int.h>
 
+static struct EmbdFlashDescr{
+	u16     BytesPerPage;      		     // 页中包含的字节数
+	u16     PagesPerSmallSect;      	 // small sector的页数
+	u16 	PagesPerLargeSect;           // large sector的页数
+	u16     PagesPerNormalSect;          // Normal sector的页数
+	u16     SmallSectorsPerPlane;        // 每plane的small sector数
+	u16     LargeSectorsPerPlane;        // 每plane的large sector数
+	u16     NormalSectorsPerPlane;       // 每plane的normal sector数
+	u16 	Planes;                      // plane数
+	u32     MappedStAddr;
+}*sp_tEmFlashDesrc;
 
 #define MPU_APP_FLASH_REGION	 (12)
 #define MPU_APP_START_ADDRESS    (0x00400000) // 内置FLASH起始地址
 #define MPU_APP_END_ADDRESS      (0x00400000 + 0x200000) // 2MB
-static struct EmbdFlashDescr *sp_tEmFlashDesrc;
 
+
+extern u32 gc_ptIbootSize;
 //-----------------------------------------------------------------------------
 //功能: 喂狗
 //参数:
@@ -126,14 +138,13 @@ void __CacheMpuEnable(u8 IsEnable)
 	Int_ContactTrunk();
 }
 
-extern u32 gc_ptIbootSize;
 //-----------------------------------------------------------------------------
 //功能: 获取内置FLASH的信息
 //参数:
 //返回:
 //备注:
 //-----------------------------------------------------------------------------
-static s32 EEFC_GetDescr(struct EmbdFlashDescr *Description)
+static s32 EEFC_Init(struct EmbdFlashDescr *Description)
 {
 	Description->BytesPerPage = 512;
 	Description->PagesPerSmallSect = 16;
@@ -143,8 +154,28 @@ static s32 EEFC_GetDescr(struct EmbdFlashDescr *Description)
 	Description->LargeSectorsPerPlane = 1;
 	Description->NormalSectorsPerPlane = 15;
 	Description->Planes = 1;
-	Description->ReservedPages = gc_ptIbootSize / 512; // 保留空间用于存放Iboot
 	Description->MappedStAddr = 0x400000;
+	return (0);
+}
+
+//-----------------------------------------------------------------------------
+//功能: 获取内置FLASH的信息
+//参数:
+//返回:
+//备注:
+//-----------------------------------------------------------------------------
+static s32 EEFC_GetDescr(struct EmFlashDescr *Description)
+{
+	Description->BytesPerPage = sp_tEmFlashDesrc->BytesPerPage;
+	Description->TotalPages = (sp_tEmFlashDesrc->PagesPerSmallSect *
+							   sp_tEmFlashDesrc->SmallSectorsPerPlane +
+							   sp_tEmFlashDesrc->PagesPerLargeSect *
+							   sp_tEmFlashDesrc->LargeSectorsPerPlane +
+							   sp_tEmFlashDesrc->PagesPerNormalSect *
+							   sp_tEmFlashDesrc->NormalSectorsPerPlane) *
+							  sp_tEmFlashDesrc->Planes;
+	Description->ReservedPages = gc_ptIbootSize / sp_tEmFlashDesrc->BytesPerPage;
+	Description->MappedStAddr = sp_tEmFlashDesrc->MappedStAddr;
 	return (0);
 }
 //-----------------------------------------------------------------------------
@@ -291,17 +322,16 @@ DONE:
 }
 //-----------------------------------------------------------------------------
 //功能:
-//参数: Start：是将smallsector and largesector的大小 转化为normalsector来计算Start的
-//            例如：一个smallsector + largesector = 1个normalsector，若想从第二个
-//            normal sector 开始，则Start = 2
+//参数: ResPages：保留页数
 //返回:
 //备注:
 //-----------------------------------------------------------------------------
-s32 ModuleInstall_EmbededFlash(const char *ChipName, u32 Flags, u16 Start)
+s32 ModuleInstall_EmbededFlash(const char *ChipName, u32 Flags, u16 ResPages)
 {
 
 	u32 Len;
     struct FlashChip *Chip;
+    struct EmFlashDescr FlashDescr;
 	struct MutexLCB *FlashLock;
 	u8 *Buf;
 	s32 Ret = 0;
@@ -317,21 +347,21 @@ s32 ModuleInstall_EmbededFlash(const char *ChipName, u32 Flags, u16 Start)
 		return (-1);
 
     // 获取FLASH信息
-    if(EEFC_GetDescr(sp_tEmFlashDesrc))
+    if(EEFC_Init(sp_tEmFlashDesrc))
     {
         TraceDrv(FLASH_TRACE_ERROR, "解析内置FLASH信息失败\r\n");
 		Ret = -3;
 		goto FAILURE;
     }
 
-    if(Start > ((sp_tEmFlashDesrc->NormalSectorsPerPlane+1)*
-    		sp_tEmFlashDesrc->Planes))
+    EEFC_GetDescr(&FlashDescr);
+    if(ResPages > FlashDescr.TotalPages)
 	{
-    	Ret = -1;
+		Ret = -1;
 		goto FAILURE;
-    }
+	}
 
-	sp_tEmFlashDesrc->ReservedPages += Start * sp_tEmFlashDesrc->PagesPerNormalSect;
+    FlashDescr.ReservedPages += ResPages;
     Len = strlen (ChipName) + 1;
     Chip = (struct FlashChip*)malloc(sizeof(struct FlashChip) + Len);
 	if (NULL == Chip)
@@ -343,7 +373,7 @@ s32 ModuleInstall_EmbededFlash(const char *ChipName, u32 Flags, u16 Start)
 
 	memset(Chip, 0x00, sizeof(*Chip));
 	Chip->Type                    = F_ALIEN;
-	Chip->Descr.Embd              = *sp_tEmFlashDesrc;
+	Chip->Descr.Embd              = FlashDescr;
 	Chip->Ops.ErsBlk              = EEFC_SectorEarse;
 	Chip->Ops.WrPage              = EEFC_PageProgram;
 	Chip->Ops.RdPage              = EEFC_PageRead;

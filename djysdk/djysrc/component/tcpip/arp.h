@@ -55,8 +55,6 @@
 #define CN_ARPITEM_PRO_STABLE  (1<<1)         //which means the mac could be use
 #define CN_ARPITEM_PRO_NONE    (0)            //no property
 
-
-
 bool_t ArpFindMac(u32 ip,u8 *mac);
 bool_t ArpItemCreate(u32 ip,u8 *mac,u32 pro);
 bool_t ArpItemDelete(u32 ip);
@@ -66,8 +64,6 @@ bool_t ArpInform(char *param);
 
 #include "rout.h"
 bool_t ArpInformAll(tagRout *rout);
-
-
 
 #endif /* __ARP_H */
 

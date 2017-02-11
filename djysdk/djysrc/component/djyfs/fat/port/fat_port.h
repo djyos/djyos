@@ -70,6 +70,7 @@ extern "C" {
  s32 FATRead(void *Buf, u32 Size, u32 Nmemb, struct FileContext *FileCt);
  s32 FATStat(struct FileContext *FileCt, const char *Path, struct Stat *Buf, const char *Root);
  s32 FATTruncate(struct FileContext *FileCt, off_t NewSize);
+ s32 FATDirRead(struct FileContext *FileCt, struct Dirent *Content);
 
  s32 FATInstall(struct MountInfo *Info, void *Private);
  s32 FATUninstall(struct MountInfo *Info);

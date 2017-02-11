@@ -68,11 +68,11 @@ static tagGpioReg volatile * const tg_GPIO_Reg[] = {GPIOA,GPIOB,GPIOC,GPIOD,
 //       PUPD,上拉或下拉
 // 返回: 无
 // =============================================================================
-void GPIO_CfgPinFunc(u32 port,u32 Msk,u32 Mode,
+bool_t GPIO_CfgPinFunc(u32 port,u32 Msk,u32 Mode,
 						u32 OutType,u32 Speed,u32 PUPD)
 {
 	if(port > GPIO_K)
-		return;
+		return  false;
 	u32 pinpos=0,pos=0,curpin=0;
 	for(pinpos=0;pinpos<16;pinpos++)
 	{
@@ -93,6 +93,7 @@ void GPIO_CfgPinFunc(u32 port,u32 Msk,u32 Mode,
 			tg_GPIO_Reg[port]->PUPDR|=PUPD<<(pinpos*2);	//设置新的上下拉
 		}
 	}
+	return true;
 }
 
 // =============================================================================
@@ -102,10 +103,10 @@ void GPIO_CfgPinFunc(u32 port,u32 Msk,u32 Mode,
 //      af_no，利用功能号
 // 返回：无
 // =============================================================================
-u32 GPIO_AFSet(u32 port,u32 pinnum,u32 af_no)
+bool_t GPIO_AFSet(u32 port,u32 pinnum,u32 af_no)
 {
 	if(port > GPIO_K||af_no>AF15)
-		return 0;
+		return false;
 	u16 flag,pinnum_1;
 	for(pinnum_1=0;pinnum_1<16;pinnum_1++)
 	{
@@ -116,7 +117,7 @@ u32 GPIO_AFSet(u32 port,u32 pinnum,u32 af_no)
 			tg_GPIO_Reg[port]->AFR[pinnum_1>>3]|=(u32)af_no<<((pinnum_1&0X07)*4);
 		}
 	}
-	return 1;
+	return true;
 }
 
 // =============================================================================
@@ -224,4 +225,62 @@ bool_t GPIO_SetLckr(u32 port,u32 Lckk)
 			return true;
 	}
 }
+
+// =============================================================================
+// 功能: 初始化GPIO 引脚
+// 参数：struct PIN
+// 返回：true/false
+// =============================================================================
+bool_t PIO_Configure(const Pin *Pin, u32 num)
+{
+	u8 flag;
+	while(num>0)
+	{
+		GPIO_PowerOn(Pin->PORT);
+
+		flag = GPIO_CfgPinFunc(Pin->PORT,Pin->Pinx,Pin->MODER,
+				Pin->O_TYPER,Pin->O_SPEEDR,Pin->PUPD);
+		if(flag == false)
+			return false;
+		GPIO_AFSet(Pin->PORT,Pin->Pinx,Pin->AF);
+		Pin++;
+		num--;
+	}
+	return true;
+}
+
+void PIO_Clear(const Pin *Pin)
+{
+	GPIO_SettoLow(Pin->PORT,Pin->Pinx);
+}
+void PIO_Set(const Pin *Pin)
+{
+	GPIO_SettoHigh(Pin->PORT,Pin->Pinx);
+}
+
+unsigned char PIO_Get( const Pin *Pin )
+{
+	unsigned int reg;
+	reg = GPIO_GetData(Pin->PORT);
+
+    if ( (reg & Pin->Pinx) == 0 )
+    {
+        return 0 ;
+    }
+    else
+    {
+        return 1 ;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 

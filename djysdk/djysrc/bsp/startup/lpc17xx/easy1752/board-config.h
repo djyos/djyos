@@ -74,8 +74,8 @@ extern "C" {
 #define CN_CFG_MCLK CN_CFG_CCLK  //主频，内核要用，必须定义
 #define CN_CFG_FCLK CN_CFG_MCLK  //cm3自由运行外设时钟
 #define CN_CFG_TIMER_CLK CN_CFG_PCLK  //定时器时钟源
-#define CN_CFG_FINE_US 0x02ab  //10.42nS,精密时钟脉冲长度?以uS为单位?32位定点数?整数小数各占16位?这也限制了ticks最长不超过65535uS
-#define CN_CFG_FINE_HZ CN_CFG_MCLK  //精密时钟频率?是cn_fine_ns的倒数。
+#define CN_CFG_FINE_US 0x02ab  //10.42nS,tick输入时钟周期?以uS为单位?32位定点数?整数小数各占16位?这也限制了ticks最长不超过65535uS
+#define CN_CFG_FINE_HZ CN_CFG_MCLK  //精密时钟频率?是CN_CFG_FINE_US的倒数。
 
 //CPU架构相关配置,可选或者可能可选的才在这里配置,例如大小端,是可选的,在这里配置,
 //而CPU字长固定,故字长在BSP的arch.h文件中定义

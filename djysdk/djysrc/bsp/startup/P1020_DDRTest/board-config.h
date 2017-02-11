@@ -68,7 +68,7 @@
 #define CN_CFG_BYTE_ORDER           CN_CFG_BIG_ENDIAN
 
 /*____与硬件相关的配置____*/
-#define CN_CFG_TICK_US (1000)  //操作系统内核时钟脉冲长度，以us为单位。*
+#define CN_CFG_TICK_US (1000)  //tick间隔，以us为单位。*
 #define CN_CFG_TICK_HZ (1000)  //内核时钟频率，单位为hz。
 #define Mhz 1000000
 #define CN_CFG_MCLK      (800*Mhz)  //主频，内核要用，必须定义

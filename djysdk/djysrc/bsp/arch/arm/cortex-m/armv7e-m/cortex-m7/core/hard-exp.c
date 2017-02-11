@@ -460,7 +460,7 @@ enum EN_ExpAction Exp_BusFaultHandler(u32 fpu_used,u32 *core_info)
     }
     else
     {
-        printk("Bus Fault: %s\n\r","Unknown Fault");
+        printk("Bus Fault: %s\n\r","Unknown Fault,可能是中断向量表地址异常");
     }
     //clear the flag of exp
     pg_scb_reg->HFSR = 0xFFFFFFFF;

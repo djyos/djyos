@@ -121,7 +121,9 @@ void Sys_ModuleInit(void)
 {
     uint16_t evtt_main;
 
-//    HAL_Init();
+    extern void Board_GpioInit(void);
+
+    Board_GpioInit();
     //初始化直接输入和输出的硬件，为stdio.c中定义的 PutStrDirect、GetCharDirect
     //两个指针赋值，也可以只为PutStrDirect赋值，以支持printk。
     //这是来自bsp的函数，一般是串口驱动,BSP没提供的话，就不要调用，会导致应用程序编译不通过。
@@ -181,6 +183,7 @@ void Sys_ModuleInit(void)
 	//  Dev = Driver_OpenDevice("UART3",D_RDONLY,CN_TIMEOUT_FOREVER);
 	ModuleInstall_Ymodem(0);
 	Ymodem_PathSet("/iboot");
+	ModuleInstall_IAP_FS(NULL);
 	ModuleInstall_IAP();
 //
 //    //安装人机交互输入模块，例如键盘、鼠标等

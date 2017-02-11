@@ -19,6 +19,11 @@ environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972
 environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002.957774120.1109145296/DJYOS_SRC_LOCATION/value=${ProjDirPath}\\..\\djysrc
 environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002.957774120.1109145296/append=true
 environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002.957774120.1109145296/appendContributed=true
+environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002.957774120.1488835551/DJYOS_SRC_LOCATION/delimiter=;
+environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002.957774120.1488835551/DJYOS_SRC_LOCATION/operation=append
+environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002.957774120.1488835551/DJYOS_SRC_LOCATION/value=${ProjDirPath}\\..\\djysrc
+environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002.957774120.1488835551/append=true
+environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002.957774120.1488835551/appendContributed=true
 environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002.957774120/DJYOS_SRC_LOCATION/delimiter=;
 environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002.957774120/DJYOS_SRC_LOCATION/operation=append
 environment/project/ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002.957774120/DJYOS_SRC_LOCATION/value=${ProjDirPath}\\..\\djysrc

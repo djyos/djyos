@@ -428,7 +428,7 @@ s64 __DjyGetSysTime(void)
     cnt = litmp.QuadPart;
     time = (u32)(cnt*1000000/s64g_freq);
     Int_LowAtomEnd(atom_low);
-    return time;// (((u32)CN_CFG_TICK_US*1000/cn_fine_ns)-pg_timer_reg->TCNTO3) *cn_fine_ns;
+    return time;// (((u32)CN_CFG_TICK_US*1000/CN_CFG_FINE_US)-pg_timer_reg->TCNTO3) *CN_CFG_FINE_US;
 }
 
 void __asm_reset_cpu(void)

@@ -49,6 +49,7 @@ void Init_Cpu(void)
     }
 
 
+//      本函数的时钟设置，必须与board-config.h中的CN_CFG_MCLK等常量定义一致。
 //外设时钟选择，在此全部设为相同的数值，该值在config-prj.h中定义
 #if (CN_CFG_MCLK/4 == CN_CFG_PCLK)          //外设时钟=1/4主时钟
     pg_sysctrl_reg->pclksel0 = 0x00000000;

@@ -17,9 +17,9 @@ bool_t  LinkHook_0807(ptu32_t handle,u16 proto,tagNetPkg *pkg)
 
 bool_t LinkHook_ResgisterTest(u16 proto,const char *name)
 {
-	return LinkRegisterRcvHook(LinkHook_0807,0,proto,name);
+	return LinkRegisterRcvHook(LinkHook_0807,NULL,proto,name);
 }
 bool_t LinkHook_UnResgisterTest(u16 proto,const char *name)
 {
-	return LinkUnRegisterRcvHook(LinkHook_0807,0,proto,name);
+	return LinkUnRegisterRcvHook(LinkHook_0807,NULL,proto,name);
 }

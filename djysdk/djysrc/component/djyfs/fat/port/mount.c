@@ -67,6 +67,7 @@ struct FileOperations g_tFATFileOps =
     .FileRead       = FATRead,
     .FileStat       = FATStat,
     .FileTruncate   = FATTruncate,
+	.DirRead        = FATDirRead
 };
 //
 // FAT的文件系统类型
@@ -89,6 +90,7 @@ struct FileSysType FAT =
 //备注:
 //-----------------------------------------------------------------------------
 #define INSTALL_MAKE_NEW            (0x1)
+#define INSTALL_DELAY				(0x2)
 s32 FATInstall(struct MountInfo *Info, void *Private)
 {
     char *DiskName, *VolName;
@@ -97,6 +99,7 @@ s32 FATInstall(struct MountInfo *Info, void *Private)
     u32 Length;
     s32 Vol;
     struct DjyDevice *Dev;
+    u32 Delay = (*(u32*)Private) & INSTALL_DELAY;
 
     Dev = Container(Info->Dev, struct DjyDevice, Node);
     Length = strlen(Info->Dev->Name);
@@ -119,7 +122,7 @@ s32 FATInstall(struct MountInfo *Info, void *Private)
     if(FatDrvInitialize(LD2PD(Vol), (struct FatDrvFuns*)(Dev->PrivateTag)))
         return (-1); // 安装驱动
 
-    Ret = f_mount(NewFAT, DiskName, 1); // 挂载
+    Ret = f_mount(NewFAT, DiskName, Delay); // 挂载
     if ((FR_NO_FILESYSTEM == Ret) && (*((u32*)Private) & INSTALL_MAKE_NEW))
         Ret = f_mkfs(DiskName, 1, 0); // 设备上不存在文件系统，则新建FAT
 

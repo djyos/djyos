@@ -50,6 +50,7 @@
 
 #include "arp.h"
 #include "rout.h"
+#include "linkhal.h"
 
 //first we should implement the device layer
 static tagNetDev        *pNetDevQ        = NULL;
@@ -118,12 +119,15 @@ ptu32_t NetDevHandle(const char *name)
 ptu32_t NetDevInstall(tagNetDevPara *para)
 {
     tagNetDev  *dev = NULL;
+    tagLinkOps *ops;
 
     if(NULL == para)
     {
         return (ptu32_t)dev;
     }
-    if(Lock_MutexPend(pRoutMutex, CN_TIMEOUT_FOREVER))
+    ops = LinkFindOps(para->iftype);
+
+    if((NULL != ops)&&Lock_MutexPend(pRoutMutex, CN_TIMEOUT_FOREVER))
     {
         dev = __NetDevGet(para->name);
         if(NULL == dev)
@@ -146,6 +150,13 @@ ptu32_t NetDevInstall(tagNetDevPara *para)
                 dev->rfilter[EN_NETDEV_FRAME_BROAD].cmd = EN_NETDEV_SETBORAD;
                 dev->rfilter[EN_NETDEV_FRAME_POINT].cmd = EN_NETDEV_SETPOINT;
                 dev->rfilter[EN_NETDEV_FRAME_MULTI].cmd = EN_NETDEV_SETMULTI;
+                //fill the ops
+                dev->linkops = ops;
+                //send a event to the link
+                if(NULL != ops->linkevent)
+                {
+                	ops->linkevent(dev,EN_LINKEVENT_DEVADD);
+                }
                 //add it to the dev chain
                 dev->nxt = pNetDevQ;
                 pNetDevQ = dev;
@@ -200,10 +211,24 @@ bool_t  NetDevUninstall(const char *name)
                 {
                     bak->nxt = tmp->nxt;
                 }
+                //send a event to the link
+                if(NULL != dev->linkops->linkevent)
+                {
+                	dev->linkops->linkevent(dev,EN_LINKEVENT_DEVDEL);
+                }
                 //free all the rout bind to the dev
                 rout = dev->routq;
                 while(NULL != rout)
                 {
+                    if(rout == pRoutDefaultV4)
+                    {
+                        pRoutDefaultV4 = NULL;
+                    }
+                    if(rout == pRoutLoop)
+                    {
+                    	pRoutLoop = NULL;
+                    }
+
                     dev->routq = rout->nxt;
                     free((void *)rout);
                     rout = dev->routq;
@@ -482,7 +507,13 @@ bool_t NetDevPrivate(ptu32_t handle)
     result = ((tagNetDev*)handle)->private;
     return result;
 }
-
+//-----------------------------------------------------------------------------
+//功能:use this function to send data to the net device
+//参数:
+//返回:
+//备注:
+//作者:zhangqf@下午3:49:46/2016年12月29日
+//-----------------------------------------------------------------------------
 // =============================================================================
 // FUNCTION:Use this function to update the net rout malloced by the dhcp client
 // PARA  IN:name, the net dev name
@@ -508,9 +539,7 @@ bool_t RoutUpdate(char *name,enum_ipv_t ver,void *netaddr)
             {
                 if((EN_IPV_4 == ver)&&(rout->ver == ver))
                 {
-                    ArpItemDelete(rout->ipaddr.ipv4.broad);
                     rout->ipaddr.ipv4 = *(tagHostAddrV4 *)netaddr;
-                    ArpItemCreate(rout->ipaddr.ipv4.broad,(u8 *)CN_MAC_BROAD,CN_ARPITEM_PRO_NONE);
                     result = true;
                 }
                 break;
@@ -572,6 +601,7 @@ bool_t RoutCreate(const char *name,enum_ipv_t ver,void *netaddr,u32 pro)
                 rout = (tagRout *) malloc(sizeof(tagRout));
                 if((NULL != rout)&&(ver == EN_IPV_4))
                 {
+                	memset(rout,0,sizeof(tagRout));
                     //fill the net address and add it to the dev rout chain
                     rout->ver = EN_IPV_4;
                     rout->ipaddr.ipv4 = *(tagHostAddrV4 *)netaddr;
@@ -581,9 +611,6 @@ bool_t RoutCreate(const char *name,enum_ipv_t ver,void *netaddr,u32 pro)
                     rout->dev = dev;
                     rout->nxt = dev->routq;
                     dev->routq = rout;
-                    //add the arpitem
-                    ArpItemCreate(rout->ipaddr.ipv4.broad,(u8 *)CN_MAC_BROAD,CN_ARPITEM_PRO_NONE);
-
                     if(rout->ipaddr.ipv4.ip == htonl(INADDR_LOOPBACK))
                     {
                         pRoutLoop = rout;   //this is the loop rout
@@ -638,8 +665,10 @@ bool_t RoutDelete(const char *name,enum_ipv_t ver,ipaddr_t addr)
                     {
                         pRoutDefaultV4 = NULL;
                     }
-                    //remove the broad arp
-                    ArpItemDelete(rout->ipaddr.ipv4.broad);
+                    if(rout == pRoutLoop)
+                    {
+                    	pRoutLoop = NULL;
+                    }
                     free((void *)rout);
                     break;
                 }
@@ -698,10 +727,7 @@ bool_t RoutSet(const char *name,enum_ipv_t ver,ipaddr_t ipold,void *newaddr)
                     newhost = (tagHostAddrV4 *)newaddr;
                     if(newhost->broad != INADDR_ANY)
                     {
-                        //remove the old arp item and add the new one
-                        ArpItemDelete(rout->ipaddr.ipv4.broad);
                         rout->ipaddr.ipv4.broad = newhost->broad;
-                        ArpItemCreate(rout->ipaddr.ipv4.broad,(u8 *)CN_MAC_BROAD,CN_ARPITEM_PRO_NONE);
                     }
                     if(newhost->dns != INADDR_ANY)
                     {
@@ -783,184 +809,6 @@ bool_t RoutSetDefault(enum_ipv_t ver,ipaddr_t ip)
     }
     return result;
 }
-
-// =============================================================================
-// FUNCTION:Use this function to get a rout to send the ip package
-// PARA  IN:ver,you must specified the ip version
-//          ip, the specified ip
-// PARA OUT:if the rout is not NULL, then will return the corresponding rout
-// RETURN  :the ip class
-// INSTRUCT:
-// =============================================================================
-enum_ip_class RoutIpClass(enum_ipv_t ver,ipaddr_t ip,tagRout **rout)
-{
-    enum_ip_class  result = EN_IPV4_NOTDEF;
-    tagRout   *tmp = NULL;
-    tagNetDev *dev = NULL;
-
-    if(Lock_MutexPend(pRoutMutex,CN_TIMEOUT_FOREVER))
-    {
-        if(ver == EN_IPV_4)
-        {
-            if(ip == INADDR_BROADCAST)
-            {
-                result = EN_IPV4_BROAD;
-            }
-            else
-            {
-                dev = __NetDevGet(NULL); //get the queue
-                while(NULL != dev)   //loop all the dev to find an proper device
-                {
-                    tmp = dev->routq;
-                    while(NULL != tmp)
-                    {
-                        if(ver == tmp->ver)
-                        {
-                            if(ip == tmp->ipaddr.ipv4.ip)
-                            {
-                                result = EN_IPV4_HOSTTARGET;
-                                if(NULL != rout)
-                                {
-                                    *rout = pRoutLoop;
-                                }
-                                dev = NULL;   //stop the search
-                                break;
-                            }
-                            else if(ip == tmp->ipaddr.ipv4.broad)
-                            {
-                                result = EN_IPV4_SUBBROAD;
-                                if(NULL != rout)
-                                {
-                                    *rout = tmp;
-                                }
-                                dev = NULL;   //stop the search
-                                break;
-                            }
-                            else if((ip & tmp->ipaddr.ipv4.submask)==\
-                                    (tmp->ipaddr.ipv4.ip&tmp->ipaddr.ipv4.submask))
-                            {
-                                result = EN_IPV4_INSUBNET;
-                                if(NULL != rout)
-                                {
-                                    *rout = tmp;
-                                }
-                                dev = NULL;   //stop the search
-                                break;
-                            }
-                            else
-                            {
-                                result = EN_IPV4_WAN;
-                                if(NULL != rout)
-                                {
-                                    *rout = pRoutDefaultV4;
-                                }
-                                //continue to search
-                            }
-                        }
-                        tmp = tmp->nxt;
-                    }
-                    if(NULL != dev)
-                    {
-                        dev = dev->nxt;
-                    }
-                }
-            }
-        }
-
-        Lock_MutexPost(pRoutMutex);
-    }
-
-    return   result;
-}
-// =============================================================================
-// FUNCTION:Use this function to get a rout to send the ip package
-// PARA  IN:dev, which net dev we will search in
-//          ver,you must specified the ip version
-//          ip, the specified ip
-// PARA OUT:if the rout is not NULL, then will return the corresponding rout
-// RETURN  :the ip class
-// INSTRUCT:
-// =============================================================================
-//we will use this to determines the destination
-enum_ip_class RoutTargetClass(tagNetDev *dev,enum_ipv_t ver,ipaddr_t ip,tagRout **rout)
-{
-    enum_ip_class  result = EN_IPV4_NOTDEF;
-    tagRout   *tmp = NULL;
-
-    if(Lock_MutexPend(pRoutMutex,CN_TIMEOUT_FOREVER))
-    {
-        if(ver == EN_IPV_4)
-        {
-            if(ip == INADDR_BROADCAST)
-            {
-                result = EN_IPV4_BROAD;
-                if(NULL != rout)
-                {
-                    *rout = dev->routq;
-                }
-            }
-            else if(dev->routq == pRoutLoop)
-            {
-                result = EN_IPV4_HOSTTARGET;
-                if(NULL != rout)
-                {
-                    *rout = dev->routq;
-                }
-            }
-            else
-            {
-                tmp = dev->routq;
-                while(NULL != tmp)
-                {
-                    if(ver == tmp->ver)
-                    {
-                        if(ip == tmp->ipaddr.ipv4.ip)
-                        {
-                            result = EN_IPV4_HOSTTARGET;
-                            if(NULL != rout)
-                            {
-                                *rout = pRoutLoop;
-                            }
-                            break;
-                        }
-                        else if(ip == tmp->ipaddr.ipv4.broad)
-                        {
-                            result = EN_IPV4_SUBBROAD;
-                            if(NULL != rout)
-                            {
-                                *rout = tmp;
-                            }
-                            break;
-                        }
-                        else if((ip & tmp->ipaddr.ipv4.submask)==\
-                                (tmp->ipaddr.ipv4.ip&tmp->ipaddr.ipv4.submask))
-                        {
-                            result = EN_IPV4_INSUBNET;
-                            if(NULL != rout)
-                            {
-                                *rout = tmp;
-                            }
-                            //continue to search
-                        }
-                        else
-                        {
-                            result = EN_IPV4_WAN;
-                            if(NULL != rout)
-                            {
-                                *rout = pRoutDefaultV4;
-                            }
-                            //continue to search
-                        }
-                    }
-                    tmp = tmp->nxt;
-                }
-            }
-        }
-        Lock_MutexPost(pRoutMutex);
-    }
-
-    return   result;
-}
 // =============================================================================
 // FUNCTION:use this function to get the default dns ip
 // PARA  IN: ver,you must specified the ip version
@@ -992,8 +840,8 @@ static void __RoutShow(tagNetDev *dev)
     struct in_addr       addr;
 
     printf("***************************************************************\r\n");
-    printf("Device:Name      :%s---%s\r\n",dev->name,\
-            dev->iftype== EN_LINK_ETHERNET?"ethernet":"raw");
+    printf("Device:Name      :%s---LinkType:%s(%d)\r\n",dev->name,\
+    		LinkTypeName(dev->iftype),dev->iftype);
     printf("Device:Mac       :%02x-%02x-%02x-%02x-%02x-%02x\r\n",\
             dev->mac[0],dev->mac[1],dev->mac[2],\
             dev->mac[3],dev->mac[4],dev->mac[5]);
@@ -1024,6 +872,10 @@ static void __RoutShow(tagNetDev *dev)
         {
             printf("Unknow Host ADDR\r\n");
         }
+
+        printf("RoutSndNum:Total:0x%llx Err:0x%llx\n\r",rout->outnum,rout->outerr);
+        printf("RoutRcvNum:Total:0x%llx Err:0x%llx\n\r",rout->innum,rout->inerr);
+
         rout = rout->nxt;
     }
 }
@@ -1146,6 +998,262 @@ static bool_t NetDevMacSet(char *param)
     return result;
 }
 
+//use this function to find a rout to output the ip package
+//-----------------------------------------------------------------------------
+//功能:use this function to get the default rout
+//参数:ver,which means ipv4 or ipv6
+//返回:
+//备注:if no rout match the destination then we could use the default rout to send the package
+//作者:zhangqf@下午5:48:47/2016年12月28日
+//-----------------------------------------------------------------------------
+tagRout *RoutGetDefault(enum_ipv_t ver)
+{
+	tagRout *result = NULL;
+	if(ver == EN_IPV_4)
+	{
+		result = pRoutDefaultV4;
+	}
+	return result;
+}
+
+bool_t *RoutSetDefaultAddr(enum_ipv_t ver,ipaddr_t ip,ipaddr_t mask,ipaddr_t gateway,ipaddr_t dns)
+{
+	bool_t result = false;
+	if((NULL != pRoutDefaultV4)&&(ver = EN_IPV_4))
+	{
+		pRoutDefaultV4->ipaddr.ipv4.ip = ip;
+		pRoutDefaultV4->ipaddr.ipv4.submask = mask;
+		pRoutDefaultV4->ipaddr.ipv4.gatway = gateway;
+		pRoutDefaultV4->ipaddr.ipv4.dns = dns;
+		pRoutDefaultV4->ipaddr.ipv4.broad = (ip&mask)|(~mask);
+
+		result = false;
+	}
+	return true;
+}
+
+
+
+
+
+//-----------------------------------------------------------------------------
+//功能:use this function to select a match rout,(same subnet)
+//参数:ver:means ipv4 or ipv6;ipaddr:which means the ipv4 address or the ipv6 address
+//返回:
+//备注:
+//作者:zhangqf@下午5:53:32/2016年12月28日
+//-----------------------------------------------------------------------------
+tagRout *RoutMatch(enum_ipv_t ver,ipaddr_t ipaddr)
+{
+	tagRout   *result = NULL;
+    tagRout   *tmp = NULL;
+    tagNetDev *dev = NULL;
+    u32        ip;
+    if(Lock_MutexPend(pRoutMutex,CN_TIMEOUT_FOREVER))
+    {
+        if(ver == EN_IPV_4)
+        {
+        	ip = (u32)ipaddr;
+            dev = __NetDevGet(NULL); //get the queue
+            while(NULL != dev)       //loop all the dev to find an proper device
+            {
+                tmp = dev->routq;
+                while(NULL != tmp)
+                {
+                    if(ver == tmp->ver)
+                    {
+                        if(ip == tmp->ipaddr.ipv4.ip) //host ip use the loop rout
+                        {
+                            result = pRoutLoop;
+                            dev = NULL;   //stop the search
+                            break;
+                        }
+                        else if((ip & tmp->ipaddr.ipv4.submask)==\
+                                (tmp->ipaddr.ipv4.ip&tmp->ipaddr.ipv4.submask))
+                        {
+                            result = tmp;
+                            dev = NULL;   //stop the search
+                            break;
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                    tmp = tmp->nxt;
+                }
+                if(NULL != dev)
+                {
+                    dev = dev->nxt;
+                }
+            }
+        }
+        Lock_MutexPost(pRoutMutex);
+    }
+    return   result;
+}
+//-----------------------------------------------------------------------------
+//功能:use this function to judge whether the ip is the host address
+//参数:
+//返回:true when the ip match the INADDR_ANY OR THE ROUT IP else false
+//备注:
+//作者:zhangqf@下午6:07:57/2016年12月28日
+//-----------------------------------------------------------------------------
+bool_t RoutHostIp(enum_ipv_t ver,ipaddr_t ipaddr)
+{
+	bool_t     result = false;
+	tagRout   *tmp = NULL;
+	tagNetDev *dev = NULL;
+	u32        ip;
+	if(Lock_MutexPend(pRoutMutex,CN_TIMEOUT_FOREVER))
+	{
+	    if(ver == EN_IPV_4)
+	    {
+	    	ip = (u32)ipaddr;
+	    	if(ip == INADDR_ANY)
+	    	{
+	    		result = true;
+	    	}
+	    	else  //check if any ip is match this
+	    	{
+		        dev = __NetDevGet(NULL); //get the queue
+		        while(NULL != dev)       //loop all the dev to find an proper device
+		        {
+		            tmp = dev->routq;
+		            while(NULL != tmp)
+		            {
+		                if(ver == tmp->ver)
+		                {
+		                    if(ip == tmp->ipaddr.ipv4.ip) //host ip use the loop rout
+		                    {
+		                        result = true;
+		                        dev = NULL;   //stop the search
+		                        break;
+		                    }
+		                    else
+		                    {
+		                    	//continue
+		                    }
+		                }
+		                tmp = tmp->nxt;
+		            }
+		            if(NULL != dev)
+		            {
+		                dev = dev->nxt;
+		            }
+		        }
+	    	}
+	    }
+	    Lock_MutexPost(pRoutMutex);
+	}
+	return   result;
+}
+
+//-----------------------------------------------------------------------------
+//功能:use this function to judge whether the ip is the host address
+//参数:
+//返回:true when the ip match the INADDR_BROADCAST OR THE ROUT IP else false
+//备注:
+//作者:zhangqf@下午6:07:57/2016年12月28日
+//-----------------------------------------------------------------------------
+bool_t RoutHostTarget(enum_ipv_t ver,ipaddr_t ipaddr)
+{
+	bool_t     result = false;
+	tagRout   *tmp = NULL;
+	tagNetDev *dev = NULL;
+	u32        ip;
+	if(Lock_MutexPend(pRoutMutex,CN_TIMEOUT_FOREVER))
+	{
+	    if(ver == EN_IPV_4)
+	    {
+	    	ip = (u32)ipaddr;
+	    	if(ip == INADDR_BROADCAST)
+	    	{
+	    		result = true;
+	    	}
+	    	else  //check if any ip is match this
+	    	{
+		        dev = __NetDevGet(NULL); //get the queue
+		        while(NULL != dev)       //loop all the dev to find an proper device
+		        {
+		            tmp = dev->routq;
+		            while(NULL != tmp)
+		            {
+		                if(ver == tmp->ver)
+		                {
+		                    if(ip == tmp->ipaddr.ipv4.ip) //host ip use the loop rout
+		                    {
+		                        result = true;
+		                        dev = NULL;   //stop the search
+		                        break;
+		                    }
+		                    else if(ip == tmp->ipaddr.ipv4.broad)
+		                    {
+		                        result = true;
+		                        dev = NULL;   //stop the search
+		                        break;
+		                    }
+		                    else if(ip == tmp->ipaddr.ipv4.multi)
+		                    {
+		                        result = true;
+		                        dev = NULL;   //stop the search
+		                        break;
+		                    }
+		                    else
+		                    {
+		                    	//continue
+		                    }
+		                }
+		                tmp = tmp->nxt;
+		            }
+		            if(NULL != dev)
+		            {
+		                dev = dev->nxt;
+		            }
+		        }
+	    	}
+	    }
+	    Lock_MutexPost(pRoutMutex);
+	}
+	return   result;
+}
+//-----------------------------------------------------------------------------
+//功能:use this function to check if the ip is in the subnet of binded to the specified device
+//参数:
+//返回:
+//备注:
+//作者:zhangqf@下午2:45:01/2016年12月29日
+//-----------------------------------------------------------------------------
+bool_t RoutSubNet(tagNetDev *dev,enum_ipv_t ver,ipaddr_t ipaddr)
+{
+	bool_t     result = false;
+	tagRout   *tmp = NULL;
+	u32        ip;
+	if(Lock_MutexPend(pRoutMutex,CN_TIMEOUT_FOREVER))
+	{
+	    if(ver == EN_IPV_4)
+	    {
+	    	ip = (u32)ipaddr;
+            tmp = dev->routq;
+            while(NULL != tmp)
+            {
+                if(ver == tmp->ver)
+                {
+                    if((ip&tmp->ipaddr.ipv4.submask)== \
+                    	(tmp->ipaddr.ipv4.ip&tmp->ipaddr.ipv4.submask))
+                    {
+                        result = true;
+                        dev = NULL;   //stop the search
+                        break;
+                    }
+                }
+                tmp = tmp->nxt;
+            }
+	    }
+	    Lock_MutexPost(pRoutMutex);
+	}
+	return   result;
+}
 
 //here we create an net dev monitor task to do the broad storm inform
 //check every ten seconds;
@@ -1183,7 +1291,6 @@ static  ptu32_t __NetDevMonitor(void)
 	return 0;
 }
 
-extern bool_t LinkHookShell(char *param);
 
 struct ShellCmdTab  gRoutDebug[] =
 {
@@ -1210,12 +1317,6 @@ struct ShellCmdTab  gRoutDebug[] =
 		NetDevFilterStat,
         "usage:netdevfilter",
         "usage:netdevfilter",
-    },
-    {
-        "linkhook",
-		LinkHookShell,
-        "usage:linkhook",
-        "usage:linkhook",
     },
 };
 #define CN_ROUTDEBUG_NUM  ((sizeof(gRoutDebug))/(sizeof(struct ShellCmdTab)))
@@ -1273,7 +1374,5 @@ EXIT_MUTEX:
     result = false;
     return result;
 }
-
-
 
 

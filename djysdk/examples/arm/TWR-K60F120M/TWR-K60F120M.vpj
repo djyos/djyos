@@ -226,20 +226,30 @@
             GUID="{701FD9A3-EA89-4F79-C629-FC2EAA27AC81}"></Folder>
     </CustomFolders>
     <Files AutoFolders="DirectoryView">
-        <Folder Name="lds">
+        <Folder
+            Name="lds"
+            GUID="{305CD042-09AF-48B2-52BE-FCC334A8C190}">
             <F N="lds/Debug.lds"/>
             <F N="lds/memory.lds"/>
             <F N="lds/Release.lds"/>
         </Folder>
-        <Folder Name="src">
-            <Folder Name="OS_prjcfg">
-                <Folder Name="include">
+        <Folder
+            Name="src"
+            GUID="{07FD3618-AC09-4198-75AF-181BBF63558F}">
+            <Folder
+                Name="OS_prjcfg"
+                GUID="{285C7EEA-119A-4462-628E-77D57EAB97A8}">
+                <Folder
+                    Name="include"
+                    GUID="{04FA54E3-CD47-441B-A919-717A0A47D99A}">
                     <F N="src/OS_prjcfg/include/gui_config.h"/>
                     <F N="src/OS_prjcfg/include/IO_config.h"/>
                     <F N="src/OS_prjcfg/include/local_config.h"/>
                     <F N="src/OS_prjcfg/include/misc_config.h"/>
                 </Folder>
-                <Folder Name="network">
+                <Folder
+                    Name="network"
+                    GUID="{E4548CD9-BBB7-44DC-5127-E57DBDC025B0}">
                     <F N="src/OS_prjcfg/network/boardnetcfg.c"/>
                     <F N="src/OS_prjcfg/network/tcpipconfig.c"/>
                 </Folder>

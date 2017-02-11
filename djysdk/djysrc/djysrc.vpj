@@ -148,56 +148,56 @@
     <Files AutoFolders="DirectoryView">
         <Folder
             Name="bsp"
-            GUID="{36AA877C-E502-4427-6525-85F2C3FFFB82}">
+            GUID="{C673D175-E03B-4E13-07BB-49C8D773F4A0}">
             <Folder
                 Name="arch"
-                GUID="{2CBCA5AB-7122-41C0-0614-4AC81E347C8A}">
+                GUID="{FE1E0FE7-B5D7-428D-7D2A-0B5884F44692}">
                 <Folder
                     Name="arm"
-                    GUID="{ADB92633-7C31-4AAD-D7CB-D84CF42A7B9E}">
+                    GUID="{92B4712E-5423-49E9-3BD9-9AE3BD94E398}">
                     <Folder
                         Name="arm7-11"
-                        GUID="{FF7F91BA-C968-4595-4705-F9819B8AC6BC}">
+                        GUID="{D48BFF35-4C0B-47C9-44A7-9DF4B060FDB1}">
                         <Folder
                             Name="arm9"
-                            GUID="{60BC620A-4E8C-45ED-A3D0-2DC23BB74DA9}">
+                            GUID="{B0443453-F19C-40DD-5829-9E4F8D973EAF}">
                             <Folder
                                 Name="omapl138"
-                                GUID="{E3C407D2-A420-4C55-66DD-B2AB15E460AB}">
+                                GUID="{DA6AD1F5-DA4A-4127-2636-A35D800E5492}">
                                 <Folder
                                     Name="core"
-                                    GUID="{FC08ED90-E1C8-47C6-8B7F-13384A6CC1A2}">
+                                    GUID="{D2F8DD39-78AB-4361-AF91-614FDCABAE84}">
                                     <F N="bsp/arch/arm/arm7-11/arm9/omapl138/core/cpu.c"/>
                                     <F N="bsp/arch/arm/arm7-11/arm9/omapl138/core/int_hard.c"/>
                                     <F N="bsp/arch/arm/arm7-11/arm9/omapl138/core/ints.S"/>
                                 </Folder>
                                 <Folder
                                     Name="include"
-                                    GUID="{ED74FD54-E627-49C5-8C13-209E0FC45D86}">
+                                    GUID="{5A2448C7-D288-4B6B-F982-073F5E381090}">
                                     <F N="bsp/arch/arm/arm7-11/arm9/omapl138/include/arch_feature.h"/>
                                     <F N="bsp/arch/arm/arm7-11/arm9/omapl138/include/arm_mode_s_file.h"/>
                                     <F N="bsp/arch/arm/arm7-11/arm9/omapl138/include/int_hard.h"/>
                                 </Folder>
                                 <Folder
                                     Name="startup"
-                                    GUID="{81E3410A-E971-41F0-1028-105BC1E995BE}">
+                                    GUID="{C9B85BF8-167B-4E38-2EF0-E8D2E999A987}">
                                     <F N="bsp/arch/arm/arm7-11/arm9/omapl138/startup/initcpu.S"/>
                                     <F N="bsp/arch/arm/arm7-11/arm9/omapl138/startup/initcpuc.c"/>
                                 </Folder>
                             </Folder>
                             <Folder
                                 Name="s3c2410"
-                                GUID="{935ACBAD-85AC-4794-4DF9-9B24DEB3DD84}">
+                                GUID="{90816497-C442-407B-F5C2-8D24F094D096}">
                                 <Folder
                                     Name="core"
-                                    GUID="{4D97E3E0-822B-463B-CB0C-4F08267453AE}">
+                                    GUID="{C184A0EE-F038-4960-F624-268D73AD91AB}">
                                     <F N="bsp/arch/arm/arm7-11/arm9/s3c2410/core/cpu.c"/>
                                     <F N="bsp/arch/arm/arm7-11/arm9/s3c2410/core/int_hard.c"/>
                                     <F N="bsp/arch/arm/arm7-11/arm9/s3c2410/core/ints.S"/>
                                 </Folder>
                                 <Folder
                                     Name="include"
-                                    GUID="{A1AFC946-1500-403C-8912-1180A755F398}">
+                                    GUID="{3E0A4E19-35F1-40A1-501C-67782A314C94}">
                                     <F N="bsp/arch/arm/arm7-11/arm9/s3c2410/include/arch_feature.h"/>
                                     <F N="bsp/arch/arm/arm7-11/arm9/s3c2410/include/cpu.h"/>
                                     <F N="bsp/arch/arm/arm7-11/arm9/s3c2410/include/hard-exp.h"/>
@@ -207,17 +207,17 @@
                             </Folder>
                             <Folder
                                 Name="s3c2416"
-                                GUID="{931DD635-ED6F-49EE-9CB7-591D1AE8B2AA}">
+                                GUID="{01D83997-7BB9-422E-09B2-883F98F42DB9}">
                                 <Folder
                                     Name="core"
-                                    GUID="{23A30E1D-F44E-4B54-68F9-CF91AF8BE8A5}">
+                                    GUID="{CDE0807C-BAED-4C33-40B7-4A8E1007EB96}">
                                     <F N="bsp/arch/arm/arm7-11/arm9/s3c2416/core/cpu.c"/>
                                     <F N="bsp/arch/arm/arm7-11/arm9/s3c2416/core/int_hard.c"/>
                                     <F N="bsp/arch/arm/arm7-11/arm9/s3c2416/core/ints.S"/>
                                 </Folder>
                                 <Folder
                                     Name="include"
-                                    GUID="{CD1320D2-9294-414B-B7DB-A6056A56F9A6}">
+                                    GUID="{F7ECE9E0-CE14-40E7-1CD0-436621DA299C}">
                                     <F N="bsp/arch/arm/arm7-11/arm9/s3c2416/include/arch_feature.h"/>
                                     <F N="bsp/arch/arm/arm7-11/arm9/s3c2416/include/cpu.h"/>
                                     <F N="bsp/arch/arm/arm7-11/arm9/s3c2416/include/hard-exp.h"/>
@@ -227,17 +227,17 @@
                             </Folder>
                             <Folder
                                 Name="s3c2440"
-                                GUID="{CF5123D3-3470-4FFB-912E-DEC6719ACE9C}">
+                                GUID="{BF989C6E-E5F5-468D-819C-9001AFEB7886}">
                                 <Folder
                                     Name="core"
-                                    GUID="{EBB5EC2A-FE8F-4B80-76CD-38769A1569BB}">
+                                    GUID="{4F97030A-A359-4293-1A26-BA60E59FCFBF}">
                                     <F N="bsp/arch/arm/arm7-11/arm9/s3c2440/core/cpu.c"/>
                                     <F N="bsp/arch/arm/arm7-11/arm9/s3c2440/core/int_hard.c"/>
                                     <F N="bsp/arch/arm/arm7-11/arm9/s3c2440/core/ints.S"/>
                                 </Folder>
                                 <Folder
                                     Name="include"
-                                    GUID="{3573BDCC-2680-469E-B2B5-6914E702D296}">
+                                    GUID="{A5BF61F3-E00E-48E7-9C69-0DDD71FC49B1}">
                                     <F N="bsp/arch/arm/arm7-11/arm9/s3c2440/include/arch_feature.h"/>
                                     <F N="bsp/arch/arm/arm7-11/arm9/s3c2440/include/cpu.h"/>
                                     <F N="bsp/arch/arm/arm7-11/arm9/s3c2440/include/hard-exp.h"/>
@@ -248,7 +248,7 @@
                         </Folder>
                         <Folder
                             Name="common"
-                            GUID="{3FAE14CE-28EC-4D9F-FA18-AE925FE250B7}">
+                            GUID="{1BA1C64D-30E6-479A-883A-7CF5DEE09A83}">
                             <F N="bsp/arch/arm/arm7-11/common/cpus.S"/>
                             <F N="bsp/arch/arm/arm7-11/common/hard-exp.c"/>
                             <F N="bsp/arch/arm/arm7-11/common/hard-exps.S"/>
@@ -258,7 +258,7 @@
                         </Folder>
                         <Folder
                             Name="include"
-                            GUID="{410A01E0-3E12-49DF-FFA0-1171ED0E08BB}">
+                            GUID="{CED104BE-B388-4F1A-D401-6540874688AC}">
                             <F N="bsp/arch/arm/arm7-11/include/arch_stdint.h"/>
                             <F N="bsp/arch/arm/arm7-11/include/arm_mode_s_file.h"/>
                             <F N="bsp/arch/arm/arm7-11/include/mmu.h"/>
@@ -267,16 +267,16 @@
                     </Folder>
                     <Folder
                         Name="cortex-m"
-                        GUID="{9AAA957C-7A70-4051-C97B-A51177D6F0AE}">
+                        GUID="{0EEFA32E-97B0-4B56-CB03-9E318100EC9F}">
                         <Folder
                             Name="armv6-m"
-                            GUID="{5383E3A0-1187-4215-275A-FE415E41DCA9}">
+                            GUID="{61D56424-B4E7-48F4-43E9-8AB5214C6188}">
                             <Folder
                                 Name="cortex-m0"
-                                GUID="{F6B4EC22-929F-448E-6462-E2CD969BE594}">
+                                GUID="{14AB4DD5-1473-43A2-51D5-16F4F9DBBDAB}">
                                 <Folder
                                     Name="core"
-                                    GUID="{E49669DC-1C0C-42FE-EE95-13E29D5D618B}">
+                                    GUID="{191E91F0-245C-4812-E954-81EB102401B6}">
                                     <F N="bsp/arch/arm/cortex-m/armv6-m/cortex-m0/core/cpu.c"/>
                                     <F N="bsp/arch/arm/cortex-m/armv6-m/cortex-m0/core/cpus.S"/>
                                     <F N="bsp/arch/arm/cortex-m/armv6-m/cortex-m0/core/hard-exp.c"/>
@@ -286,7 +286,7 @@
                                 </Folder>
                                 <Folder
                                     Name="include"
-                                    GUID="{205E37BC-86AE-4688-B455-44E5116EA59C}">
+                                    GUID="{572D45BB-1BA1-4429-A157-7842F4093E97}">
                                     <F N="bsp/arch/arm/cortex-m/armv6-m/cortex-m0/include/arch_feature.h"/>
                                     <F N="bsp/arch/arm/cortex-m/armv6-m/cortex-m0/include/arch_stdint.h"/>
                                     <F N="bsp/arch/arm/cortex-m/armv6-m/cortex-m0/include/cpu.h"/>
@@ -295,10 +295,10 @@
                                 </Folder>
                                 <Folder
                                     Name="startup"
-                                    GUID="{17226110-5011-4A90-DF0E-CD04C9808DA2}">
+                                    GUID="{4B9DDBC9-53CA-4730-8AE0-68FF55B21CB8}">
                                     <Folder
                                         Name="lpc12xx"
-                                        GUID="{3DF02F3C-B33E-499A-9EE8-5D059F9C24B3}">
+                                        GUID="{1F5FFDFC-D845-4963-F9BC-715641B985BC}">
                                         <F N="bsp/arch/arm/cortex-m/armv6-m/cortex-m0/startup/lpc12xx/initcpuc.c"/>
                                     </Folder>
                                 </Folder>
@@ -306,13 +306,13 @@
                         </Folder>
                         <Folder
                             Name="armv7-m"
-                            GUID="{B9C2D278-F61F-47AF-2857-0C7A33408DA1}">
+                            GUID="{028DAFB5-8AA6-40B4-150D-F59A740E02BC}">
                             <Folder
                                 Name="cortex-m3"
-                                GUID="{07BEACB0-E20F-4A01-3846-D4DB0ABEFBAA}">
+                                GUID="{8CFDAEC0-F6E8-496A-D118-36DE1F195FB7}">
                                 <Folder
                                     Name="core"
-                                    GUID="{649E33F2-01D5-404C-0794-33A37FD99891}">
+                                    GUID="{441D2D15-7764-4289-F24B-59836372F5A0}">
                                     <F N="bsp/arch/arm/cortex-m/armv7-m/cortex-m3/core/cpu.c"/>
                                     <F N="bsp/arch/arm/cortex-m/armv7-m/cortex-m3/core/cpus.S"/>
                                     <F N="bsp/arch/arm/cortex-m/armv7-m/cortex-m3/core/hard-exp.c"/>
@@ -322,7 +322,7 @@
                                 </Folder>
                                 <Folder
                                     Name="include"
-                                    GUID="{84C068FD-2C9B-4142-9710-E26F352888A1}">
+                                    GUID="{694206D5-D100-4D35-48B6-5F4143D25BA9}">
                                     <F N="bsp/arch/arm/cortex-m/armv7-m/cortex-m3/include/arch_feature.h"/>
                                     <F N="bsp/arch/arm/cortex-m/armv7-m/cortex-m3/include/arch_stdint.h"/>
                                     <F N="bsp/arch/arm/cortex-m/armv7-m/cortex-m3/include/cpu.h"/>
@@ -333,13 +333,13 @@
                         </Folder>
                         <Folder
                             Name="armv7e-m"
-                            GUID="{A192B5E5-A53C-412B-D975-5F483825A5BF}">
+                            GUID="{46FE24D0-13D8-43F8-1CAA-D00C99E2F68D}">
                             <Folder
                                 Name="cortex-m4"
-                                GUID="{4A9FA1F2-D88C-4242-BD79-9AFCD937B7BB}">
+                                GUID="{A0BBEFB1-F8DC-4F9C-EAF5-4EC71ADA69B1}">
                                 <Folder
                                     Name="core"
-                                    GUID="{10628911-EDCE-4314-1289-F8E607389DB5}">
+                                    GUID="{406D4E1E-6C31-41D0-99F2-695347813195}">
                                     <F N="bsp/arch/arm/cortex-m/armv7e-m/cortex-m4/core/cpu.c"/>
                                     <F N="bsp/arch/arm/cortex-m/armv7e-m/cortex-m4/core/cpus.S"/>
                                     <F N="bsp/arch/arm/cortex-m/armv7e-m/cortex-m4/core/hard-exp.c"/>
@@ -349,7 +349,7 @@
                                 </Folder>
                                 <Folder
                                     Name="include"
-                                    GUID="{7EEF315D-7DCC-4467-C3EF-39C1DBC024AB}">
+                                    GUID="{424F0078-F3F3-4C48-487E-14C31B49D29D}">
                                     <F N="bsp/arch/arm/cortex-m/armv7e-m/cortex-m4/include/arch_feature.h"/>
                                     <F N="bsp/arch/arm/cortex-m/armv7e-m/cortex-m4/include/arch_stdint.h"/>
                                     <F N="bsp/arch/arm/cortex-m/armv7e-m/cortex-m4/include/cpu.h"/>
@@ -359,10 +359,10 @@
                             </Folder>
                             <Folder
                                 Name="cortex-m7"
-                                GUID="{6B1F5728-32A9-49D0-07C2-772194523C8C}">
+                                GUID="{20E0E311-876C-417B-E4AA-A419099FDEB4}">
                                 <Folder
                                     Name="core"
-                                    GUID="{E07AFB02-65A3-4D1A-E6DC-D8794A3A51B8}">
+                                    GUID="{A1033263-48DE-469E-47F9-0E7351D2778D}">
                                     <F N="bsp/arch/arm/cortex-m/armv7e-m/cortex-m7/core/cpu.c"/>
                                     <F N="bsp/arch/arm/cortex-m/armv7e-m/cortex-m7/core/cpus.S"/>
                                     <F N="bsp/arch/arm/cortex-m/armv7e-m/cortex-m7/core/hard-exp.c"/>
@@ -372,7 +372,7 @@
                                 </Folder>
                                 <Folder
                                     Name="include"
-                                    GUID="{34B04AE2-DB4B-4A84-ECCD-5159045CE6B1}">
+                                    GUID="{93A4364F-0B07-45E0-ED6A-CB52C26B468C}">
                                     <F N="bsp/arch/arm/cortex-m/armv7e-m/cortex-m7/include/arch_feature.h"/>
                                     <F N="bsp/arch/arm/cortex-m/armv7e-m/cortex-m7/include/arch_stdint.h"/>
                                     <F N="bsp/arch/arm/cortex-m/armv7e-m/cortex-m7/include/cpu.h"/>
@@ -390,16 +390,16 @@
                 </Folder>
                 <Folder
                     Name="dsp"
-                    GUID="{A1AB2B6C-0C8F-41DB-2C2C-447EB52CACA5}">
+                    GUID="{EB7EEF16-5003-40DD-E42C-38ED5111B887}">
                     <Folder
                         Name="sharc"
-                        GUID="{23953091-C5D7-4BE5-29C1-8D8A0675E688}">
+                        GUID="{6D804CDA-7887-4F40-5BC8-96712F83F1AE}">
                         <Folder
                             Name="21469"
-                            GUID="{6EAAE521-0643-4860-23E6-5886FA377EA0}">
+                            GUID="{6F5F0ECC-9076-46FB-959C-5513CE71E9B2}">
                             <Folder
                                 Name="core"
-                                GUID="{08278054-D1C6-44B0-128F-2C2ECED31AB9}">
+                                GUID="{1F6883AA-FC00-44A3-CDA5-430F151D3AB4}">
                                 <F N="bsp/arch/dsp/sharc/21469/core/cpu.c"/>
                                 <F N="bsp/arch/dsp/sharc/21469/core/cpus.S"/>
                                 <F N="bsp/arch/dsp/sharc/21469/core/GP_timer.c"/>
@@ -410,7 +410,7 @@
                             </Folder>
                             <Folder
                                 Name="include"
-                                GUID="{BCF1D891-9627-4497-789C-68B74611D08D}">
+                                GUID="{6187B9F6-CAFA-4C96-EEF6-63A99F8AC990}">
                                 <F N="bsp/arch/dsp/sharc/21469/include/arch.h"/>
                                 <F N="bsp/arch/dsp/sharc/21469/include/cpu.h"/>
                                 <F N="bsp/arch/dsp/sharc/21469/include/hard-exp.h"/>
@@ -418,33 +418,33 @@
                             </Folder>
                             <Folder
                                 Name="startup"
-                                GUID="{91CE7F67-C1B1-4F4A-3710-E2597C10EF8C}">
+                                GUID="{5B7667A0-6C92-49D2-8512-6483C889FB84}">
                                 <F N="bsp/arch/dsp/sharc/21469/startup/21469_copytable_init.c"/>
                                 <F N="bsp/arch/dsp/sharc/21469/startup/second_stage_boot_kernel.S"/>
                             </Folder>
                         </Folder>
                         <Folder
                             Name="include"
-                            GUID="{9A0735B9-1CBB-49B5-E262-571984FDF391}">
+                            GUID="{B0F19B4B-5EC2-48B6-B65E-788B93193EAB}">
                             <F N="bsp/arch/dsp/sharc/include/stdint.h"/>
                         </Folder>
                     </Folder>
                 </Folder>
                 <Folder
                     Name="ppc"
-                    GUID="{B4DCB5E6-4FC1-44A1-8E76-2E0148DC8BB1}">
+                    GUID="{BCF7EDAB-7F54-4C41-0B92-6B460BFA6582}">
                     <Folder
                         Name="freescale"
-                        GUID="{0A74EC4F-6F64-44C8-FF51-7DEF71423A81}">
+                        GUID="{94DC1CCA-C874-4240-3416-976A4962ACA2}">
                         <Folder
                             Name="e500V2"
-                            GUID="{D4C8563F-658A-4EF5-EEF0-B18BB9CF0A98}">
+                            GUID="{227CA3F6-B672-4E8A-6BA3-B75E16D41EB9}">
                             <Folder
                                 Name="common"
-                                GUID="{C1FD9A0A-37F0-4EA5-4812-95EF1228948D}">
+                                GUID="{C6C06794-468B-4AFB-6F38-10A46F7B1896}">
                                 <Folder
                                     Name="include"
-                                    GUID="{8661913C-8565-4B69-1047-A499918360BE}">
+                                    GUID="{FEA23F41-B7D1-441D-9807-818CBDC889AF}">
                                     <F N="bsp/arch/ppc/freescale/e500V2/common/include/arch_feature.h"/>
                                     <F N="bsp/arch/ppc/freescale/e500V2/common/include/arch_stdint.h"/>
                                     <F N="bsp/arch/ppc/freescale/e500V2/common/include/E500v2Reg.h"/>
@@ -455,7 +455,7 @@
                                 </Folder>
                                 <Folder
                                     Name="src"
-                                    GUID="{7E0EB5CC-B202-4056-F316-CBAFCDE79B84}">
+                                    GUID="{99B22C81-F46D-4337-FD78-EB7F4D88338D}">
                                     <F N="bsp/arch/ppc/freescale/e500V2/common/src/exp_asm.S"/>
                                     <F N="bsp/arch/ppc/freescale/e500V2/common/src/exp_vec.S"/>
                                     <F N="bsp/arch/ppc/freescale/e500V2/common/src/hard-exp.c"/>
@@ -467,13 +467,13 @@
                             </Folder>
                             <Folder
                                 Name="P10XX"
-                                GUID="{1BB44CC0-7053-4FD5-7675-4F3BE69B4E80}">
+                                GUID="{F400B680-7819-4F66-AEF4-1C4C69C928BF}">
                                 <Folder
                                     Name="P1020"
-                                    GUID="{CE80291C-62C1-45CE-8552-B1E30944F387}">
+                                    GUID="{A26476D1-905D-41CE-6CF8-8A61A62F2AA2}">
                                     <Folder
                                         Name="core"
-                                        GUID="{AE795FB0-E403-4617-139E-2D9102FB17A4}">
+                                        GUID="{BF585867-A9B0-497B-C75E-416FA32681BD}">
                                         <F N="bsp/arch/ppc/freescale/e500V2/P10XX/P1020/core/cpu.c"/>
                                         <F N="bsp/arch/ppc/freescale/e500V2/P10XX/P1020/core/cpus.S"/>
                                         <F N="bsp/arch/ppc/freescale/e500V2/P10XX/P1020/core/cpustart.c"/>
@@ -487,7 +487,7 @@
                                     </Folder>
                                     <Folder
                                         Name="include"
-                                        GUID="{D3202C6C-EA6A-4CC0-3E3A-0F30C58E8FB7}">
+                                        GUID="{0994A069-FD45-4B97-601F-074E568BBEB8}">
                                         <F N="bsp/arch/ppc/freescale/e500V2/P10XX/P1020/include/cache.h"/>
                                         <F N="bsp/arch/ppc/freescale/e500V2/P10XX/P1020/include/cpu-optional.h"/>
                                         <F N="bsp/arch/ppc/freescale/e500V2/P10XX/P1020/include/cpu.h"/>
@@ -506,17 +506,17 @@
                 </Folder>
                 <Folder
                     Name="windows"
-                    GUID="{751D52FA-307B-4070-2641-CEFB7B64F993}">
+                    GUID="{D781510D-2458-46FF-AADE-9AD6DFFA7DA9}">
                     <Folder
                         Name="core"
-                        GUID="{947A5F0B-599A-4A3B-4B98-789CF26DCE8A}">
+                        GUID="{A38066A9-E9ED-44F5-2724-3B8820674498}">
                         <F N="bsp/arch/windows/core/cpu.c"/>
                         <F N="bsp/arch/windows/core/hard-exp.c"/>
                         <F N="bsp/arch/windows/core/int_hard.c"/>
                     </Folder>
                     <Folder
                         Name="include"
-                        GUID="{78AA19B3-C299-480A-5A9D-F0B1E36BC3B9}">
+                        GUID="{F1227135-6EA1-4A05-BFD5-EFCD69517CBE}">
                         <F N="bsp/arch/windows/include/arch_feature.h"/>
                         <F N="bsp/arch/windows/include/arch_stdint.h"/>
                         <F N="bsp/arch/windows/include/cpu.h"/>
@@ -527,23 +527,23 @@
             </Folder>
             <Folder
                 Name="boarddrv"
-                GUID="{3F7D7D5C-FBD9-4B06-C837-3488345E238F}">
+                GUID="{20785286-AE6F-433B-9607-9B70FCD37E83}">
                 <Folder
-                    Name="EXPLORER"
-                    GUID="{496141FE-BCA7-4E7D-5CC2-3EEC27994CBA}">
+                    Name="EXPLORER-stm32f4"
+                    GUID="{DEED6A72-61A2-4227-395D-EAF668EEA4A8}">
                     <Folder
                         Name="include"
-                        GUID="{B8F69D09-B4A3-45AF-248E-0E385432F9B0}">
-                        <F N="bsp/boarddrv/EXPLORER/include/board-config.h"/>
+                        GUID="{F34ACD25-EEAF-400D-6D97-4E12798AEF83}">
+                        <F N="bsp/boarddrv/EXPLORER-stm32f4/include/board-config.h"/>
                     </Folder>
-                    <F N="bsp/boarddrv/EXPLORER/board.c"/>
+                    <F N="bsp/boarddrv/EXPLORER-stm32f4/board.c"/>
                 </Folder>
                 <Folder
                     Name="iot-hall"
-                    GUID="{2978AA30-90AC-4B17-7761-4B41F22F5BB3}">
+                    GUID="{0B588263-C3DF-4C29-0D9F-53DEE94D259A}">
                     <Folder
                         Name="include"
-                        GUID="{8D8AE935-853C-4541-283B-9A92AAC09A85}">
+                        GUID="{90738583-EF49-4628-5005-659E1FC46FAF}">
                         <F N="bsp/boarddrv/iot-hall/include/board-config.h"/>
                         <F N="bsp/boarddrv/iot-hall/include/sst25vf032.h"/>
                     </Folder>
@@ -554,10 +554,10 @@
                 </Folder>
                 <Folder
                     Name="mcb1700"
-                    GUID="{2DA80A6C-CB6D-42C8-E787-AA2A26E149BE}">
+                    GUID="{76DD969C-10CB-475B-8212-D255A5932DA0}">
                     <Folder
                         Name="include"
-                        GUID="{8F617D0D-52D2-41A8-85AF-01FCCC1AA2A5}">
+                        GUID="{A2079316-1476-408D-6EAB-A31E235CF4AD}">
                         <F N="bsp/boarddrv/mcb1700/include/board-config.h"/>
                         <F N="bsp/boarddrv/mcb1700/include/lcd.h"/>
                         <F N="bsp/boarddrv/mcb1700/include/lcd_spidrv.h"/>
@@ -568,20 +568,32 @@
                 </Folder>
                 <Folder
                     Name="NUCLEO-F746ZG"
-                    GUID="{68260DAA-754E-48EE-F913-7FE2F3773B9A}">
+                    GUID="{FB5896AB-6713-4895-1A8F-13B6EC713482}">
                     <Folder
                         Name="include"
-                        GUID="{54046FF2-A528-4691-4D99-9DC5A9AD2CB5}">
+                        GUID="{81F5E51F-8ED1-4459-B3BA-9BFF55EA8AAA}">
                         <F N="bsp/boarddrv/NUCLEO-F746ZG/include/board-config.h"/>
+                        <F N="bsp/boarddrv/NUCLEO-F746ZG/include/board.h"/>
                         <F N="bsp/boarddrv/NUCLEO-F746ZG/include/stm32f7xx.h"/>
                     </Folder>
+                    <F N="bsp/boarddrv/NUCLEO-F746ZG/board.c"/>
+                </Folder>
+                <Folder
+                    Name="NUCLEO-L476RG"
+                    GUID="{FAE6DA26-F417-417F-C82B-5BEA2F3DDFB4}">
+                    <Folder
+                        Name="include"
+                        GUID="{5B252DAE-A738-4857-04FB-0BF813CF82B6}">
+                        <F N="bsp/boarddrv/NUCLEO-L476RG/include/board-config.h"/>
+                    </Folder>
+                    <F N="bsp/boarddrv/NUCLEO-L476RG/board.c"/>
                 </Folder>
                 <Folder
                     Name="qh_1"
-                    GUID="{C785FD8A-0B9B-471D-33AB-F4D1DC9570BD}">
+                    GUID="{1F623B01-0C40-40C7-746D-4DDF037DDBAC}">
                     <Folder
                         Name="include"
-                        GUID="{052C54E8-1931-4BF3-ED01-B1738FBFFBA2}">
+                        GUID="{B21A3861-5472-42DA-F3A5-663A77AA6FA4}">
                         <F N="bsp/boarddrv/qh_1/include/board-config.h"/>
                         <F N="bsp/boarddrv/qh_1/include/dm9000a-brd.h"/>
                         <F N="bsp/boarddrv/qh_1/include/ili9325-brd.h"/>
@@ -593,10 +605,10 @@
                 </Folder>
                 <Folder
                     Name="SAM4E-EK"
-                    GUID="{20460B02-AFFA-4A7D-411E-FCD4381422A8}">
+                    GUID="{DB485E1A-B01D-4BD4-757A-9599954689B4}">
                     <Folder
                         Name="include"
-                        GUID="{D001FAB8-7275-4985-6F0D-6E3AFA3E2592}">
+                        GUID="{98E52396-CCF6-48FE-4B20-09EA1D9CCA95}">
                         <F N="bsp/boarddrv/SAM4E-EK/include/board-config.h"/>
                         <F N="bsp/boarddrv/SAM4E-EK/include/ksz8051mnl.h"/>
                     </Folder>
@@ -605,10 +617,10 @@
                 </Folder>
                 <Folder
                     Name="SAMV71Xplained"
-                    GUID="{5A23E8D9-BCDF-4C75-0592-C49824EBCB8C}">
+                    GUID="{FCA227CA-68C8-40A4-97B5-A0C410524690}">
                     <Folder
                         Name="include"
-                        GUID="{C4DFD741-9751-4842-9524-688C6F3D7FB9}">
+                        GUID="{D49AACF2-4F5A-4EB9-8465-7043CEBFBC82}">
                         <F N="bsp/boarddrv/SAMV71Xplained/include/board-config.h"/>
                         <F N="bsp/boarddrv/SAMV71Xplained/include/ksz8061.h"/>
                         <F N="bsp/boarddrv/SAMV71Xplained/include/mt29f1g.h"/>
@@ -618,20 +630,20 @@
                 </Folder>
                 <Folder
                     Name="SR1210"
-                    GUID="{98D549B8-75D7-455E-114A-7160A2CE5FAB}">
+                    GUID="{8EB13AD6-3933-4DAD-79A0-D9227B39E3AB}">
                     <Folder
                         Name="include"
-                        GUID="{C9C5BE49-D085-4842-772B-3841B6520C91}">
+                        GUID="{5E4F54C4-3684-43D7-8891-A8AB779DE082}">
                         <F N="bsp/boarddrv/SR1210/include/board-config.h"/>
                     </Folder>
                     <F N="bsp/boarddrv/SR1210/SR1210_lowpower.c"/>
                 </Folder>
                 <Folder
                     Name="sr3200"
-                    GUID="{1784582F-4456-4058-113A-8516EF633492}">
+                    GUID="{046F551D-9077-41D5-A163-2F61062DFB8A}">
                     <Folder
                         Name="include"
-                        GUID="{6F34DEFF-0B58-43F9-F7F4-5FFB54221FAF}">
+                        GUID="{9A28B77B-5880-4F36-3A2A-24ACDB2FCB90}">
                         <F N="bsp/boarddrv/sr3200/include/board-config.h"/>
                         <F N="bsp/boarddrv/sr3200/include/board.h"/>
                         <F N="bsp/boarddrv/sr3200/include/flash.h"/>
@@ -644,10 +656,10 @@
                 </Folder>
                 <Folder
                     Name="sr3252"
-                    GUID="{E11A2A5F-5CC0-43E2-DC76-31CA17C02BA2}">
+                    GUID="{C4354BC5-357D-4554-99C1-A6DDB2F207AD}">
                     <Folder
                         Name="include"
-                        GUID="{9CECDA7A-34CC-4928-1598-96218B63BF8C}">
+                        GUID="{19A34DF6-B020-4549-DD3A-7B98B77CCDAA}">
                         <F N="bsp/boarddrv/sr3252/include/board-config.h"/>
                         <F N="bsp/boarddrv/sr3252/include/flashdrv.h"/>
                     </Folder>
@@ -657,19 +669,19 @@
                 </Folder>
                 <Folder
                     Name="sr5190"
-                    GUID="{70C48BF0-8EC9-40C4-EA62-E9115B71249E}">
+                    GUID="{DAECC409-AD38-4502-B26A-17A8B36D749C}">
                     <Folder
                         Name="include"
-                        GUID="{511B94B4-451E-408E-B0EF-948251A46FA6}">
+                        GUID="{1663EB39-C0A9-49E2-2DCB-AAD8D4698581}">
                         <F N="bsp/boarddrv/sr5190/include/board-config.h"/>
                     </Folder>
                 </Folder>
                 <Folder
                     Name="sr5333"
-                    GUID="{5E2A0488-D7AA-4031-BE04-406F95717F87}">
+                    GUID="{A21DC06A-0D0E-4A5D-E94C-B5CF748AB3AB}">
                     <Folder
                         Name="include"
-                        GUID="{B440C847-4F0D-4BEA-47C9-8CE78022B7A4}">
+                        GUID="{D1D469C0-1418-42F1-ACD8-F3619B461D84}">
                         <F N="bsp/boarddrv/sr5333/include/board-config.h"/>
                         <F N="bsp/boarddrv/sr5333/include/kiko.h"/>
                         <F N="bsp/boarddrv/sr5333/include/pwm.h"/>
@@ -682,21 +694,40 @@
                     <F N="bsp/boarddrv/sr5333/pwm.c"/>
                 </Folder>
                 <Folder
-                    Name="STM32756G-EVAL2"
-                    GUID="{B4671A10-58C5-4D55-E563-4FA86554338F}">
+                    Name="sr5333-v2.0"
+                    GUID="{57EFFEF9-C15F-45E2-271F-29288913BE90}">
                     <Folder
                         Name="include"
-                        GUID="{0AF5C3A5-71A0-4113-1D97-956C18B6ECBA}">
+                        GUID="{D57FFEA7-1F86-4AB8-5637-8FE789B5B595}">
+                        <F N="bsp/boarddrv/sr5333-v2.0/include/board-config.h"/>
+                        <F N="bsp/boarddrv/sr5333-v2.0/include/kiko.h"/>
+                        <F N="bsp/boarddrv/sr5333-v2.0/include/pwm.h"/>
+                    </Folder>
+                    <F N="bsp/boarddrv/sr5333-v2.0/backupmode.c"/>
+                    <F N="bsp/boarddrv/sr5333-v2.0/board.c"/>
+                    <F N="bsp/boarddrv/sr5333-v2.0/brdexp.c"/>
+                    <F N="bsp/boarddrv/sr5333-v2.0/kiko.c"/>
+                    <F N="bsp/boarddrv/sr5333-v2.0/max706.c"/>
+                    <F N="bsp/boarddrv/sr5333-v2.0/pwm.c"/>
+                </Folder>
+                <Folder
+                    Name="STM32756G-EVAL2"
+                    GUID="{036BDF32-C587-4F9C-4110-E25867E554B2}">
+                    <Folder
+                        Name="include"
+                        GUID="{B5261959-F5AB-4199-B66C-3473564804A7}">
                         <F N="bsp/boarddrv/STM32756G-EVAL2/include/board-config.h"/>
+                        <F N="bsp/boarddrv/STM32756G-EVAL2/include/board.h"/>
                         <F N="bsp/boarddrv/STM32756G-EVAL2/include/stm32f7xx.h"/>
                     </Folder>
+                    <F N="bsp/boarddrv/STM32756G-EVAL2/board.c"/>
                 </Folder>
                 <Folder
                     Name="tq2416"
-                    GUID="{A341C851-3ED4-42A2-FB27-EDCA9105178F}">
+                    GUID="{6BB8AA55-9234-4B5F-B7DC-2C7075F9AFBE}">
                     <Folder
                         Name="include"
-                        GUID="{9BE0850F-E8B0-4008-0232-F7EA1998CA8F}">
+                        GUID="{B7EC95CF-E450-4707-59C6-F175CBFF71AB}">
                         <F N="bsp/boarddrv/tq2416/include/board-config.h"/>
                         <F N="bsp/boarddrv/tq2416/include/key_hard.h"/>
                     </Folder>
@@ -706,10 +737,10 @@
                 </Folder>
                 <Folder
                     Name="tq2440"
-                    GUID="{A10081AE-F1DD-4E45-BFF5-753A938A5092}">
+                    GUID="{8AFD65D9-6E65-4FF3-8563-C4DE228772A2}">
                     <Folder
                         Name="include"
-                        GUID="{51BABEC4-C179-4CEA-2356-2F9F922EC498}">
+                        GUID="{674F331B-CC74-4C6B-A7A6-D76B6F588083}">
                         <F N="bsp/boarddrv/tq2440/include/board-config.h"/>
                         <F N="bsp/boarddrv/tq2440/include/dm9000a-brd.h"/>
                         <F N="bsp/boarddrv/tq2440/include/key_hard.h"/>
@@ -719,19 +750,19 @@
                 </Folder>
                 <Folder
                     Name="TWR_K60F120M"
-                    GUID="{B08F907B-141B-4510-28A0-5CFF80F7B587}">
+                    GUID="{7E62C0EA-C495-4F6C-1AD0-00B81589DBBD}">
                     <Folder
                         Name="include"
-                        GUID="{4F7F9CEB-8995-400F-5CE2-D0E3C1F85E8C}">
+                        GUID="{96D75EB5-AA8E-4805-46D6-35E4C7C06F9A}">
                         <F N="bsp/boarddrv/TWR_K60F120M/include/board-config.h"/>
                     </Folder>
                 </Folder>
                 <Folder
                     Name="TWR_K70F120M"
-                    GUID="{DDE416BA-E3E1-49CF-AE2A-045FB4990BB9}">
+                    GUID="{903FD48A-49D8-4A22-043A-1F96B803CC84}">
                     <Folder
                         Name="include"
-                        GUID="{CC9DD458-6FB2-498A-5BFC-29803C01649C}">
+                        GUID="{906061EF-E539-4E56-28BA-D8B46D3A4A92}">
                         <F N="bsp/boarddrv/TWR_K70F120M/include/board-config.h"/>
                         <F N="bsp/boarddrv/TWR_K70F120M/include/crtch.h"/>
                     </Folder>
@@ -739,10 +770,10 @@
                 </Folder>
                 <Folder
                     Name="ty82xx"
-                    GUID="{6C82970D-FBD4-427E-7777-660C224BA1A6}">
+                    GUID="{A2E8C1F0-A9BB-4738-C4AD-D5503E61C48C}">
                     <Folder
                         Name="include"
-                        GUID="{E4F56E46-2BAA-4002-C710-ACB6869684A9}">
+                        GUID="{9FDD35C0-69B6-4502-DBD9-ABFDB0BDE793}">
                         <F N="bsp/boarddrv/ty82xx/include/board-config.h"/>
                     </Folder>
                     <F N="bsp/boarddrv/ty82xx/board.c"/>
@@ -750,10 +781,10 @@
                 </Folder>
                 <Folder
                     Name="wb7290"
-                    GUID="{5893B8E3-788A-4397-18B2-5B2A3C0536BC}">
+                    GUID="{DABB0609-6E6C-433A-29C9-D44927AEF5BA}">
                     <Folder
                         Name="include"
-                        GUID="{A1637338-65A4-4343-D8C7-E00420AD3289}">
+                        GUID="{EC8D97F7-BAD2-4D8D-9481-4929A6D706A9}">
                         <F N="bsp/boarddrv/wb7290/include/ad7616.h"/>
                         <F N="bsp/boarddrv/wb7290/include/ads8688.h"/>
                         <F N="bsp/boarddrv/wb7290/include/at24c128b.h"/>
@@ -778,29 +809,29 @@
                 </Folder>
                 <Folder
                     Name="wb7292"
-                    GUID="{7FB5EFB8-C484-4A5C-0891-D7D5F6888BBE}">
+                    GUID="{2E106B3F-4739-437F-2B89-30FB861520A1}">
                     <Folder
                         Name="include"
-                        GUID="{9CFF0B6A-1D0D-432E-7712-5C35773D779C}">
+                        GUID="{58F38AC1-DBE1-4199-E7D8-FE96C58FBCB0}">
                         <F N="bsp/boarddrv/wb7292/include/board-config.h"/>
                     </Folder>
                 </Folder>
             </Folder>
             <Folder
                 Name="chipdrv"
-                GUID="{D155916F-64C9-4C21-B9E4-F9E0A18CC884}">
+                GUID="{8439CC73-AEF1-40CD-63AD-60656529658A}">
                 <Folder
                     Name="39vf160"
-                    GUID="{017AF89F-BBDE-46D5-3D20-D3B2A7B874AF}">
+                    GUID="{FAD98F9B-797D-4D7E-C09A-A483017EC9BF}">
                     <Folder
                         Name="mcb1700"
-                        GUID="{48163480-83DE-4B12-F185-E6DE7D928398}">
+                        GUID="{9D749BD8-A210-46CD-0A05-78A88DA11D93}">
                         <F N="bsp/chipdrv/39vf160/mcb1700/abc.c"/>
                         <F N="bsp/chipdrv/39vf160/mcb1700/address.h"/>
                     </Folder>
                     <Folder
                         Name="qh_1"
-                        GUID="{54971478-DAE4-47F9-FF08-181B7902B183}">
+                        GUID="{E85296D3-BD61-425A-CEDB-56A1BB47BAB5}">
                         <F N="bsp/chipdrv/39vf160/qh_1/abc.c"/>
                         <F N="bsp/chipdrv/39vf160/qh_1/address.h"/>
                     </Folder>
@@ -808,117 +839,117 @@
                 </Folder>
                 <Folder
                     Name="88E1512"
-                    GUID="{99F34C17-4C0B-4D82-02DE-4C497E48C894}">
+                    GUID="{5D2FD2D0-5E7B-4A0E-8546-A0F7B590F5B0}">
                     <F N="bsp/chipdrv/88E1512/phy_88e1512.c"/>
                 </Folder>
                 <Folder
                     Name="88E6060"
-                    GUID="{DCA87E72-97F7-445C-F196-7902F100B0AC}">
+                    GUID="{A58AD42A-A2C3-4B5B-D8FE-FDD4A330C3A8}">
                     <F N="bsp/chipdrv/88E6060/ls88e6060.c"/>
                 </Folder>
                 <Folder
                     Name="ad7606"
-                    GUID="{209C1F30-8012-4258-CE5D-60370C57E2B6}">
+                    GUID="{152C6D00-10AD-4FC4-8733-50B37A0297A4}">
                     <Folder
                         Name="sr3200"
-                        GUID="{F6F007DA-7737-41B2-BBC5-0278FB7001A7}">
+                        GUID="{BE94DBDC-EE1F-4FF3-C22B-65C93B13D495}">
                         <F N="bsp/chipdrv/ad7606/sr3200/iodefine.h"/>
                     </Folder>
                     <F N="bsp/chipdrv/ad7606/AD7606.c"/>
                 </Folder>
                 <Folder
                     Name="ad7616"
-                    GUID="{EFA303EE-A27E-4B87-F459-682D3D6BD3A2}">
+                    GUID="{88F4FC23-2C1B-4E8C-F2AD-09D3B8E5D1BD}">
                     <Folder
                         Name="wb7190"
-                        GUID="{2B037FC6-91C1-48CF-8AE0-8FBBF59006B8}">
+                        GUID="{C5964FEB-7349-4082-38F3-9BA9C34657AC}">
                         <F N="bsp/chipdrv/ad7616/wb7190/iodefine.h"/>
                     </Folder>
                 </Folder>
                 <Folder
                     Name="adm1032"
-                    GUID="{0EE8FB71-1BBA-4D1C-9FE8-465605FDFA93}">
+                    GUID="{61E93851-FFB5-49AB-0373-63F2B18EA8B7}">
                     <F N="bsp/chipdrv/adm1032/adm1032.c"/>
                 </Folder>
                 <Folder
                     Name="AR8021"
-                    GUID="{9EED0CC5-2D11-48C4-B510-2274A3548188}">
+                    GUID="{D38DE61F-A4CA-4150-9644-99578BF04B8F}">
                     <Folder
                         Name="P1020"
-                        GUID="{FBA930A9-AEA2-42BA-F22E-269D33C5BA85}">
+                        GUID="{CCBB5B0C-49D5-4614-AFF1-5D79E05F1CAF}">
                         <F N="bsp/chipdrv/AR8021/P1020/AR8021.c"/>
                     </Folder>
                 </Folder>
                 <Folder
                     Name="at24c02a"
-                    GUID="{85113560-15DB-49E1-406E-0CF611C558AC}">
+                    GUID="{3345A3B4-3E8E-462F-2520-4441FFE07981}">
                     <F N="bsp/chipdrv/at24c02a/at24c02a.c"/>
                 </Folder>
                 <Folder
                     Name="at24c128b"
-                    GUID="{F82A674D-DED8-4C7C-EE00-D9A770B236A7}">
+                    GUID="{01AB42C2-E603-4CF6-96BA-F823E6C482B8}">
                     <F N="bsp/chipdrv/at24c128b/at24c128b.c"/>
                 </Folder>
                 <Folder
                     Name="at45db321"
-                    GUID="{B36964E3-3B39-4CB8-0391-F369297BF491}">
+                    GUID="{E624DA66-F356-481B-C360-AFE2B237CE8B}">
                     <F N="bsp/chipdrv/at45db321/at45db321.c"/>
                 </Folder>
                 <Folder
                     Name="AX88796"
-                    GUID="{9CFF8CD8-79D0-4409-5DBC-97C8BF5857A2}">
+                    GUID="{3DF4EE40-0D60-46F6-C709-316F47210295}">
                     <F N="bsp/chipdrv/AX88796/AX88796Byte.c"/>
                     <F N="bsp/chipdrv/AX88796/AX88796Byte.h"/>
                 </Folder>
                 <Folder
                     Name="board"
-                    GUID="{30542631-6256-44C1-5231-A57FEC83ECAD}">
+                    GUID="{64CE0BA8-0BE1-4271-1654-60E7BC622583}">
                     <Folder
                         Name="adsp21469"
-                        GUID="{D63BB447-3D4D-4B52-5786-0B37FB2B7EAD}">
+                        GUID="{9CBBB288-88B8-4239-52AB-8A327BC989BD}">
                         <Folder
                             Name="include"
-                            GUID="{1DFCDD34-7681-4890-8EC1-244E4382D0B9}">
+                            GUID="{629DB84B-A014-4D76-FED1-BE3E1802D387}">
                             <F N="bsp/chipdrv/board/adsp21469/include/key_hard.h"/>
                         </Folder>
                     </Folder>
                     <Folder
                         Name="omapl138"
-                        GUID="{F32D4602-8FB1-45B6-E9C2-E0F8EE37CDB5}">
+                        GUID="{D8EEF369-6DC2-49E7-AEAC-18C5969B0F92}">
                         <Folder
                             Name="fpga"
-                            GUID="{519DF1D7-2B8F-4529-223F-19B321E13EB6}">
+                            GUID="{67FE80EE-AA03-4A80-032D-04CE3275DC9F}">
                             <F N="bsp/chipdrv/board/omapl138/fpga/fpga.c"/>
                         </Folder>
                         <Folder
                             Name="include"
-                            GUID="{60C198E5-04D0-427A-5158-F8D4187E989E}">
+                            GUID="{7DD8B415-E861-458C-FDE6-34BE3CC62DA7}">
                             <F N="bsp/chipdrv/board/omapl138/include/fpga.h"/>
                             <F N="bsp/chipdrv/board/omapl138/include/key_hard.h"/>
                             <F N="bsp/chipdrv/board/omapl138/include/lcddrv.h"/>
                         </Folder>
                         <Folder
                             Name="keyboard"
-                            GUID="{2C7F4781-BBD6-4B3C-56BD-65C731953C84}">
+                            GUID="{B7514FC4-8905-423A-ED52-BF679A6CDFBA}">
                             <F N="bsp/chipdrv/board/omapl138/keyboard/key_hard.c"/>
                         </Folder>
                         <Folder
                             Name="lcd"
-                            GUID="{2E383869-BA93-40A7-A6A3-8F80791707A6}">
+                            GUID="{68DD0CA6-9311-45C5-1A2C-38180BA0398F}">
                             <F N="bsp/chipdrv/board/omapl138/lcd/lcddrv.c"/>
                         </Folder>
                     </Folder>
                     <Folder
                         Name="wb8298"
-                        GUID="{2A69C420-3C24-44A5-C9E8-171184D9168B}">
+                        GUID="{99E2F572-EE88-40BC-A889-7B2255EE8DB6}">
                         <Folder
                             Name="cpld"
-                            GUID="{AA459DAB-5162-421E-8603-1BE288C48C84}">
+                            GUID="{F3D86854-3093-42BB-F5F1-E55B4D99AAA9}">
                             <F N="bsp/chipdrv/board/wb8298/cpld/cpld.c"/>
                         </Folder>
                         <Folder
                             Name="fpga"
-                            GUID="{B29DFE42-F52B-4FAE-3919-55643B963FBE}">
+                            GUID="{9B403516-73A1-4BC2-756E-13A4305A43B1}">
                             <F N="bsp/chipdrv/board/wb8298/fpga/addrv.c"/>
                             <F N="bsp/chipdrv/board/wb8298/fpga/fpga_info.c"/>
                             <F N="bsp/chipdrv/board/wb8298/fpga/fpga_timer.c"/>
@@ -929,7 +960,7 @@
                         </Folder>
                         <Folder
                             Name="include"
-                            GUID="{61545051-2D9B-49C4-2BB3-44EDC6210593}">
+                            GUID="{3740AE2C-8484-4D78-4B26-77BCFF00D488}">
                             <F N="bsp/chipdrv/board/wb8298/include/addrv.h"/>
                             <F N="bsp/chipdrv/board/wb8298/include/cpld.h"/>
                             <F N="bsp/chipdrv/board/wb8298/include/fpga_address.h"/>
@@ -944,33 +975,33 @@
                 </Folder>
                 <Folder
                     Name="dm9000"
-                    GUID="{AD5E6D4F-6BA3-4444-6A0B-C6B288ACB690}">
+                    GUID="{B7DBBD78-80B1-4B98-E92C-47069F1F8981}">
                     <F N="bsp/chipdrv/dm9000/dm9000.c"/>
                     <F N="bsp/chipdrv/dm9000/dm9000.h"/>
                 </Folder>
                 <Folder
                     Name="dm9000a"
-                    GUID="{CA3E89C4-55E0-4C53-0C7C-CF280E54A690}">
+                    GUID="{9F089903-FD63-43D7-2560-5B29A72B80B5}">
                     <F N="bsp/chipdrv/dm9000a/dm9000a.c"/>
                 </Folder>
                 <Folder
                     Name="ds1390"
-                    GUID="{D6801AC5-3906-4C66-691C-D8CE4E7DFC8A}">
+                    GUID="{BE6C1285-B313-404A-E8C7-9018BEF095A9}">
                     <F N="bsp/chipdrv/ds1390/rtc_ds1390.c"/>
                 </Folder>
                 <Folder
                     Name="fram"
-                    GUID="{054B1C3B-9448-49B3-817C-6B0589302E80}">
+                    GUID="{8F11ECFC-F40F-45D4-A61E-7F4E6B0ABE90}">
                     <F N="bsp/chipdrv/fram/fram_fm24cl64b.c"/>
                 </Folder>
                 <Folder
                     Name="ili9325"
-                    GUID="{AB3F2993-9B6C-40A7-590B-56DB490FDC98}">
+                    GUID="{61325D3F-051F-45F9-9D15-E6FBAFBF9D8A}">
                     <F N="bsp/chipdrv/ili9325/ili9325.c"/>
                 </Folder>
                 <Folder
                     Name="include"
-                    GUID="{A5A33AD1-4991-4C46-300D-47A6EAE6B8BC}">
+                    GUID="{D507C361-066C-4839-4B8E-EF6B42C5ADBF}">
                     <F N="bsp/chipdrv/include/39vfxxx.h"/>
                     <F N="bsp/chipdrv/include/88e6060.h"/>
                     <F N="bsp/chipdrv/include/ad7606.h"/>
@@ -996,39 +1027,44 @@
                 </Folder>
                 <Folder
                     Name="k9f1208xxx"
-                    GUID="{7DD4FF86-0A68-4C59-3CEC-575EA27DEBA3}">
+                    GUID="{B1B44E0C-B2B8-40ED-4CCD-9146D8B1428A}">
                     <F N="bsp/chipdrv/k9f1208xxx/k9f1208xxx.c"/>
                     <F N="bsp/chipdrv/k9f1208xxx/k9fxxx.c"/>
                 </Folder>
                 <Folder
                     Name="LCM240128C"
-                    GUID="{7FF95B0C-FF2A-4550-B7B6-5C1E7E5C6EA8}">
+                    GUID="{705F66E6-3CD3-4912-2FF4-105D9323AFAF}">
                     <Folder
                         Name="sr5333"
-                        GUID="{435FEF7A-F1B4-4D83-E4AB-C078842D9FAE}">
+                        GUID="{E68C9484-EC9A-4659-E778-163B4DCD3489}">
                         <F N="bsp/chipdrv/LCM240128C/sr5333/lcm240128c_config.h"/>
+                    </Folder>
+                    <Folder
+                        Name="sr5333-v2.0"
+                        GUID="{13C3D8ED-8AF3-43EA-46D5-A80FC39B188B}">
+                        <F N="bsp/chipdrv/LCM240128C/sr5333-v2.0/lcm240128c_config.h"/>
                     </Folder>
                     <F N="bsp/chipdrv/LCM240128C/LCM240128C.c"/>
                     <F N="bsp/chipdrv/LCM240128C/LCM240128Touch.c"/>
                 </Folder>
                 <Folder
                     Name="m24256"
-                    GUID="{3FB42705-7CEA-4229-7AE0-AB211EF6F38C}">
+                    GUID="{6997511E-318E-4B08-0E5E-FD3F1C15B181}">
                     <F N="bsp/chipdrv/m24256/m24256.c"/>
                 </Folder>
                 <Folder
                     Name="m25p16"
-                    GUID="{D20D9A29-07E4-4642-EC64-FBAC899D2888}">
+                    GUID="{A6EE3821-05BA-424D-6215-4A41557046BC}">
                     <F N="bsp/chipdrv/m25p16/m25p16.c"/>
                 </Folder>
                 <Folder
                     Name="m29w320"
-                    GUID="{1B3B95BA-E60A-4F06-D894-CEE181CCC6BD}">
+                    GUID="{B298B934-0C25-423B-253E-9405A014CC93}">
                     <F N="bsp/chipdrv/m29w320/m29w320.c"/>
                 </Folder>
                 <Folder
                     Name="mcb1700lcd"
-                    GUID="{469A67CA-AF21-4A69-427F-80097DB2F3A3}">
+                    GUID="{41E4719C-850B-4531-64D6-C66B2FF701B4}">
                     <F N="bsp/chipdrv/mcb1700lcd/lcd.c"/>
                     <F N="bsp/chipdrv/mcb1700lcd/lcd.h"/>
                     <F N="bsp/chipdrv/mcb1700lcd/lcd_spidrv.c"/>
@@ -1036,46 +1072,46 @@
                 </Folder>
                 <Folder
                     Name="mma8451q"
-                    GUID="{460846CE-FA03-4F9A-CEBB-BC718F1B8095}">
+                    GUID="{78A20AA6-CD9B-4A05-F38D-6F5E43B58E91}">
                     <F N="bsp/chipdrv/mma8451q/mma8451q.c"/>
                 </Folder>
                 <Folder
                     Name="mt29fxxx"
-                    GUID="{BE953B08-CC8F-48C6-BB74-B9712DD4D1AE}">
+                    GUID="{BD973B96-2677-4694-FC65-21EF5DAFB488}">
                     <F N="bsp/chipdrv/mt29fxxx/mt29fxxx.c"/>
                 </Folder>
                 <Folder
                     Name="s25fl128"
-                    GUID="{59F35769-4DB7-4DC7-6FD9-391E9864FD82}">
+                    GUID="{39FC388D-27FA-4083-6132-40CA3EDBA796}">
                     <F N="bsp/chipdrv/s25fl128/S25FL128.c"/>
                     <F N="bsp/chipdrv/s25fl128/S25FL128.h"/>
                 </Folder>
                 <Folder
                     Name="s29glxxx"
-                    GUID="{B1218D46-D7C3-4A57-02BB-9B1486C591A1}">
+                    GUID="{89057453-24C9-4071-6E7C-F41CC4D33B88}">
                     <F N="bsp/chipdrv/s29glxxx/easynor_s29glxxx.c"/>
                     <F N="bsp/chipdrv/s29glxxx/flash_s29glxxx.c"/>
                 </Folder>
                 <Folder
                     Name="STMPE811"
-                    GUID="{7B2E9DB4-B25F-4BC6-C488-E3DB2FEF79AD}">
+                    GUID="{F8744823-E0E5-4D8B-92FB-03BD6B7DFBAC}">
                     <F N="bsp/chipdrv/STMPE811/stmpe811.c"/>
                 </Folder>
                 <Folder
                     Name="w25qxx"
-                    GUID="{42D661DA-B50B-4791-9143-0EA0F9775982}">
+                    GUID="{25761BE1-EBC0-44EF-42C3-5B0FA3ED8C9B}">
                     <F N="bsp/chipdrv/w25qxx/w25qxx.c"/>
                 </Folder>
             </Folder>
             <Folder
                 Name="cpudrv"
-                GUID="{D42DCEE2-4C5F-4BBF-2908-B4C62FD8A8A4}">
+                GUID="{F97403FA-C250-400F-8CB2-312F44CD7EA3}">
                 <Folder
                     Name="AtmelSam4e"
-                    GUID="{8896ABEF-7511-4EB6-50B2-7632F9418CA4}">
+                    GUID="{30FD3827-A239-44A3-F163-E61A41EFD9BE}">
                     <Folder
                         Name="include"
-                        GUID="{B9A79C9A-D3B8-400A-D54C-A9A94CF2A0A0}">
+                        GUID="{E2A25AD3-E106-4F99-22C1-8AD9A28C6585}">
                         <F N="bsp/cpudrv/AtmelSam4e/include/cpu_peri.h"/>
                         <F N="bsp/cpudrv/AtmelSam4e/include/cpu_peri_efc.h"/>
                         <F N="bsp/cpudrv/AtmelSam4e/include/cpu_peri_gmac.h"/>
@@ -1091,7 +1127,7 @@
                     </Folder>
                     <Folder
                         Name="src"
-                        GUID="{A11FEC90-0BAE-4DB5-0845-AD66A3BF3589}">
+                        GUID="{ED2141E0-A0A9-4D26-F9BB-5A705E964E96}">
                         <F N="bsp/cpudrv/AtmelSam4e/src/cpu_peri_efc.c"/>
                         <F N="bsp/cpudrv/AtmelSam4e/src/cpu_peri_gmac.c"/>
                         <F N="bsp/cpudrv/AtmelSam4e/src/cpu_peri_iic.c"/>
@@ -1104,10 +1140,10 @@
                 </Folder>
                 <Folder
                     Name="AtmelSam4s"
-                    GUID="{5673D011-355D-4928-3FA4-60415C47B090}">
+                    GUID="{38439CA1-1749-44D8-DB0B-08EED05C9583}">
                     <Folder
                         Name="include"
-                        GUID="{09E026E6-FFF2-477C-A6E8-40A3868A98AA}">
+                        GUID="{4A52F661-D1FA-4017-63CD-2A53EAC1CCB7}">
                         <F N="bsp/cpudrv/AtmelSam4s/include/cpu_peri.h"/>
                         <F N="bsp/cpudrv/AtmelSam4s/include/cpu_peri_efc.h"/>
                         <F N="bsp/cpudrv/AtmelSam4s/include/cpu_peri_iic.h"/>
@@ -1122,7 +1158,7 @@
                     </Folder>
                     <Folder
                         Name="src"
-                        GUID="{EBF1F2E9-1E3C-4AB6-6C54-C10BAF39459D}">
+                        GUID="{6DE8F630-1538-4BFA-A9C1-EA0CB34470A6}">
                         <F N="bsp/cpudrv/AtmelSam4s/src/cpu_peri_efc.c"/>
                         <F N="bsp/cpudrv/AtmelSam4s/src/cpu_peri_iic.c"/>
                         <F N="bsp/cpudrv/AtmelSam4s/src/cpu_peri_pio.c"/>
@@ -1134,10 +1170,10 @@
                 </Folder>
                 <Folder
                     Name="AtmelSamV7"
-                    GUID="{D9851DA6-83C3-455C-B0E2-A09374FFB48A}">
+                    GUID="{84FE958D-97C8-4D08-55B8-96D114A0C288}">
                     <Folder
                         Name="include"
-                        GUID="{4EE3CAD8-B489-4EDF-464A-AAAA3CA89695}">
+                        GUID="{73E2DE63-9F9E-4D8E-FED5-6AA6E420DDA2}">
                         <F N="bsp/cpudrv/AtmelSamV7/include/cpu_peri.h"/>
                         <F N="bsp/cpudrv/AtmelSamV7/include/cpu_peri_bksram.h"/>
                         <F N="bsp/cpudrv/AtmelSamV7/include/cpu_peri_gmac.h"/>
@@ -1163,84 +1199,84 @@
                     </Folder>
                     <Folder
                         Name="src"
-                        GUID="{E6CC6F9E-1959-40F3-3AE9-D5A3B4860194}">
+                        GUID="{4A7DA754-A15D-4975-EED6-5AB9CD25C8BE}">
                         <Folder
                             Name="cpu_peri_bksram"
-                            GUID="{91843B32-7202-44D6-D349-C659EDA061A3}">
+                            GUID="{7A4B1D7E-C5E2-4ACD-9749-02253F125E83}">
                             <F N="bsp/cpudrv/AtmelSamV7/src/cpu_peri_bksram/cpu_peri_bksram.c"/>
                         </Folder>
                         <Folder
                             Name="cpu_peri_eefc"
-                            GUID="{1414234D-AC31-48BB-06B2-2CDE977CC889}">
+                            GUID="{AF45B7CB-C55F-4122-E859-D0ED05A21781}">
                             <F N="bsp/cpudrv/AtmelSamV7/src/cpu_peri_eefc/embedded_flash.c"/>
                         </Folder>
                         <Folder
                             Name="cpu_peri_gmac"
-                            GUID="{E2C3668F-72ED-4B71-C9CE-F7C9DD4BE29F}">
+                            GUID="{8F948F8E-4E3D-4549-0255-593E244784A0}">
                             <F N="bsp/cpudrv/AtmelSamV7/src/cpu_peri_gmac/gmac.c"/>
                             <F N="bsp/cpudrv/AtmelSamV7/src/cpu_peri_gmac/gmac_interface.c"/>
                         </Folder>
                         <Folder
                             Name="cpu_peri_mcan"
-                            GUID="{5EE4EA4F-1626-4272-1839-F784EA3823BC}">
+                            GUID="{0DD5FACF-59CD-4921-C1F2-462452FF0EA1}">
                             <F N="bsp/cpudrv/AtmelSamV7/src/cpu_peri_mcan/cpu_peri_mcan.c"/>
                         </Folder>
                         <Folder
                             Name="cpu_peri_nand"
-                            GUID="{E039B43B-6FEA-452C-A3F9-B8438859FD88}">
+                            GUID="{3C2B7E4E-8597-4032-0269-3C7B860D698D}">
                             <F N="bsp/cpudrv/AtmelSamV7/src/cpu_peri_nand/cpu_peri_nand.c"/>
                         </Folder>
                         <Folder
                             Name="cpu_peri_pio"
-                            GUID="{31078239-31DE-4398-F016-EFF2281C1EB4}">
+                            GUID="{7687C72A-9612-4A8B-D4E3-820D417A2D97}">
                             <F N="bsp/cpudrv/AtmelSamV7/src/cpu_peri_pio/cpu_peri_pio.c"/>
                         </Folder>
                         <Folder
                             Name="cpu_peri_qspi"
-                            GUID="{B1DE9B3F-6048-4092-764B-4FD93C2680BC}">
+                            GUID="{058F72E1-AAB4-446B-3421-165015F1E2B4}">
                             <F N="bsp/cpudrv/AtmelSamV7/src/cpu_peri_qspi/cpu_peri_qspi.c"/>
                         </Folder>
                         <Folder
                             Name="cpu_peri_rtc"
-                            GUID="{6F3BA685-2175-4E00-2817-33370657709D}">
+                            GUID="{3EF60167-E460-4BD5-AE13-FEC665192D8C}">
                             <F N="bsp/cpudrv/AtmelSamV7/src/cpu_peri_rtc/cpu_peri_rtc.c"/>
                         </Folder>
                         <Folder
                             Name="cpu_peri_spi"
-                            GUID="{4E3B445A-0B5C-405A-016A-5B7103844FA3}">
+                            GUID="{40387989-D4A3-4743-7A28-55F8D41AB886}">
                             <F N="bsp/cpudrv/AtmelSamV7/src/cpu_peri_spi/cpu_peri_spi.c"/>
                             <F N="bsp/cpudrv/AtmelSamV7/src/cpu_peri_spi/spi_dma.c"/>
                         </Folder>
                         <Folder
                             Name="cpu_peri_systime"
-                            GUID="{5D601861-5F79-4B3B-A6C3-A773B874A5B5}">
+                            GUID="{30FCC2CE-49F2-4BB0-D8E5-7F151FBA1991}">
                             <F N="bsp/cpudrv/AtmelSamV7/src/cpu_peri_systime/cpu_peri_systime.c"/>
                         </Folder>
                         <Folder
                             Name="cpu_peri_tc"
-                            GUID="{193DDE35-78F8-4E75-F8D8-EB64B5DC3FBC}">
+                            GUID="{2F7EE038-0920-4E78-B490-8821BEA70BA0}">
                             <F N="bsp/cpudrv/AtmelSamV7/src/cpu_peri_tc/cpu_peri_tc.c"/>
                         </Folder>
                         <Folder
                             Name="cpu_peri_twi"
-                            GUID="{98707F78-A967-4E6E-BFAA-6E0409173C80}">
+                            GUID="{A8E5AE80-1C03-4E34-7AD7-A9201C800DBD}">
                             <F N="bsp/cpudrv/AtmelSamV7/src/cpu_peri_twi/cpu_peri_twi.c"/>
                             <F N="bsp/cpudrv/AtmelSamV7/src/cpu_peri_twi/twi_dma.c"/>
                         </Folder>
                         <Folder
                             Name="cpu_peri_uart"
-                            GUID="{94877D7E-33E9-4E67-8F56-2A25B1BD2FB6}">
+                            GUID="{C49CCCAD-92F8-4730-01E0-A06E94CF0481}">
                             <F N="bsp/cpudrv/AtmelSamV7/src/cpu_peri_uart/cpu_peri_uart.c"/>
                             <F N="bsp/cpudrv/AtmelSamV7/src/cpu_peri_uart/uart_dma.c"/>
                         </Folder>
                         <Folder
                             Name="cpu_peri_wdt"
-                            GUID="{81931EBF-46DE-4711-11D7-DB47D79F5393}">
+                            GUID="{7E4373C3-7B33-4ECF-2FA2-01C0314690AA}">
                             <F N="bsp/cpudrv/AtmelSamV7/src/cpu_peri_wdt/cpu_peri_wdt.c"/>
                         </Folder>
                         <Folder
                             Name="xdma"
-                            GUID="{8E689D57-5C1C-464A-E6C1-FF8B7F779598}">
+                            GUID="{A49DEE60-79FC-46F2-ED46-079EB35017BC}">
                             <F N="bsp/cpudrv/AtmelSamV7/src/xdma/xdma_hardware_interface.c"/>
                             <F N="bsp/cpudrv/AtmelSamV7/src/xdma/xdmac.c"/>
                             <F N="bsp/cpudrv/AtmelSamV7/src/xdma/xdmad.c"/>
@@ -1249,10 +1285,10 @@
                 </Folder>
                 <Folder
                     Name="FslKxx"
-                    GUID="{C3677B54-61B2-4884-9857-BF9E85B4ACB6}">
+                    GUID="{6F4835DD-D18E-4198-DF85-1709AEA0CA87}">
                     <Folder
                         Name="include"
-                        GUID="{7969EACB-33E3-4C10-4387-A1F36582BBB5}">
+                        GUID="{1BC3FA6B-DC52-4BC3-710C-F88E60F9EE86}">
                         <F N="bsp/cpudrv/FslKxx/include/cpu_peri.h"/>
                         <F N="bsp/cpudrv/FslKxx/include/cpu_peri_enet.h"/>
                         <F N="bsp/cpudrv/FslKxx/include/cpu_peri_gpio.h"/>
@@ -1268,7 +1304,7 @@
                     </Folder>
                     <Folder
                         Name="src"
-                        GUID="{C86A853E-45D1-4428-F3B3-2B06C1643BB1}">
+                        GUID="{C6ECD288-DF05-41A7-308E-89E01D66388A}">
                         <F N="bsp/cpudrv/FslKxx/src/cpu_peri_enet.c"/>
                         <F N="bsp/cpudrv/FslKxx/src/cpu_peri_flash.c"/>
                         <F N="bsp/cpudrv/FslKxx/src/cpu_peri_gpio.c"/>
@@ -1281,14 +1317,15 @@
                         <F N="bsp/cpudrv/FslKxx/src/cpu_peri_timer.c"/>
                         <F N="bsp/cpudrv/FslKxx/src/cpu_peri_uart.c"/>
                         <F N="bsp/cpudrv/FslKxx/src/cpu_peri_wdt.c"/>
+                        <F N="bsp/cpudrv/FslKxx/src/cpu_peri_emflash.c"/>
                     </Folder>
                 </Folder>
                 <Folder
                     Name="lpc12xx"
-                    GUID="{A4170C6C-11CC-47E7-2996-CE17A19BF099}">
+                    GUID="{8F4A3BDB-6085-43E1-3C63-EE06A14CB587}">
                     <Folder
                         Name="include"
-                        GUID="{C1516973-8A45-48E9-BDD1-32536B9C02B7}">
+                        GUID="{504E509B-A832-4350-11C9-51EEFA364AA8}">
                         <F N="bsp/cpudrv/lpc12xx/include/cpu_peri.h"/>
                         <F N="bsp/cpudrv/lpc12xx/include/cpu_peri_gpio.h"/>
                         <F N="bsp/cpudrv/lpc12xx/include/cpu_peri_int_line.h"/>
@@ -1299,7 +1336,7 @@
                     </Folder>
                     <Folder
                         Name="src"
-                        GUID="{70639306-370D-421E-B27C-F1A5AD82868A}">
+                        GUID="{F9541151-0097-4E62-7873-78E71DDE44A6}">
                         <F N="bsp/cpudrv/lpc12xx/src/cpu_peri.c"/>
                         <F N="bsp/cpudrv/lpc12xx/src/gpio.c"/>
                         <F N="bsp/cpudrv/lpc12xx/src/sysctrl.c"/>
@@ -1308,10 +1345,10 @@
                 </Folder>
                 <Folder
                     Name="lpc17xx"
-                    GUID="{A0F172C0-0B18-42AF-1DF0-C87CADCBA6B3}">
+                    GUID="{7B438317-EBCE-4BA7-BD12-6ED6A9E69FB5}">
                     <Folder
                         Name="include"
-                        GUID="{53F9A6E9-8D57-40C8-35DA-54766FA99B93}">
+                        GUID="{15941F42-F7BD-4B54-A640-97C7D9602BB7}">
                         <F N="bsp/cpudrv/lpc17xx/include/cpu_peri.h"/>
                         <F N="bsp/cpudrv/lpc17xx/include/cpu_peri_enet.h"/>
                         <F N="bsp/cpudrv/lpc17xx/include/cpu_peri_gpio.h"/>
@@ -1324,7 +1361,7 @@
                     </Folder>
                     <Folder
                         Name="src"
-                        GUID="{70FFC625-D375-4C0D-961A-7DD75D0BB389}">
+                        GUID="{40771950-AE85-4651-C2E1-C40CE3B99581}">
                         <F N="bsp/cpudrv/lpc17xx/src/cpu_peri.c"/>
                         <F N="bsp/cpudrv/lpc17xx/src/cpu_peri_enet.c"/>
                         <F N="bsp/cpudrv/lpc17xx/src/cpu_peri_flash.c"/>
@@ -1334,14 +1371,15 @@
                         <F N="bsp/cpudrv/lpc17xx/src/cpu_peri_timer.c"/>
                         <F N="bsp/cpudrv/lpc17xx/src/cpu_peri_uart.c"/>
                         <F N="bsp/cpudrv/lpc17xx/src/cpu_peri_wdt.c"/>
+                        <F N="bsp/cpudrv/lpc17xx/src/cpu_peri_emflash.c"/>
                     </Folder>
                 </Folder>
                 <Folder
                     Name="omapl138"
-                    GUID="{2F0BA3BF-B390-4AD9-B6BD-106B99F3968A}">
+                    GUID="{47A79633-CB7B-4B19-B734-FE855EE2EA9B}">
                     <Folder
                         Name="include"
-                        GUID="{6F0DBB64-92E9-4F11-0C91-4910C9B94191}">
+                        GUID="{3A9BEAE0-2340-4C2C-8D37-918412FBA4BB}">
                         <F N="bsp/cpudrv/omapl138/include/cpu_peri.h"/>
                         <F N="bsp/cpudrv/omapl138/include/cpu_peri_int_line.h"/>
                         <F N="bsp/cpudrv/omapl138/include/omapl138_cpucfg.h"/>
@@ -1355,7 +1393,7 @@
                     </Folder>
                     <Folder
                         Name="src"
-                        GUID="{B3A74CA1-A59C-4230-99FC-090CB8DC7398}">
+                        GUID="{FE5CC873-2F51-4AE4-7E82-02C2E48987A7}">
                         <F N="bsp/cpudrv/omapl138/src/nude_io.c"/>
                         <F N="bsp/cpudrv/omapl138/src/omapl138_cpucfg.c"/>
                         <F N="bsp/cpudrv/omapl138/src/omapl138_dcore.c"/>
@@ -1369,33 +1407,33 @@
                 </Folder>
                 <Folder
                     Name="p1020"
-                    GUID="{BEC733CD-2AEF-4D10-B3CB-9ABFCC71C391}">
+                    GUID="{88508246-5946-4194-711B-B06839212189}">
                     <Folder
                         Name="dma"
-                        GUID="{6D740FB0-330E-4693-3574-2F0626F2EAB4}">
+                        GUID="{C0CBAEAC-31FC-43F6-DF8F-FFA5BA917CA2}">
                         <F N="bsp/cpudrv/p1020/dma/cpu_peri_dma.c"/>
                     </Folder>
                     <Folder
                         Name="elbc"
-                        GUID="{784597A5-F18C-4ADB-34AB-4CB958821596}">
+                        GUID="{455778B1-D359-439B-5ECF-45BBDB0AD9B5}">
                         <F N="bsp/cpudrv/p1020/elbc/cpu_peri_elbc_nand.c"/>
                     </Folder>
                     <Folder
                         Name="gpio"
-                        GUID="{42297DB6-877B-42E7-8C7B-8ADC27DD0697}">
+                        GUID="{AB614182-0365-4BAD-3597-65E32983DC99}">
                         <F N="bsp/cpudrv/p1020/gpio/cpu_peri_gpio.c"/>
                     </Folder>
                     <Folder
                         Name="iic"
-                        GUID="{F8C06421-19D1-4459-D181-4C6A0EDA44BF}">
+                        GUID="{B94DFA75-2617-429A-0C10-F63B46B9959F}">
                         <F N="bsp/cpudrv/p1020/iic/cpu_peri_iic.c"/>
                     </Folder>
                     <Folder
                         Name="include"
-                        GUID="{A3F14BE6-9352-47A8-5FE6-FBF192E11A82}">
+                        GUID="{B93DB670-A546-4A44-AF19-7CD4FEF29EA9}">
                         <Folder
                             Name="asm"
-                            GUID="{F50C6129-E58C-4D3F-AC2D-24A7B5637EAC}">
+                            GUID="{AA396016-E652-429E-AFF0-815B1B827391}">
                             <F N="bsp/cpudrv/p1020/include/asm/bitops.h"/>
                             <F N="bsp/cpudrv/p1020/include/asm/io.h"/>
                         </Folder>
@@ -1412,39 +1450,39 @@
                     </Folder>
                     <Folder
                         Name="net"
-                        GUID="{EA14AA03-701A-4437-A5CE-9645C97404AB}">
+                        GUID="{B1546CF0-CA5C-43E4-A4E7-4D9F83FAC6A6}">
                         <F N="bsp/cpudrv/p1020/net/cpu_peri_tsec.c"/>
                         <F N="bsp/cpudrv/p1020/net/NetStackDriver.c"/>
                         <F N="bsp/cpudrv/p1020/net/p1020Tsec.c"/>
                     </Folder>
                     <Folder
                         Name="pci"
-                        GUID="{9B8D1FED-85E0-4386-9A2E-41F71CC509AA}">
+                        GUID="{DC5ECC05-3763-4521-52E6-6D5C76EE3C80}">
                         <F N="bsp/cpudrv/p1020/pci/cpu_peri_pci.c"/>
                         <F N="bsp/cpudrv/p1020/pci/pci_indirect.c"/>
                     </Folder>
                     <Folder
                         Name="serdes"
-                        GUID="{6E2F5727-A698-44EC-19B3-42FB4895E69B}">
+                        GUID="{E674F023-3934-4174-8C87-12EF65CFD7A6}">
                         <F N="bsp/cpudrv/p1020/serdes/cpu_peri_serdes.c"/>
                     </Folder>
                     <Folder
                         Name="spi"
-                        GUID="{709EB97C-9878-425F-26F3-F10CC917EAAD}">
+                        GUID="{025A442D-DCD5-4C52-323B-B6582F569F96}">
                         <F N="bsp/cpudrv/p1020/spi/cpu_peri_spi.c"/>
                     </Folder>
                     <Folder
                         Name="uart"
-                        GUID="{4C7BA889-ECA7-4FC6-D4F8-B0672E8CEB91}">
+                        GUID="{AE17F45D-DB94-43EC-71F1-22D09FD56A95}">
                         <F N="bsp/cpudrv/p1020/uart/cpu_peri_uart.c"/>
                     </Folder>
                 </Folder>
                 <Folder
                     Name="s3c2410"
-                    GUID="{F4980A40-B0A9-463E-01CC-C2A4200192A0}">
+                    GUID="{B18BCC33-81AB-4F51-1770-441B8E2FCC83}">
                     <Folder
                         Name="include"
-                        GUID="{0E7027F0-28CD-4BA1-A48C-7C169F9CBDBD}">
+                        GUID="{FA96F673-5F8C-400D-54A0-517089A5219F}">
                         <F N="bsp/cpudrv/s3c2410/include/cpu_peri.h"/>
                         <F N="bsp/cpudrv/s3c2410/include/cpu_peri_adc.h"/>
                         <F N="bsp/cpudrv/s3c2410/include/cpu_peri_gpio.h"/>
@@ -1462,7 +1500,7 @@
                     </Folder>
                     <Folder
                         Name="src"
-                        GUID="{B07B1C56-E6AA-479D-8DFC-471FA810BAAB}">
+                        GUID="{CA3D4E46-115B-4D6C-EE11-8C93937EE3A0}">
                         <F N="bsp/cpudrv/s3c2410/src/cpu_peri.c"/>
                         <F N="bsp/cpudrv/s3c2410/src/cpu_peri_gpio.c"/>
                         <F N="bsp/cpudrv/s3c2410/src/cpu_peri_iic.c"/>
@@ -1477,10 +1515,10 @@
                 </Folder>
                 <Folder
                     Name="s3c2416"
-                    GUID="{106C55D6-CBCF-4C83-A733-14AA1C937F96}">
+                    GUID="{9A40799D-5958-4CE1-1002-552B6A7D9D86}">
                     <Folder
                         Name="include"
-                        GUID="{130538B7-0EEF-4B3A-D85A-F4FCC98397B6}">
+                        GUID="{64A11DC7-C762-4A8F-1887-4C2E98F545A0}">
                         <F N="bsp/cpudrv/s3c2416/include/cpu_peri.h"/>
                         <F N="bsp/cpudrv/s3c2416/include/cpu_peri_adc.h"/>
                         <F N="bsp/cpudrv/s3c2416/include/cpu_peri_gpio.h"/>
@@ -1498,10 +1536,10 @@
                     </Folder>
                     <Folder
                         Name="src"
-                        GUID="{FBA22317-495A-42B1-DA83-EB37FDD185BC}">
+                        GUID="{B28268B1-8514-4650-9246-23360B6110AA}">
                         <Folder
                             Name="cpu_peri_hsmmc"
-                            GUID="{31A8F733-B184-4C6A-BA74-8317FAE43C96}">
+                            GUID="{4FF30EBE-F3AC-4240-0809-0194D63CA586}">
                             <F N="bsp/cpudrv/s3c2416/src/cpu_peri_hsmmc/s3c2416_hsmmc.c"/>
                             <F N="bsp/cpudrv/s3c2416/src/cpu_peri_hsmmc/sdcard.c"/>
                         </Folder>
@@ -1521,10 +1559,10 @@
                 </Folder>
                 <Folder
                     Name="s3c2440"
-                    GUID="{DD387900-1B9F-439D-5CCB-DA288569A888}">
+                    GUID="{8EBAE1BA-5D2A-4353-CAF3-D75D0C794781}">
                     <Folder
                         Name="include"
-                        GUID="{D0FEA3E2-D4EB-42E2-68F7-683A257948BD}">
+                        GUID="{0FDC38D9-769F-4E1D-7FF4-1DCCC55E33A4}">
                         <F N="bsp/cpudrv/s3c2440/include/cpu_peri.h"/>
                         <F N="bsp/cpudrv/s3c2440/include/cpu_peri_adc.h"/>
                         <F N="bsp/cpudrv/s3c2440/include/cpu_peri_gpio.h"/>
@@ -1541,7 +1579,7 @@
                     </Folder>
                     <Folder
                         Name="src"
-                        GUID="{0AEB63D4-488D-4BB1-1E7E-CFDB3E126690}">
+                        GUID="{CC4663AB-09A0-4121-0724-D134D97AA8BB}">
                         <F N="bsp/cpudrv/s3c2440/src/cpu_peri.c"/>
                         <F N="bsp/cpudrv/s3c2440/src/cpu_peri_gpio.c"/>
                         <F N="bsp/cpudrv/s3c2440/src/cpu_peri_iic.c"/>
@@ -1557,10 +1595,10 @@
                 </Folder>
                 <Folder
                     Name="Sharc21469"
-                    GUID="{0566DE15-C50A-4F91-AD0A-3F83B8F8AF95}">
+                    GUID="{59BC01B4-4F47-41EC-3044-FA0E6353FCB9}">
                     <Folder
                         Name="include"
-                        GUID="{31415796-5669-4D4D-2702-C2DF0C1D4F9D}">
+                        GUID="{A531E35D-65D3-4804-2481-247C86DFB48A}">
                         <F N="bsp/cpudrv/Sharc21469/include/cpu_peri.h"/>
                         <F N="bsp/cpudrv/Sharc21469/include/cpu_peri_address.h"/>
                         <F N="bsp/cpudrv/Sharc21469/include/cpu_peri_cmd.h"/>
@@ -1574,7 +1612,7 @@
                     </Folder>
                     <Folder
                         Name="src"
-                        GUID="{D03BDC5A-404A-46E7-92AA-BF38C05F6682}">
+                        GUID="{31A39A3D-B487-4018-A1C9-F57C2A3D57B7}">
                         <F N="bsp/cpudrv/Sharc21469/src/cpu_peri_dma.c"/>
                         <F N="bsp/cpudrv/Sharc21469/src/cpu_peri_iic.c"/>
                         <F N="bsp/cpudrv/Sharc21469/src/cpu_peri_linkport.c"/>
@@ -1585,10 +1623,10 @@
                 </Folder>
                 <Folder
                     Name="stm32f1xx"
-                    GUID="{15C32FF1-52E2-42EE-3797-DDEA566E0498}">
+                    GUID="{8D7A6E6B-BBDE-4822-77B3-271667A74284}">
                     <Folder
                         Name="include"
-                        GUID="{2570BEF3-8A65-494D-E854-C189FB0E01A6}">
+                        GUID="{EBE73437-E212-4E03-F31C-004A1F2E4E9B}">
                         <F N="bsp/cpudrv/stm32f1xx/include/cpu_peri.h"/>
                         <F N="bsp/cpudrv/stm32f1xx/include/cpu_peri_dma.h"/>
                         <F N="bsp/cpudrv/stm32f1xx/include/cpu_peri_gpio.h"/>
@@ -1605,7 +1643,7 @@
                     </Folder>
                     <Folder
                         Name="src"
-                        GUID="{1C70BE58-0941-4F61-6DC3-079C02BAF6B4}">
+                        GUID="{DD55432E-76CE-4E90-61C6-1924E5B8ABB8}">
                         <F N="bsp/cpudrv/stm32f1xx/src/cpu_peri.c"/>
                         <F N="bsp/cpudrv/stm32f1xx/src/cpu_peri_dma.c"/>
                         <F N="bsp/cpudrv/stm32f1xx/src/cpu_peri_gpio.c"/>
@@ -1616,14 +1654,15 @@
                         <F N="bsp/cpudrv/stm32f1xx/src/cpu_peri_wdt.c"/>
                         <F N="bsp/cpudrv/stm32f1xx/src/embedded_flash.c"/>
                         <F N="bsp/cpudrv/stm32f1xx/src/stm32f1x_lowppwer.c"/>
+                        <F N="bsp/cpudrv/stm32f1xx/src/cpu_peri_emflash.c"/>
                     </Folder>
                 </Folder>
                 <Folder
                     Name="stm32f407"
-                    GUID="{B116BD68-CF71-46A7-4848-902BD5A107B8}">
+                    GUID="{005A3CB3-4225-49FC-59BC-704B94950C9C}">
                     <Folder
                         Name="include"
-                        GUID="{8ACC98A3-2B00-410B-0F51-54C7F955B6B5}">
+                        GUID="{A470023F-F16A-40C7-BCD2-1321D9B58B9C}">
                         <F N="bsp/cpudrv/stm32f407/include/cpu_peri.h"/>
                         <F N="bsp/cpudrv/stm32f407/include/cpu_peri_dma.h"/>
                         <F N="bsp/cpudrv/stm32f407/include/cpu_peri_gpio.h"/>
@@ -1635,15 +1674,16 @@
                     </Folder>
                     <Folder
                         Name="src"
-                        GUID="{364C3F90-1875-4887-C8DB-FA51D6AAE29D}">
+                        GUID="{72A6A32F-9CC9-46EB-55BC-FA886E89D288}">
                         <Folder
                             Name="cpu_peri_sdio"
-                            GUID="{34C8D637-A07A-4B78-EE5D-A615DC5B9B8E}">
+                            GUID="{C7FF1732-9E8E-4F52-B670-EB7EFF76DEAC}">
                             <F N="bsp/cpudrv/stm32f407/src/cpu_peri_sdio/sdcard.c"/>
                             <F N="bsp/cpudrv/stm32f407/src/cpu_peri_sdio/sdio_sdcard.c"/>
                         </Folder>
                         <F N="bsp/cpudrv/stm32f407/src/cpu_peri.c"/>
                         <F N="bsp/cpudrv/stm32f407/src/cpu_peri_dma.c"/>
+                        <F N="bsp/cpudrv/stm32f407/src/cpu_peri_emflash.c"/>
                         <F N="bsp/cpudrv/stm32f407/src/cpu_peri_flash.c"/>
                         <F N="bsp/cpudrv/stm32f407/src/cpu_peri_gpio.c"/>
                         <F N="bsp/cpudrv/stm32f407/src/cpu_peri_iic.c"/>
@@ -1654,37 +1694,53 @@
                 </Folder>
                 <Folder
                     Name="stm32f7"
-                    GUID="{94E967B5-14FA-495B-D118-F4BABE1D508C}">
+                    GUID="{6BEA0F37-A8D8-4FBB-A36F-2E74F7628191}">
                     <Folder
                         Name="include"
-                        GUID="{2BC51A4A-D8D6-4339-619A-7A8F3215ADA3}">
+                        GUID="{C5D6D8AB-BDB6-4440-C769-1537D3B8C594}">
                         <F N="bsp/cpudrv/stm32f7/include/cpu_peri.h"/>
+                        <F N="bsp/cpudrv/stm32f7/include/cpu_peri_can.h"/>
                         <F N="bsp/cpudrv/stm32f7/include/cpu_peri_dma.h"/>
                         <F N="bsp/cpudrv/stm32f7/include/cpu_peri_gpio.h"/>
                         <F N="bsp/cpudrv/stm32f7/include/cpu_peri_iic.h"/>
                         <F N="bsp/cpudrv/stm32f7/include/cpu_peri_int_line.h"/>
                         <F N="bsp/cpudrv/stm32f7/include/cpu_peri_lcd.h"/>
+                        <F N="bsp/cpudrv/stm32f7/include/cpu_peri_rtc.h"/>
                         <F N="bsp/cpudrv/stm32f7/include/cpu_peri_spi.h"/>
                         <F N="bsp/cpudrv/stm32f7/include/cpu_peri_uart.h"/>
+                        <F N="bsp/cpudrv/stm32f7/include/cpu_peri_Temprate.h"/>
                     </Folder>
                     <Folder
                         Name="src"
-                        GUID="{F3A44E0D-6A83-42FE-CE2D-56BFC3FB2E8D}">
+                        GUID="{3189E216-1993-486A-545E-9D263440C7A4}">
+                        <Folder
+                            Name="cpu_peri_usb"
+                            GUID="{943BF882-F07A-41C6-6E06-7FCE7842F293}">
+                            <F N="bsp/cpudrv/stm32f7/src/cpu_peri_usb/stm32f7xx_hal_gpio.c"/>
+                            <F N="bsp/cpudrv/stm32f7/src/cpu_peri_usb/stm32f7xx_hal_hcd.c"/>
+                            <F N="bsp/cpudrv/stm32f7/src/cpu_peri_usb/stm32f7xx_ll_usb.c"/>
+                            <F N="bsp/cpudrv/stm32f7/src/cpu_peri_usb/usb_detector.c"/>
+                        </Folder>
+                        <F N="bsp/cpudrv/stm32f7/src/cpu_peri_can.c"/>
                         <F N="bsp/cpudrv/stm32f7/src/cpu_peri_dma.c"/>
                         <F N="bsp/cpudrv/stm32f7/src/cpu_peri_flash.c"/>
                         <F N="bsp/cpudrv/stm32f7/src/cpu_peri_gpio.c"/>
                         <F N="bsp/cpudrv/stm32f7/src/cpu_peri_iic.c"/>
                         <F N="bsp/cpudrv/stm32f7/src/cpu_peri_lcd.c"/>
+                        <F N="bsp/cpudrv/stm32f7/src/cpu_peri_rtc.c"/>
                         <F N="bsp/cpudrv/stm32f7/src/cpu_peri_spi.c"/>
+                        <F N="bsp/cpudrv/stm32f7/src/cpu_peri_timer.c"/>
                         <F N="bsp/cpudrv/stm32f7/src/cpu_peri_uart.c"/>
+                        <F N="bsp/cpudrv/stm32f7/src/cpu_peri_emflash.c"/>
+                        <F N="bsp/cpudrv/stm32f7/src/cpu_peri_Temprate.c"/>
                     </Folder>
                 </Folder>
                 <Folder
                     Name="windows"
-                    GUID="{250F8E1F-66D0-4DF6-5C7A-E8AC101003A3}">
+                    GUID="{6BBF342B-73DE-43D5-31D3-2F9F845BEE85}">
                     <Folder
                         Name="include"
-                        GUID="{BF13C331-99DA-4F67-D218-36831932398A}">
+                        GUID="{BFCC4110-AF2D-4832-B159-9C7DADB387B2}">
                         <F N="bsp/cpudrv/windows/include/cpu_peri.h"/>
                         <F N="bsp/cpudrv/windows/include/cpu_peri_cmd.h"/>
                         <F N="bsp/cpudrv/windows/include/cpu_peri_int_line.h"/>
@@ -1695,7 +1751,7 @@
                     </Folder>
                     <Folder
                         Name="src"
-                        GUID="{26791333-726C-4D64-9D0F-34716BF63C8E}">
+                        GUID="{9F58744D-A8D8-4935-2A28-F876A5FDB199}">
                         <F N="bsp/cpudrv/windows/src/command.c"/>
                         <F N="bsp/cpudrv/windows/src/cpu_peri_keyboard.c"/>
                         <F N="bsp/cpudrv/windows/src/cpu_peri_lcd_touch_mouse.c"/>
@@ -1705,61 +1761,61 @@
             </Folder>
             <Folder
                 Name="startup"
-                GUID="{1198A8BC-8AC4-4458-2839-8E4540CA7D96}">
+                GUID="{AB55791F-F217-4C71-AE57-C0AB6D299292}">
                 <Folder
                     Name="AtmelSam4e"
-                    GUID="{02208E9C-8FD9-4010-57EB-7B9BDEB1E288}">
+                    GUID="{A7B37AD0-1332-47DA-72FA-CADFAEAF19B9}">
                     <Folder
                         Name="sam4e-ek"
-                        GUID="{F651F1E2-F9F5-4FBB-06BC-11D2F1310C85}">
+                        GUID="{D8128944-E40C-4F58-79B6-0A3FC65CC4BD}">
                         <F N="bsp/startup/AtmelSam4e/sam4e-ek/initcpu.c"/>
                     </Folder>
                     <F N="bsp/startup/AtmelSam4e/cpu-optional.h"/>
                 </Folder>
                 <Folder
                     Name="AtmelSam4s"
-                    GUID="{3A4B9CE6-7B6D-4FD2-4148-BFE44C2CD487}">
+                    GUID="{C6B9743A-07C2-4BB0-D3BB-9BD6E2537884}">
                     <Folder
                         Name="wb7292"
-                        GUID="{2CAF6F5F-7878-4E4C-833E-DFB0F0822CA0}">
+                        GUID="{CCF728C4-1202-4412-6173-CF7E734FDDAE}">
                         <F N="bsp/startup/AtmelSam4s/wb7292/initcpu.c"/>
                     </Folder>
                     <F N="bsp/startup/AtmelSam4s/cpu-optional.h"/>
                 </Folder>
                 <Folder
                     Name="AtmelSamV7"
-                    GUID="{029BF550-F0A7-4B73-43A2-332C1DCBB6B8}">
+                    GUID="{938749B3-4FE6-4491-6BF8-241C97E0D0B4}">
                     <Folder
                         Name="SAMV71Xplained"
-                        GUID="{91E31A0D-451E-4AD1-707D-C815ACAFC08B}">
+                        GUID="{70DA4E7B-2B85-4076-A9A2-879E9E4AFB9A}">
                         <F N="bsp/startup/AtmelSamV7/SAMV71Xplained/initcpu.c"/>
                         <F N="bsp/startup/AtmelSamV7/SAMV71Xplained/set-cache.c"/>
                         <F N="bsp/startup/AtmelSamV7/SAMV71Xplained/sysinit.c"/>
                     </Folder>
                     <Folder
                         Name="sr3252"
-                        GUID="{43556B69-164B-4444-0921-70123F3743BF}">
+                        GUID="{1A9CC1FE-5FE6-423A-BBFD-DCD9AAF40FA4}">
                         <F N="bsp/startup/AtmelSamV7/sr3252/initcpu.c"/>
                         <F N="bsp/startup/AtmelSamV7/sr3252/set-cache.c"/>
                         <F N="bsp/startup/AtmelSamV7/sr3252/sysinit.c"/>
                     </Folder>
                     <Folder
                         Name="sr5333"
-                        GUID="{442E5AEB-1AA1-4F43-7D6A-60979CD00F94}">
+                        GUID="{BD1E8689-6A3B-4D76-36BB-A7C9AABCC3BD}">
                         <F N="bsp/startup/AtmelSamV7/sr5333/initcpu.c"/>
                         <F N="bsp/startup/AtmelSamV7/sr5333/set-cache.c"/>
                         <F N="bsp/startup/AtmelSamV7/sr5333/sysinit.c"/>
                     </Folder>
                     <Folder
                         Name="ty82xx"
-                        GUID="{CFC4AA06-E9AB-45D9-0874-412CA6410ABD}">
+                        GUID="{12DF5457-4C0E-497B-1AA7-0AA93E3A8A8E}">
                         <F N="bsp/startup/AtmelSamV7/ty82xx/initcpu.c"/>
                         <F N="bsp/startup/AtmelSamV7/ty82xx/set-cache.c"/>
                         <F N="bsp/startup/AtmelSamV7/ty82xx/sysinit.c"/>
                     </Folder>
                     <Folder
                         Name="wb7290"
-                        GUID="{0D6E7C08-E7BC-41C1-DC38-5E31C77AB8AB}">
+                        GUID="{0B5CB03B-0A80-4CB6-4494-2442C3C28197}">
                         <F N="bsp/startup/AtmelSamV7/wb7290/initcpu.c"/>
                         <F N="bsp/startup/AtmelSamV7/wb7290/set-cache.c"/>
                         <F N="bsp/startup/AtmelSamV7/wb7290/sysinit.c"/>
@@ -1769,16 +1825,16 @@
                 </Folder>
                 <Folder
                     Name="FslKxx"
-                    GUID="{A1AF7060-9F62-4B1E-C0E6-78FCE0BED49F}">
+                    GUID="{01992BD7-F604-463F-2079-5978E8E4CC96}">
                     <Folder
                         Name="TWR_K60F120M"
-                        GUID="{94313AA8-0B56-43F9-04DC-198EE5B2E6BD}">
+                        GUID="{A70660AE-AB1A-45B1-CF34-4FA4C72C4DA4}">
                         <F N="bsp/startup/FslKxx/TWR_K60F120M/initcpuc.c"/>
                         <F N="bsp/startup/FslKxx/TWR_K60F120M/sysinit.c"/>
                     </Folder>
                     <Folder
                         Name="TWR_K70F120M"
-                        GUID="{51EF1B93-7E39-447D-8B36-1777E32264B6}">
+                        GUID="{97EF9B2F-10C3-44C9-DC58-672C043A8BAA}">
                         <F N="bsp/startup/FslKxx/TWR_K70F120M/initcpuc.c"/>
                         <F N="bsp/startup/FslKxx/TWR_K70F120M/sysinit.c"/>
                     </Folder>
@@ -1786,50 +1842,50 @@
                 </Folder>
                 <Folder
                     Name="lpc17xx"
-                    GUID="{D2FDF98A-06C8-4CA8-3DB4-1041FB2CCFAF}">
+                    GUID="{3C8D45F5-0E0E-4450-1C36-22949D1E278F}">
                     <Folder
                         Name="easy1752"
-                        GUID="{28AE678E-50B6-4A5D-37FD-20EECF4B6791}">
+                        GUID="{F5A26612-93B6-428C-2C31-A9FA4C5A42B1}">
                         <F N="bsp/startup/lpc17xx/easy1752/board-config.h"/>
                         <F N="bsp/startup/lpc17xx/easy1752/initcpuc.c"/>
                     </Folder>
                     <Folder
                         Name="mcb1700"
-                        GUID="{38524279-7753-465C-56E6-602773C49E87}">
+                        GUID="{8148BA0B-39DE-47B8-879F-0E1F0DF3DEB1}">
                         <F N="bsp/startup/lpc17xx/mcb1700/initcpuc.c"/>
                     </Folder>
                     <Folder
                         Name="sr3200"
-                        GUID="{38D3439E-E2FF-4959-7F9C-256702D39EAD}">
+                        GUID="{D5412CBF-ACF2-4329-DBE8-018350A3D785}">
                         <F N="bsp/startup/lpc17xx/sr3200/initcpuc.c"/>
                     </Folder>
                     <Folder
                         Name="sr5190"
-                        GUID="{3753531A-4F27-45AD-47C8-36A2BEDD2A85}">
+                        GUID="{AF12CC2B-1453-44AB-EF04-FBADDC34AE84}">
                         <F N="bsp/startup/lpc17xx/sr5190/initcpuc.c"/>
                     </Folder>
                     <F N="bsp/startup/lpc17xx/cpu-optional.h"/>
                 </Folder>
                 <Folder
                     Name="P1020_DDRTest"
-                    GUID="{B5071650-78FD-45FB-7893-A694A39C2EA7}">
+                    GUID="{C2EBF877-C26E-4BB7-1A8D-674FAAB53F87}">
                     <F N="bsp/startup/P1020_DDRTest/board-config.h"/>
                     <F N="bsp/startup/P1020_DDRTest/boardroutcfg.c"/>
                     <F N="bsp/startup/P1020_DDRTest/SysSpace.h"/>
                 </Folder>
                 <Folder
                     Name="P1020RDB"
-                    GUID="{624371D6-A99A-47CD-ACDF-C47331BCB8A1}">
+                    GUID="{975E986E-DE0C-4021-6954-3F26BE803280}">
                     <F N="bsp/startup/P1020RDB/board-config.h"/>
                     <F N="bsp/startup/P1020RDB/boardroutcfg.c"/>
                     <F N="bsp/startup/P1020RDB/SysSpace.h"/>
                 </Folder>
                 <Folder
                     Name="s3c2410"
-                    GUID="{E12BD23E-D492-4690-6C8C-6077E3D36DB8}">
+                    GUID="{3BB4D4E5-A988-4E3C-C3B0-41BBA6DA198D}">
                     <Folder
                         Name="SR1210"
-                        GUID="{B4B7F661-BA43-4F03-39A3-B09278E1A7A0}">
+                        GUID="{20F5F820-0380-44C3-9D80-203ED676F594}">
                         <F N="bsp/startup/s3c2410/SR1210/initcpu.h"/>
                         <F N="bsp/startup/s3c2410/SR1210/initcpu.S"/>
                         <F N="bsp/startup/s3c2410/SR1210/initcpuc.c"/>
@@ -1838,10 +1894,10 @@
                 </Folder>
                 <Folder
                     Name="s3c2416"
-                    GUID="{78245EA3-C9AF-46DF-B6E9-DC1BE8D529AE}">
+                    GUID="{8DD915E3-C2EB-4815-EB45-2D86CDE2AB8F}">
                     <Folder
                         Name="tq2416"
-                        GUID="{FD9C74CB-402F-49C3-DF83-674539F52CB1}">
+                        GUID="{38F88B56-D0F2-41D4-9F65-DB7BB1CECF80}">
                         <F N="bsp/startup/s3c2416/tq2416/initcpu.h"/>
                         <F N="bsp/startup/s3c2416/tq2416/initcpu.S"/>
                         <F N="bsp/startup/s3c2416/tq2416/initcpuc.c"/>
@@ -1850,10 +1906,10 @@
                 </Folder>
                 <Folder
                     Name="s3c2440"
-                    GUID="{53849C15-4475-4A82-DB66-DAA3C7D895AD}">
+                    GUID="{28D5D350-70D6-49B3-BF24-8199E7274986}">
                     <Folder
                         Name="tq2440"
-                        GUID="{825C6140-EA2B-400B-4A4A-61E5CEC34A8B}">
+                        GUID="{34099FB1-B102-4EAD-0608-DC2F6505089B}">
                         <F N="bsp/startup/s3c2440/tq2440/initcpu.S"/>
                         <F N="bsp/startup/s3c2440/tq2440/initcpuc.c"/>
                     </Folder>
@@ -1861,10 +1917,10 @@
                 </Folder>
                 <Folder
                     Name="stm32f103"
-                    GUID="{34B96A94-12B2-400B-EB38-E29AC8140E87}">
+                    GUID="{F163D69C-700B-4C40-22AA-14DA293958B7}">
                     <Folder
                         Name="qh_1"
-                        GUID="{D06072C7-FA23-4FC0-CE44-B0A9C68641B9}">
+                        GUID="{CAEAD95E-49F4-4DFA-FCBA-A797364C8D9D}">
                         <F N="bsp/startup/stm32f103/qh_1/initcpuc.c"/>
                         <F N="bsp/startup/stm32f103/qh_1/SRAM.c"/>
                         <F N="bsp/startup/stm32f103/qh_1/SRAM.h"/>
@@ -1873,16 +1929,16 @@
                 </Folder>
                 <Folder
                     Name="stm32f407"
-                    GUID="{1C45CB70-0CE7-4669-B622-A1459BA3D991}">
+                    GUID="{BD974929-7BF6-4D3F-A5DF-67C07E8A75A5}">
                     <Folder
                         Name="EXPLORER"
-                        GUID="{23B9ADF0-AD50-46ED-2208-6EBDCC577E99}">
+                        GUID="{E2485363-96CC-4836-7120-DE7F877F1991}">
                         <F N="bsp/startup/stm32f407/EXPLORER/initcpuc.c"/>
                         <F N="bsp/startup/stm32f407/EXPLORER/sysinit.c"/>
                     </Folder>
                     <Folder
                         Name="iot-hall"
-                        GUID="{6BB48B8A-85C4-4CCE-8C2E-2C5C60A9F794}">
+                        GUID="{CCE445A1-3B05-4A9A-1D78-FE697DFA188A}">
                         <F N="bsp/startup/stm32f407/iot-hall/initcpuc.c"/>
                         <F N="bsp/startup/stm32f407/iot-hall/sysinit.c"/>
                     </Folder>
@@ -1890,17 +1946,24 @@
                 </Folder>
                 <Folder
                     Name="stm32f7"
-                    GUID="{F5773D50-D9A9-4974-85C8-D229B22CB18B}">
+                    GUID="{C5C7354A-7F67-4DFB-77E6-B528194F94B2}">
                     <Folder
                         Name="NUCLEO-F746ZG"
-                        GUID="{EBBF3210-BFF6-4C1A-2EA3-590323FEB798}">
+                        GUID="{D78C365A-2A9B-446E-DA9C-80B62C7B69B5}">
                         <F N="bsp/startup/stm32f7/NUCLEO-F746ZG/initcpuc.c"/>
                         <F N="bsp/startup/stm32f7/NUCLEO-F746ZG/set-cache.c"/>
                         <F N="bsp/startup/stm32f7/NUCLEO-F746ZG/sysinit.c"/>
                     </Folder>
                     <Folder
+                        Name="sr5333-v2.0"
+                        GUID="{A9306D12-D204-4892-1F4D-6ECB497A1EB8}">
+                        <F N="bsp/startup/stm32f7/sr5333-v2.0/initcpuc.c"/>
+                        <F N="bsp/startup/stm32f7/sr5333-v2.0/set-cache.c"/>
+                        <F N="bsp/startup/stm32f7/sr5333-v2.0/sysinit.c"/>
+                    </Folder>
+                    <Folder
                         Name="STM32756G-EVAL2"
-                        GUID="{4C512647-7E7F-464E-D00D-12DE626EC297}">
+                        GUID="{3A77C7DF-84FD-4B8F-BCA1-C21354C342B2}">
                         <F N="bsp/startup/stm32f7/STM32756G-EVAL2/initcpuc.c"/>
                         <F N="bsp/startup/stm32f7/STM32756G-EVAL2/set-cache.c"/>
                         <F N="bsp/startup/stm32f7/STM32756G-EVAL2/sysinit.c"/>
@@ -1909,24 +1972,35 @@
                     <F N="bsp/startup/stm32f7/set-cache.h"/>
                 </Folder>
                 <Folder
+                    Name="STM32L476"
+                    GUID="{E7C1D18E-685D-4D15-88A8-848A67B5C68A}">
+                    <Folder
+                        Name="nucleo"
+                        GUID="{2867C7F6-3545-4122-56F6-9B8AD1F7E492}">
+                        <F N="bsp/startup/STM32L476/nucleo/initcpuc.c"/>
+                        <F N="bsp/startup/STM32L476/nucleo/sysinit.c"/>
+                    </Folder>
+                    <F N="bsp/startup/STM32L476/cpu-optional.h"/>
+                </Folder>
+                <Folder
                     Name="windows"
-                    GUID="{8D74495D-6900-421E-9BC0-1061EAC84FAC}">
+                    GUID="{5EB80501-3A45-4849-18BB-8D5EB19D4F8C}">
                     <F N="bsp/startup/windows/board-config.h"/>
                 </Folder>
             </Folder>
         </Folder>
         <Folder
             Name="component"
-            GUID="{43AAE960-C490-4DCE-9083-2CFDBD331A95}">
+            GUID="{9EA5B58A-F724-4942-D64D-1DC8C392308C}">
             <Folder
                 Name="buffer"
-                GUID="{4CB29F27-9591-47CA-4BB0-7F32141AAC87}">
+                GUID="{9CC230F4-0E12-4E74-7E8C-072414A610AA}">
                 <F N="component/buffer/line.c"/>
                 <F N="component/buffer/ring.c"/>
             </Folder>
             <Folder
                 Name="charset"
-                GUID="{7397C990-C813-4A01-3658-959C762A9580}">
+                GUID="{B3EC0E66-ED97-4601-68D8-C37BF44DD5AA}">
                 <F N="component/charset/arabic.c"/>
                 <F N="component/charset/ascii.c"/>
                 <F N="component/charset/ascii.h"/>
@@ -1942,17 +2016,17 @@
             </Folder>
             <Folder
                 Name="djybus"
-                GUID="{644EB770-CF96-4493-F251-CC07DCBCADB0}">
+                GUID="{C4630FF4-DE7C-432C-8335-907680E2979A}">
                 <F N="component/djybus/djybus.c"/>
                 <F N="component/djybus/iicbus.c"/>
                 <F N="component/djybus/spibus.c"/>
             </Folder>
             <Folder
                 Name="djyfs"
-                GUID="{9569CD30-8920-4B7A-29E3-C988B44CD690}">
+                GUID="{A740BAA9-7F69-496B-BB62-7A8FB3898CB1}">
                 <Folder
                     Name="efs"
-                    GUID="{D95F8759-60F9-4C61-F427-3A88D587A5AB}">
+                    GUID="{07BA0328-C36A-40A5-738C-C510452160A7}">
                     <F N="component/djyfs/efs/efs.c"/>
                     <F N="component/djyfs/efs/efs.h"/>
                     <F N="component/djyfs/efs/efs_port.h"/>
@@ -1962,16 +2036,16 @@
                 </Folder>
                 <Folder
                     Name="fat"
-                    GUID="{F9AB5C7C-D15E-4A98-39F5-0EAD8DDA11B1}">
+                    GUID="{FC1DE656-A8B4-4B48-EE7A-23565D4E3791}">
                     <Folder
                         Name="ff11"
-                        GUID="{3A5C6387-FC47-4E2B-0E24-251389210DB4}">
+                        GUID="{B76F6CEC-27E1-4B55-AC87-F4604FF6B994}">
                         <Folder
                             Name="src"
-                            GUID="{F1C147B2-F7E7-4BA3-3AA6-E508AFA26CB3}">
+                            GUID="{3A531AA7-2763-463F-45C6-6AFD97B328B2}">
                             <Folder
                                 Name="option"
-                                GUID="{3E520B1B-ED43-442F-E0A0-61F6B99AB191}">
+                                GUID="{670D7B73-0D45-43FA-84D4-83C194FB5697}">
                                 <F N="component/djyfs/fat/ff11/src/option/cc936.c"/>
                                 <F N="component/djyfs/fat/ff11/src/option/syscall.c"/>
                                 <F N="component/djyfs/fat/ff11/src/option/unicode.c"/>
@@ -1988,10 +2062,10 @@
                     </Folder>
                     <Folder
                         Name="port"
-                        GUID="{CB3E60AE-CC30-4668-5989-C8B4F4D63D9C}">
+                        GUID="{199E93B0-6468-45A4-B556-C61185D99DAC}">
                         <Folder
                             Name="drivers"
-                            GUID="{D8ED7AD2-CA68-4019-4AC4-C9171444E6BA}">
+                            GUID="{9D9D1637-568C-420F-E49D-C9AD47B82EAD}">
                             <F N="component/djyfs/fat/port/drivers/fat_drivers.c"/>
                             <F N="component/djyfs/fat/port/drivers/fat_drivers.h"/>
                         </Folder>
@@ -2002,14 +2076,20 @@
                     <F N="component/djyfs/fat/module_install.c"/>
                 </Folder>
                 <Folder
+                    Name="iap"
+                    GUID="{931A44C1-753A-404E-BB8C-E00E70339E99}">
+                    <F N="component/djyfs/iap/iap_fs.c"/>
+                    <F N="component/djyfs/iap/iap_low_level.c"/>
+                </Folder>
+                <Folder
                     Name="yaffs2"
-                    GUID="{251A2B96-3006-4B6C-6E19-7939BB2B18AF}">
+                    GUID="{5ABE13BC-0609-4ED5-4C5D-E12F778FC9B1}">
                     <Folder
                         Name="port"
-                        GUID="{02C48879-3D8F-4238-C823-3DEDD5AAC0A6}">
+                        GUID="{4FDA3268-A727-4E77-3AA5-9E804FF857A0}">
                         <Folder
                             Name="drivers"
-                            GUID="{F566761D-9361-4398-4521-FA0CF03D4589}">
+                            GUID="{A5B8BD23-81C5-42F4-FF66-7340F569D594}">
                             <F N="component/djyfs/yaffs2/port/drivers/config.c"/>
                             <F N="component/djyfs/yaffs2/port/drivers/yaffs_drv_generic.c"/>
                             <F N="component/djyfs/yaffs2/port/drivers/yaffs_drv_generic.h"/>
@@ -2024,19 +2104,19 @@
                     </Folder>
                     <Folder
                         Name="yaffs2-583dbd9"
-                        GUID="{5333E68C-E1D8-46A4-2C05-199B69002C80}">
+                        GUID="{5AC822D9-1304-4864-2E75-2E2DEA34FDA3}">
                         <Folder
                             Name="yaffs2-583dbd9"
-                            GUID="{09AF67F0-6D4D-4A74-59AB-7A60285A45AD}">
+                            GUID="{1D1C06FC-F6F5-43C8-2BEA-98B628B6BC9C}">
                             <Folder
                                 Name="direct"
-                                GUID="{926C9564-1ED1-4796-41F6-3E4AC78D258D}">
+                                GUID="{21BFB5F7-AD1D-434C-967A-6FB1EDB41286}">
                                 <Folder
                                     Name="test-framework"
-                                    GUID="{D18F3745-3047-4CCC-8F04-FFDDD3270EA8}">
+                                    GUID="{03FF870D-8131-42DE-141A-4125000A7387}">
                                     <Folder
                                         Name="basic-tests"
-                                        GUID="{103442B8-9409-4FB5-B64D-BC074075DAB7}">
+                                        GUID="{C5906B79-8744-4A29-39A4-A7A9EE2DBBA8}">
                                         <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/basic-tests/dtest.c"/>
                                         <F
                                             N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/basic-tests/Makefile"
@@ -2044,7 +2124,7 @@
                                     </Folder>
                                     <Folder
                                         Name="python"
-                                        GUID="{BC6C1FF4-5DE6-4CF6-A082-8AE5ACA797A8}">
+                                        GUID="{B1876053-FBE1-4A5B-CD6D-F823276FDC92}">
                                         <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/python/examples.py"/>
                                         <F
                                             N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/python/Makefile"
@@ -2059,7 +2139,7 @@
                                     </Folder>
                                     <Folder
                                         Name="tests"
-                                        GUID="{9D87DF77-884A-4931-8C2A-187C690E2785}">
+                                        GUID="{292AB134-01F2-4F22-0460-FB5642C7DAA7}">
                                         <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/tests/fuzzer.c"/>
                                         <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/tests/init_fw_update_test_m18.sh"/>
                                         <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/tests/init_fw_update_test_nand.sh"/>
@@ -2084,10 +2164,10 @@
                                     </Folder>
                                     <Folder
                                         Name="timothy_tests"
-                                        GUID="{DC15F820-9784-4CDE-4A7B-E3733178CF86}">
+                                        GUID="{F90B9E06-8A08-4B93-3825-41C024B591A9}">
                                         <Folder
                                             Name="handle_tests"
-                                            GUID="{7FDFCEB9-4309-460F-3BD5-B350BCD1D5AA}">
+                                            GUID="{2358B5F4-D9BF-424E-D4E1-EF98A5842BB6}">
                                             <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/timothy_tests/handle_tests/handle_test.c"/>
                                             <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/timothy_tests/handle_tests/handle_test.h"/>
                                             <F
@@ -2097,7 +2177,7 @@
                                         </Folder>
                                         <Folder
                                             Name="is_yaffs_working_tests"
-                                            GUID="{30E984EF-A817-42EB-4B36-15052B1B56A6}">
+                                            GUID="{76C06EF9-3C8B-44FC-205E-3FC1AD710B98}">
                                             <F
                                                 N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/timothy_tests/is_yaffs_working_tests/Makefile"
                                                 Type="Makefile"/>
@@ -2106,7 +2186,7 @@
                                         </Folder>
                                         <Folder
                                             Name="linux_tests"
-                                            GUID="{6083C5DF-88F8-4F7F-50D2-9E05A535A183}">
+                                            GUID="{8ABFB3FA-4EC0-4699-483F-892A255C9CAB}">
                                             <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/timothy_tests/linux_tests/lib.c"/>
                                             <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/timothy_tests/linux_tests/lib.h"/>
                                             <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/timothy_tests/linux_tests/linux_test.c"/>
@@ -2118,7 +2198,7 @@
                                         </Folder>
                                         <Folder
                                             Name="quick_tests"
-                                            GUID="{80BA6333-ADB0-42C8-BF6F-A98D0623658C}">
+                                            GUID="{8D5A8627-4666-40B9-3287-3D010D42968A}">
                                             <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/timothy_tests/quick_tests/lib.c"/>
                                             <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/timothy_tests/quick_tests/lib.h"/>
                                             <F
@@ -2556,7 +2636,7 @@
                                         </Folder>
                                         <Folder
                                             Name="stress_tester"
-                                            GUID="{C9E5C0FF-E5A4-4F7C-CE89-BE3E2D550FA0}">
+                                            GUID="{1F6920BC-AD23-41F4-BF40-D0EFB146D495}">
                                             <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/timothy_tests/stress_tester/error_handler.c"/>
                                             <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/timothy_tests/stress_tester/error_handler.h"/>
                                             <F
@@ -2570,7 +2650,7 @@
                                         </Folder>
                                         <Folder
                                             Name="threading"
-                                            GUID="{9782E5B9-2D68-49FC-F883-CC871B683EBF}">
+                                            GUID="{FF9ABBBD-1CC2-4E6C-C36F-C37E95E22190}">
                                             <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/timothy_tests/threading/lib.c"/>
                                             <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/timothy_tests/threading/lib.h"/>
                                             <F
@@ -2588,7 +2668,7 @@
                                         </Folder>
                                         <Folder
                                             Name="yaffs_and_linux_mirror_tests"
-                                            GUID="{0ABCC35B-CE2E-448C-4132-9DA970490188}">
+                                            GUID="{BC4CCA02-CE1D-4C74-C385-2E14AD755993}">
                                             <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/timothy_tests/yaffs_and_linux_mirror_tests/lib.c"/>
                                             <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/timothy_tests/yaffs_and_linux_mirror_tests/lib.h"/>
                                             <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework/timothy_tests/yaffs_and_linux_mirror_tests/linux_test_open.c"/>
@@ -2652,18 +2732,18 @@
                                 </Folder>
                                 <Folder
                                     Name="u-boot"
-                                    GUID="{35145766-9E4F-4DEB-D5DB-FFD1667CA3A0}">
+                                    GUID="{8C61DB2A-D88B-4BD7-AF71-26C35D37C4BF}">
                                     <Folder
                                         Name="common"
-                                        GUID="{C09312B0-CDF8-4D33-387A-9DA3C15A2B97}">
+                                        GUID="{FEBB1F95-D424-4839-60FB-3A3990BAAA98}">
                                         <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/u-boot/common/cmd_yaffs2.c"/>
                                     </Folder>
                                     <Folder
                                         Name="fs"
-                                        GUID="{153BE4AF-7E23-46AC-8E56-9F5D411DF09D}">
+                                        GUID="{594EDC70-AD0E-428D-74AC-DEB4E5BAB499}">
                                         <Folder
                                             Name="yaffs2"
-                                            GUID="{FD70FD35-E9AD-4BAE-7CA6-A4AA13AAA780}">
+                                            GUID="{B21A2954-320A-4A26-E0E9-03BED8FBB681}">
                                             <F
                                                 N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/u-boot/fs/yaffs2/Makefile"
                                                 Type="Makefile"/>
@@ -2700,7 +2780,7 @@
                             </Folder>
                             <Folder
                                 Name="linux-tests"
-                                GUID="{EC43CC24-6AF0-491A-70CE-D3D5319A8580}">
+                                GUID="{C15C10EE-5195-4BF7-D4B1-17FFBDAB9CA3}">
                                 <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/linux-tests/initnandsim"/>
                                 <F
                                     N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/linux-tests/Makefile"
@@ -2717,7 +2797,7 @@
                             </Folder>
                             <Folder
                                 Name="mtdemul"
-                                GUID="{AEF9D85C-1B1F-48D6-DAE8-1D43EA5CDD88}">
+                                GUID="{8140B779-EA29-45F4-83D5-EC16C36FB18D}">
                                 <F
                                     N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/mtdemul/Makefile"
                                     Type="Makefile"/>
@@ -2725,14 +2805,14 @@
                             </Folder>
                             <Folder
                                 Name="patches"
-                                GUID="{CFCB52AC-5BDA-4481-E6D7-46B131A3189D}">
+                                GUID="{FCDBB72C-3631-413C-1FAD-8600237E8E91}">
                                 <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/patches/README.txt"/>
                                 <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/patches/yaffs_linux_allocator.c"/>
                                 <F N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/patches/yaffs_mtdif2.c"/>
                             </Folder>
                             <Folder
                                 Name="utils"
-                                GUID="{EF2EF071-D8E7-49A8-E56A-6C8D34B7BA8E}">
+                                GUID="{BE6CD78A-5E61-4F3F-8018-0CC4671BDAB2}">
                                 <F
                                     N="component/djyfs/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/utils/Makefile"
                                     Type="Makefile"/>
@@ -2802,12 +2882,6 @@
                     <F N="component/djyfs/yaffs2/!!readme.txt"/>
                     <F N="component/djyfs/yaffs2/module_install.c"/>
                 </Folder>
-                <Folder
-                    Name="iap"
-                    GUID="{F77BE027-6084-4FB0-EE37-7402D800EA87}">
-                    <F N="component/djyfs/iap/iap_fs.c"/>
-                    <F N="component/djyfs/iap/iap_low_level.c"/>
-                </Folder>
                 <F N="component/djyfs/dev_module.c"/>
                 <F N="component/djyfs/file.c"/>
                 <F N="component/djyfs/file.h"/>
@@ -2824,15 +2898,15 @@
             </Folder>
             <Folder
                 Name="driver"
-                GUID="{6C53DDE8-A1BA-4B7F-7BDA-935FBA590085}">
+                GUID="{7EAA79E0-87C5-406C-DD2F-729425738A8D}">
                 <Folder
                     Name="card"
-                    GUID="{CE6DCAFA-E2CC-4E0B-C78E-192833EEABBD}">
+                    GUID="{34F86687-EBCC-490A-52D3-56280A634991}">
                     <F N="component/driver/card/card.h"/>
                 </Folder>
                 <Folder
                     Name="flash"
-                    GUID="{70359A61-3455-4A34-F577-EA1C35647D80}">
+                    GUID="{F59C2A8D-E8BA-413C-9E7C-C6E650415FBA}">
                     <F N="component/driver/flash/ecc_sw.c"/>
                     <F N="component/driver/flash/ecc_sw.h"/>
                     <F N="component/driver/flash/embedded_flash.h"/>
@@ -2845,27 +2919,27 @@
                 </Folder>
                 <Folder
                     Name="include"
-                    GUID="{0A976E25-9DFB-43B7-42DF-ACFB2FBED8B7}">
+                    GUID="{2396EE49-E2E8-4F51-6F52-239B2FEEAFBF}">
                     <F N="component/driver/include/pci.h"/>
                     <F N="component/driver/include/uart.h"/>
                 </Folder>
                 <Folder
                     Name="pci"
-                    GUID="{7C6CC2D0-DCFE-4722-CDC8-AA2E479243B3}">
+                    GUID="{1C3E4FCD-D476-484F-9979-C4B5C260CD9B}">
                     <F N="component/driver/pci/cmd_pci.c"/>
                     <F N="component/driver/pci/pci.c"/>
                     <F N="component/driver/pci/pci_auto.c"/>
                 </Folder>
                 <Folder
                     Name="uart"
-                    GUID="{D8D1F829-A14E-4990-2127-A5946348FABE}">
+                    GUID="{025F37AC-1BDB-4020-A2EF-C4BE9D144181}">
                     <F N="component/driver/uart/uart.c"/>
                 </Folder>
                 <F N="component/driver/driver.c"/>
             </Folder>
             <Folder
                 Name="exp"
-                GUID="{8AE76BA9-C398-4ECA-0026-5CB4C7BF1492}">
+                GUID="{7FE4142D-432F-4946-C566-9B4B353F3888}">
                 <F N="component/exp/exp.c"/>
                 <F N="component/exp/exp_decoder.c"/>
                 <F N="component/exp/exp_decoder.h"/>
@@ -2880,7 +2954,7 @@
             </Folder>
             <Folder
                 Name="font"
-                GUID="{1C92D61A-D9BC-478D-13C3-AB81CA0A6688}">
+                GUID="{02E4B28A-0B29-4BA5-D329-6E9FCB7A91B4}">
                 <F N="component/font/ascii6x12.c"/>
                 <F N="component/font/ascii6x12.h"/>
                 <F N="component/font/ascii8x16.c"/>
@@ -2893,13 +2967,13 @@
             </Folder>
             <Folder
                 Name="gui"
-                GUID="{2183E62E-4FE2-4C50-3DE0-5D82D111EAB7}">
+                GUID="{099BF43E-D6E4-46CD-E7EC-014E226A409A}">
                 <Folder
                     Name="gdd"
-                    GUID="{7FE9D68C-0271-4B00-9B1D-42D92F7849B7}">
+                    GUID="{4CDCB03E-2C29-4364-5BDF-BB7D7D21E899}">
                     <Folder
                         Name="widget"
-                        GUID="{E2F6B85B-B46C-4877-8226-436A9D4419B9}">
+                        GUID="{79C9EEEB-4435-4965-8700-2E6947BE28AB}">
                         <F N="component/gui/gdd/widget/gdd_button.c"/>
                         <F N="component/gui/gdd/widget/gdd_checkbox.c"/>
                         <F N="component/gui/gdd/widget/gdd_keyboard.c"/>
@@ -2923,7 +2997,7 @@
                 </Folder>
                 <Folder
                     Name="gkernel"
-                    GUID="{25F3DE66-CE36-4171-24A2-7151B5AA2DA0}">
+                    GUID="{079F78F7-921B-49EB-0FC5-A40269F14E85}">
                     <F N="component/gui/gkernel/gk_api.c"/>
                     <F N="component/gui/gkernel/gk_clip.c"/>
                     <F N="component/gui/gkernel/gk_clip.h"/>
@@ -2939,25 +3013,25 @@
             </Folder>
             <Folder
                 Name="hmi-input"
-                GUID="{966A004B-53AB-4F25-6F96-2FCAFCDD3D9A}">
+                GUID="{8CEA0BCD-5DB0-4865-5929-C2D151086785}">
                 <Folder
                     Name="keypad"
-                    GUID="{BFD806B9-561B-4A1C-83F8-EC9B2EEFE19F}">
+                    GUID="{D86827CC-C7D5-4C04-8571-9FCBE3A3749A}">
                     <F N="component/hmi-input/keypad/keyboard.c"/>
                 </Folder>
                 <Folder
                     Name="touch"
-                    GUID="{CA8CA7BB-0473-41BC-8FBD-26AFC3269E90}">
+                    GUID="{7FA27117-ACB5-4B04-2C69-6D5F2C91F48A}">
                     <F N="component/hmi-input/touch/Touch.c"/>
                 </Folder>
                 <F N="component/hmi-input/hmi-input.c"/>
             </Folder>
             <Folder
                 Name="include"
-                GUID="{AC095F0A-C588-4084-5266-171A942AADA6}">
+                GUID="{B68CFCB3-96ED-454A-FB82-EEB3CA9F358D}">
                 <Folder
                     Name="cfg"
-                    GUID="{F3874C3B-D13A-4808-77C9-1EE7BD5015AF}">
+                    GUID="{6616686F-0B03-4DFE-C5D3-5BE6D16FA4A0}">
                     <F N="component/include/cfg/gui_config.h"/>
                     <F N="component/include/cfg/Iboot_config.h"/>
                     <F N="component/include/cfg/IO_config.h"/>
@@ -2967,7 +3041,7 @@
                 </Folder>
                 <Folder
                     Name="widget"
-                    GUID="{AB3F9804-5E7E-4153-36AE-389C4B571DA3}">
+                    GUID="{7B2CD377-5472-4C0C-D9A5-826CEE757A92}">
                     <F N="component/include/widget/gdd_button.h"/>
                     <F N="component/include/widget/gdd_checkbox.h"/>
                     <F N="component/include/widget/gdd_keyboard.h"/>
@@ -3008,15 +3082,15 @@
             </Folder>
             <Folder
                 Name="lowpower"
-                GUID="{7F3A9F13-ED0B-4C6A-F2CB-E2AE22E2229A}">
+                GUID="{43D4B027-7B34-49F4-F907-74096D4373AA}">
                 <F N="component/lowpower/lowpower.c"/>
             </Folder>
             <Folder
                 Name="menu"
-                GUID="{0A6756E9-313C-41AB-4FB0-0B2E82ECD69F}">
+                GUID="{088DAE7E-E755-4CA3-A133-E26197D0789D}">
                 <Folder
                     Name="include"
-                    GUID="{B5EF8430-175C-4E40-9C26-1E582D5825BB}">
+                    GUID="{6139ECF4-ABA8-460D-FDF9-BF484162DD8F}">
                     <F N="component/menu/include/menuapp.h"/>
                     <F N="component/menu/include/MenuAppInit.h"/>
                     <F N="component/menu/include/MenuData.h"/>
@@ -3041,7 +3115,7 @@
                 </Folder>
                 <Folder
                     Name="src"
-                    GUID="{B65D983D-BD4B-4BFD-0C62-913FCB1FF8B5}">
+                    GUID="{6D178FED-954D-4FD1-E436-D63F65F9CFA7}">
                     <F N="component/menu/src/menuapp.c"/>
                     <F N="component/menu/src/MenuData.c"/>
                     <F N="component/menu/src/MenuDesigner.c"/>
@@ -3064,22 +3138,22 @@
             </Folder>
             <Folder
                 Name="multiplex"
-                GUID="{50BB4E6E-4CB0-42E3-EA8E-206A0364E384}">
+                GUID="{04E6916F-735F-46B7-3DD9-0D0830433BAC}">
                 <F N="component/multiplex/multiplex.c"/>
             </Folder>
             <Folder
                 Name="pipe"
-                GUID="{BA7D27C9-EB10-4435-9BDF-74CA06DF8493}">
+                GUID="{A706DF78-1598-4B69-B85D-575FEF8015A1}">
                 <F N="component/pipe/pipe.c"/>
             </Folder>
             <Folder
                 Name="shell"
-                GUID="{18E57185-81A7-48F1-DF39-32A29B5E5C91}">
+                GUID="{AB6EEE68-2AC4-4C68-5B77-3AC6558900AF}">
                 <F N="component/shell/shell.c"/>
             </Folder>
             <Folder
                 Name="stddev"
-                GUID="{A0973661-94C9-4A5E-5FCB-33B22A38C3AF}">
+                GUID="{33EA5AC0-F416-4D28-3D0D-D50B7794BBB1}">
                 <F N="component/stddev/dcvt.c"/>
                 <F N="component/stddev/stdin.c"/>
                 <F N="component/stddev/stdio.c"/>
@@ -3087,13 +3161,13 @@
             </Folder>
             <Folder
                 Name="tcpip"
-                GUID="{4A12327B-99FE-4C17-07B7-A2360A1A80A8}">
+                GUID="{4F05FFFD-8B0E-4F24-875A-B2207025F385}">
                 <Folder
                     Name="apps"
-                    GUID="{20522789-0636-4D66-3315-C0AE59775C87}">
+                    GUID="{2E645C6B-8BCB-41A7-6759-DDFBDCF316B8}">
                     <Folder
                         Name="dhcp"
-                        GUID="{913A785A-46E6-4D45-902B-E193D7BC2CBA}">
+                        GUID="{58E9A62B-A31D-432B-3B35-DE173E404387}">
                         <F N="component/tcpip/apps/dhcp/dhcpclient.c"/>
                         <F N="component/tcpip/apps/dhcp/dhcpLib.c"/>
                         <F N="component/tcpip/apps/dhcp/dhcpLib.h"/>
@@ -3101,18 +3175,18 @@
                     </Folder>
                     <Folder
                         Name="dns"
-                        GUID="{1B1FDCBB-60AD-483D-598B-17C5DE1D0DA5}">
+                        GUID="{DCBC995F-9D47-46D5-7A13-81361CAB59B0}">
                         <F N="component/tcpip/apps/dns/dns.c"/>
                     </Folder>
                     <Folder
                         Name="ftp"
-                        GUID="{F46DE9A8-53D7-4E80-858E-2BBFE55BE6BC}">
+                        GUID="{5802FAE4-8C77-47A4-2653-21509154B0A8}">
                         <F N="component/tcpip/apps/ftp/ftp.h"/>
                         <F N="component/tcpip/apps/ftp/server.c"/>
                     </Folder>
                     <Folder
                         Name="osupdate.c"
-                        GUID="{ACF60AAB-5F00-4CBC-449B-55876DA2F09E}">
+                        GUID="{06CA91BA-9552-401E-40AF-528919CBD8AB}">
                         <F N="component/tcpip/apps/osupdate.c/osupdateconfig.h"/>
                         <F N="component/tcpip/apps/osupdate.c/s29xxx.c"/>
                         <F N="component/tcpip/apps/osupdate.c/s29xxx.h"/>
@@ -3121,27 +3195,27 @@
                     </Folder>
                     <Folder
                         Name="ping"
-                        GUID="{289ADD43-4A6A-4C18-5436-3535AEB9649F}">
+                        GUID="{B90E09EF-29AC-48B4-3349-1913B5754B91}">
                         <F N="component/tcpip/apps/ping/ping.c"/>
                     </Folder>
                     <Folder
                         Name="sntp"
-                        GUID="{01B51EAB-E2CC-437C-9EB9-2086C83E2A82}">
+                        GUID="{5A172195-3090-4B21-CEFA-9C4A8CCB00B2}">
                         <F N="component/tcpip/apps/sntp/sntp.c"/>
                     </Folder>
                     <Folder
                         Name="telnet"
-                        GUID="{D96EA23B-C721-4997-634F-63434A8A2B82}">
+                        GUID="{ECD73711-BB70-4462-3E2A-516B5FD1F2A4}">
                         <F N="component/tcpip/apps/telnet/telnet.c"/>
                     </Folder>
                     <Folder
                         Name="test"
-                        GUID="{AF79376A-B947-446D-4E4A-EE5D73C796AE}">
+                        GUID="{1CB0480C-75B9-4F64-AD72-4230C9A5B1A0}">
                         <F N="component/tcpip/apps/test/LinkHookTest.c"/>
                     </Folder>
                     <Folder
                         Name="tftp"
-                        GUID="{884026A2-6FCB-4194-9C06-3818C8397CB6}">
+                        GUID="{5E1B6709-527E-4DB8-05B7-95B1E33C77AB}">
                         <F N="component/tcpip/apps/tftp/client.c"/>
                         <F N="component/tcpip/apps/tftp/server.c"/>
                         <F N="component/tcpip/apps/tftp/tftplib.c"/>
@@ -3151,21 +3225,21 @@
                 </Folder>
                 <Folder
                     Name="include"
-                    GUID="{ED10DDF1-06A8-4103-A797-8ED30AE76197}">
+                    GUID="{D59B7947-34CB-432B-83D5-6D2FD5FCB4B1}">
                     <Folder
                         Name="arpa"
-                        GUID="{4D57B998-C71B-4BEE-8038-D638D449B4A3}">
+                        GUID="{BA2BD807-9386-4920-F272-979DEC10969C}">
                         <F N="component/tcpip/include/arpa/inet.h"/>
                         <F N="component/tcpip/include/arpa/tftp.h"/>
                     </Folder>
                     <Folder
                         Name="netinet"
-                        GUID="{DBF190EE-B1D0-438C-2D07-98A40CACA793}">
+                        GUID="{E0678E9E-D1DD-486B-9FB5-561F3DE9C596}">
                         <F N="component/tcpip/include/netinet/in.h"/>
                     </Folder>
                     <Folder
                         Name="sys"
-                        GUID="{06638B43-CC91-4388-1A21-5D0BAFFAF2B1}">
+                        GUID="{48675F3D-CC62-405C-1E9E-E475D2BFFFA8}">
                         <F N="component/tcpip/include/sys/mman.h"/>
                         <F N="component/tcpip/include/sys/select.h"/>
                         <F N="component/tcpip/include/sys/stat.h"/>
@@ -3182,7 +3256,7 @@
                 </Folder>
                 <Folder
                     Name="source"
-                    GUID="{B425A077-0B04-49AD-3780-9AA630D38B94}">
+                    GUID="{D14ED30C-F5BB-4EE3-09BE-CF57DC8D6E8D}">
                     <F N="component/tcpip/source/error.c"/>
                     <F N="component/tcpip/source/fcntl.c"/>
                     <F N="component/tcpip/source/netdb.c"/>
@@ -3202,9 +3276,6 @@
                 <F N="component/tcpip/ip.h"/>
                 <F N="component/tcpip/ipV4.c"/>
                 <F N="component/tcpip/ipV4.h"/>
-                <F N="component/tcpip/link.c"/>
-                <F N="component/tcpip/link.h"/>
-                <F N="component/tcpip/loopIf.c"/>
                 <F N="component/tcpip/pkg.c"/>
                 <F N="component/tcpip/rout.c"/>
                 <F N="component/tcpip/rout.h"/>
@@ -3220,29 +3291,29 @@
             </Folder>
             <Folder
                 Name="timer"
-                GUID="{14AFB3A0-690D-488A-D06F-1E605CBFA3AB}">
+                GUID="{617783A8-4948-444A-9A2F-6CCAC8ABC8AB}">
                 <F N="component/timer/timer.c"/>
                 <F N="component/timer/timer_hard.c"/>
             </Folder>
             <Folder
                 Name="wdt"
-                GUID="{CDABBD79-593E-4ACA-1FE0-8FEEE1ED96AE}">
+                GUID="{C0340799-11D2-4521-5A56-3FD414122EA7}">
                 <F N="component/wdt/wdt_hal.c"/>
                 <F N="component/wdt/wdt_soft.c"/>
             </Folder>
             <Folder
                 Name="ymodem"
-                GUID="{7CD7A0C7-BFBE-4DD8-E2DE-68E075592387}">
+                GUID="{E826FF76-1846-4454-86EA-A24BF022B491}">
                 <F N="component/ymodem/ymodem.c"/>
                 <F N="component/ymodem/ymodemcfg.h"/>
             </Folder>
         </Folder>
         <Folder
             Name="djyos"
-            GUID="{B8A45EE7-25C4-4F94-2BB3-36A76C09A2A5}">
+            GUID="{5CD62323-0614-4C41-48B2-F570FDC61898}">
             <Folder
                 Name="core"
-                GUID="{E31D5A22-D54D-43AE-DA48-2AF8FC76F7A8}">
+                GUID="{7ECAEB18-87B8-42BF-09D0-2B14986747B7}">
                 <F N="djyos/core/djyos.c"/>
                 <F N="djyos/core/knlShell.c"/>
                 <F N="djyos/core/list.c"/>
@@ -3250,14 +3321,14 @@
             </Folder>
             <Folder
                 Name="heap"
-                GUID="{8F8D8553-C157-4EC5-B55E-309C42062192}">
+                GUID="{E04C758C-CA6E-41C6-8222-ACDB234261A6}">
                 <F N="djyos/heap/heap-dynamic.c"/>
                 <F N="djyos/heap/heap-in.h"/>
                 <F N="djyos/heap/heap-static.c"/>
             </Folder>
             <Folder
                 Name="include"
-                GUID="{1A28A2F4-AC40-407D-734E-F4EF1EA68DA8}">
+                GUID="{4F5F030E-B4A6-43F9-49C8-13AAE62C248F}">
                 <F N="djyos/include/align.h"/>
                 <F N="djyos/include/atomic.h"/>
                 <F N="djyos/include/core_config.h"/>
@@ -3278,38 +3349,38 @@
             </Folder>
             <Folder
                 Name="int"
-                GUID="{BB6FE293-9211-4ABC-A157-1BE8078091A3}">
+                GUID="{A0B836F5-A5C0-435E-7900-4C74782F79BA}">
                 <F N="djyos/int/atomic.c"/>
                 <F N="djyos/int/int.c"/>
             </Folder>
             <Folder
                 Name="lock"
-                GUID="{93B878F6-3558-411D-7647-8219EEFC5FB6}">
+                GUID="{907A0DC7-6D80-4D36-966F-76B609C771B6}">
                 <F N="djyos/lock/lock.c"/>
             </Folder>
             <Folder
                 Name="msg"
-                GUID="{C9F3C384-FED4-4224-9915-450137793988}">
+                GUID="{93578D5C-60E0-486A-D5B8-B3FDBD1F7681}">
                 <F N="djyos/msg/msg.c"/>
             </Folder>
             <Folder
                 Name="msgqueue"
-                GUID="{F6E31F03-65BE-41B7-4056-C28EF0603B8A}">
+                GUID="{1C62A6EC-1C1F-405B-1CCF-49564D47D396}">
                 <F N="djyos/msgqueue/msgqueue.c"/>
             </Folder>
             <Folder
                 Name="object"
-                GUID="{8DF7116B-B2F0-4D02-9AC4-BF7650C5B888}">
+                GUID="{2A5B5D3C-DABA-43A8-8AAE-54792C189BAC}">
                 <F N="djyos/object/object.c"/>
             </Folder>
             <Folder
                 Name="pool"
-                GUID="{02E86468-D718-46A5-579B-73379A19BC90}">
+                GUID="{3576BFF4-E488-43CD-1BC4-4072B8A954A8}">
                 <F N="djyos/pool/pool.c"/>
             </Folder>
             <Folder
                 Name="time"
-                GUID="{688242E7-C32A-457A-8716-A55D0795899F}">
+                GUID="{4A8ACA90-3241-46AF-3A46-251467785994}">
                 <F N="djyos/time/Rtc.c"/>
                 <F N="djyos/time/systime.c"/>
                 <F N="djyos/time/time.c"/>
@@ -3317,13 +3388,13 @@
         </Folder>
         <Folder
             Name="extern-component"
-            GUID="{F66F080D-43F3-4B3A-0E8F-DF3ADB96FCB1}">
+            GUID="{E86B941D-BD75-4BE8-EA08-DE67256401B7}">
             <Folder
                 Name="cjson-code-73"
-                GUID="{D2DEA530-A257-415D-3076-8CAA14D22F9C}">
+                GUID="{EE1A00F9-5EAC-4C60-3465-498121D56A9C}">
                 <Folder
                     Name="tests"
-                    GUID="{1B2A4309-65BC-4F89-C25F-1178CF6066BB}">
+                    GUID="{1D8815B8-ED00-417B-9800-5C40FC85E482}">
                     <F N="extern-component/cjson-code-73/tests/test1"/>
                     <F N="extern-component/cjson-code-73/tests/test2"/>
                     <F N="extern-component/cjson-code-73/tests/test3"/>
@@ -3341,13 +3412,13 @@
             </Folder>
             <Folder
                 Name="firmware"
-                GUID="{103D1C1D-F84A-4A25-81E4-5E15AA3AFDA8}">
+                GUID="{6210CD4B-94F8-4CF4-386C-0450938090A2}">
                 <Folder
                     Name="AtmelSam4e"
-                    GUID="{8C20D5C2-221E-4407-C759-B9BEB11F8385}">
+                    GUID="{B3F3D4C7-F59D-47EB-0EF9-48566DAF16AF}">
                     <Folder
                         Name="component"
-                        GUID="{F7979AFF-8B95-42B1-55F3-17B248426E9A}">
+                        GUID="{4C6E9041-27C9-451D-53E9-B5D3C440B293}">
                         <F N="extern-component/firmware/AtmelSam4e/component/acc.h"/>
                         <F N="extern-component/firmware/AtmelSam4e/component/aes.h"/>
                         <F N="extern-component/firmware/AtmelSam4e/component/afec.h"/>
@@ -3381,7 +3452,7 @@
                     </Folder>
                     <Folder
                         Name="instance"
-                        GUID="{6D3AB93D-E476-4871-4B9F-0C9B003022A1}">
+                        GUID="{457E2A8F-B659-457C-9236-47991F4472B3}">
                         <F N="extern-component/firmware/AtmelSam4e/instance/acc.h"/>
                         <F N="extern-component/firmware/AtmelSam4e/instance/aes.h"/>
                         <F N="extern-component/firmware/AtmelSam4e/instance/afec0.h"/>
@@ -3425,7 +3496,7 @@
                     </Folder>
                     <Folder
                         Name="pio"
-                        GUID="{BE0A0703-346F-47F6-5DA5-5DC3F53D0AA2}">
+                        GUID="{3D39EC28-FC76-4544-F917-182299170FB4}">
                         <F N="extern-component/firmware/AtmelSam4e/pio/sam4e16e.h"/>
                         <F N="extern-component/firmware/AtmelSam4e/pio/sam4e8e.h"/>
                     </Folder>
@@ -3436,10 +3507,10 @@
                 </Folder>
                 <Folder
                     Name="AtmelSam4s"
-                    GUID="{46C59D07-CDA7-47CF-49E3-1EFB073470A3}">
+                    GUID="{30BDCF37-8DDF-4C5E-A8CE-708CD543D686}">
                     <Folder
                         Name="component"
-                        GUID="{0EFAD70F-5FF7-49D6-10BC-72FC133F7290}">
+                        GUID="{87B1683C-1373-4C52-6418-DAFDA8FD688A}">
                         <F N="extern-component/firmware/AtmelSam4s/component/acc.h"/>
                         <F N="extern-component/firmware/AtmelSam4s/component/adc.h"/>
                         <F N="extern-component/firmware/AtmelSam4s/component/chipid.h"/>
@@ -3470,7 +3541,7 @@
                     </Folder>
                     <Folder
                         Name="instance"
-                        GUID="{310EF4B9-C157-4F50-C790-FDB6E6F57D91}">
+                        GUID="{00BD63E1-DA7C-4337-F6A7-F308F45A11AD}">
                         <F N="extern-component/firmware/AtmelSam4s/instance/acc.h"/>
                         <F N="extern-component/firmware/AtmelSam4s/instance/adc.h"/>
                         <F N="extern-component/firmware/AtmelSam4s/instance/chipid.h"/>
@@ -3507,7 +3578,7 @@
                     </Folder>
                     <Folder
                         Name="pio"
-                        GUID="{8EF0780F-988C-4B37-81FE-49B58ECD31A3}">
+                        GUID="{1AD01DFA-E422-4029-F297-28581A7CC491}">
                         <F N="extern-component/firmware/AtmelSam4s/pio/sam4s16b.h"/>
                         <F N="extern-component/firmware/AtmelSam4s/pio/sam4s16c.h"/>
                         <F N="extern-component/firmware/AtmelSam4s/pio/sam4s2a.h"/>
@@ -3546,16 +3617,16 @@
                 </Folder>
                 <Folder
                     Name="AtmelSamV7"
-                    GUID="{546C7D09-D408-4608-2AB4-E17B4D0D48B3}">
+                    GUID="{B832274C-E29D-4900-313C-2BC4D9626FAA}">
                     <Folder
                         Name="include"
-                        GUID="{4D65E707-3E02-491E-1120-3F713707CAAD}">
+                        GUID="{806AC8D8-F543-4833-4F1A-AA6D07EA0490}">
                         <Folder
                             Name="samv7"
-                            GUID="{5711BD10-3A43-461A-1B65-D88AB8B2EC82}">
+                            GUID="{485A9EDA-E0BB-4FF1-7CA9-A40520A892A3}">
                             <Folder
                                 Name="component"
-                                GUID="{D530FA08-1357-4BF6-CBBD-345E71BD2B8A}">
+                                GUID="{A90E8FD6-5119-4E1C-7268-17A5344BA494}">
                                 <F N="extern-component/firmware/AtmelSamV7/include/samv7/component/component_acc.h"/>
                                 <F N="extern-component/firmware/AtmelSamV7/include/samv7/component/component_aes.h"/>
                                 <F N="extern-component/firmware/AtmelSamV7/include/samv7/component/component_afec.h"/>
@@ -3597,7 +3668,7 @@
                             </Folder>
                             <Folder
                                 Name="instance"
-                                GUID="{94DCDB35-86D8-4AC1-41F1-C57545EDD79F}">
+                                GUID="{CB74AD1C-227E-4263-2A54-2D56C4237EBB}">
                                 <F N="extern-component/firmware/AtmelSamV7/include/samv7/instance/instance_acc.h"/>
                                 <F N="extern-component/firmware/AtmelSamV7/include/samv7/instance/instance_aes.h"/>
                                 <F N="extern-component/firmware/AtmelSamV7/include/samv7/instance/instance_afec0.h"/>
@@ -3656,7 +3727,7 @@
                             </Folder>
                             <Folder
                                 Name="pio"
-                                GUID="{3CEACC45-611D-418E-C9CC-4AF0EEF1ECB1}">
+                                GUID="{ABADB8FA-D2C7-49F3-6AF7-3F145B54EEB8}">
                                 <F N="extern-component/firmware/AtmelSamV7/include/samv7/pio/pio_samv71j19.h"/>
                                 <F N="extern-component/firmware/AtmelSamV7/include/samv7/pio/pio_samv71j20.h"/>
                                 <F N="extern-component/firmware/AtmelSamV7/include/samv7/pio/pio_samv71j21.h"/>
@@ -3733,7 +3804,7 @@
                     </Folder>
                     <Folder
                         Name="source"
-                        GUID="{7EA322B9-7DA9-4542-7320-2A2398ED3A8E}">
+                        GUID="{7DB417AF-13F6-4573-344D-8EAAED6A1EB8}">
                         <F N="extern-component/firmware/AtmelSamV7/source/acc.c"/>
                         <F N="extern-component/firmware/AtmelSamV7/source/aes.c"/>
                         <F N="extern-component/firmware/AtmelSamV7/source/afe_dma.c"/>
@@ -3787,10 +3858,10 @@
                 </Folder>
                 <Folder
                     Name="CMSIS"
-                    GUID="{06722BDC-F652-4627-4DAA-CE933EB9D587}">
+                    GUID="{D6CD221A-FC11-48D4-AFD6-1A4BA1B6A3B5}">
                     <Folder
                         Name="Include"
-                        GUID="{4F296935-D4CE-4CD3-00E8-FCC435401CB8}">
+                        GUID="{42FE76E3-4824-490B-3975-ACD96588078C}">
                         <F N="extern-component/firmware/CMSIS/Include/arm_common_tables.h"/>
                         <F N="extern-component/firmware/CMSIS/Include/arm_const_structs.h"/>
                         <F N="extern-component/firmware/CMSIS/Include/arm_math.h"/>
@@ -3811,15 +3882,15 @@
                 </Folder>
                 <Folder
                     Name="FslKxx"
-                    GUID="{86B11AF8-AC00-444C-D6E1-461181B72C85}">
+                    GUID="{AB9482E3-F41B-41FE-0015-B2724B91EDA1}">
                     <F N="extern-component/firmware/FslKxx/MKxxF12.h"/>
                 </Folder>
                 <Folder
                     Name="lpc12xx"
-                    GUID="{9576235D-9ABF-482D-8817-DBE0F3DC3183}">
+                    GUID="{C4E9DEE0-3451-4ECF-762D-A683C1081CBA}">
                     <Folder
                         Name="include"
-                        GUID="{36040C3F-9B3F-40F4-0150-C062207D0B9E}">
+                        GUID="{93766E9F-BDA4-421A-263F-30BBBD5E89A4}">
                         <F N="extern-component/firmware/lpc12xx/include/debug_frmwrk.h"/>
                         <F N="extern-component/firmware/lpc12xx/include/LPC12xx.h"/>
                         <F N="extern-component/firmware/lpc12xx/include/lpc12xx_adc.h"/>
@@ -3844,7 +3915,7 @@
                     </Folder>
                     <Folder
                         Name="src"
-                        GUID="{77AE8046-3F3D-4131-3D03-54E074022481}">
+                        GUID="{9331EAD1-03F0-4BC4-EBE9-32044CE9AE9A}">
                         <F N="extern-component/firmware/lpc12xx/src/debug_frmwrk.c"/>
                         <F N="extern-component/firmware/lpc12xx/src/lpc12xx_adc.c"/>
                         <F N="extern-component/firmware/lpc12xx/src/lpc12xx_comp.c"/>
@@ -3867,13 +3938,13 @@
                 </Folder>
                 <Folder
                     Name="lpc17xx"
-                    GUID="{3D70B198-1514-4C19-7DF9-3AC4E9A731BF}">
+                    GUID="{07B30EB2-F56B-46D4-5152-60CC5F084F91}">
                     <Folder
                         Name="drivers"
-                        GUID="{E5C0D575-6F0E-4AAF-52C2-615418E3DE9D}">
+                        GUID="{640C0D86-C342-4CBE-83C4-299B55619A95}">
                         <Folder
                             Name="include"
-                            GUID="{6F1B32A9-6D36-422B-526C-001933C39FB1}">
+                            GUID="{B8D1C3F2-152A-4D59-068A-984BDBA802AB}">
                             <F N="extern-component/firmware/lpc17xx/drivers/include/debug_frmwrk.h"/>
                             <F N="extern-component/firmware/lpc17xx/drivers/include/lpc17xx_adc.h"/>
                             <F N="extern-component/firmware/lpc17xx/drivers/include/lpc17xx_can.h"/>
@@ -3905,7 +3976,7 @@
                         </Folder>
                         <Folder
                             Name="source"
-                            GUID="{AB38CCD4-012D-4C8E-2EE4-2EEEE88EF7A6}">
+                            GUID="{F8ABFDA8-DAA7-4685-66E5-359C0614E682}">
                             <F N="extern-component/firmware/lpc17xx/drivers/source/debug_frmwrk.c"/>
                             <F N="extern-component/firmware/lpc17xx/drivers/source/lpc17xx_adc.c"/>
                             <F N="extern-component/firmware/lpc17xx/drivers/source/lpc17xx_can.c"/>
@@ -3941,10 +4012,10 @@
                 </Folder>
                 <Folder
                     Name="Sharc21469"
-                    GUID="{42C9E19B-81B4-4A1F-7C74-FCA77899B48A}">
+                    GUID="{E9DD6036-2D0F-4E83-53A2-FE3CC0AD62AC}">
                     <Folder
                         Name="include"
-                        GUID="{0469BB05-6399-430C-8BD9-81588C36239D}">
+                        GUID="{2AC2C799-89E7-4636-A551-C8DCAD1620B0}">
                         <F N="extern-component/firmware/Sharc21469/include/Cdef21469.h"/>
                         <F N="extern-component/firmware/Sharc21469/include/def21469.h"/>
                         <F N="extern-component/firmware/Sharc21469/include/irptl.h"/>
@@ -3955,13 +4026,13 @@
                 </Folder>
                 <Folder
                     Name="stm32"
-                    GUID="{66930E1F-AE3A-4DE6-3BC4-9C882C35A48E}">
+                    GUID="{D577D76F-18E1-4A99-4136-C1BB60D96FBB}">
                     <Folder
                         Name="F10x"
-                        GUID="{58AB1287-5989-417C-D4A6-076C4D27AABB}">
+                        GUID="{5DD5D4F1-9B03-41A6-9375-4D4F700178B3}">
                         <Folder
                             Name="inc"
-                            GUID="{F93F3ACC-3004-4034-EA97-A75F1D4BBE89}">
+                            GUID="{B184590F-9667-4E7E-E07B-8D2FE8FA5C8F}">
                             <F N="extern-component/firmware/stm32/F10x/inc/misc.h"/>
                             <F N="extern-component/firmware/stm32/F10x/inc/stm32f10x.h"/>
                             <F N="extern-component/firmware/stm32/F10x/inc/stm32f10x_adc.h"/>
@@ -3990,7 +4061,7 @@
                         </Folder>
                         <Folder
                             Name="src"
-                            GUID="{43D5DE9C-29A6-479A-E75B-F10D40E8BB92}">
+                            GUID="{4A664A16-0C75-4E4B-6238-37C21C8018AB}">
                             <F N="extern-component/firmware/stm32/F10x/src/misc.c"/>
                             <F N="extern-component/firmware/stm32/F10x/src/stm32f10x_adc.c"/>
                             <F N="extern-component/firmware/stm32/F10x/src/stm32f10x_bkp.c"/>
@@ -4023,13 +4094,13 @@
                 </Folder>
                 <Folder
                     Name="stm32f4"
-                    GUID="{96863C94-9027-4777-2893-9BE5E2D0F395}">
+                    GUID="{D6B03678-7D17-4BD4-EA4E-4C13DA5FC4B8}">
                     <Folder
                         Name="STM32F4_FWLIB"
-                        GUID="{A8E0DF17-2BBD-4B72-CD86-66D6FA6960A5}">
+                        GUID="{743C0557-AA83-4104-35AD-143FFDD4689F}">
                         <Folder
                             Name="inc"
-                            GUID="{444A3E7F-0240-4E20-174C-69ACA11A4D92}">
+                            GUID="{4EB271B9-319E-4AF2-F1AC-DD1D12970493}">
                             <F N="extern-component/firmware/stm32f4/STM32F4_FWLIB/inc/misc.h"/>
                             <F N="extern-component/firmware/stm32f4/STM32F4_FWLIB/inc/stm32f4xx_adc.h"/>
                             <F N="extern-component/firmware/stm32f4/STM32F4_FWLIB/inc/stm32f4xx_can.h"/>
@@ -4064,7 +4135,7 @@
                         </Folder>
                         <Folder
                             Name="src"
-                            GUID="{A745208A-355B-497A-FD17-43ADCA289D87}">
+                            GUID="{75837C61-45EC-4E35-22F0-AC24DA5E8DA7}">
                             <F N="extern-component/firmware/stm32f4/STM32F4_FWLIB/src/misc.c"/>
                             <F N="extern-component/firmware/stm32f4/STM32F4_FWLIB/src/stm32f4xx_adc.c"/>
                             <F N="extern-component/firmware/stm32f4/STM32F4_FWLIB/src/stm32f4xx_can.c"/>
@@ -4109,16 +4180,16 @@
                 </Folder>
                 <Folder
                     Name="stm32f7"
-                    GUID="{9E422A85-8D87-4EA8-53BC-922086EC5895}">
+                    GUID="{D487FB78-F42F-4D8D-6F12-C8EE5A608F82}">
                     <Folder
                         Name="STM32F7xx_HAL_Driver"
-                        GUID="{A9721FB5-96DC-47D7-E7F4-8C43B722D5B7}">
+                        GUID="{FAF8F851-3EE4-4E03-A36A-3AB611C4FAAF}">
                         <Folder
                             Name="Inc"
-                            GUID="{30D878BC-D0EF-41DB-7C67-EF3F0EA38EB7}">
+                            GUID="{BF05C757-0E6D-4868-5A68-A5A6EB0344B8}">
                             <Folder
                                 Name="Legacy"
-                                GUID="{88120BFC-F0FE-4312-8394-9F5E817767B0}">
+                                GUID="{4C933196-BA56-47EB-D0C4-9C9D03B7D794}">
                                 <F N="extern-component/firmware/stm32f7/STM32F7xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h"/>
                             </Folder>
                             <F N="extern-component/firmware/stm32f7/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal.h"/>
@@ -4195,7 +4266,7 @@
                         </Folder>
                         <Folder
                             Name="Src"
-                            GUID="{453D8F93-5DFD-4C82-778C-E585FEE11A87}">
+                            GUID="{140AAB4C-61BC-4074-832E-28123D5265B0}">
                             <F N="extern-component/firmware/stm32f7/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal.c"/>
                             <F N="extern-component/firmware/stm32f7/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_adc.c"/>
                             <F N="extern-component/firmware/stm32f7/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_adc_ex.c"/>
@@ -4282,20 +4353,20 @@
             </Folder>
             <Folder
                 Name="goahead-2.5.0"
-                GUID="{042E5198-D609-4F74-16AA-3A224F418983}">
+                GUID="{16C6F254-2095-4D72-0820-8323C3C21DB1}">
                 <Folder
                     Name="DJYOS"
-                    GUID="{798C2C96-304C-4354-0DAC-E0BF290DE4B1}">
+                    GUID="{9339CEDF-75C4-467E-C7DE-9912A2B197A6}">
                     <F N="extern-component/goahead-2.5.0/DJYOS/main.c"/>
                 </Folder>
                 <Folder
                     Name="utils"
-                    GUID="{23A8E7CD-20E2-4761-E1A9-497481E3BC84}">
+                    GUID="{A69BB732-E339-46BD-1817-2E4E2CB76DA2}">
                     <F N="extern-component/goahead-2.5.0/utils/webcomp.c"/>
                 </Folder>
                 <Folder
                     Name="www"
-                    GUID="{637781E7-5928-4487-9904-3D89EA074CBC}">
+                    GUID="{043C9360-D1D0-4B20-7979-188D53C218A4}">
                     <F N="extern-component/goahead-2.5.0/www/home.htm"/>
                 </Folder>
                 <F N="extern-component/goahead-2.5.0/.gitignore"/>
@@ -4348,10 +4419,10 @@
             </Folder>
             <Folder
                 Name="LibVNCServer-0.9.9"
-                GUID="{3CECDB97-1D21-4887-0C4E-D9D448CB069A}">
+                GUID="{08B03B7C-CF56-4A4B-FC0E-F3B7C4AE1D96}">
                 <Folder
                     Name="common"
-                    GUID="{6CEF46F9-92C8-45BB-89B9-58DBAD740898}">
+                    GUID="{0302F10A-9FB4-4C71-DA40-AA162221E7A2}">
                     <F N="extern-component/LibVNCServer-0.9.9/common/d3des.c"/>
                     <F N="extern-component/LibVNCServer-0.9.9/common/d3des.h"/>
                     <F N="extern-component/LibVNCServer-0.9.9/common/lzoconf.h"/>
@@ -4369,10 +4440,10 @@
                 </Folder>
                 <Folder
                     Name="libvncserver"
-                    GUID="{DE0CD336-5E97-46C1-EA16-B133047A4DAC}">
+                    GUID="{ED442537-4A4C-4DC9-E25D-7CAA32292495}">
                     <Folder
                         Name="rfb"
-                        GUID="{3A85A888-7E06-4E83-57D1-2ED2840FB285}">
+                        GUID="{5AA106F5-C650-42B2-1339-0EF565407B85}">
                         <F N="extern-component/LibVNCServer-0.9.9/libvncserver/rfb/default8x16.h"/>
                         <F N="extern-component/LibVNCServer-0.9.9/libvncserver/rfb/keysym.h"/>
                         <F N="extern-component/LibVNCServer-0.9.9/libvncserver/rfb/rfb.h"/>
@@ -4427,10 +4498,10 @@
             </Folder>
             <Folder
                 Name="lua-5.1.4"
-                GUID="{8F22736E-1865-44A6-AD3D-43C3A3EC16BD}">
+                GUID="{3E9F2403-9570-44D6-AD09-D4BD5CDDA8A8}">
                 <Folder
                     Name="doc"
-                    GUID="{392D1689-B513-4E46-4584-79B8DAF79489}">
+                    GUID="{0AA9F583-C2A2-4F68-67C4-0CF3856952BA}">
                     <F N="extern-component/lua-5.1.4/doc/amazon.gif"/>
                     <F N="extern-component/lua-5.1.4/doc/contents.html"/>
                     <F N="extern-component/lua-5.1.4/doc/cover.png"/>
@@ -4446,7 +4517,7 @@
                 </Folder>
                 <Folder
                     Name="etc"
-                    GUID="{0F9165E5-DF2D-447B-E605-5DF666593598}">
+                    GUID="{1C8BEE0A-F090-44C0-8D0D-722B8DCBDB82}">
                     <F N="extern-component/lua-5.1.4/etc/all.c"/>
                     <F N="extern-component/lua-5.1.4/etc/lua.hpp"/>
                     <F N="extern-component/lua-5.1.4/etc/lua.ico"/>
@@ -4463,7 +4534,7 @@
                 </Folder>
                 <Folder
                     Name="src"
-                    GUID="{EBC58F48-4648-4F2B-5C39-BEA6756CD8AA}">
+                    GUID="{E16DB6A0-E7F3-4B9A-BD0A-9F9976E11789}">
                     <F N="extern-component/lua-5.1.4/src/lapi.c"/>
                     <F N="extern-component/lua-5.1.4/src/lapi.h"/>
                     <F N="extern-component/lua-5.1.4/src/lauxlib.c"/>
@@ -4525,7 +4596,7 @@
                 </Folder>
                 <Folder
                     Name="test"
-                    GUID="{3C7D4532-27A4-4F93-5775-4BDF89E82FBB}">
+                    GUID="{F6DB8247-C57C-45BA-2C85-4F06D47C25AA}">
                     <F N="extern-component/lua-5.1.4/test/bisect.lua"/>
                     <F N="extern-component/lua-5.1.4/test/bisect.luac"/>
                     <F N="extern-component/lua-5.1.4/test/cf.lua"/>
@@ -4576,10 +4647,10 @@
             </Folder>
             <Folder
                 Name="mbedtls"
-                GUID="{3DDAE4DB-D18F-412E-0161-04CA6E901A91}">
+                GUID="{564BEC0B-8837-4A1F-CB8E-F78C6EFC0A9D}">
                 <Folder
                     Name="mbedtls"
-                    GUID="{B8A8D1C5-13C1-4201-37CE-1F7CB9D755B6}">
+                    GUID="{EB634555-4533-42B8-7834-A4E94D275DA9}">
                     <F N="extern-component/mbedtls/mbedtls/aes.h"/>
                     <F N="extern-component/mbedtls/mbedtls/aesni.h"/>
                     <F N="extern-component/mbedtls/mbedtls/arc4.h"/>
@@ -4650,7 +4721,7 @@
                 </Folder>
                 <Folder
                     Name="source"
-                    GUID="{4FB47094-5563-42AA-1ADD-FBC099CB8E80}">
+                    GUID="{6CE68D2E-00CB-4D79-F97C-01683A41259A}">
                     <F N="extern-component/mbedtls/source/aes.c"/>
                     <F N="extern-component/mbedtls/source/aesni.c"/>
                     <F N="extern-component/mbedtls/source/arc4.c"/>
@@ -4725,32 +4796,32 @@
                 </Folder>
                 <Folder
                     Name="test"
-                    GUID="{D0011265-11E3-4AF0-1767-07AE837F9FA3}">
+                    GUID="{2FCD806E-0D70-4A92-6681-C55A5B229788}">
                     <Folder
                         Name="example-authcrypt"
-                        GUID="{BD886676-69C3-487D-C984-5A0347E48084}">
+                        GUID="{582BB963-71AC-4471-0D69-7CC562D7E2B6}">
                         <F N="extern-component/mbedtls/test/example-authcrypt/authcry_main.c"/>
                     </Folder>
                     <Folder
                         Name="example-benchmark"
-                        GUID="{AAF2E4C5-C886-4859-7432-0C833FCAE4B2}">
+                        GUID="{8C3CF4F2-AA9B-45CC-5867-B595AB301D81}">
                         <F N="extern-component/mbedtls/test/example-benchmark/bench_main.c"/>
                     </Folder>
                     <Folder
                         Name="example-hashing"
-                        GUID="{57F5C551-AFF4-419B-39E0-42EB75DC8F8F}">
+                        GUID="{B1C867EA-4856-4836-7BD8-3E6A5FA3D08F}">
                         <F N="extern-component/mbedtls/test/example-hashing/hash_main.c"/>
                     </Folder>
                     <Folder
                         Name="example-selftest"
-                        GUID="{A2898BEB-35F0-4FE3-80C1-4CA05CCCA09F}">
+                        GUID="{32E6AB83-7131-4D23-6BAF-697ADE07549C}">
                         <F N="extern-component/mbedtls/test/example-selftest/selftest_main.c"/>
                     </Folder>
                 </Folder>
             </Folder>
             <Folder
                 Name="qrencode"
-                GUID="{749015BC-FCB6-4011-B154-9E12044684BB}">
+                GUID="{083443AA-FB80-4D57-5890-9A73CD669DA5}">
                 <F N="extern-component/qrencode/bitstream.c"/>
                 <F N="extern-component/qrencode/bitstream.h"/>
                 <F N="extern-component/qrencode/config.h"/>
@@ -4777,7 +4848,7 @@
             </Folder>
             <Folder
                 Name="sqlite3"
-                GUID="{27DD40F2-CC2F-4966-07C3-7A57DF803C9D}">
+                GUID="{3F6C2D6E-1C33-4EEC-D9F0-67E9D9F810A4}">
                 <F N="extern-component/sqlite3/alter.c"/>
                 <F N="extern-component/sqlite3/analyze.c"/>
                 <F N="extern-component/sqlite3/attach.c"/>
@@ -4894,7 +4965,7 @@
             </Folder>
             <Folder
                 Name="zlib-1.2.8"
-                GUID="{CFFB7144-3161-46C1-DC6F-5F95A8C85992}">
+                GUID="{A9DE56D2-6473-437D-5127-A99676891AB1}">
                 <F N="extern-component/zlib-1.2.8/adler32.c"/>
                 <F N="extern-component/zlib-1.2.8/compress.c"/>
                 <F N="extern-component/zlib-1.2.8/crc32.c"/>
@@ -4928,13 +4999,13 @@
         </Folder>
         <Folder
             Name="libc"
-            GUID="{20A5A909-CB5A-461E-04E7-D75142BE879C}">
+            GUID="{2EAE9053-9679-4365-48CC-7DC9CEBD11B3}">
             <Folder
                 Name="libc"
-                GUID="{0EC7FECC-44EB-46A5-CDA6-66B458535AB3}">
+                GUID="{CE5C59E9-9774-4E33-3240-D5E0BD1B30BB}">
                 <Folder
                     Name="ctype"
-                    GUID="{3BEC359D-1985-495E-A090-895895E9B4B1}">
+                    GUID="{42809461-3D39-4CEC-B60C-93960C18C8B1}">
                     <F N="libc/libc/ctype/ctype_.c"/>
                     <F N="libc/libc/ctype/ctype_cp.h"/>
                     <F N="libc/libc/ctype/ctype_iso.h"/>
@@ -4979,10 +5050,10 @@
                 </Folder>
                 <Folder
                     Name="include"
-                    GUID="{9001DF2C-712B-46C9-EEA8-2F9E31F66BBC}">
+                    GUID="{93E8DBAB-15D5-4D0D-CE65-EAF7B0ABF79E}">
                     <Folder
                         Name="sys"
-                        GUID="{6A46D50E-3A8F-44AD-8C31-004385A03E90}">
+                        GUID="{D1BBB3B9-65BC-49DE-1B7B-03E2458850B6}">
                         <F N="libc/libc/include/sys/cdefs.h"/>
                         <F N="libc/libc/include/sys/features.h"/>
                         <F N="libc/libc/include/sys/queue.h"/>
@@ -5039,7 +5110,7 @@
                 </Folder>
                 <Folder
                     Name="locale"
-                    GUID="{40D8EFA7-80F9-4612-A690-06C951B1F98F}">
+                    GUID="{0B5E360A-1C0A-4159-1265-D32C76BFD7A4}">
                     <F N="libc/libc/locale/fix_grouping.c"/>
                     <F N="libc/libc/locale/lctype.c"/>
                     <F N="libc/libc/locale/lctype.h"/>
@@ -5057,13 +5128,13 @@
                 </Folder>
                 <Folder
                     Name="misc"
-                    GUID="{1A489A87-BD6D-450B-79FC-422D105CD082}">
+                    GUID="{AF1EFE69-173D-4E54-E6C0-B28C438AAA9D}">
                     <F N="libc/libc/misc/endian.c"/>
                     <F N="libc/libc/misc/verify.c"/>
                 </Folder>
                 <Folder
                     Name="search"
-                    GUID="{6937FB50-905E-417E-5D22-A2B7F529D1AC}">
+                    GUID="{C46C8F6E-3098-4440-0D8D-122B9529A0A5}">
                     <F N="libc/libc/search/bsearch.c"/>
                     <F N="libc/libc/search/db_local.h"/>
                     <F N="libc/libc/search/extern.h"/>
@@ -5088,7 +5159,7 @@
                 </Folder>
                 <Folder
                     Name="stdio"
-                    GUID="{49878472-B490-43B2-826D-AAC6C19590B9}">
+                    GUID="{8E99A8DB-1BCD-4878-7436-333A8025D3A7}">
                     <F N="libc/libc/stdio/fgets.c"/>
                     <F N="libc/libc/stdio/fgetwc.c"/>
                     <F N="libc/libc/stdio/fgetws.c"/>
@@ -5119,7 +5190,7 @@
                 </Folder>
                 <Folder
                     Name="stdlib"
-                    GUID="{F0B13B24-9280-4D13-B8D4-B07A2FB565B5}">
+                    GUID="{819E1052-8C3B-465C-E078-1D54A6223E99}">
                     <F N="libc/libc/stdlib/__adjust.c"/>
                     <F N="libc/libc/stdlib/__exp10.c"/>
                     <F N="libc/libc/stdlib/__ten_mu.c"/>
@@ -5159,7 +5230,7 @@
                 </Folder>
                 <Folder
                     Name="string"
-                    GUID="{DFBF8A23-0F6C-4476-DB2B-533297C0EDA6}">
+                    GUID="{4E6C1AA7-19C4-4CDB-4752-079188EB6EA5}">
                     <F N="libc/libc/string/local.h"/>
                     <F N="libc/libc/string/memccpy.c"/>
                     <F N="libc/libc/string/memchr.c"/>
@@ -5243,10 +5314,10 @@
             </Folder>
             <Folder
                 Name="libm"
-                GUID="{7EEC993C-D8F3-4C58-4C72-EDE3D86605A2}">
+                GUID="{675E6ADB-AF53-4447-87A8-6514445BB184}">
                 <Folder
                     Name="common"
-                    GUID="{B419A46E-FC4E-4E4E-4C76-7BBE2A2BA0A0}">
+                    GUID="{B61A90BC-99EF-4F02-0856-284E2A6A9198}">
                     <F N="libc/libm/common/acoshl.c"/>
                     <F N="libc/libm/common/acosl.c"/>
                     <F N="libc/libm/common/asinhl.c"/>
@@ -5379,7 +5450,7 @@
                 </Folder>
                 <Folder
                     Name="complex"
-                    GUID="{AFF1D38D-9491-4BA1-F0A5-1F6D278DF4B9}">
+                    GUID="{68091764-94D9-4696-BB0A-67C2BCCAAD88}">
                     <F N="libc/libm/complex/cabs.c"/>
                     <F N="libc/libm/complex/cabsf.c"/>
                     <F N="libc/libm/complex/cacos.c"/>
@@ -5432,10 +5503,10 @@
                 </Folder>
                 <Folder
                     Name="machine"
-                    GUID="{6A03A4BE-E2A2-4F8C-759E-CD82208599A2}">
+                    GUID="{D3352904-0ACD-4FC4-27FA-54301AD5639D}">
                     <Folder
                         Name="arm"
-                        GUID="{99FC70B5-2F6A-45CF-B624-7EBAFE2FBB8E}">
+                        GUID="{0B5287F5-6ED5-44C7-113F-6CDDD35FB5B0}">
                         <F N="libc/libm/machine/arm/configure"/>
                         <F N="libc/libm/machine/arm/s_ceil.c"/>
                         <F N="libc/libm/machine/arm/s_floor.c"/>
@@ -5453,7 +5524,7 @@
                 </Folder>
                 <Folder
                     Name="math"
-                    GUID="{809D198C-706B-42C0-7112-F23B66C6D9B8}">
+                    GUID="{ADB4643D-303B-4E5A-E8F8-08751A573B8F}">
                     <F N="libc/libm/math/e_acos.c"/>
                     <F N="libc/libm/math/e_acosh.c"/>
                     <F N="libc/libm/math/e_asin.c"/>
@@ -5592,7 +5663,7 @@
                 </Folder>
                 <Folder
                     Name="test"
-                    GUID="{95FDFA10-D33B-4D8C-0BC5-5DE9199BA68B}">
+                    GUID="{0DF7B9A5-D260-472D-CC9E-8D2FADD45591}">
                     <F N="libc/libm/test/acosf_vec.c"/>
                     <F N="libc/libm/test/acosh_vec.c"/>
                     <F N="libc/libm/test/acoshf_vec.c"/>
@@ -5678,10 +5749,10 @@
         </Folder>
         <Folder
             Name="loader"
-            GUID="{BA578E98-1312-4691-1C5A-46BC0970AAB3}">
+            GUID="{95344F49-FF10-4699-521C-7C4A571CE7B7}">
             <Folder
                 Name="si"
-                GUID="{C8362EF8-FCCA-4621-3EA1-3DB054C99F9C}">
+                GUID="{62112C19-3310-408D-5014-133E661C5B95}">
                 <F N="loader/si/check_text_code.c"/>
                 <F N="loader/si/check_text_code.h"/>
                 <F N="loader/si/copy_table.h"/>
@@ -5694,20 +5765,20 @@
         </Folder>
         <Folder
             Name="test"
-            GUID="{85FDDC5F-4C4D-4D3B-9E55-7D705F21B28A}">
+            GUID="{76BDC332-3E73-4B64-57E5-E8BE0CDA3CBA}">
             <Folder
                 Name="dhrystone"
-                GUID="{99155078-2ADE-4B55-4F54-4C6D083A3FBD}">
+                GUID="{7A137915-8FE5-4D94-1159-4B69A78317A9}">
                 <F N="test/dhrystone/dhry.h"/>
                 <F N="test/dhrystone/dhry_1.c"/>
                 <F N="test/dhrystone/dhry_2.c"/>
             </Folder>
             <Folder
                 Name="djyiptest"
-                GUID="{A8E08301-A5AD-4179-103D-0F9FD416A798}">
+                GUID="{5635964A-C337-4850-F4D3-9B08FACF4EB9}">
                 <Folder
                     Name="tcptest"
-                    GUID="{67AEF144-2777-4FFA-CCEE-32CA21428FAA}">
+                    GUID="{C582A91F-47C6-4B73-1C6D-6E8D515F5194}">
                     <F N="test/djyiptest/tcptest/effectserver.c"/>
                     <F N="test/djyiptest/tcptest/sBlockSend.c"/>
                     <F N="test/djyiptest/tcptest/sNblockSend.c"/>
@@ -5715,7 +5786,7 @@
                 </Folder>
                 <Folder
                     Name="udptest"
-                    GUID="{6AB58066-2DA3-4720-B0EB-8190A5D0A7A6}">
+                    GUID="{664F96BB-7DC1-40DD-32B4-CFE01811ECAB}">
                     <F N="test/djyiptest/udptest/udpserverrcv.c"/>
                     <F N="test/djyiptest/udptest/udpserversnd.c"/>
                 </Folder>
@@ -5723,10 +5794,10 @@
             </Folder>
             <Folder
                 Name="filesystem_test"
-                GUID="{1CFCC3F2-9061-4188-22A4-A5E9960E8EB0}">
+                GUID="{153BD0BD-F0A7-4409-1B21-6B4EABB306A1}">
                 <Folder
                     Name="testbench_lib"
-                    GUID="{DF68EDDD-7766-4DB0-867C-F10FA5F658A7}">
+                    GUID="{FBD430D4-75A3-4BE6-F06A-2EA6FCCE3387}">
                     <F N="test/filesystem_test/testbench_lib/testbench_config.h"/>
                     <F N="test/filesystem_test/testbench_lib/testbench_lib.c"/>
                 </Folder>
@@ -5738,7 +5809,7 @@
             </Folder>
             <Folder
                 Name="gdd_test"
-                GUID="{280F1166-0EA1-43A8-8CE5-32AD4DBC3FB4}">
+                GUID="{E9068412-F52F-4248-EDB4-296B21FDE7BE}">
                 <F N="test/gdd_test/gdd_demo_draw_text.c"/>
                 <F N="test/gdd_test/gdd_demo_hello_world.c"/>
                 <F N="test/gdd_test/gdd_demo_listbox.c"/>
@@ -5750,7 +5821,7 @@
             </Folder>
             <Folder
                 Name="lua_test"
-                GUID="{1E5531FA-4A9C-4F80-1FC2-FD32C3755CB4}">
+                GUID="{6EE15FE7-9F83-4D75-CC27-B22A5AD95993}">
                 <F N="test/lua_test/lua_test.c"/>
                 <F N="test/lua_test/lua_x.c"/>
                 <F N="test/lua_test/test_lua.lua"/>
@@ -5758,7 +5829,7 @@
             </Folder>
             <Folder
                 Name="testbmp"
-                GUID="{16DF174F-0EC1-47C0-8819-34996FEE54BD}">
+                GUID="{2F0A203A-41F7-4B5E-2D5A-C9391C0FE190}">
                 <F N="test/testbmp/gray1_64x48.c"/>
                 <F N="test/testbmp/gray2_64x48.c"/>
                 <F N="test/testbmp/gray4_64x48.c"/>
@@ -5770,12 +5841,12 @@
             </Folder>
             <Folder
                 Name="timertest"
-                GUID="{C5A907B0-456D-439B-F588-4B82F5075BA8}">
+                GUID="{6035E2C0-422D-4602-B042-F103C3DC6886}">
                 <F N="test/timertest/timertest.c"/>
             </Folder>
             <Folder
                 Name="whetstone"
-                GUID="{C6075563-E467-4753-78CD-1830F57BD6B5}">
+                GUID="{1136F9E4-CFA8-4759-DE02-EEA0700BD399}">
                 <F N="test/whetstone/whetstone.c"/>
             </Folder>
             <F N="test/存放测试用例.txt"/>

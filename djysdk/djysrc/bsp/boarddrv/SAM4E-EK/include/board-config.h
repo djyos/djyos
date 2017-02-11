@@ -66,7 +66,7 @@ extern "C" {
 
 #include "cpu-optional.h"
 
-#define CN_CFG_TICK_US 1000  //操作系统内核时钟脉冲长度，以us为单位。*
+#define CN_CFG_TICK_US 1000  //tick间隔，以us为单位。*
 #define CN_CFG_TICK_HZ 1000  //内核时钟频率，单位为hz。
 
 //FslKxx系列有部分支持MPU或FPU，故不能统一在cpu-optional.h中声明
@@ -78,10 +78,10 @@ extern "C" {
 #define CN_CFG_FCLK CN_CFG_MCLK  //cm4自由运行外设时钟
 
 /*____以下定义tick参数____*/
-#define CN_CFG_TICK_US 1000  //操作系统内核时钟脉冲长度，以us为单位。
+#define CN_CFG_TICK_US 1000  //tick间隔，以us为单位。
 #define CN_CFG_TICK_HZ 1000  //内核时钟频率，单位为hz。
-#define CN_CFG_FINE_US 0x00000222  //1/120M,精密时钟脉冲长度，以uS为单位，32位定点数整数、小数各占16位，这也限制了ticks最长不超过65535uS
-#define CN_CFG_FINE_HZ CN_CFG_MCLK  //内核精密时钟频率，是cn_fine_ns的倒数。
+#define CN_CFG_FINE_US 0x00000222  //1/120M,tick输入时钟周期，以uS为单位，32位定点数整数、小数各占16位，这也限制了ticks最长不超过65535uS
+#define CN_CFG_FINE_HZ CN_CFG_MCLK  //tick输入时钟频率，是CN_CFG_FINE_US的倒数。
 
 //内核相关配置
 #define CN_CFG_DYNAMIC_MEM 1  //是否支持动态内存分配，即使不支持，也允许使用malloc-free分配内存，

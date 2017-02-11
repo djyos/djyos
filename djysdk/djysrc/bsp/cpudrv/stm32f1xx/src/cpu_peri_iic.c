@@ -87,31 +87,31 @@ static int __iic_wait_addr(volatile tagI2CReg *dev, int write)
     unsigned timeout = 0;
     do
     {
-    	Djy_DelayUs(1);
+        Djy_DelayUs(1);
         csr = dev->SR1;
         csr|=(u16)(dev->SR2<<16);
         if (!(csr & I2C_SR1_ADDR_MASK))//地址没有发送发送
-        	continue;
+            continue;
 
         csr=dev->SR1;   /*清状态寄存器标志*/
         if (csr & I2C_SR1_ARLO_MASK)       /*如果仲裁丢失*/
-			{
-			#ifdef DEBUG
-			printk("__i2c_wait: ARLO\n");
-			#endif
-			return -1;
-			}
+            {
+            #ifdef DEBUG
+            printk("__i2c_wait: ARLO\n");
+            #endif
+            return -1;
+            }
 
         if (write == I2C_WRITE_BIT) /*写时*/
-			{
-			if( (csr & I2C_SR1_AF_MASK))/*判断ack*/
-			  {
-				#ifdef DEBUG
-				printk("__i2c_wait: No RXACK\n");
-				#endif
-				return -1;
-			  }
-			}
+            {
+            if( (csr & I2C_SR1_AF_MASK))/*判断ack*/
+              {
+                #ifdef DEBUG
+                printk("__i2c_wait: No RXACK\n");
+                #endif
+                return -1;
+              }
+            }
 
         return 0;
     } while (timeout++ < CONFIG_I2C_TIMEOUT);//0.01s超时
@@ -140,11 +140,11 @@ static int __iic_write_addr (volatile tagI2CReg *dev,
     dev->CR1 |=  I2C_CR1_PE_MASK;/*使能 IIC start*/
     dev->CR1 |=  I2C_CR1_START_MASK;
     while(!(dev->SR1&I2C_SR1_SB_MASK))//没有发送起始条件条件//
-	{
-    	Djy_DelayUs(1);
-    	if(time++>(CONFIG_I2C_MBB_TIMEOUT))//????
-    		return 0;	//超时返回
-	}
+    {
+        Djy_DelayUs(1);
+        if(time++>(CONFIG_I2C_MBB_TIMEOUT))//????
+            return 0;   //超时返回
+    }
 
     dev->DR = (devaddr << 1) | dir;    /*写 地 址*/
 
@@ -211,29 +211,27 @@ static void __IIC_IntDisable(volatile tagI2CReg *reg)
 // =============================================================================
 static void __IIC_SetClk(volatile tagI2CReg *reg,u32 i2cclk)
 {
-	switch (i2cclk)
-	{
-			case CN_IIC_SPEED_50KHZ:    //24M    Thigh = CCR ×TPCLK1  Tlow = 2 × CCR × TPCLK1
-				 pg_iic1_reg->CCR     = 240;//快速/标准模式下的时钟控制分频系数(主模式)
-				break;
-			case CN_IIC_SPEED_100KHZ:
-				 pg_iic1_reg->CCR     = 120;//快速/标准模式下的时钟控制分频系数(主模式)
-				break;
-			case CN_IIC_SPEED_200KHZ:
-				 pg_iic1_reg->CCR     = 60;//快速/标准模式下的时钟控制分频系数(主模式)
-				break;
-			case CN_IIC_SPEED_300KHZ:
-				pg_iic1_reg->CCR     =  40;//快速/标准模式下的时钟控制分频系数(主模式)
-				break;
-			case CN_IIC_SPEED_400KHZ:
-				 pg_iic1_reg->CCR     = 30;//快速/标准模式下的时钟控制分频系数(主模式)
-				break;
-			default:
-			break;
-	}
+    switch (i2cclk)
+    {
+            case CN_IIC_SPEED_50KHZ:    //24M    Thigh = CCR ×TPCLK1  Tlow = 2 × CCR × TPCLK1
+                 pg_iic1_reg->CCR     = 240;//快速/标准模式下的时钟控制分频系数(主模式)
+                break;
+            case CN_IIC_SPEED_100KHZ:
+                 pg_iic1_reg->CCR     = 120;//快速/标准模式下的时钟控制分频系数(主模式)
+                break;
+            case CN_IIC_SPEED_200KHZ:
+                 pg_iic1_reg->CCR     = 60;//快速/标准模式下的时钟控制分频系数(主模式)
+                break;
+            case CN_IIC_SPEED_300KHZ:
+                pg_iic1_reg->CCR     =  40;//快速/标准模式下的时钟控制分频系数(主模式)
+                break;
+            case CN_IIC_SPEED_400KHZ:
+                 pg_iic1_reg->CCR     = 30;//快速/标准模式下的时钟控制分频系数(主模式)
+                break;
+            default:
+            break;
+    }
 }
-
-
 
 // =============================================================================
 // 功能: I/O模拟的方式 释放没有复位和使能引脚的IIC器件
@@ -242,40 +240,36 @@ static void __IIC_SetClk(volatile tagI2CReg *reg,u32 i2cclk)
 //      TS_SCK:引脚号
 // 返回: true/false
 // =============================================================================
-static bool_t _IIC_BUSfree(u32 port,u32 sda_pin,u32 sck_pin)
+static bool_t _IIC_Busfree(u32 port,u32 sda_pin,u32 sck_pin)
 {
-	 u32 timeout=0;
-	 GPIO_CfgPinFunc(port,sda_pin,CN_GPIO_MODE_IN_FLOATING);//TS_SDA
-	 GPIO_CfgPinFunc(port,sck_pin,CN_GPIO_MODE_GPIO_OUT_OD_50Mhz);//TS_SCK
+     u32 timeout=0;
+     GPIO_CfgPinFunc(port,sda_pin,CN_GPIO_MODE_IN_FLOATING);//TS_SDA
+     GPIO_CfgPinFunc(port,sck_pin,CN_GPIO_MODE_GPIO_OUT_OD_50Mhz);//TS_SCK
 
-	 while(1)
-	 {
-		  timeout++;
-		  GPIO_SettoLow(port,1<<sck_pin);
-		  Djy_DelayUs(10);
+     while(1)
+     {
+          timeout++;
+          GPIO_SettoLow(port,1<<sck_pin);
+          Djy_DelayUs(10);
 
-		  GPIO_SettoHigh(port,1<<sck_pin);
-		  Djy_DelayUs(10);
+          GPIO_SettoHigh(port,1<<sck_pin);
+          Djy_DelayUs(10);
 
-		  if(timeout>=CONFIG_I2C_TIMEOUT)
-			  return false;
-		  if( GPIO_GetData(port)&(1<<sda_pin))
-			  break;
-	}
+          if(timeout>=CONFIG_I2C_TIMEOUT)
+              return false;
+          if( GPIO_GetData(port)&(1<<sda_pin))
+              break;
+    }
 
-	GPIO_CfgPinFunc(port,sda_pin,CN_GPIO_MODE_GPIO_OUT_OD_50Mhz);//TS_SDA
-	//产生停止信号 iic总线释放
-	GPIO_SettoLow(port,1<<sck_pin);
-	Djy_DelayUs(10);
-	GPIO_SettoHigh(port,1<<sck_pin);
-	Djy_DelayUs(10);
+    GPIO_CfgPinFunc(port,sda_pin,CN_GPIO_MODE_GPIO_OUT_OD_50Mhz);//TS_SDA
+    //产生停止信号 iic总线释放
+    GPIO_SettoLow(port,1<<sda_pin);
+    Djy_DelayUs(10);
+    GPIO_SettoHigh(port,1<<sda_pin);
+    Djy_DelayUs(10);
 
-	return true;
-
+    return true;
 }
-
-
-
 
 // =============================================================================
 // 功能: 硬件GPIO初始化，包括电源等
@@ -285,18 +279,18 @@ static bool_t _IIC_BUSfree(u32 port,u32 sda_pin,u32 sck_pin)
 static bool_t __IIC_GpioConfig(u8 IIC_NO)
 {
     u8 tout;
-	pg_rcc_reg->APB2ENR |=(1<<3)|(1<<0);             //开时钟B和复用功能
-	switch(IIC_NO)
+    pg_rcc_reg->APB2ENR |=(1<<3)|(1<<0);             //开时钟B和复用功能
+    switch(IIC_NO)
     {
     case CN_IIC1:
-    	pg_rcc_reg->APB1ENR |=(1<<21);               //开时钟
-    	pg_iic1_reg->CR1     |=I2C_CR1_SWRST_MASK;       /* 复位IIC外设   */
-    	for (tout = 100; tout; tout--);
-    	pg_iic1_reg->CR1     = 0x0000;
-    	//对于一些 IIC器件它们没有复位或者使能管脚，像stmpe811 在工作过程中，如果在数据端口为低电平时发生cpu复位
-    	//将导致iic总线被从器件一直占用 在这里采用I/O模拟的方式产生停止信号释放IIC总线
-    	if(_IIC_BUSfree(CN_GPIO_B,9,8)==false)
-    		return false;
+        pg_rcc_reg->APB1ENR |=(1<<21);               //开时钟
+        pg_iic1_reg->CR1     |=I2C_CR1_SWRST_MASK;       /* 复位IIC外设   */
+        for (tout = 100; tout; tout--);
+        pg_iic1_reg->CR1     = 0x0000;
+        //对于一些 IIC器件它们没有复位或者使能管脚，像stmpe811 在工作过程中，如果在数据端口为低电平时发生cpu复位
+        //将导致iic总线被从器件一直占用 在这里采用I/O模拟的方式产生停止信号释放IIC总线
+        if(_IIC_Busfree(CN_GPIO_B,9,8)==false)
+            return false;
 
         GPIO_CfgPinFunc(CN_GPIO_B,9,CN_GPIO_MODE_PERI_OUT_OD_50Mhz);//TS_SDA
         GPIO_CfgPinFunc(CN_GPIO_B,8,CN_GPIO_MODE_PERI_OUT_OD_50Mhz);//TS_SCK
@@ -308,20 +302,20 @@ static bool_t __IIC_GpioConfig(u8 IIC_NO)
         pg_iic1_reg->CCR     = 0x00b4;//快速/标准模式下的时钟控制分频系数(主模式)
         pg_iic1_reg->CR1    |= 0x0401;//PE使能&ACK
         pg_iic1_reg->OAR1    = 0x40A0;//4必须始终由软件保持为’1’。A接口地址
-		pg_iic1_reg->CCR|=I2C_CCR_FS_MASK;//快速模式
+        pg_iic1_reg->CCR|=I2C_CCR_FS_MASK;//快速模式
         break;
     case CN_IIC2:
-    	pg_rcc_reg->APB1ENR |=(1<<22);//开时钟
+        pg_rcc_reg->APB1ENR |=(1<<22);//开时钟
 
-    	if(_IIC_BUSfree(CN_GPIO_B,11,10)==false)
-    	    return false;
+        if(_IIC_Busfree(CN_GPIO_B,11,10)==false)
+            return false;
 
         GPIO_CfgPinFunc(CN_GPIO_B,11,CN_GPIO_MODE_PERI_OUT_OD_50Mhz);//TS_SDA
         GPIO_CfgPinFunc(CN_GPIO_B,10,CN_GPIO_MODE_PERI_OUT_OD_50Mhz);//TS_SCK
 
         pg_iic2_reg->CR1     |= I2C_CR1_SWRST_MASK;    /* 复位IIC外设   */
-    	  for (tout = 100; tout; tout--);
-    	pg_iic2_reg->CR1     = 0x0000;
+          for (tout = 100; tout; tout--);
+        pg_iic2_reg->CR1     = 0x0000;
         pg_iic2_reg->CR1    |= I2C_CR1_PE_MASK;
         pg_iic2_reg->CR2     = 24;
         pg_iic2_reg->CR1     = 0x0000;
@@ -334,7 +328,7 @@ static bool_t __IIC_GpioConfig(u8 IIC_NO)
     default:
         break;
     }
-	return true;
+    return true;
 }
 
 
@@ -371,17 +365,17 @@ static void __IIC_GenerateStop(volatile tagI2CReg *reg)
 
 static u16 __iic_read(volatile tagI2CReg *reg, u8 *buf, u32 len)
 {
-	u8 i=0;
-	while(len--)//接收数据
-	{  /*  是否进行ACK应答  */
-	if (len>=1)                     reg->CR1 |=  I2C_CR1_ACK_MASK;
-	else                            reg->CR1 &= ~I2C_CR1_ACK_MASK;
-	while (!(reg->SR1 & I2C_SR1_RxNE_MASK));//等待接收完成
+    u8 i=0;
+    while(len--)//接收数据
+    {  /*  是否进行ACK应答  */
+    if (len>=1)                     reg->CR1 |=  I2C_CR1_ACK_MASK;
+    else                            reg->CR1 &= ~I2C_CR1_ACK_MASK;
+    while (!(reg->SR1 & I2C_SR1_RxNE_MASK));//等待接收完成
 
-		buf[i++] = reg->DR;
+        buf[i++] = reg->DR;
 
-	}
-	return i;
+    }
+    return i;
 
 }
 
@@ -389,8 +383,8 @@ static u16 __iic_read(volatile tagI2CReg *reg, u8 *buf, u32 len)
 // 功能：轮询方式读IIC从设备的数据
 // 参数：reg,寄存器基址
 //       devaddr,器件物理地址，最后一bit区分读写
-//		 memaddr//寄存器地址
-//		 maddrlen的寄存器地址的长度
+//       memaddr//寄存器地址
+//       maddrlen的寄存器地址的长度
 //       addr,访问的寄存器地址
 //       buf, 存储缓冲区
 //       len, 存储缓冲区的长度
@@ -652,18 +646,18 @@ static s32 __IIC_BusCtrl(tagI2CReg *reg,u32 cmd,u32 data1,u32 data2)
         break;
     case CN_IIC_DMA_USED://使用dma传输
 
-    	break;
+        break;
     case CN_IIC_DMA_UNUSED://禁止dma传输
 
-    	break;
+        break;
     case CN_IIC_SET_POLL:           //使用轮询方式发送接收
-    	__IIC_IntDisable(reg);
-    	break;
+        __IIC_IntDisable(reg);
+        break;
     case CN_IIC_SET_INT:         //使用中断方式发送接收
-    	__IIC_IntEnable(reg);
-    	break;
+        __IIC_IntEnable(reg);
+        break;
     default:
-    	return 0;
+        return 0;
     }
     return 1;
 }
@@ -688,19 +682,19 @@ static u32 __IIC_ISR(ufast_t i2c_int_line)
     u32 IicErrorNo;
     switch (i2c_int_line)
     {
-		case CN_INT_LINE_I2C1_EV:
-				reg = (tagI2CReg*)CN_IIC1_BASE;
-				ICB = &s_IIC1_CB;
-				IntParam = &IntParamset0;
-				break;
-		case CN_INT_LINE_I2C2_EV:
-				reg = (tagI2CReg*)CN_IIC2_BASE;
-				ICB = &s_IIC2_CB;
-				IntParam = &IntParamset1;
-				break;
-		default:
-				return false;
-	}
+        case CN_INT_LINE_I2C1_EV:
+                reg = (tagI2CReg*)CN_IIC1_BASE;
+                ICB = &s_IIC1_CB;
+                IntParam = &IntParamset0;
+                break;
+        case CN_INT_LINE_I2C2_EV:
+                reg = (tagI2CReg*)CN_IIC2_BASE;
+                ICB = &s_IIC2_CB;
+                IntParam = &IntParamset1;
+                break;
+        default:
+                return false;
+    }
 
     if(reg->SR1 & I2C_SR1_BTF_MASK)        //已经启动传输
     {
@@ -822,7 +816,7 @@ bool_t IIC2_Init(void)
     IIC2_Config.pWriteReadPoll      = (WriteReadPoll)__IIC_WriteReadPoll;//轮询或中断未开时使用
 
     if(false==__IIC_GpioConfig(CN_IIC2))
-    	return 0;
+        return 0;
     __IIC_IntConfig(CN_INT_LINE_I2C2_EV,__IIC_ISR);
 
     if(NULL == IIC_BusAdd_s(&s_IIC2_CB,&IIC2_Config))

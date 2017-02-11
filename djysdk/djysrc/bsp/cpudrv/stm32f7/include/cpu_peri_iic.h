@@ -102,7 +102,7 @@ extern "C" {
 #define I2C_TIMINGE_SCLH_8BIT(X)    (X<<0)
 #define I2C_TIMINGE_SCLL_8BIT(X)    (X<<8)
 
-
+bool_t IIC_Busfree(u32 port,u32 sda_pin,u32 sck_pin);
 bool_t IIC_Init(u8 iic_port);
 
 #ifdef __cplusplus

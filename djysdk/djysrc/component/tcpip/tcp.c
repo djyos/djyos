@@ -187,13 +187,13 @@ typedef struct
     int                       datalen;     //which means the unsend data length
     int                       buflenleft;  //the free buffer len,which means how many data you could use
     int                       trigerlevel; //the buffer trigerlevel,if the bufleftlen is less than this ,then will active the sync
-                                           //the default is the size of the buffer
+    									   //the default is the size of the buffer
     u8                        dupacktims;  //when receive the same ack,add it,when over,do the resend
 }tagSendBuf;  //this buf used for the tcp send
 //each client has an CCB for the tcp state control
 typedef struct CCB
 {
-    struct CCB               *nxt;          //used for the list
+	struct CCB               *nxt;          //used for the list
     tagSocket                *server;       //if this is an accept one
     u16                       machinestat;  //the machine stat of the tcb
     u16                       channelstat;  //the stat of the channel,which mean we could recv or send
@@ -232,8 +232,8 @@ typedef struct CCB
 //each server has an SCB
 typedef struct SCB
 {
-    struct SCB                *nxt;                 //used for the list
-    int                        backlog;             //which limit the pending num
+	struct SCB                *nxt;                 //used for the list
+	int                        backlog;             //which limit the pending num
     int                        pendnum;             //which means how much still in pending
     u32                        accepttime;          //block time for the accept
     tagSocket                 *clst;                //all the client including the pending stat
@@ -243,10 +243,10 @@ typedef struct SCB
 //we use this structure to statistics the tcp state
 typedef struct
 {
-    u32  ccbnum;
-    u32  ccbfreenum;
-    u32  scbnum;
-    u32  scbfreenum;
+	u32  ccbnum;
+	u32  ccbfreenum;
+	u32  scbnum;
+	u32  scbfreenum;
 }tagTcpStatistics;
 //define for the register in the tpl layer
 static tagTlayerProto         gTcpProto;
@@ -463,7 +463,7 @@ static bool_t  __initCB(int ccbnum, int scbnum)
     pCCBFreeList = malloc(ccbnum *sizeof(tagCCB));
     if((ccbnum > 0)&&(NULL == pCCBFreeList))
     {
-        goto CCB_MEM;
+    	goto CCB_MEM;
     }
     //do CCB initialize
     if(ccbnum > 1)
@@ -478,7 +478,7 @@ static bool_t  __initCB(int ccbnum, int scbnum)
     pSCBFreeList = malloc(scbnum *sizeof(tagSCB));
     if((scbnum > 0)&&(NULL == pSCBFreeList))
     {
-        goto SCB_MEM;
+    	goto SCB_MEM;
     }
     //do CCB initialize
     if(scbnum > 1)
@@ -493,12 +493,12 @@ static bool_t  __initCB(int ccbnum, int scbnum)
     return result;
 
 SCB_MEM:
-    free((void *)pCCBFreeList);
-    pCCBFreeList = NULL;
+	free((void *)pCCBFreeList);
+	pCCBFreeList = NULL;
 CCB_MEM:
-    Lock_MutexDelete_s(pCBSync);
-    pCBSync = NULL;
-    result = false;
+ 	Lock_MutexDelete_s(pCBSync);
+ 	pCBSync = NULL;
+ 	result = false;
     return result;
 }
 //malloc a ccb
@@ -513,7 +513,7 @@ static tagCCB  *mallocccb(void)
             pCCBFreeList = result->nxt;
         }
 
-        Lock_MutexPost(pCBSync);
+    	Lock_MutexPost(pCBSync);
     }
     return result;
 }
@@ -541,7 +541,7 @@ static tagSCB  *mallocscb(void)
             result = pSCBFreeList;
             pSCBFreeList = result->nxt;
         }
-        Lock_MutexPost(pCBSync);
+    	Lock_MutexPost(pCBSync);
     }
     return result;
 }
@@ -568,9 +568,9 @@ static bool_t  freescb(tagSCB  *scb)
 //malloc a ccb and init the member in it
 static tagCCB  *__CreateCCB(void)
 {
-    tagCCB *result;
+	tagCCB *result;
 
-    result =  mallocccb();
+	result =  mallocccb();
     if(NULL == result)
     {
         goto EXIT_CCBMEM;
@@ -587,7 +587,7 @@ static tagCCB  *__CreateCCB(void)
     result->sbuf.buf = malloc(gTcpSndBufSizeDefault);
     if(NULL == result->sbuf.buf)
     {
-        goto EXIT_CCBSBUF;
+    	goto EXIT_CCBSBUF;
     }
     result->sbuf.buflenleft =  gTcpSndBufSizeDefault;
     result->sbuf.buflenlimit = gTcpSndBufSizeDefault;
@@ -640,8 +640,8 @@ static tagCCB  *__CreateCCB(void)
 
 EXIT_CCBSBUF:
 EXIT_CCBSEMP:
-    Lock_SempDelete_s(result->rbuf.bufsync);
-    Lock_SempDelete_s(result->sbuf.bufsync);
+	Lock_SempDelete_s(result->rbuf.bufsync);
+	Lock_SempDelete_s(result->sbuf.bufsync);
     freeccb(result);
     result = NULL;
 EXIT_CCBMEM:
@@ -681,8 +681,8 @@ static void  __ResetCCB(tagCCB *ccb,u16 machinestat)
 static bool_t __DeleCCB(tagCCB *ccb)
 {
     //free all the pkg to snd
-    free(ccb->sbuf.buf);
-    //free all the pkg to rcv
+	free(ccb->sbuf.buf);
+	//free all the pkg to rcv
     PkgTryFreeQ(ccb->rbuf.ph);
     //free all the pkg to recomb
     PkgTryFreeQ(ccb->pkgrecomblst);
@@ -697,17 +697,17 @@ static bool_t __DeleCCB(tagCCB *ccb)
 //use this function to create a scb and init it
 static tagSCB* __CreateScb(void)
 {
-    tagSCB *result;
+	tagSCB *result;
 
-    result = mallocscb();
-    if(NULL == result)
-    {
-        goto SCB_MEM;
-    }
+	result = mallocscb();
+	if(NULL == result)
+	{
+		goto SCB_MEM;
+	}
     result->acceptsemp = Lock_SempCreate_s(&result->acceptsyncmem,CN_TCP_ACCEPTMAX,0,CN_BLOCK_FIFO,NULL);
     if(NULL == result->acceptsemp)
     {
-        goto SCB_SYNC;
+    	goto SCB_SYNC;
     }
     result->backlog     =  CN_TCP_LISTENDEFAULT;
     result->clst        =  NULL;
@@ -715,8 +715,8 @@ static tagSCB* __CreateScb(void)
     result->accepttime  =  CN_TIMEOUT_FOREVER;
     return result;
 SCB_SYNC:
-    freescb(result);
-    result = NULL;
+	freescb(result);
+	result = NULL;
 SCB_MEM:
     return  result;
 }
@@ -789,7 +789,7 @@ static tagSocket * __socket(int family, int type, int protocal)
                 }
                 else
                 {
-                    //no port for you,you must do some kidding
+                	//no port for you,you must do some kidding
                 }
                 Lock_MutexPost(pTcpHashTab->tabsync);
             }//end if for the lock pend
@@ -828,7 +828,7 @@ static int __bind(tagSocket *sock,struct sockaddr *addr, int addrlen)
                 sockaddrin = (struct sockaddr_in *)addr;
                 ip = sockaddrin->sin_addr.s_addr;
                 port = sockaddrin->sin_port;
-                if((ip == INADDR_ANY)||(EN_IPV4_HOSTTARGET==RoutIpClass(EN_IPV_4,ip,NULL)))    //first it must be an local ip
+                if(RoutHostIp(EN_IPV_4,ip))    //first it must be an local ip
                 {
                     tmp = __hashSocketLocalSearch(ip,port);
                 }
@@ -841,8 +841,8 @@ static int __bind(tagSocket *sock,struct sockaddr *addr, int addrlen)
                     }
                     else
                     {
-                        //some one has the same ip and port ,so bind failed
-                        result = -1;
+                    	//some one has the same ip and port ,so bind failed
+                    	result = -1;
                     }
                 }
                 else //no one matches, so reinsert the socket
@@ -921,13 +921,13 @@ static tagSocket *__acceptclient(tagSCB *scb)
             //remove it from the scb client
             if(scb->clst == client)
             {
-                scb->clst = client->nxt;
+            	scb->clst = client->nxt;
             }
             else
             {
-                pre->nxt = client->nxt;
+            	pre->nxt = client->nxt;
             }
-            client->nxt = NULL;
+        	client->nxt = NULL;
             result = client;
             break;
         }
@@ -966,7 +966,7 @@ static tagSocket *__accept(tagSocket *sock, struct sockaddr *addr, int *addrlen)
         waittime = scb->accepttime;
         if((NULL == result)&&(0 != waittime))
         {
-            //if none find and permit the wait
+        	//if none find and permit the wait
             Lock_MutexPost(sock->sync);
             if(Lock_SempPend(scb->acceptsemp,waittime))
             {
@@ -983,7 +983,7 @@ static tagSocket *__accept(tagSocket *sock, struct sockaddr *addr, int *addrlen)
         }
         else
         {
-            result->sockstat |= CN_SOCKET_OPEN;
+        	result->sockstat |= CN_SOCKET_OPEN;
         }
         Lock_MutexPost(sock->sync);
     }
@@ -1030,7 +1030,7 @@ static bool_t __sendmsg(tagSocket *sock, tagNetPkg *pkg,u16 translen)
 
 //use this function to make a tcp header
 static tagNetPkg  *__buildhdr(tagSocket *sock, u8 flags,\
-        void *option, u8 optionlen,u32 pkgflag,u32 sndno)
+		void *option, u8 optionlen,u32 pkgflag,u32 sndno)
 {
     tagNetPkg  *result;
     tagTcpHdr  *hdr;
@@ -1101,10 +1101,10 @@ static int __connect(tagSocket *sock, struct sockaddr *serveraddr, int addrlen)
     //fist we make sure to adjust the its place in the hash tab
     if(Lock_MutexPend(pTcpHashTab->tabsync,CN_TIMEOUT_FOREVER))
     {
-        if((NULL != serveraddr)&&(addrlen == sizeof(struct sockaddr_in))&&\
-            (CN_SOCKET_CLIENT&sock->sockstat))
+    	if((NULL != serveraddr)&&(addrlen == sizeof(struct sockaddr_in))&&\
+    	    (CN_SOCKET_CLIENT&sock->sockstat))
         {
-            addrin = (struct sockaddr_in *)serveraddr;
+    	    addrin = (struct sockaddr_in *)serveraddr;
             __hashSocketRemove(sock);
             sock->element.v4.ipremote =addrin->sin_addr.s_addr;
             sock->element.v4.portremote = addrin->sin_port;
@@ -1116,8 +1116,8 @@ static int __connect(tagSocket *sock, struct sockaddr *serveraddr, int addrlen)
     }
     if(0 == result)
     {
-        result = -1;
-        //now do the handshake with the server
+    	result = -1;
+    	//now do the handshake with the server
         if(Lock_MutexPend(sock->sync, CN_TIMEOUT_FOREVER))
         {
             ccb = (tagCCB *)sock->cb;
@@ -1134,7 +1134,7 @@ static int __connect(tagSocket *sock, struct sockaddr *serveraddr, int addrlen)
                 Lock_MutexPost(sock->sync); //release the mutex
                 //wait the sync signal happens
                 Lock_SempPend(ccb->rbuf.bufsync,ccb->rbuf.timeout);
-                //check the connection
+            	//check the connection
                 Lock_MutexPend(sock->sync, CN_TIMEOUT_FOREVER);
                 if(ccb->machinestat == EN_TCP_MC_ESTABLISH)
                 {
@@ -1166,12 +1166,12 @@ static void __cpy2sndbuf(tagSocket *sock, const void *msg, int len)
     cpylen = ccb->sbuf.buflenlimit-ccb->sbuf.dataoff;
     if(cpylen >= len)
     {
-        cpylen = len;
-        len = 0;
+    	cpylen = len;
+    	len = 0;
     }
     else
     {
-        len -= cpylen;
+    	len -= cpylen;
     }
     dst = (u8 *)(ccb->sbuf.buf + ccb->sbuf.dataoff);
     src = (u8 *)msg;
@@ -1180,7 +1180,7 @@ static void __cpy2sndbuf(tagSocket *sock, const void *msg, int len)
     ccb->sbuf.dataoff += cpylen;
     if(ccb->sbuf.dataoff == ccb->sbuf.buflenlimit) //actually,we could be same at most
     {
-        ccb->sbuf.dataoff = 0;
+    	ccb->sbuf.dataoff = 0;
     }
     //update the member
     ccb->sbuf.buflenleft -= cpylen;
@@ -1188,13 +1188,13 @@ static void __cpy2sndbuf(tagSocket *sock, const void *msg, int len)
 
     if(len > 0)
     {
-        cpylen = len;
+    	cpylen = len;
         dst = (u8 *)(ccb->sbuf.buf + ccb->sbuf.dataoff);
         memcpy(dst,src,cpylen);
         ccb->sbuf.dataoff += cpylen;
         if(ccb->sbuf.dataoff >= ccb->sbuf.buflenlimit)
         {
-            ccb->sbuf.dataoff = 0;
+        	ccb->sbuf.dataoff = 0;
         }
         //update the member
         ccb->sbuf.buflenleft -= cpylen;
@@ -1213,39 +1213,39 @@ static int __chkchannelsendlen(tagSocket *sock)
     ccb =(tagCCB *)sock->cb;
     if(0 ==(ccb->channelstat & CN_TCP_CHANNEL_STATKSND))
     {
-        return 0;
+    	return 0;
     }
 
     datalen = ccb->sbuf.datalen;
-    if(CN_SOCKET_PRONAGLE&sock->sockstat) //nagle is open
+	if(CN_SOCKET_PRONAGLE&sock->sockstat) //nagle is open
     {
-        //this means nothing to ack now or the new data is more than the mss,
-        if(ccb->sbuf.unackno == ccb->sbuf.sndnxtno)
-        {
-            //this means nothing to acknowledge, so you could send as much data as possible
-            result = datalen;
-        }
-        else if(datalen > ccb->mss)
-        {
-            result = datalen;
-        }
-        else
-        {
-            result = 0;
-        }
+    	//this means nothing to ack now or the new data is more than the mss,
+    	if(ccb->sbuf.unackno == ccb->sbuf.sndnxtno)
+    	{
+    		//this means nothing to acknowledge, so you could send as much data as possible
+    		result = datalen;
+    	}
+    	else if(datalen > ccb->mss)
+    	{
+    		result = datalen;
+    	}
+    	else
+    	{
+    		result = 0;
+    	}
     }
     else //nagle is close
     {
-        //we will send the mixnum of (sndwnd cwnd datalen)
-        result = ccb->cwnd;
-        if(result > ccb->sndwnd)
-        {
-            result = ccb->sndwnd;
-        }
-        if(result > datalen)
-        {
-            result = datalen;
-        }
+    	//we will send the mixnum of (sndwnd cwnd datalen)
+    	result = ccb->cwnd;
+    	if(result > ccb->sndwnd)
+    	{
+    		result = ccb->sndwnd;
+    	}
+    	if(result > datalen)
+    	{
+    		result = datalen;
+    	}
     }
     return result;
 }
@@ -1265,61 +1265,61 @@ static void __senddata(tagSocket *sock,int length)
     ccb = (tagCCB *)sock->cb;
     while(length > 0) //we send all the data specified by length or until send failed
     {
-        //compute the data datalen flags first
-        flags = CN_TCP_FLAG_ACK;
-        if((length <= ccb->mss)) //we could send it at one time
-        {
-            flags |= CN_TCP_FLAG_PSH;
-            if(0 == (ccb->channelstat & CN_TCP_CHANNEL_STATASND))
-            {
-                flags |= CN_TCP_FLAG_FIN;   //we would not send any more
-            }
-            datalen = length;
-        }
-        else
-        {
-            datalen = ccb->mss;
-        }
-        //make sure the data not round trip
-        if((ccb->sbuf.sndnxtoff + datalen )>ccb->sbuf.buflenlimit)
-        {
-            //this means the data round up ,we just send the part
-            datalen = ccb->sbuf.buflenlimit - ccb->sbuf.sndnxtoff;
-            flags &=(~CN_TCP_FLAG_FIN);
-        }
-        else
-        {
-            //no round trip,just do it
-        }
-        data = ccb->sbuf.buf + ccb->sbuf.sndnxtoff;
-        pkghdr = __buildhdr(sock,flags,NULL,0,0,ccb->sbuf.sndnxtno);
-        if(NULL != pkghdr)
-        {
-            pkgdata = PkgMalloc(sizeof(tagNetPkg),CN_PKLGLST_END);
-            if(NULL != pkgdata)
-            {
-                //we got the data pkgnow, make sure how many data we will send
-                pkgdata->buf = data;
-                pkgdata->offset = 0;
-                pkgdata->datalen = datalen;
-                pkgdata->partnext = NULL;
-                pkghdr->partnext = pkgdata;
-                translen = datalen + pkghdr->datalen;
-                sendresult = __sendmsg(sock,pkghdr,translen);
-                //free the package
-                PkgTryFreePart(pkghdr);
-                PkgTryFreePart(pkgdata);
-                //update the members
-                if(sendresult)
-                {
-                    ccb->sbuf.sndnxtno += datalen;
-                    ccb->sbuf.sndnxtoff += datalen;
-                    if(ccb->sbuf.sndnxtoff == ccb->sbuf.buflenlimit)
-                    {
-                        ccb->sbuf.sndnxtoff = 0; //round
-                    }
-                    ccb->sbuf.unacklen += datalen;
-                    ccb->sbuf.datalen -= datalen;
+    	//compute the data datalen flags first
+    	flags = CN_TCP_FLAG_ACK;
+    	if((length <= ccb->mss)) //we could send it at one time
+    	{
+    		flags |= CN_TCP_FLAG_PSH;
+    		if(0 == (ccb->channelstat & CN_TCP_CHANNEL_STATASND))
+    		{
+    			flags |= CN_TCP_FLAG_FIN;   //we would not send any more
+    		}
+    		datalen = length;
+    	}
+    	else
+    	{
+    		datalen = ccb->mss;
+    	}
+    	//make sure the data not round trip
+		if((ccb->sbuf.sndnxtoff + datalen )>ccb->sbuf.buflenlimit)
+		{
+			//this means the data round up ,we just send the part
+			datalen = ccb->sbuf.buflenlimit - ccb->sbuf.sndnxtoff;
+			flags &=(~CN_TCP_FLAG_FIN);
+		}
+		else
+		{
+			//no round trip,just do it
+		}
+		data = ccb->sbuf.buf + ccb->sbuf.sndnxtoff;
+    	pkghdr = __buildhdr(sock,flags,NULL,0,0,ccb->sbuf.sndnxtno);
+    	if(NULL != pkghdr)
+    	{
+    		pkgdata = PkgMalloc(sizeof(tagNetPkg),CN_PKLGLST_END);
+    		if(NULL != pkgdata)
+    		{
+    			//we got the data pkgnow, make sure how many data we will send
+    			pkgdata->buf = data;
+    			pkgdata->offset = 0;
+    			pkgdata->datalen = datalen;
+    			pkgdata->partnext = NULL;
+    			pkghdr->partnext = pkgdata;
+    			translen = datalen + pkghdr->datalen;
+    			sendresult = __sendmsg(sock,pkghdr,translen);
+    			//free the package
+    			PkgTryFreePart(pkghdr);
+    			PkgTryFreePart(pkgdata);
+    			//update the members
+    			if(sendresult)
+    			{
+        			ccb->sbuf.sndnxtno += datalen;
+        			ccb->sbuf.sndnxtoff += datalen;
+        			if(ccb->sbuf.sndnxtoff == ccb->sbuf.buflenlimit)
+        			{
+        				ccb->sbuf.sndnxtoff = 0; //round
+        			}
+        			ccb->sbuf.unacklen += datalen;
+        			ccb->sbuf.datalen -= datalen;
                     if(ccb->sndwnd > datalen)
                     {
                         ccb->sndwnd -= datalen;
@@ -1328,10 +1328,10 @@ static void __senddata(tagSocket *sock,int length)
                     {
                         ccb->sndwnd = 0;
                     }
-                    length -= datalen;
+        			length -= datalen;
                     if(flags & CN_TCP_FLAG_FIN) //IF FIN SEND ,THEN STAT CHANGE,CLOSE THE KERNEL SEND
                     {
-                        ccb->sbuf.sndnxtno++;
+                    	ccb->sbuf.sndnxtno++;
                         if(EN_TCP_MC_CLOSEWAIT == ccb->machinestat)
                         {
                             ccb->machinestat = EN_TCP_MC_LASTACK;
@@ -1345,30 +1345,30 @@ static void __senddata(tagSocket *sock,int length)
                         //no send anymore and break
                         break;
                     }
-                }
-                else
-                {
-                    ccb->timerctrl |= CN_TCP_TIMER_PERSIST;
-                    ccb->persistimer = CN_TCP_TICK_PERSIST;
-                    break;  //send failed,open the persist timer
-                }
-            }
-            else
-            {
-                PkgTryFreePart(pkghdr);  //no pkg memory for the tcpdata
-                break;
-            }
-        }
-        else
-        {
-            break;  //no pkg memory for the tcp header
-        }
-        ccb->sbuf.rtotick = gTcpTicks;
+    			}
+    			else
+    			{
+    		        ccb->timerctrl |= CN_TCP_TIMER_PERSIST;
+    		        ccb->persistimer = CN_TCP_TICK_PERSIST;
+    				break;  //send failed,open the persist timer
+    			}
+    		}
+    		else
+    		{
+    			PkgTryFreePart(pkghdr);  //no pkg memory for the tcpdata
+    			break;
+    		}
+    	}
+    	else
+    	{
+    		break;  //no pkg memory for the tcp header
+    	}
+    	ccb->sbuf.rtotick = gTcpTicks;
     }
     if(ccb->sbuf.unacklen > 0)
     {
-        ccb->resndtimer = ccb->rto;
-        ccb->timerctrl |= CN_TCP_TIMER_RESEND;   //OPEN THE RESEND TIMER
+		ccb->resndtimer = ccb->rto;
+		ccb->timerctrl |= CN_TCP_TIMER_RESEND;   //OPEN THE RESEND TIMER
     }
     if(((ccb->sbuf.datalen > 0)&&(ccb->sndwnd < ccb->mss)))
     {
@@ -1399,42 +1399,42 @@ static void __resenddata(tagSocket *sock)
     datalen = ccb->sbuf.unacklen;
     if((datalen + ccb->sbuf.unackoff)>ccb->sbuf.buflenlimit)
     {
-        //the unack is round up, so just send part
-        datalen = ccb->sbuf.buflenlimit - ccb->sbuf.unackoff;
+    	//the unack is round up, so just send part
+    	datalen = ccb->sbuf.buflenlimit - ccb->sbuf.unackoff;
     }
     if(datalen > ccb->mss)
     {
-        //sorry to tell you that we could send a mss at most
-        datalen = ccb->mss;
+    	//sorry to tell you that we could send a mss at most
+    	datalen = ccb->mss;
     }
     if(datalen > 0)
     {
-        //compute the data datalen flags first
-        flags = CN_TCP_FLAG_ACK|CN_TCP_FLAG_PSH;
-        data = ccb->sbuf.buf + ccb->sbuf.unackoff;
-        pkghdr = __buildhdr(sock,flags,NULL,0,0,ccb->sbuf.unackno);
-        if(NULL != pkghdr)
-        {
-            pkgdata = PkgMalloc(sizeof(tagNetPkg),CN_PKLGLST_END);
-            if(NULL != pkgdata)
-            {
-                //we got the data pkgnow, make sure how many data we will send
-                pkgdata->buf = data;
-                pkgdata->offset = 0;
-                pkgdata->datalen = datalen;
-                pkgdata->partnext = NULL;
-                pkghdr->partnext = pkgdata;
-                translen = datalen + pkghdr->datalen;
-                __sendmsg(sock,pkghdr,translen);
-                //free the package
-                PkgTryFreePart(pkghdr);
-                PkgTryFreePart(pkgdata);
-            }
-            else
-            {
-                PkgTryFreePart(pkghdr);  //no pkg memory for the tcpdata
-            }
-        }
+    	//compute the data datalen flags first
+    	flags = CN_TCP_FLAG_ACK|CN_TCP_FLAG_PSH;
+		data = ccb->sbuf.buf + ccb->sbuf.unackoff;
+    	pkghdr = __buildhdr(sock,flags,NULL,0,0,ccb->sbuf.unackno);
+    	if(NULL != pkghdr)
+    	{
+    		pkgdata = PkgMalloc(sizeof(tagNetPkg),CN_PKLGLST_END);
+    		if(NULL != pkgdata)
+    		{
+    			//we got the data pkgnow, make sure how many data we will send
+    			pkgdata->buf = data;
+    			pkgdata->offset = 0;
+    			pkgdata->datalen = datalen;
+    			pkgdata->partnext = NULL;
+    			pkghdr->partnext = pkgdata;
+    			translen = datalen + pkghdr->datalen;
+    			__sendmsg(sock,pkghdr,translen);
+    			//free the package
+    			PkgTryFreePart(pkghdr);
+    			PkgTryFreePart(pkgdata);
+    		}
+    		else
+    		{
+    			PkgTryFreePart(pkghdr);  //no pkg memory for the tcpdata
+    		}
+    	}
     }
     return;
 }
@@ -1459,18 +1459,18 @@ static int __send(tagSocket *sock, const void *msg, int len, int flags)
     result = -1;
     if(0 == (CN_SOCKET_CLIENT &sock->sockstat))
     {
-        return result;
+    	return result;
     }
     ccb = (tagCCB *)sock->cb;
     if(Lock_SempPend(ccb->sbuf.bufsync,ccb->sbuf.timeout))
     {
-        //got the mutex
-        if(Lock_MutexPend(sock->sync, CN_TIMEOUT_FOREVER))
-        {
-            //check if we could copy it to the buffer
-            if(CN_TCP_CHANNEL_STATASND&ccb->channelstat)
-            {
-                sndlen = ccb->sbuf.buflenleft>len?len:ccb->sbuf.buflenleft;
+    	//got the mutex
+    	if(Lock_MutexPend(sock->sync, CN_TIMEOUT_FOREVER))
+    	{
+    		//check if we could copy it to the buffer
+    		if(CN_TCP_CHANNEL_STATASND&ccb->channelstat)
+    		{
+            	sndlen = ccb->sbuf.buflenleft>len?len:ccb->sbuf.buflenleft;
                 if(sndlen > 0)
                 {
                     //enough,we could cpy the buf to the sbuf;
@@ -1489,7 +1489,7 @@ static int __send(tagSocket *sock, const void *msg, int len, int flags)
                    {
                        sock->iostat|= CN_SOCKET_IOWRITE;
                        Multiplex_Set(sock->ioselect, sock->iostat);
-                       Lock_SempPost(ccb->sbuf.bufsync);
+                	   Lock_SempPost(ccb->sbuf.bufsync);
                    }
                    else
                    {
@@ -1499,29 +1499,29 @@ static int __send(tagSocket *sock, const void *msg, int len, int flags)
                 }
                 else
                 {
-                    if(len == 0)
-                    {
-                        result = len;   //0 bytes copied
-                    }
-                    else
-                    {
-                        result = -1;    //unkonw reason
-                    }
+                	if(len == 0)
+                	{
+                		result = len;   //0 bytes copied
+                	}
+                	else
+                	{
+                		result = -1;    //unkonw reason
+                	}
                 }
-            }
-            else
-            {
-                result = 0;  // the channel is shutdown now
+    		}
+    		else
+    		{
+    			result = 0;  // the channel is shutdown now
                 sock->iostat|= CN_SOCKET_IOWRITE;
                 Multiplex_Set(sock->ioselect, sock->iostat);
-                Lock_SempPost(ccb->sbuf.bufsync);
-            }
+    			Lock_SempPost(ccb->sbuf.bufsync);
+    		}
             Lock_MutexPost(sock->sync);
-        }
+    	}
     }
     else
     {
-        //has not got the sync yet. maybe time out
+    	//has not got the sync yet. maybe time out
     }
     return result;
 }
@@ -1580,30 +1580,30 @@ static int __recv(tagSocket *sock, void *buf,int len, unsigned int flags)
     result = -1;
     if(0 == (CN_SOCKET_CLIENT &sock->sockstat))
     {
-        return result;
+    	return result;
     }
     ccb = (tagCCB *)sock->cb;
     if(Lock_SempPend(ccb->rbuf.bufsync,ccb->rbuf.timeout))
     {
-        //got the mutex
-        if(Lock_MutexPend(sock->sync, CN_TIMEOUT_FOREVER))
-        {
-            if(CN_TCP_CHANNEL_STATARCV & ccb->channelstat)
-            {
-                //maybe there are some data
+    	//got the mutex
+    	if(Lock_MutexPend(sock->sync, CN_TIMEOUT_FOREVER))
+    	{
+    		if(CN_TCP_CHANNEL_STATARCV & ccb->channelstat)
+    		{
+    			//maybe there are some data
                 result = __cpyfromrcvbuf(ccb,buf,len);   //the buf already has data
                 if(result == 0)
                 {
-                    //no data yet
-                    if(0 == (ccb->channelstat&CN_TCP_CHANNEL_STATKRCV))
-                    {
-                        //the remote is shutdown,so close the areceive
-                        ccb->channelstat &= (~CN_TCP_CHANNEL_STATARCV);
-                    }
-                    else
-                    {
-                        result = -1;  //not shutdown yet
-                    }
+                	//no data yet
+                	if(0 == (ccb->channelstat&CN_TCP_CHANNEL_STATKRCV))
+                	{
+                		//the remote is shutdown,so close the areceive
+                		ccb->channelstat &= (~CN_TCP_CHANNEL_STATARCV);
+                	}
+                	else
+                	{
+                		result = -1;  //not shutdown yet
+                	}
                 }
 
                 if((ccb->rbuf.buflen > ccb->rbuf.trigerlevel)||
@@ -1624,21 +1624,21 @@ static int __recv(tagSocket *sock, void *buf,int len, unsigned int flags)
                     //if the data is zero, we could snd the window
                     __sendflag(sock,CN_TCP_FLAG_ACK,NULL,0,ccb->sbuf.sndnxtno);
                 }
-            }
-            else
-            {
-                result = 0;  // the channel receive is shutdown now
+    		}
+    		else
+    		{
+    			result = 0;  // the channel receive is shutdown now
                 sock->iostat|= CN_SOCKET_IOREAD;
                 Multiplex_Set(sock->ioselect, sock->iostat);
-                Lock_SempPost(ccb->rbuf.bufsync);
-            }
+    			Lock_SempPost(ccb->rbuf.bufsync);
+    		}
 
-            Lock_MutexPost(sock->sync);
-        }
+    		Lock_MutexPost(sock->sync);
+    	}
     }
     else
     {
-        //not got the sync yet
+    	//not got the sync yet
     }
     return  result;
 }
@@ -1708,13 +1708,13 @@ static int __shutdownWR(tagSocket *sock)
             }
             else
             {
-                ccb->machinestat  = EN_TCP_MC_FINWAIT1;
+            	ccb->machinestat  = EN_TCP_MC_FINWAIT1;
             }
-            result = 0;
+        	result = 0;
         }
         else
         {
-            //send the fin with the data, this will do in __senddata
+        	//send the fin with the data, this will do in __senddata
         }
     }
     return result;
@@ -1836,8 +1836,8 @@ static int __setsockopt_sol(tagSocket *sock,int optname,const void *optval, int 
     tagCCB *ccb;
     tagSCB *scb;
     struct linger      *mylinger;
-    u8 *buf;
-    int buflen;
+	u8 *buf;
+	int buflen;
 
     result = -1;
     switch(optname)
@@ -1890,8 +1890,8 @@ static int __setsockopt_sol(tagSocket *sock,int optname,const void *optval, int 
             if(CN_SOCKET_CLIENT&sock->sockstat)
             {
                 ccb = (tagCCB *)sock->cb;
-                int buflen;
-                buflen = *(int *)optval;
+            	int buflen;
+            	buflen = *(int *)optval;
                 if(buflen >0)
                 {
                     ccb->rbuf.buflenlimit = buflen;
@@ -1904,7 +1904,7 @@ static int __setsockopt_sol(tagSocket *sock,int optname,const void *optval, int 
             if(CN_SOCKET_CLIENT&sock->sockstat)
             {
                 ccb = (tagCCB *)sock->cb;
-                buflen = *(int *)optval;
+            	buflen = *(int *)optval;
                 if((buflen >0)&&((buf = malloc(buflen))!= NULL))
                 {
                     ccb->sbuf.buflenleft =  buflen;
@@ -1919,7 +1919,7 @@ static int __setsockopt_sol(tagSocket *sock,int optname,const void *optval, int 
                     ccb->sbuf.dupacktims  = 0;
                     if(NULL != ccb->sbuf.buf)
                     {
-                        free((void *)ccb->sbuf.buf);
+                    	free((void *)ccb->sbuf.buf);
                     }
                     ccb->sbuf.buf = buf;
                     result = 0;
@@ -1960,7 +1960,7 @@ static int __setsockopt_sol(tagSocket *sock,int optname,const void *optval, int 
             }
             else
             {
-                scb = (tagSCB *)sock->cb;
+            	scb = (tagSCB *)sock->cb;
                 if(*(int *)optval>=0)
                 {
                     scb->accepttime = *(int *)optval;
@@ -2281,7 +2281,7 @@ static u32 __rcvdata(tagSocket *client, u32 seqno,tagNetPkg *pkg)
     pkgstop = seqno + pkg->datalen;
     if(ccb->rbuf.rcvnxt == pkgstart)
     {
-        //this is just the pkg what we want to receive next
+    	//this is just the pkg what we want to receive next
         PkgCachedPart(pkg); //cached the package
         //and add it to the receive queue
         if(NULL == ccb->rbuf.pt)
@@ -2299,11 +2299,11 @@ static u32 __rcvdata(tagSocket *client, u32 seqno,tagNetPkg *pkg)
     }
     else if((pkgstop > pkgstart)&&((ccb->rbuf.rcvnxt > pkgstart)&&(ccb->rbuf.rcvnxt < pkgstop)))
     {
-        //this is only part of the package data valid
-        pkgdataoff = ccb->rbuf.rcvnxt - pkgstart;
-        pkg->offset += pkgdataoff;
-        pkg->datalen -= pkgdataoff;
-        //then cached it and add it to the queue
+    	//this is only part of the package data valid
+    	pkgdataoff = ccb->rbuf.rcvnxt - pkgstart;
+    	pkg->offset += pkgdataoff;
+    	pkg->datalen -= pkgdataoff;
+    	//then cached it and add it to the queue
         PkgCachedPart(pkg); //cached the package
         //and add it to the receive queue
         if(NULL == ccb->rbuf.pt)
@@ -2321,11 +2321,11 @@ static u32 __rcvdata(tagSocket *client, u32 seqno,tagNetPkg *pkg)
     }
     else if((pkgstop < pkgstart)&&((ccb->rbuf.rcvnxt > pkgstart)||(ccb->rbuf.rcvnxt < pkgstop)))
     {
-        //this is only part of the package data valid and the seqo turn over
-        pkgdataoff = ccb->rbuf.rcvnxt - pkgstart;
-        pkg->offset += pkgdataoff;
-        pkg->datalen -= pkgdataoff;
-        //then cached it and add it to the queue
+    	//this is only part of the package data valid and the seqo turn over
+    	pkgdataoff = ccb->rbuf.rcvnxt - pkgstart;
+    	pkg->offset += pkgdataoff;
+    	pkg->datalen -= pkgdataoff;
+    	//then cached it and add it to the queue
         PkgCachedPart(pkg); //cached the package
         //and add it to the receive queue
         if(NULL == ccb->rbuf.pt)
@@ -2343,10 +2343,10 @@ static u32 __rcvdata(tagSocket *client, u32 seqno,tagNetPkg *pkg)
     }
     else
     {
-        //this data is out of sequence, we'd better to cached it in the recombination queue
+    	//this data is out of sequence, we'd better to cached it in the recombination queue
         //could cached in the recombination queue
-        if(gEnableTcpReoder)
-        {
+    	if(gEnableTcpReoder)
+    	{
             PkgCachedPart(pkg);
             pkg->private = seqno;
             //find an proplace to insert the pkg
@@ -2361,45 +2361,45 @@ static u32 __rcvdata(tagSocket *client, u32 seqno,tagNetPkg *pkg)
                 ccb->pkgrecomblst = pkg;
             }
             ccb->pkgrecomblen++;
-        }
+    	}
     }
     //if we have receive some data to the receive buffer, then we check all the data
     //in the combination queue, if mathes then move it to the receive buffer, else drops now
     if(rcvlen > 0)
     {
-        if(gEnableTcpReoder)
-        {
-            while(NULL != ccb->pkgrecomblst)
-            {
-                pkgcomb = ccb->pkgrecomblst;
-                ccb->pkgrecomblst = pkgcomb->partnext;
-                pkgcomb->partnext = NULL;
-                pkgstart = (u32)pkgcomb->private;
-                pkgstop = pkgstart + pkgcomb->datalen;
-                if(pkgstart == ccb->rbuf.rcvnxt)
-                {
-                    //and add it to the receive queue
-                    if(NULL == ccb->rbuf.pt)
-                    {
-                        ccb->rbuf.ph = pkgcomb;
-                    }
-                    else
-                    {
-                        ccb->rbuf.pt->partnext = pkgcomb;
-                    }
-                    ccb->rbuf.pt = pkgcomb;
-                    ccb->rbuf.buflen += pkgcomb->datalen;
-                    ccb->rbuf.rcvnxt+= pkgcomb->datalen;
-                    rcvlen += pkgcomb->datalen;
-                }
-                else
-                {
-                    //drops it now
-                    PkgTryFreePart(pkgcomb);
-                }
-                ccb->pkgrecomblen = 0;
-            }
-        }
+    	if(gEnableTcpReoder)
+    	{
+        	while(NULL != ccb->pkgrecomblst)
+        	{
+        		pkgcomb = ccb->pkgrecomblst;
+        		ccb->pkgrecomblst = pkgcomb->partnext;
+        		pkgcomb->partnext = NULL;
+        		pkgstart = (u32)pkgcomb->private;
+        		pkgstop = pkgstart + pkgcomb->datalen;
+        		if(pkgstart == ccb->rbuf.rcvnxt)
+        		{
+        	        //and add it to the receive queue
+        	        if(NULL == ccb->rbuf.pt)
+        	        {
+        	            ccb->rbuf.ph = pkgcomb;
+        	        }
+        	        else
+        	        {
+        	            ccb->rbuf.pt->partnext = pkgcomb;
+        	        }
+        	        ccb->rbuf.pt = pkgcomb;
+        	        ccb->rbuf.buflen += pkgcomb->datalen;
+        	        ccb->rbuf.rcvnxt+= pkgcomb->datalen;
+        	        rcvlen += pkgcomb->datalen;
+        		}
+        		else
+        		{
+        			//drops it now
+        			PkgTryFreePart(pkgcomb);
+        		}
+            	ccb->pkgrecomblen = 0;
+        	}
+    	}
         if(ccb->rbuf.buflen > ccb->rbuf.trigerlevel)
         {
             client->iostat |= CN_SOCKET_IOREAD;
@@ -2440,9 +2440,9 @@ static bool_t __ackdata(tagSocket *client, tagTcpHdr *hdr)
     //first we will deal the send buffer to release some space
     if((ackno  == ccb->sbuf.unackno)&&(ccb->sbuf.unacklen > 0))
     {
-        ccb->sbuf.dupacktims++;
-        if(ccb->sbuf.dupacktims > CN_TCP_FASTRETRANS)
-        {
+    	ccb->sbuf.dupacktims++;
+    	if(ccb->sbuf.dupacktims > CN_TCP_FASTRETRANS)
+    	{
             //do the fast retransmition
             ccb->rto = ccb->rto<<1;
             if(ccb->rto < CN_TCP_RTOMIN)
@@ -2461,30 +2461,30 @@ static bool_t __ackdata(tagSocket *client, tagTcpHdr *hdr)
             }
             ccb->cwnd = ccb->ssthresh + 3*ccb->mss;
             __resenddata(client);
-        }
+    	}
     }
-    //1,sndnxtno > unackno, then ackno must be between them
-    //2,sndnxtno <= unackno,then ackno must be bigger than unack no or less than sndnxtno
+	//1,sndnxtno > unackno, then ackno must be between them
+	//2,sndnxtno <= unackno,then ackno must be bigger than unack no or less than sndnxtno
     else if(((ccb->sbuf.sndnxtno > ccb->sbuf.unackno)&&\
-       ((ackno >ccb->sbuf.unackno)&&(ackno <= ccb->sbuf.sndnxtno)))||\
-            ((ccb->sbuf.sndnxtno < ccb->sbuf.unackno)&&\
-             ((ackno >ccb->sbuf.unackno)||(ackno <= ccb->sbuf.sndnxtno))))
-    {
-        acklen = ackno-ccb->sbuf.unackno;
-        if(acklen > ccb->sbuf.unacklen)
-        {
-            acklen = ccb->sbuf.unacklen;
-        }
-        ccb->sbuf.unackoff   +=  acklen;
-        if(ccb->sbuf.unackoff >= ccb->sbuf.buflenlimit)
-        {
-            ccb->sbuf.unackoff -= ccb->sbuf.buflenlimit;
-        }
-        ccb->sbuf.unackno = ackno;
-        ccb->sbuf.unacklen   -=  acklen;
-        ccb->sbuf.buflenleft += acklen;
-        ccb->sbuf.dupacktims = 0;
-        //do the cwnd
+	   ((ackno >ccb->sbuf.unackno)&&(ackno <= ccb->sbuf.sndnxtno)))||\
+			((ccb->sbuf.sndnxtno < ccb->sbuf.unackno)&&\
+			 ((ackno >ccb->sbuf.unackno)||(ackno <= ccb->sbuf.sndnxtno))))
+	{
+		acklen = ackno-ccb->sbuf.unackno;
+		if(acklen > ccb->sbuf.unacklen)
+		{
+			acklen = ccb->sbuf.unacklen;
+		}
+		ccb->sbuf.unackoff   +=  acklen;
+		if(ccb->sbuf.unackoff >= ccb->sbuf.buflenlimit)
+		{
+			ccb->sbuf.unackoff -= ccb->sbuf.buflenlimit;
+		}
+    	ccb->sbuf.unackno = ackno;
+		ccb->sbuf.unacklen   -=  acklen;
+		ccb->sbuf.buflenleft += acklen;
+    	ccb->sbuf.dupacktims = 0;
+    	//do the cwnd
         if(ccb->cwnd > ccb->ssthresh)
         {
             ccb->cwnd += ccb->cwnd/32;  //it is congestion avoid
@@ -2495,7 +2495,7 @@ static bool_t __ackdata(tagSocket *client, tagTcpHdr *hdr)
         }
         if(ccb->resndtimes == 0)
         {
-            //no resend happens,so measure the rto time
+        	//no resend happens,so measure the rto time
             usedtime = gTcpTicks - ccb->sbuf.rtotick;
             err = usedtime - ccb->sa;
             uerr = err>0?err:(-err);
@@ -2514,15 +2514,15 @@ static bool_t __ackdata(tagSocket *client, tagTcpHdr *hdr)
         }
         else
         {
-            ccb->resndtimes = 0;//the remote has acknowledge some data,so just clear it
+        	ccb->resndtimes = 0;//the remote has acknowledge some data,so just clear it
         }
 
         if((ccb->sbuf.buflenleft > ccb->sbuf.trigerlevel)||
            (0 ==(ccb->channelstat&CN_TCP_CHANNEL_STATASND)))
         {
-            client->iostat|= CN_SOCKET_IOWRITE;
+        	client->iostat|= CN_SOCKET_IOWRITE;
             Multiplex_Set(client->ioselect, client->iostat);
-            Lock_SempPost(ccb->sbuf.bufsync);
+     	    Lock_SempPost(ccb->sbuf.bufsync);
         }
         else
         {
@@ -2531,13 +2531,13 @@ static bool_t __ackdata(tagSocket *client, tagTcpHdr *hdr)
         }
         if(ccb->sbuf.sndnxtno == ccb->sbuf.unackno)  //noting to resend, so close the resend timer
         {
-            ccb->timerctrl &= (~CN_TCP_TIMER_RESEND);
+        	ccb->timerctrl &= (~CN_TCP_TIMER_RESEND);
         }
         ccb->resndtimer = ccb->rto;
-    }
+	}
     else //ack the unseen data, we could do something or nothing
     {
-        //maybe nothing to ack or ack the unseen data
+    	//maybe nothing to ack or ack the unseen data
     }
     //update the window
     ccb->sndwnd = (ntohs(hdr->window))<<ccb->sndwndscale;
@@ -2648,20 +2648,20 @@ static bool_t __stable_ms(tagSocket *client, tagTcpHdr *hdr,tagNetPkg *pkg)
     //receive the data to the receive buffer
     if((NULL != pkg)&&(pkg->datalen > 0))
     {
-        if((0==(CN_TCP_CHANNEL_STATCONGEST&ccb->channelstat))&&\
-                   (CN_TCP_CHANNEL_STATKRCV&ccb->channelstat))
-        {
+    	if((0==(CN_TCP_CHANNEL_STATCONGEST&ccb->channelstat))&&\
+    		       (CN_TCP_CHANNEL_STATKRCV&ccb->channelstat))
+    	{
             //we will deal the pkg for two reson:
             //1,the channel permit to receive more
             //2,the pkg is sequance and is the last pkg
-            rcvlen = __rcvdata(client,seqno,pkg);
-        }
-        ccb->acktimes ++;
+    		rcvlen = __rcvdata(client,seqno,pkg);
+    	}
+    	ccb->acktimes ++;
     }
     //if any fin received
     if((CN_TCP_FLAG_FIN & hdr->flags)&&((ccb->rbuf.rcvnxt == seqno)||(rcvlen > 0)))
     {
-        ccb->acktimes += CN_TCP_TICK_ACK;
+    	ccb->acktimes += CN_TCP_TICK_ACK;
         ccb->rbuf.rcvnxt++;
         ccb->machinestat= EN_TCP_MC_CLOSEWAIT;
         //could never to receive more data
@@ -2713,26 +2713,26 @@ static bool_t __finwait1_ms(tagSocket *client, tagTcpHdr *hdr,tagNetPkg *pkg)
     //receive the data to the receive buffer
     if((NULL != pkg)&&(pkg->datalen > 0))
     {
-        if((0==(CN_TCP_CHANNEL_STATCONGEST&ccb->channelstat))&&\
-                   (CN_TCP_CHANNEL_STATKRCV&ccb->channelstat))
-        {
+    	if((0==(CN_TCP_CHANNEL_STATCONGEST&ccb->channelstat))&&\
+    		       (CN_TCP_CHANNEL_STATKRCV&ccb->channelstat))
+    	{
             //we will deal the pkg for two reson:
             //1,the channel permit to receive more
             //2,the pkg is sequance and is the last pkg
-            rcvlen = __rcvdata(client,seqno,pkg);
-        }
-        ccb->acktimes ++;
+    		rcvlen = __rcvdata(client,seqno,pkg);
+    	}
+    	ccb->acktimes ++;
     }
 
     if(ccb->sbuf.unackno == ccb->sbuf.sndnxtno)             //FIN ACK --TIME_WAIT
     {
-        ccb->timerctrl &= (~CN_TCP_TIMER_FIN);  //CLOSE THE FIN TIMER
+    	ccb->timerctrl &= (~CN_TCP_TIMER_FIN);  //CLOSE THE FIN TIMER
         ccb->machinestat= EN_TCP_MC_FINWAIT2;
     }
     //if any fin received
     if((CN_TCP_FLAG_FIN & hdr->flags)&&((ccb->rbuf.rcvnxt== seqno)||(rcvlen > 0)))
     {
-        ccb->acktimes += CN_TCP_TICK_ACK;
+    	ccb->acktimes += CN_TCP_TICK_ACK;
         ccb->rbuf.rcvnxt++;
         if(ccb->machinestat == EN_TCP_MC_FINWAIT1)
         {
@@ -2782,20 +2782,20 @@ static bool_t __finwait2_ms(tagSocket *client, tagTcpHdr *hdr,tagNetPkg *pkg)
     //receive the data to the receive buffer
     if((NULL != pkg)&&(pkg->datalen > 0))
     {
-        if((0==(CN_TCP_CHANNEL_STATCONGEST&ccb->channelstat))&&\
-                   (CN_TCP_CHANNEL_STATKRCV&ccb->channelstat))
-        {
+    	if((0==(CN_TCP_CHANNEL_STATCONGEST&ccb->channelstat))&&\
+    		       (CN_TCP_CHANNEL_STATKRCV&ccb->channelstat))
+    	{
             //we will deal the pkg for two reson:
             //1,the channel permit to receive more
             //2,the pkg is sequance and is the last pkg
-            rcvlen = __rcvdata(client,seqno,pkg);
-        }
-        ccb->acktimes ++;
+    		rcvlen = __rcvdata(client,seqno,pkg);
+    	}
+    	ccb->acktimes ++;
     }
     //if any fin received
     if((CN_TCP_FLAG_FIN & hdr->flags)&&((ccb->rbuf.rcvnxt== seqno)||(rcvlen > 0)))
     {
-        ccb->acktimes += CN_TCP_TICK_ACK;
+    	ccb->acktimes += CN_TCP_TICK_ACK;
         ccb->rbuf.rcvnxt++;
         ccb->machinestat = EN_TCP_MC_TIMEWAIT;
         ccb->timerctrl = CN_TCP_TIMER_2MSL;
@@ -2833,13 +2833,13 @@ static bool_t __closing_ms(tagSocket *client, tagTcpHdr *hdr,tagNetPkg *pkg)
     if(ccb->sbuf.unackno == ccb->sbuf.sndnxtno)
     {
         ccb->machinestat = EN_TCP_MC_TIMEWAIT;
-        ccb->timerctrl &= (~CN_TCP_TIMER_FIN);  //CLOSE THE FIN TIMER
+    	ccb->timerctrl &= (~CN_TCP_TIMER_FIN);  //CLOSE THE FIN TIMER
         ccb->timerctrl |= CN_TCP_TIMER_2MSL;    //open the 2ml timer
         ccb->mltimer = CN_TCP_TICK_2ML;
      }
      if((NULL != pkg)&&(pkg->datalen > 0))
      {
-         ccb->acktimes ++;
+    	 ccb->acktimes ++;
      }
      if(ccb->acktimes>= CN_TCP_TICK_ACK)
      {
@@ -2861,7 +2861,7 @@ static bool_t __timewait_ms(tagSocket *client, tagTcpHdr *hdr,tagNetPkg *pkg)
 
     if((NULL != pkg)&&(pkg->datalen > 0))
     {
-        ccb->acktimes ++;
+    	ccb->acktimes ++;
     }
     if(ccb->acktimes>= CN_TCP_TICK_ACK)
     {
@@ -2886,16 +2886,16 @@ static bool_t __closewait_ms(tagSocket *client, tagTcpHdr *hdr,tagNetPkg *pkg)
         __ackdata(client, hdr);
     }
     //if any fin received
-    if((NULL != pkg)&&(pkg->datalen > 0))
-    {
-        ccb->acktimes ++;
-    }
+	if((NULL != pkg)&&(pkg->datalen > 0))
+	{
+		ccb->acktimes ++;
+	}
     //see if anymore data to send
-    if(ccb->channelstat&CN_TCP_CHANNEL_STATKSND)
-    {
-        //SEND ANY DATA
-        __senddata(client,__chkchannelsendlen(client));
-    }
+	if(ccb->channelstat&CN_TCP_CHANNEL_STATKSND)
+	{
+		//SEND ANY DATA
+		__senddata(client,__chkchannelsendlen(client));
+	}
     if(ccb->acktimes>= CN_TCP_TICK_ACK)
     {
         __sendflag(client,CN_TCP_FLAG_ACK,NULL,0,ccb->sbuf.sndnxtno);
@@ -2920,16 +2920,16 @@ static bool_t __lastack_ms(tagSocket *client, tagTcpHdr *hdr,tagNetPkg *pkg)
     {
         __ackdata(client, hdr);
     }
-    if(ccb->sbuf.unackno == ccb->sbuf.sndnxtno)
-    {
-        ccb->machinestat = EN_TCP_MC_2FREE;
-        ccb->timerctrl &= (~CN_TCP_TIMER_FIN);  //CLOSE THE FIN TIMER
-    }
-    if((NULL != pkg)&&(pkg->datalen > 0))
-    {
-        ccb->acktimes ++;
-    }
-    //so it will be free next
+	if(ccb->sbuf.unackno == ccb->sbuf.sndnxtno)
+	{
+		ccb->machinestat = EN_TCP_MC_2FREE;
+    	ccb->timerctrl &= (~CN_TCP_TIMER_FIN);  //CLOSE THE FIN TIMER
+	}
+	if((NULL != pkg)&&(pkg->datalen > 0))
+	{
+		ccb->acktimes ++;
+	}
+	//so it will be free next
     if(ccb->acktimes>= CN_TCP_TICK_ACK)
     {
         __sendflag(client,CN_TCP_FLAG_ACK,NULL,0,ccb->sbuf.sndnxtno);
@@ -3182,14 +3182,14 @@ static bool_t __tcprcvdealv4(u32 ipsrc, u32 ipdst,  tagNetPkg *pkg, u32 devfunc)
 // RETURN  :
 // INSTRUCT:true success while false failed
 // =============================================================================
-bool_t __recvProcess(enum_ipv_t  ver,ptu32_t ipsrc, ptu32_t ipdst,  tagNetPkg *pkg, tagRout *rout)
+bool_t __recvProcess(enum_ipv_t  ver,ptu32_t ipsrc, ptu32_t ipdst,  tagNetPkg *pkg, tagNetDev *dev)
 {
     bool_t result = false;
     u32 devfunc;
 
     if(ver == EN_IPV_4)
     {
-        devfunc = NetDevGetFunc(rout->dev);
+        devfunc = NetDevGetFunc(dev);
         result = __tcprcvdealv4((u32)ipsrc,(u32)ipdst,pkg,devfunc);
     }
 
@@ -3205,7 +3205,7 @@ bool_t __recvProcess(enum_ipv_t  ver,ptu32_t ipsrc, ptu32_t ipdst,  tagNetPkg *p
 // =============================================================================
 static bool_t __dealclienttimer(tagSocket *client)
 {
-    u8        flag;
+	u8        flag;
     tagCCB   *ccb;
 
     ccb = (tagCCB *)client->cb;
@@ -3238,33 +3238,33 @@ static bool_t __dealclienttimer(tagSocket *client)
         if(ccb->resndtimer == 0)
         {
 
-            if(ccb->resndtimes > CN_TCP_RSNDMAX)
-            {
+        	if(ccb->resndtimes > CN_TCP_RSNDMAX)
+        	{
                 __ResetCCB(ccb,EN_TCP_MC_2FREE);  //resend timeout
-            }
-            else
-            {
-                if(ccb->timerctrl & CN_TCP_TIMER_SYN)  //syn
-                {
-                    //we will help you to send the syn
-                    flag = CN_TCP_FLAG_SYN;
-                    if(ccb->machinestat == EN_TCP_MC_SYNRCV)
-                    {
-                        flag |= CN_TCP_FLAG_ACK;
-                    }
-                    __sendflag(client,flag,&sgSynOptDefault,sizeof(sgSynOptDefault),ccb->sbuf.unackno);
-                }
-                else if(ccb->timerctrl & CN_TCP_TIMER_RESEND) //resend
-                {
-                    //do the resend
-                    __resenddata(client);
+        	}
+        	else
+        	{
+        	    if(ccb->timerctrl & CN_TCP_TIMER_SYN)  //syn
+        	    {
+        	    	//we will help you to send the syn
+        	    	flag = CN_TCP_FLAG_SYN;
+        	    	if(ccb->machinestat == EN_TCP_MC_SYNRCV)
+        	    	{
+        	    		flag |= CN_TCP_FLAG_ACK;
+        	    	}
+        			__sendflag(client,flag,&sgSynOptDefault,sizeof(sgSynOptDefault),ccb->sbuf.unackno);
+        	    }
+        	    else if(ccb->timerctrl & CN_TCP_TIMER_RESEND) //resend
+        	    {
+            		//do the resend
+            		__resenddata(client);
 
-                }
-                else  //fin
-                {
-                    __sendflag(client,CN_TCP_FLAG_FIN|CN_TCP_FLAG_ACK,NULL,0,ccb->sbuf.sndnxtno-1);
-                }
-                //do the rto update
+        	    }
+        	    else  //fin
+        	    {
+            		__sendflag(client,CN_TCP_FLAG_FIN|CN_TCP_FLAG_ACK,NULL,0,ccb->sbuf.sndnxtno-1);
+        	    }
+        		//do the rto update
                 ccb->rto = ccb->rto<<1;
                 if(ccb->rto < CN_TCP_RTOMIN)
                 {
@@ -3283,12 +3283,12 @@ static bool_t __dealclienttimer(tagSocket *client)
                 }
                 ccb->cwnd = ccb->mss;
                 ccb->resndtimer = ccb->rto;
-                ccb->resndtimes++;
-            }
+        		ccb->resndtimes++;
+        	}
         }
         else
         {
-            ccb->resndtimer--;
+    		ccb->resndtimer--;
         }
     }
     if(ccb->timerctrl &CN_TCP_TIMER_CORK)     //do the socket cork
@@ -3311,14 +3311,14 @@ static bool_t __dealclienttimer(tagSocket *client)
     {
         if(0 == ccb->persistimer)
         {
-            if(ccb->sbuf.datalen > 0)
-            {
+        	if(ccb->sbuf.datalen > 0)
+        	{
                 __senddata(client,1);
-            }
-            else
-            {
-                __sendflag(client,CN_TCP_FLAG_ACK,NULL,0,ccb->sbuf.sndnxtno);
-            }
+        	}
+        	else
+        	{
+        		__sendflag(client,CN_TCP_FLAG_ACK,NULL,0,ccb->sbuf.sndnxtno);
+        	}
             ccb->persistimer = CN_TCP_TICK_PERSIST;
         }
         else
@@ -3332,9 +3332,9 @@ static bool_t __dealclienttimer(tagSocket *client)
     }
     if(NULL != ccb->pkgrecomblst)
     {
-        PkgTryFreeQ(ccb->pkgrecomblst);
-        ccb->pkgrecomblst = NULL;
-        ccb->pkgrecomblen = 0;
+    	PkgTryFreeQ(ccb->pkgrecomblst);
+    	ccb->pkgrecomblst = NULL;
+    	ccb->pkgrecomblen = 0;
     }
     return true;
 }
@@ -3359,7 +3359,7 @@ static ptu32_t __tcptick(void)
     {
         for(i = 0; i <pTcpHashTab->tablen; i ++)
         {
-            //each hash number we will lock and unlock ,so left some time for others
+        	//each hash number we will lock and unlock ,so left some time for others
             Lock_MutexPend(pTcpHashTab->tabsync, CN_TIMEOUT_FOREVER);
             sock = pTcpHashTab->array[i];
             while(NULL != sock)
@@ -3398,25 +3398,25 @@ static ptu32_t __tcptick(void)
                         ccb = (tagCCB *)client->cb;
                         if(EN_TCP_MC_2FREE == ccb->machinestat)
                         {
-                            //remove it from the queue
+                        	//remove it from the queue
                             if(client == scb->clst)
                             {
-                                scb->clst = client->nxt;
-                                clientpre = client->nxt;
+                            	scb->clst = client->nxt;
+                            	clientpre = client->nxt;
                             }
                             else
                             {
-                                clientpre->nxt = client->nxt;
+                            	clientpre->nxt = client->nxt;
                             }
-                            clientnxt = client->nxt;
-                            client->nxt = NULL;
+                        	clientnxt = client->nxt;
+                        	client->nxt = NULL;
                             __ResetCCB(ccb,EN_TCP_MC_2FREE);
                             __DeleCCB(ccb);
                             SocketFree(client);  //free the client
                         }
                         else
                         {
-                            clientpre = client;
+                        	clientpre = client;
                             clientnxt = client->nxt;
                         }
                         client = clientnxt;
@@ -3463,26 +3463,26 @@ static void __tcpdebugsockinfo(tagSocket *sock,char *prefix)
 
 static void __tcpdebugccb(tagCCB *ccb,char *prefix)
 {
-    //machine state
+	//machine state
     printf("%s:machinestat:%s\n\r",prefix,gCCBLinkStat[ccb->machinestat]);
     //channel stat
     printf("%s:channelstat:apprcv:%s\n\r",prefix,\
-            ccb->channelstat&CN_TCP_CHANNEL_STATARCV?"enable":"disable");
+    		ccb->channelstat&CN_TCP_CHANNEL_STATARCV?"enable":"disable");
     printf("%s:channelstat:appsnd:%s\n\r",prefix,\
-            ccb->channelstat&CN_TCP_CHANNEL_STATASND?"enable":"disable");
+    		ccb->channelstat&CN_TCP_CHANNEL_STATASND?"enable":"disable");
     printf("%s:channelstat:knlrcv:%s\n\r",prefix,\
-            ccb->channelstat&CN_TCP_CHANNEL_STATKRCV?"enable":"disable");
+    		ccb->channelstat&CN_TCP_CHANNEL_STATKRCV?"enable":"disable");
     printf("%s:channelstat:knlsnd:%s\n\r",prefix,\
-            ccb->channelstat&CN_TCP_CHANNEL_STATKSND?"enable":"disable");
+    		ccb->channelstat&CN_TCP_CHANNEL_STATKSND?"enable":"disable");
     //send buffer
     printf("%s:sndbuffer:buflen:%04d bufleft:%04d  unacklen:%04d datalen:%04d\n\r",prefix,\
-            ccb->sbuf.buflenlimit,ccb->sbuf.buflenleft,ccb->sbuf.unacklen,ccb->sbuf.datalen);
+    		ccb->sbuf.buflenlimit,ccb->sbuf.buflenleft,ccb->sbuf.unacklen,ccb->sbuf.datalen);
     printf("%s:sndbuffer:unackoff:%04d sndnxtoff:%04d dataoff:%04d  trigger:%04d\n\r",prefix,\
-            ccb->sbuf.unackoff,ccb->sbuf.sndnxtoff,ccb->sbuf.dataoff,ccb->sbuf.trigerlevel);
+    		ccb->sbuf.unackoff,ccb->sbuf.sndnxtoff,ccb->sbuf.dataoff,ccb->sbuf.trigerlevel);
     printf("%s:sndbuffer:unackno:0x%08x sndnxtno:0x%08x \n\r",prefix,\
-            ccb->sbuf.unackno,ccb->sbuf.sndnxtno);
+    		ccb->sbuf.unackno,ccb->sbuf.sndnxtno);
     printf("%s:sndbuffer:timeout:0x%08x rtotick:0x%08x dupacks:%04d sync:%s\n\r",prefix,\
-            ccb->sbuf.timeout,ccb->sbuf.rtotick,ccb->sbuf.dupacktims,ccb->sbuf.bufsync->lamp_counter?"enable":"disable");
+    		ccb->sbuf.timeout,ccb->sbuf.rtotick,ccb->sbuf.dupacktims,ccb->sbuf.bufsync->lamp_counter?"enable":"disable");
     //receive buffer
     printf("%s:rcvbuf:buflen:%04d datalen:%04d trigerlevel:%04d\n\r",\
             prefix,ccb->rbuf.buflenlimit,ccb->rbuf.buflen,ccb->rbuf.trigerlevel);
@@ -3495,7 +3495,7 @@ static void __tcpdebugccb(tagCCB *ccb,char *prefix)
     printf("%s:cwnd :%d ssh:%d \r\n",prefix,ccb->cwnd,ccb->ssthresh);
     //resend
     printf("%s:resndtimer:%04d resndtimes:%04d acktimes:%04d\r\n",prefix,\
-            ccb->resndtimer,ccb->resndtimes,ccb->acktimes);
+    		ccb->resndtimer,ccb->resndtimes,ccb->acktimes);
     //timer
     printf("%s:syntimer:%s  \r\n",prefix,ccb->timerctrl&CN_TCP_TIMER_SYN?"enable":"disable");
     printf("%s:2mltimer:%s  \r\n",prefix,ccb->timerctrl&CN_TCP_TIMER_2MSL?"enable":"disable");
@@ -3505,7 +3505,7 @@ static void __tcpdebugccb(tagCCB *ccb,char *prefix)
     printf("%s:ligtimer:%s  \r\n",prefix,ccb->timerctrl&CN_TCP_TIMER_LINGER?"enable":"disable");
     printf("%s:sndtimer:%s  \r\n",prefix,ccb->timerctrl&CN_TCP_TIMER_RESEND?"enable":"disable");
     printf("%s:fintimer:%s  \r\n",prefix,ccb->timerctrl&CN_TCP_TIMER_FIN?"enable":"disable");
-    return;
+	return;
 }
 
 static void __tcpdebugscb(tagSCB *scb,char *prefix)

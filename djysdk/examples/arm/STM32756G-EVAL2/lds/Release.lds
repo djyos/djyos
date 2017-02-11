@@ -97,9 +97,12 @@ SECTIONS
         KEEP(* (.nocacheram .nocacheram.*))
     }>RAM1NOCACHE
 
+    /*Cortex-M 系列的向量表可重定位，对起始地址的要求是：若有N个向量（包含异常），*/
+    /*先增大到2的整数次幂，若为M，则Addr = ALIGN(4 * M) */
+    /*举例：若cpu有64个中断，则N = 80, M = 128, Addr = ALIGN(0x200)*/
     zi_preload_rRAM1_lRAM1 (NOLOAD) :
     {
-       . = ALIGN(0x100);
+       . = ALIGN(0x200);
         KEEP(* (.table.exceptions .table.exceptions.*))
         KEEP(* (.table.vectors .table.vectors.*))
         *liblibOS_STM32756G-EVAL2_o2.a:loader.o (.bss .bss.* COMMON)

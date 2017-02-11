@@ -78,6 +78,14 @@ extern "C" {
 #define MASK_ECC                			((u32)0x00070000)
 
 //
+// 不允许ECC和SPARE同时操作,因为ECC自动写入SPARE区域
+//
+#define ASSERT_FLAGS(x)						do{\
+											if(((x & HW_ECC) || (x & SW_ECC)) && (x & SPARE_REQ))\
+											return (-1);\
+											}while(0)
+
+//
 // FLASH操作方式
 //
 struct FlashOps{
@@ -99,7 +107,7 @@ struct FlashChip{
 	union {
 		struct NandDescr Nand; 									// 描述NAND信息
 		struct NorDescr Nor; 									// 描述NOR信息
-		struct EmbdFlashDescr Embd;				     		    // 描述特殊的FLASH
+		struct EmFlashDescr Embd;				     		    // 描述特殊的FLASH
 	}Descr;
     struct FlashOps Ops; 										// 操作函数表,用于实现找到节点即会操作的功能
     void *Lock; 												// todo: 由于存在缓冲,需要底层互斥锁。

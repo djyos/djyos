@@ -179,9 +179,9 @@ struct WinTimer
 //    u32 Tag ;
     HWND hwnd;              //定时器所属窗口.
     u16 Id;                 //定时器Id.
-    u16 Flag;               //定时器标记.
-    u32 Interval;           //定时间隔(单位:毫秒).
-    u32 HoldTime;           //定时开始时间(单位:毫秒).
+    u16 Flag;               //定时器标记，参看TMR_START等定义
+    u32 Interval;           //定时间隔(单位:uS).
+    u32 HoldTime;           //定时开始时间(单位:uS).
     list_t  node_sys;       //系统定时器链表节点.
     list_t  node_hwnd;      //所属窗口的定时器链表节点.
     list_t  node_msg_timer; //TIMER消息节点,当产生MSG_TIMER消息时,该节点插入到

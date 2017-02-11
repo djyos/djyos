@@ -54,6 +54,7 @@
 
 
 #define CN_PING_DEFAULT_TIMEOUT   (1*1000*mS)   //1s
+#define CN_PING_WAIT_TIME         (5*1000*mS)
 #define CN_PING_DEFAULT_COUNTER   (4)
 #define CN_PING_DEFAULT_SIZE      (32)
 // =============================================================================
@@ -117,7 +118,7 @@ bool_t Ping(char *param)
     for(i = 0; i <times; i++)
     {
         timestart = (u32)DjyGetSysTime();
-        if(Icmp_EchoRequest(ip,datapad,CN_PING_DEFAULT_SIZE,CN_PING_DEFAULT_TIMEOUT))
+        if(Icmp_EchoRequest(ip,datapad,CN_PING_DEFAULT_SIZE,CN_PING_WAIT_TIME))
         {
             timeend = (u32)DjyGetSysTime();
             timeused = (u32)(timeend - timestart);

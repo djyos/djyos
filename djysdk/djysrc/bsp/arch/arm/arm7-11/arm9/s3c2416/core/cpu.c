@@ -202,12 +202,12 @@ void __DjyInitTick(void)
     //连接timer3作为tick中断
     Int_IsrConnect(CN_INT_LINE_TIMER3,__DjyIsrTick);
     Int_SettoAsynSignal(CN_INT_LINE_TIMER3);          //tick中断被设为异步信号
-    //以下设置定时器参数，需与port_config.h中CN_CFG_TICK_US、cn_tick_hz和
-    //cn_fine_ns、cn_fine_hz的定义一致
+    //以下设置定时器参数，需与board-config.h中CN_CFG_TICK_US、CN_CFG_TICK_HZ和
+    //CN_CFG_FINE_US、CN_CFG_FINE_HZ的定义一致
     Timer_SetClkSource(3,0);          //pclk预分频数的1/2分频
     Timer_SetPrecale(1,CN_CFG_TIMER_CLK/CN_CFG_FINE_HZ/2 -1);
-    //以上把定时器输入时钟的频率设为cn_fine_hz
-    //Timer_SetCounter(3,(uint16_t)((u32)CN_CFG_TICK_US*1000/cn_fine_ns));
+    //以上把定时器输入时钟的频率设为CN_CFG_FINE_HZ
+    //Timer_SetCounter(3,(uint16_t)((u32)CN_CFG_TICK_US*1000/CN_CFG_FINE_US));
     Timer_SetCounter(3, CN_CFG_FINE_HZ/CN_CFG_TICK_HZ);
     Timer_SetType(3,1);                //设置tick定时器连续工作
     Timer_Reload(3);                    //重载定时值

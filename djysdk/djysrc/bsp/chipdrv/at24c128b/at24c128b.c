@@ -235,7 +235,7 @@ u16 AT24_ReadWord(u32 wAddr)
 // 参数：无
 // 返回：true,成功;false,失败
 // =============================================================================
-bool_t AT24_ModuleInit(void)
+bool_t AT24_ModuleInit(char *BusName)
 {
     bool_t result = false;
     static struct IIC_Device s_AT24_Dev;
@@ -246,7 +246,7 @@ bool_t AT24_ModuleInit(void)
         return false;
 
     //添加FM24CL64到IIC0总线
-    if(NULL != IIC_DevAdd_s(&s_AT24_Dev,"TWI0","IIC_Dev_AT24",
+    if(NULL != IIC_DevAdd_s(&s_AT24_Dev,BusName,"IIC_Dev_AT24",
                             AT24_ADDRESS,0,16))
     {
         ps_AT24_Dev = &s_AT24_Dev;

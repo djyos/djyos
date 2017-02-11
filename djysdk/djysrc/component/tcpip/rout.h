@@ -52,7 +52,6 @@
 #include <sys/socket.h>
 
 typedef struct NetDev  tagNetDev;
-
 typedef struct  __Rout
 {
    struct __Rout  *nxt;        //rout chain
@@ -66,18 +65,45 @@ typedef struct  __Rout
        tagHostAddrV4 ipv4;
        tagHostAddrV6 ipv6;
    }ipaddr;
+   //the following used for the debug
+   u64 innum;
+   u64 inerr;
+   u64 outnum;
+   u64 outerr;
 }tagRout;
+
 typedef enum
 {
-    EN_IPV4_ANY = 0,       //not sure yet
-    EN_IPV4_HOSTTARGET,    //which means this is an host address
-    EN_IPV4_INSUBNET,      //which means it is in the same sub net
-    EN_IPV4_SUBBROAD,      //it is the sub net broad address
-    EN_IPV4_BROAD,         //it is the limited broad address
-    EN_IPV4_WAN,          //it is the wlan address
-    EN_IPV4_MULTI,         //it is an multicast address
-    EN_IPV4_NOTDEF,        //not define yet
-}enum_ip_class;
+	EN_LINKEVENT_POWERON = 0,//the link device is power on
+	EN_LINKEVENT_DEVADD,    //add a device
+	EN_LINKEVENT_DEVDEL,    //del a device
+	EN_LINKEVENT_DOWN,      //the link rout is shutdown or disconnet
+	EN_LINKEVENT_UP,        //the link rout is established or power on
+	EN_LINKEVENT_TIMEOUT,   //the link rout is timeout state
+}enLinkEvent;
+//return value is the really receive or send data units(bytes)
+//the device driver use this function to pass the receive package to the tcpip stack
+typedef bool_t (*fnLinkIn)(tagNetDev *dev,tagNetPkg *pkg); //pkg is the link frame
+//the tcpip stack use this function to pass the package to the hard device
+typedef bool_t (*fnLinkOut)(tagRout *rout,tagNetPkg *pkglst,u32 framlen,u32 devtask,u16 proto,enum_ipv_t ver,ipaddr_t ipdst);//pkg is the ip frame
+//this function is used do some event to the upper protocols
+typedef bool_t (*fnLinkEvent)(tagNetDev *dev,enLinkEvent event);
+//this function is used do some command from the upper protocols;
+typedef bool_t (*fnLinkIo)(tagNetDev *dev,u32 cmd,u32 para);
+typedef struct
+{
+	fnLinkIn     linkin;
+	fnLinkOut    linkout;
+	fnLinkEvent  linkevent;
+	fnLinkIo     linkio;
+	void       *ctx;    //this is the link control block here,used by the link here
+	//do the debug info
+	s64         innum;
+	s64         inerr;
+	s64         outnum;
+	s64         outerr;
+}tagLinkOps;
+//each device must have a link operations
 
 typedef struct
 {
@@ -110,15 +136,18 @@ struct NetDev
     u32                            frcv;     //frame receive
     u32                            frcverr;  //frame receive err
     tagNetDevRcvFilter             rfilter[EN_NETDEV_FRAME_LAST];  //the recv filter
+    //the following function used to package the info
+    tagLinkOps                    *linkops;
 };
 
 tagNetDev  *NetDevGet(const char  *name);
 #define     NetDevGetMac(dev)     (dev->mac)       //get the dev mac(stack use)
 #define     NetDevGetFunc(dev)    (dev->devfunc)   //get the dev func(stack use)
 #define     RoutFunc(rout)        (rout->func)     //use this to get the rout func
-enum_ip_class RoutIpClass(enum_ipv_t ver,ipaddr_t ip,tagRout **rout);//use this function to get the ip net
-enum_ip_class RoutTargetClass(tagNetDev *dev,enum_ipv_t ver,ipaddr_t ip,tagRout **rout);
-bool_t RoutUpdate(char *name,enum_ipv_t ver,void *netaddr);// use this function to update
-
-
+bool_t   RoutUpdate(char *name,enum_ipv_t ver,void *netaddr);// use this function to update
+tagRout *RoutGetDefault(enum_ipv_t ver);//use this function to get the default rout
+tagRout *RoutMatch(enum_ipv_t ver,ipaddr_t ipaddr);//use this function to find a rout to output the ip package
+bool_t   RoutHostIp(enum_ipv_t ver,ipaddr_t ipaddr);//check if the ip is the host address
+bool_t   RoutHostTarget(enum_ipv_t ver,ipaddr_t ipaddr);//check if the ip is the host address
+bool_t   RoutSubNet(tagNetDev *dev,enum_ipv_t ver,ipaddr_t ipaddr);
 #endif /* __ROUT_H */

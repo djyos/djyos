@@ -912,7 +912,7 @@ bool_t AT45_FLASH_Ready(void)
 //#define test_buff_size  2048
 //u8 Data_write[test_buff_size];
 //u8 Data_read[test_buff_size];
-bool_t ModuleInstall_at45db321(void)
+bool_t ModuleInstall_at45db321(char *BusName)
 {
     if(NULL == Lock_SempCreate_s(&AT45_Semp,1,1,CN_BLOCK_FIFO,"AT45 semp"))
         return false;
@@ -925,7 +925,7 @@ bool_t ModuleInstall_at45db321(void)
     s_AT45_Dev.Mode = SPI_MODE_0;
     s_AT45_Dev.ShiftDir = SPI_SHIFT_MSB;
 
-    if(NULL != SPI_DevAdd_s(&s_AT45_Dev,"QSPI","AT45DB321E"))
+    if(NULL != SPI_DevAdd_s(&s_AT45_Dev,BusName,"AT45DB321E"))
     {
         SPI_BusCtrl(&s_AT45_Dev,CN_SPI_SET_POLL,0,0);
     }

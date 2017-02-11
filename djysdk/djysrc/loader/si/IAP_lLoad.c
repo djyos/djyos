@@ -93,9 +93,8 @@ extern struct AppInfo   gc_ptAppInfo;
 extern u32 g_pAppCodeStartRamAddr;
 extern u32 g_pAppCodeEndRamAddr;
 
-
-extern void __AppStart(void);
-
+extern void __AppStart(void);   //这是在iboot.lds中定位的函数，在APP的lds文件中，
+                                //确保了其指向 AppStart 函数
 
 u32 IAP_GetAPPStartCodeRamAddr(void)
 {
@@ -321,11 +320,6 @@ ptu32_t IAP_Shell_Module_Install(void)
 //----------------------------------------------------------------------------
 ptu32_t ModuleInstall_IAP(void)
 {
-    s32 Res;
-    extern s32 ModuleInstall_IAP_FS(const char *Dir);
-    Res = ModuleInstall_IAP_FS(NULL);
-    if(Res)
-        printf("\r\nerror: IAP file system is not installed!\r\n");
     IAP_Shell_Module_Install();
     printf("IAP ModuleInstall success.\r\n");
     return 0;

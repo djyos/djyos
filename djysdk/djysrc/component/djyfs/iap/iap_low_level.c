@@ -79,7 +79,7 @@ extern u32 gc_pAppOffset; // 来自于LDS定义
 void *LowLevelInit(void *Dev, u32 *Base)
 {
 	struct __LowLevel *LowLevel;
-	struct EmbdFlashDescr *Embd;
+	struct EmFlashDescr *Embd;
 	u32 Capacity; 
 	struct FlashChip *Flash = (struct FlashChip *)Dev;
 	u32 IAP_Capacity = gc_pAppRange;
@@ -103,10 +103,7 @@ void *LowLevelInit(void *Dev, u32 *Base)
 		IAP_Start = IAP_Start / Embd->BytesPerPage + Unalign; // 转化为页号
 	}
 
-	Capacity = (Embd->PagesPerSmallSect * Embd->SmallSectorsPerPlane +
-			    Embd->PagesPerLargeSect * Embd->LargeSectorsPerPlane +
-		        Embd->PagesPerNormalSect * Embd->NormalSectorsPerPlane) *
-		       Embd->Planes - Embd->ReservedPages;
+	Capacity = Embd->TotalPages - Embd->ReservedPages;
 	Unalign = 0;		  
 	if(IAP_Capacity % Embd->BytesPerPage)	
 		Unalign	= 1; // 容量不对齐，则去掉不对齐的部分
@@ -144,6 +141,11 @@ void *LowLevelInit(void *Dev, u32 *Base)
 	}	
 
 	*Base = 0; //
+	printf("\r\nIAP: disk physical info: ");
+	printf("size (%d Bytes)", LowLevel->PageBytes);
+	printf(", ranges (page no.%d to page no.%d)", LowLevel->StartPage,
+			LowLevel->EndPage);
+	printf("\r\n");
 	return ((void*)LowLevel);
 }
 

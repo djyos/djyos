@@ -301,103 +301,28 @@ static void __UART_GpioConfig(u8 SerialNo)
 	{
 	case CN_UART1:
 		RCC->APB2ENR |=(1<<4);//串口时钟使能
-		GPIO_PowerOn(GPIO_A);//GPIO时钟使能
-		GPIO_AFSet( GPIO_A,PIN10|PIN9, AF7);//设置复用功能
-		GPIO_CfgPinFunc(GPIO_A,PIN10|PIN9,GPIO_MODE_AF,
-						GPIO_OTYPE_PP,GPIO_SPEED_100M,GPIO_PUPD_PU);
-
-//		GPIO_PowerOn(GPIO_B);//GPIO时钟使能
-//		GPIO_AFSet( GPIO_B,PIN6|PIN7, AF7);//设置复用功能
-//		GPIO_CfgPinFunc(GPIO_B,PIN6|PIN7,GPIO_MODE_AF,
-//						GPIO_OTYPE_PP,GPIO_SPEED_100M,GPIO_PUPD_PU);
-
 		break;
 	case CN_UART2:
 		RCC->APB1ENR |=(1<<17);
-		GPIO_PowerOn(GPIO_A);//GPIO时钟使能
-		GPIO_AFSet( GPIO_A,PIN2|PIN3, AF7);
-		GPIO_CfgPinFunc(GPIO_A,PIN2|PIN3,GPIO_MODE_AF,
-				GPIO_OTYPE_PP,GPIO_SPEED_100M,GPIO_PUPD_NONE);
-
-//		GPIO_PowerOn(GPIO_A);//GPIO时钟使能
-//		GPIO_AFSet( GPIO_D,PIN5|PIN6, AF7);
-//		GPIO_CfgPinFunc(GPIO_A,PIN5|PIN6,GPIO_MODE_AF,
-//				GPIO_OTYPE_PP,GPIO_SPEED_100M,GPIO_PUPD_NONE);
-
 		break;
 	case CN_UART3:
 		RCC->APB1ENR |=(1<<18);
-		GPIO_PowerOn(GPIO_D);//GPIO时钟使能
-		GPIO_AFSet( GPIO_D,PIN8|PIN9, AF7);
-		GPIO_CfgPinFunc(GPIO_D,PIN8|PIN9,GPIO_MODE_AF,
-				GPIO_OTYPE_PP,GPIO_SPEED_100M,GPIO_PUPD_NONE);
-
-//		GPIO_PowerOn(GPIO_C);//GPIO时钟使能
-//		GPIO_AFSet( GPIO_C,PIN10|PIN11, AF7);
-//		GPIO_CfgPinFunc(GPIO_C,PIN10|PIN11,GPIO_MODE_AF,
-//				GPIO_OTYPE_PP,GPIO_SPEED_100M,GPIO_PUPD_NONE);
-
-//		GPIO_PowerOn(GPIO_B);//GPIO时钟使能
-//		GPIO_AFSet( GPIO_B,PIN10|PIN11, AF7);
-//		GPIO_CfgPinFunc(GPIO_B,PIN10|PIN11,GPIO_MODE_AF,
-//				GPIO_OTYPE_PP,GPIO_SPEED_100M,GPIO_PUPD_NONE);
 
 		break;
 	case CN_UART4:
 		RCC->APB1ENR |=(1<<19);
-		GPIO_PowerOn(GPIO_A);//GPIO时钟使能
-		GPIO_AFSet( GPIO_A,PIN0|PIN1, AF8);
-		GPIO_CfgPinFunc(GPIO_A,PIN0|PIN1,GPIO_MODE_AF,
-				GPIO_OTYPE_PP,GPIO_SPEED_100M,GPIO_PUPD_NONE);
-
-//		GPIO_PowerOn(GPIO_C);//GPIO时钟使能
-//		GGPIO_AFSet( GPIO_C,PIN10|PIN11, AF8);
-//		GPIO_CfgPinFunc(GPIO_C,PIN10|PIN11,GPIO_MODE_AF,
-//				GPIO_OTYPE_PP,GPIO_SPEED_100M,GPIO_PUPD_NONE);
-
 		break;
 	case CN_UART5:
 		RCC->APB1ENR |=(1<<20);
-		GPIO_PowerOn(GPIO_C);//GPIO时钟使能
-		GPIO_AFSet( GPIO_C,PIN12, AF8);
-		GPIO_CfgPinFunc(GPIO_C,PIN12,GPIO_MODE_AF,
-				GPIO_OTYPE_PP,GPIO_SPEED_100M,GPIO_PUPD_NONE);
-
-		GPIO_PowerOn(GPIO_D);//GPIO时钟使能
-		GPIO_AFSet( GPIO_D,PIN2, AF8);//C12 D2
-		GPIO_CfgPinFunc(GPIO_D,PIN2,GPIO_MODE_AF,
-				GPIO_OTYPE_PP,GPIO_SPEED_100M,GPIO_PUPD_NONE);
 		break;
 	case CN_UART6:
 		RCC->APB2ENR |=(1<<5);
-		GPIO_PowerOn(GPIO_C);//GPIO时钟使能
-		GPIO_AFSet( GPIO_C,PIN6|PIN7, AF8);
-		GPIO_CfgPinFunc(GPIO_C,PIN6|PIN7,GPIO_MODE_AF,
-				GPIO_OTYPE_PP,GPIO_SPEED_100M,GPIO_PUPD_NONE);
-
-//		GPIO_PowerOn(GPIO_G);//GPIO时钟使能
-//		GPIO_AFSet( GPIO_G,PIN9|PIN14, AF8);
-//		GPIO_CfgPinFunc(GPIO_G,PIN9|PIN14,GPIO_MODE_AF,
-//				GPIO_OTYPE_PP,GPIO_SPEED_100M,GPIO_PUPD_NONE);
 		break;
 	case CN_UART7:
 		RCC->APB1ENR |=(1<<30);
-		GPIO_PowerOn(GPIO_F);//GPIO时钟使能
-		GPIO_AFSet( GPIO_F,PIN6|PIN7, AF8);
-		GPIO_CfgPinFunc(GPIO_F,PIN6|PIN7,GPIO_MODE_AF,
-				GPIO_OTYPE_PP,GPIO_SPEED_100M,GPIO_PUPD_NONE);
-
-//		GPIO_PowerOn(GPIO_E);//GPIO时钟使能
-//		GPIO_AFSet( GPIO_E,PIN8|PIN7, AF8);
-//		GPIO_CfgPinFunc(GPIO_E,PIN8|PIN7,GPIO_MODE_AF,
-//				GPIO_OTYPE_PP,GPIO_SPEED_100M,GPIO_PUPD_NONE);
 		break;
 	case CN_UART8:
 		RCC->APB1ENR |=(1<<31);
-		GPIO_PowerOn(GPIO_E);//GPIO时钟使能
-		GPIO_AFSet( GPIO_E,PIN0|PIN1, AF8);
-		GPIO_CfgPinFunc(GPIO_E,PIN0|PIN1,GPIO_MODE_AF,
-				GPIO_OTYPE_PP,GPIO_SPEED_100M,GPIO_PUPD_NONE);
 		break;
 	default: break;
 
@@ -558,7 +483,7 @@ static void __UART_HardInit(u8 SerialNo)
     __UART_GpioConfig(SerialNo);
     //系统初始化时已经使中断处于禁止状态，无需再禁止和清除中断。
    //初始化uart硬件控制数据结构
-    tg_UART_Reg[SerialNo]->CR1 = 0x00bd;
+    tg_UART_Reg[SerialNo]->CR1 = 0x00ad;
     tg_UART_Reg[SerialNo]->CR2 = 0x0;
     tg_UART_Reg[SerialNo]->CR3 = 0x0000;
     __UART_BaudSet(tg_UART_Reg[SerialNo],SerialNo,115200);
@@ -802,6 +727,7 @@ static ptu32_t __UART_Ctrl(tagUartReg *Reg,u32 cmd, u32 data1,u32 data2)
 {
     ptu32_t result = 0;
     u32 port;
+    u32 timeout = 10000;
     if(Reg == NULL)
         return 0;
 
@@ -813,6 +739,8 @@ static ptu32_t __UART_Ctrl(tagUartReg *Reg,u32 cmd, u32 data1,u32 data2)
     case CN_UART4_BASE: port = CN_UART4;break;
     case CN_UART5_BASE: port = CN_UART5;break;
     case CN_UART6_BASE: port = CN_UART6;break;
+    case CN_UART7_BASE: port = CN_UART7;break;
+    case CN_UART8_BASE: port = CN_UART8;break;
     default:return 0;
     }
 
@@ -824,6 +752,19 @@ static ptu32_t __UART_Ctrl(tagUartReg *Reg,u32 cmd, u32 data1,u32 data2)
         case CN_UART_STOP:
             __UART_Disable(port);
             break;
+        case CN_UART_HALF_DUPLEX_SEND: //发送数据
+        	Board_UartHalfDuplexSend(port);
+        	break;
+
+        case CN_UART_HALF_DUPLEX_RECV: //接收数据
+            while((false == __UART_TxTranEmpty(Reg))&& (timeout > 10))
+            {
+                timeout -=10;
+                Djy_DelayUs(10);
+            }
+            Board_UartHalfDuplexRecv(port);
+        	break;
+
         case CN_UART_SET_BAUD:  //设置Baud
              __UART_BaudSet(Reg,port, data1);
             break;
@@ -1046,6 +987,7 @@ u32 UART_ISR(ptu32_t IntLine)
         ch = (u8)Reg->RDR;
         num = Reg->ISR;     //读一下sr寄存器
         UART_ErrHandle(UCB,CN_UART_FIFO_OVER_ERR);
+        Reg->ICR |=(1<<3);//清过载标志位
     }
     if(Reg->ISR & (1<<4))
     {

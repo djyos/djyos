@@ -17,11 +17,6 @@ typedef unsigned int in_addr_t;
 typedef bool_t bool;
 #endif
 
-#ifndef INADDR_LOOPBACK
-#define INADDR_LOOPBACK  0x7f000001     //127.0.0.1
-#endif
-
-
 typedef int pid_t;
 typedef int __uid_t;
 typedef int __gid_t;

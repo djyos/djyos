@@ -62,10 +62,10 @@ extern struct FileSysType FAT;
 //返回: 0 -- 成功; 0< -- 失败;
 //备注:
 //-----------------------------------------------------------------------------
-s32 ModuleInstall_FAT(const char *DevPath)
+s32 ModuleInstall_FAT(const char *DevPath, u32 Options)
 {
 	s32 Ret;
-	u32 Private = 0;//
+	u32 Private = Options;//
 
 	if(NULL == DevPath)
 		return (-1);
@@ -79,7 +79,7 @@ s32 ModuleInstall_FAT(const char *DevPath)
 		return (-1);// 失败;
 
 
-	Ret = Mount("/fat", "/dev/sd", "FAT", &Private);// todo: 路径与设备安装相关
+	Ret = Mount("/fat", DevPath, "FAT", &Private); // todo: 路径与设备安装相关
 	if(Ret < 0)
 		return (-1);// 失败
 

@@ -63,7 +63,7 @@ struct FileContext *FATOpen(const char *Path, u32 Mode, const char *Root)
 	char *LocalPath;
 	struct FileContext *FileCt;
 	struct FileBuf *Buf;
-	FRESULT Ret = FR_OK;
+	FRESULT Res = FR_OK;
 	u8 LocalMode = 0;
 	
 	// 先排除不支持功能
@@ -107,9 +107,9 @@ struct FileContext *FATOpen(const char *Path, u32 Mode, const char *Root)
 		FIL *NewFile = malloc(sizeof(FIL));
 		if(NewFile)
 		{	
-			Ret = f_open(NewFile, LocalPath, LocalMode);// 打开文件
-			if((FR_OK == Ret) || 
-			   ((FR_EXIST == Ret) && (Mode & M_OPEN)))//打开已存在文件
+			Res = f_open(NewFile, LocalPath, LocalMode);// 打开文件
+			if((FR_OK == Res) || 
+			   ((FR_EXIST == Res) && (Mode & M_OPEN)))//打开已存在文件
 			{
 				if(0 == AllocFileBuf(&Buf, 0)) // 为文件创建缓冲区
 				{
@@ -135,19 +135,19 @@ struct FileContext *FATOpen(const char *Path, u32 Mode, const char *Root)
 	
 	if(Mode & M_DIR)// 打开目录
 	{
-		DIR *NewDir;
+		_DIR *NewDir;
 		
 		if(LocalMode & FA_CREATE_NEW)// 需创建，先试图创建目录
 		{
-			Ret = f_mkdir(LocalPath);
+			Res = f_mkdir(LocalPath);
 		}
-		if(FR_OK == Ret)
+		if(FR_OK == Res)
 		{
-			NewDir = malloc(sizeof(DIR));
+			NewDir = malloc(sizeof(_DIR));
 			if(NewDir)
 			{
-				Ret = f_opendir(NewDir, LocalPath);
-				if(FR_OK == Ret)
+				Res = f_opendir(NewDir, LocalPath);
+				if(FR_OK == Res)
 				{
 					FileCt->Property |= P_DIR;
 					FileCt->Private = (void *)(NewDir);
@@ -173,15 +173,15 @@ struct FileContext *FATOpen(const char *Path, u32 Mode, const char *Root)
 //-----------------------------------------------------------------------------
 s32 FATClose(struct FileContext *FileCt)
 {
-	FRESULT Ret;
+	FRESULT Res;
 	
 	switch(FileCt->Property & P_TYPE)
 	{
 		case P_REG:
 		{
 			FIL *File = (FIL *)(FileCt->Private);
-			Ret = f_close(File);
-			if(FR_OK == Ret)
+			Res = f_close(File);
+			if(FR_OK == Res)
 			{
 				FreeFileBuf(FileCt->Buf);
 				break;
@@ -190,9 +190,9 @@ s32 FATClose(struct FileContext *FileCt)
 		}
 		case P_DIR:
 		{
-			DIR *Dir = (DIR*)(FileCt->Private);
-			Ret = f_closedir(Dir);
-			if(FR_OK == Ret)
+			_DIR *Dir = (_DIR*)(FileCt->Private);
+			Res = f_closedir(Dir);
+			if(FR_OK == Res)
 				break;
 			return (-2);// 失败
 		}
@@ -200,7 +200,7 @@ s32 FATClose(struct FileContext *FileCt)
 			return (-2);// 失败
 	}
 	
-	free(FileCt->Private);// 释放"FIL"或"DIR"
+	free(FileCt->Private);// 释放"FIL"或"_DIR"
 	FreeContext(FileCt);
 	return (0);
 	
@@ -213,11 +213,11 @@ s32 FATClose(struct FileContext *FileCt)
 //-----------------------------------------------------------------------------
 s32 FATSync(struct FileContext *FileCt)
 {
-	FRESULT Ret;
+	FRESULT Res;
     FIL *File = (FIL*)(FileCt->Private);
 	
-	Ret = f_sync(File);
-    if (FR_OK != Ret)
+	Res = f_sync(File);
+    if (FR_OK != Res)
         return (-3);
 		
     return (0);
@@ -230,7 +230,7 @@ s32 FATSync(struct FileContext *FileCt)
 //-----------------------------------------------------------------------------
 s32 FATSeek(struct FileContext *FileCt, s64 Offset, int Whence)
 {
-	FRESULT Ret;
+	FRESULT Res;
     DWORD NewPos;
     FIL *File = (FIL*)FileCt->Private;
 	
@@ -242,8 +242,8 @@ s32 FATSeek(struct FileContext *FileCt, s64 Offset, int Whence)
 		default: return (-2);// 参数错误
 	}
 	
-	Ret = f_lseek(File, NewPos);
-    if (FR_OK != Ret)
+	Res = f_lseek(File, NewPos);
+    if (FR_OK != Res)
         return (-1);
     return (0);
 }
@@ -255,11 +255,11 @@ s32 FATSeek(struct FileContext *FileCt, s64 Offset, int Whence)
 //-----------------------------------------------------------------------------
 s32 FATDelete(const char *Path, const char *Root)
 {
-	FRESULT Ret;
+	FRESULT Res;
 	char *LocalPath = PathCopy(Root, Path, NULL);
 	
-	Ret = f_unlink(LocalPath);
-	if(FR_OK != Ret)
+	Res = f_unlink(LocalPath);
+	if(FR_OK != Res)
 		return (-3);
 	return (0);	
 }
@@ -308,7 +308,7 @@ s32 FATStat(struct FileContext *FileCt, const char *Path, struct Stat *Buf, cons
 	FIL *File;
 	char *LocalPath;
 	FILINFO FileInfo = {0};// 要初始化，否则源程序会跑飞
-	FRESULT Ret;
+	FRESULT Res;
 
 	if(FileCt)
 	{
@@ -329,8 +329,8 @@ s32 FATStat(struct FileContext *FileCt, const char *Path, struct Stat *Buf, cons
 	if(Path && Root)
 	{
 		LocalPath = PathCopy(Root, Path, NULL);
-		Ret = f_stat(LocalPath, &FileInfo);
-		if(FR_OK != Ret)
+		Res = f_stat(LocalPath, &FileInfo);
+		if(FR_OK != Res)
 			return (-1);
 
 		Buf->Size = FileInfo.fsize;
@@ -360,14 +360,47 @@ s32 FATStat(struct FileContext *FileCt, const char *Path, struct Stat *Buf, cons
 s32 FATTruncate(struct FileContext *FileCt, off_t NewSize)
 {
 	FIL *File;
-	FRESULT Ret;
+	FRESULT Res;
 
 	File = (FIL*)(FileCt->Private);
 
 	File->fptr = (DWORD)NewSize; // todo
 
-	Ret = f_truncate(File);
-	if(FR_OK == Ret)
+	Res = f_truncate(File);
+	if(FR_OK == Res)
 		return (0);
 	return (-1);
+}
+
+//-----------------------------------------------------------------------------
+//功能: 读目录内容
+//参数:
+//返回: 1 -- 结束,全部读完;
+//      -1 -- 参数错误; -2 -- 函数不支持; -3 -- 其他错误;
+//      0 -- 成功读取返回;
+//备注: 每读一次,返回一个目录项
+//-----------------------------------------------------------------------------
+s32 FATDirRead(struct FileContext *FileCt, struct Dirent *Content)
+{
+	FILINFO ItemInfo;
+	char LongNameBuf[256];
+	FRESULT Res;
+	_DIR *Dir = (_DIR *)FileCt->Private;
+	
+	ItemInfo.lfname = LongNameBuf;
+	Res = f_readdir(Dir, &ItemInfo);
+	if(FR_OK !=Res)
+		return (-3);
+		
+	if(0 == ItemInfo.fname[0])
+		return (1);
+		
+	strcpy(Content->Name, ItemInfo.fname);
+	switch(ItemInfo.fattrib & 0x30)
+	{
+		case AM_ARC: Content->Property = P_REG; break;
+		case AM_DIR: Content->Property = P_DIR; break;
+		default: return (-3); // 尚未支持的文件格式
+	}
+	return (0);
 }

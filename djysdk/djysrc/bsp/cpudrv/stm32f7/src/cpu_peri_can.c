@@ -228,7 +228,7 @@ struct ShellCmdTab const shell_cmd_can_table[]=
 			"COMMAND:canlb+CAN控制器编号+enter"
 	},
 	{
-			"canf",
+			"canfc",
 			Sh_CAN_FilterConfig,
 			"配置CAN过滤器",
 			"COMMAND:canf+配置参数列表+enter"
@@ -341,7 +341,7 @@ static void Sh_CAN_Stat(void)
 static void Sh_Read_CAN_Reg(void)
 {
 	  vu32 Reg;
-	  uint8_t i;
+	  uint8_t i,j;
 	  tagCanReg *pCan;
 	  printf("CAN Reg:\r\n");
 	  for(i=0;i<2;i++)
@@ -369,9 +369,32 @@ static void Sh_Read_CAN_Reg(void)
 		  printf("%s IER     :0x%08x\r\n",CN_PRINT_PREFIX,Reg);
 		  Reg=pCan->ESR;
 		  printf("%s ESR     :0x%08x\r\n",CN_PRINT_PREFIX,Reg);
-		  //TODO
 		  Reg=pCan->BTR;
 		  printf("%s BTR     :0x%08x\r\n",CN_PRINT_PREFIX,Reg);
+          // tx fifo
+		  for(j=0;j<3;j++)
+		  {
+			  Reg=pCan->sTxMailBox[j].TIR;
+			  printf("%s TIR %d  :0x%08x\r\n",CN_PRINT_PREFIX,j,Reg);
+			  Reg=pCan->sTxMailBox[j].TDTR;
+			  printf("%s TITR %d :0x%08x\r\n",CN_PRINT_PREFIX,j,Reg);
+			  Reg=pCan->sTxMailBox[j].TDLR;
+			  printf("%s TDLR %d :0x%08x\r\n",CN_PRINT_PREFIX,j,Reg);
+			  Reg=pCan->sTxMailBox[j].TDHR;
+			  printf("%s TDHR %d :0x%08x\r\n",CN_PRINT_PREFIX,j,Reg);
+		  }
+		  //rx fifo
+		  for(j=0;j<2;j++)
+		  {
+			  Reg=pCan->sFIFOMailBox[j].RIR;
+			  printf("%s RIR %d  :0x%08x\r\n",CN_PRINT_PREFIX,j,Reg);
+			  Reg=pCan->sFIFOMailBox[j].RDTR;
+			  printf("%s RDTR %d :0x%08x\r\n",CN_PRINT_PREFIX,j,Reg);
+			  Reg=pCan->sFIFOMailBox[j].RDLR;
+			  printf("%s RDLR %d :0x%08x\r\n",CN_PRINT_PREFIX,j,Reg);
+			  Reg=pCan->sFIFOMailBox[j].RDHR;
+			  printf("%s RDHR %d :0x%08x\r\n",CN_PRINT_PREFIX,j,Reg);
+		  }
 	  }
 	  printf("Common Reg:\r\n");
 	  pCan=(tagCanReg *)CAN1_BASE;
@@ -386,6 +409,14 @@ static void Sh_Read_CAN_Reg(void)
 	  Reg=pCan->FA1R;
 	  printf("%s FA1R    :0x%08x\r\n",CN_PRINT_PREFIX,Reg);
 	  printf("The End.\r\n");
+	  //filter
+	  for(j=0;j<28;j++)
+	  {
+		  Reg=pCan->sFilterRegister[j].FR1;
+		  printf("%s FR1 %d  :0x%08x\r\n",CN_PRINT_PREFIX,j,Reg);
+		  Reg=pCan->sFilterRegister[j].FR2;
+		  printf("%s FR2 %d  :0x%08x\r\n",CN_PRINT_PREFIX,j,Reg);
+	  }
 
 }
 
@@ -503,7 +534,7 @@ static void Sh_CAN_FilterConfig(char *param)
     memcpy(gs_pCanFilterPara,&Para,sizeof(CanFilterConfPara));
     for(i=0;i<CN_CAN_NUM;i++)
     {
-    	CAN_Hard_Init(i,gs_CANBaudRate,gs_pCanFilterPara);
+    	CAN_Hard_Init(i,gs_CANBaudRate[i],gs_pCanFilterPara);
     }
 }
 /*******************************************************************************

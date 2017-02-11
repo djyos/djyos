@@ -70,6 +70,11 @@
 			<locationURI>DJYOS_SRC_LOCATION/bsp/startup</locationURI>
 		</link>
 		<link>
+			<name>src/OS_code/extern-component/firmware</name>
+			<type>2</type>
+			<locationURI>DJYOS_SRC_LOCATION/extern-component/firmware</locationURI>
+		</link>
+		<link>
 			<name>src/OS_code/loader/si</name>
 			<type>2</type>
 			<locationURI>DJYOS_SRC_LOCATION/loader/si</locationURI>

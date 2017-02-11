@@ -74,7 +74,11 @@ extern "C" {
 #define GPIO_SPEED_25M		1		//GPIO速度MEDIUM
 #define GPIO_SPEED_50M		2		//GPIO速度High
 #define GPIO_SPEED_100M		3		//GPIO速度very high
-
+//todo 以上4个定义不太合适改为下面四个定义
+#define GPIO_SPEED_L		0		//GPIO速度LOW
+#define GPIO_SPEED_M		1		//GPIO速度MEDIUM
+#define GPIO_SPEED_H		2		//GPIO速度High
+#define GPIO_SPEED_VH	    3		//GPIO速度very high
 
 
 #define GPIO_PUPD_NONE		0		//不带上下拉
@@ -135,10 +139,33 @@ extern "C" {
 #define AF13				13
 #define AF14				14
 #define AF15				15
+#define AF_NUll             16//复用模式为空作为普通I/O口使用。
 
-void GPIO_CfgPinFunc(u32 port,u32 Pinx,u32 Mode,
+//O_开头的是输出需要初始化的   I_  开头的是输入需要初始化化的
+typedef struct PIN
+{
+   //GPIO_A....
+   u32 PORT;
+   //如PIN1....
+   u32 Pinx;
+   // GPIO 端口模式寄存器如 GPIO_MODE_IN
+   u32 MODER;
+   //输出模式开漏或者 推挽输出
+   u32 O_TYPER;
+   //频率
+   u32 O_SPEEDR;
+   //上拉下拉等
+   u32 PUPD;
+   //AF mode
+   u32 AF;
+}Pin;
+
+#define PIO_LISTSIZE(pPins)    (sizeof(pPins) / sizeof( Pin))
+
+
+bool_t GPIO_CfgPinFunc(u32 port,u32 Pinx,u32 Mode,
 						u32 OutType,u32 OutSpeed,u32 PUPD);
-u32 GPIO_AFSet(u32 port,u32 pinnum,u32 af_no);
+bool_t GPIO_AFSet(u32 port,u32 pinnum,u32 af_no);
 u32 GPIO_GetData(u32 port);
 void GPIO_OutData(u32 port,u32 data);
 void GPIO_SettoHigh(u32 port,u32 msk);
@@ -146,6 +173,15 @@ void GPIO_SettoLow(u32 port,u32 msk);
 void GPIO_PowerOn(u32 port);
 void GPIO_PowerOff(u32 port);
 bool_t GPIO_SetLckr(u32 port,u32 Lckk);
+
+
+
+
+bool_t PIO_Configure(const Pin *Pin, u32 num);
+void PIO_Clear(const Pin *Pin);
+void PIO_Set(const Pin *Pin);
+unsigned char PIO_Get( const Pin *pin );
+
 #ifdef __cplusplus
 }
 #endif

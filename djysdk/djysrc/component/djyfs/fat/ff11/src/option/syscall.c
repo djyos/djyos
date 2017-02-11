@@ -128,7 +128,7 @@ void ff_rel_grant (
 /*------------------------------------------------------------------------*/
 /* If a NULL is returned, the file function fails with FR_NOT_ENOUGH_CORE.
 */
-
+#include <stdlib.h>
 void* ff_memalloc (	/* Returns pointer to the allocated memory block */
 	UINT msize		/* Number of bytes to allocate */
 )
