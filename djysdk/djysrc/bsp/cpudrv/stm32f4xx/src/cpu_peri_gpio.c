@@ -146,7 +146,7 @@ void GPIO_SettoHigh(u32 port,u32 msk)
 {
     if(port >GPIO_I)
         return;
-    tg_GPIO_Reg[port]->BSRRL = msk & 0xffff;
+    tg_GPIO_Reg[port]->BSRR = msk & 0xffff;
 }
 
 // =============================================================================
@@ -159,7 +159,7 @@ void GPIO_SettoLow(u32 port,u32 msk)
 {
     if(port > GPIO_I)
         return;
-    tg_GPIO_Reg[port]->BSRRH = msk & 0xffff;
+    tg_GPIO_Reg[port]->BSRR = ((msk & 0xffff)<<16);
 }
 
 // =============================================================================

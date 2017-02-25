@@ -37,6 +37,8 @@ SECTIONS
         KEEP(*liblibOS_NUCLEO-F746ZG_o0.a:cpu_peri_gpio.o (.text .text.* .rodata .rodata.*))
         KEEP(*liblibOS_NUCLEO-F746ZG_o0.a:IAP_pLoad.o (.text .text.* .rodata .rodata.*))
         KEEP(*liblibOS_NUCLEO-F746ZG_o0.a:set-cache.o (.text .text.* .rodata .rodata.*))
+ 	KEEP(*liblibOS_NUCLEO-F746ZG_o0.a:cpu_peri_hal.o (.text .text.* .rodata .rodata.*))
+        KEEP(*liblibOS_NUCLEO-F746ZG_o0.a:stm32f7xx_hal_tim.o (.text .text.* .rodata .rodata.*))
         KEEP(*board/NUCLEO-F746ZG/src/OS_prjcfg/Iboot_config.o (.text .text.* .rodata .rodata.*))
     }>InnerFlash
 
@@ -99,6 +101,7 @@ SECTIONS
         *board/NUCLEO-F746ZG/src/critical/*.o (.bss .bss.* COMMON)
         *liblibOS_NUCLEO-F746ZG_o0.a:heap-static.o (.bss .bss.* COMMON)
         *liblibOS_NUCLEO-F746ZG_o0.a:list.o (.bss .bss.* COMMON)
+        *liblibOS_NUCLEO-F746ZG_o0.a:cpu_peri_hal.o (.bss .bss.* COMMON)
     }>RAM1
 
     rw_sysload_rRAM1_lIbootRom :

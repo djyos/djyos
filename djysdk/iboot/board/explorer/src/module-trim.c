@@ -163,6 +163,7 @@ void Sys_ModuleInit(void)
 
     ModuleInstall_Ymodem(0);
 	Ymodem_PathSet("/iboot");
+	ModuleInstall_IAP_FS(NULL);
     ModuleInstall_IAP();
 
     //djybusÄ£¿é

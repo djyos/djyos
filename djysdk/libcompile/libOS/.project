@@ -25,59 +25,29 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>src/OS_code/component</name>
+			<name>src/component</name>
 			<type>2</type>
 			<locationURI>DJYOS_SRC_LOCATION/component</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/djyos</name>
+			<name>src/djyos</name>
 			<type>2</type>
 			<locationURI>DJYOS_SRC_LOCATION/djyos</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/extern-component</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/extern-component</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/libc</name>
+			<name>src/libc</name>
 			<type>2</type>
 			<locationURI>DJYOS_SRC_LOCATION/libc</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/bsp/arch</name>
+			<name>src/third</name>
 			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/arch</locationURI>
+			<locationURI>DJYOS_SRC_LOCATION/third</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/bsp/boarddrv</name>
+			<name>src/third/firmware</name>
 			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/boarddrv</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/bsp/chipdrv</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/chipdrv</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/bsp/cpudrv</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/cpudrv</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/bsp/startup</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/bsp/startup</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/extern-component/firmware</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/extern-component/firmware</locationURI>
-		</link>
-		<link>
-			<name>src/OS_code/loader/si</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/loader/si</locationURI>
+			<locationURI>DJYOS_SRC_LOCATION/third/firmware</locationURI>
 		</link>
 	</linkedResources>
 	<variableList>

@@ -76,28 +76,33 @@ bool_t Ping(char *param)
     struct in_addr ipaddr;
     struct hostent *host;
     u32    times;
+    u32    numrcv = 0;
+    u32    waittime;
 
-    int argc = 2;
-    char *argv[2];
+    char *argv[3];
+    int argc = 3;
+    memset(argv,0,sizeof(argv));
     if(NULL == param)
     {
         return false;
     }
-
     string2arg(&argc,argv,param);
-    if((argc != 1)&&(argc != 2))
+    if(argc == 0)
     {
-        return false;
+    	return false;
     }
-    if(argc == 2)
+
+    times = CN_PING_DEFAULT_COUNTER;
+    waittime = CN_PING_DEFAULT_TIMEOUT;
+    if(NULL != argv[1])
     {
         times = strtol(argv[1],NULL,0);
     }
-    else
+    if(NULL != argv[2])
     {
-        times = CN_PING_DEFAULT_COUNTER;
+        waittime = strtol(argv[2],NULL,0);
+        waittime =waittime*1000*mS;
     }
-
     if(0 == inet_aton(argv[0],&ipaddr))
     {
         //use the dns to get the ip
@@ -109,7 +114,7 @@ bool_t Ping(char *param)
         else
         {
             printf("%s:Unknown host:%s\n\r",__FUNCTION__,param);
-            return false;
+            return true;
         }
     }
     ip = ipaddr.s_addr;
@@ -123,13 +128,15 @@ bool_t Ping(char *param)
             timeend = (u32)DjyGetSysTime();
             timeused = (u32)(timeend - timestart);
             printf("0x%08x %s reply:Time = %d ms\n\r",i,inet_ntoa(ipaddr),timeused/1000);
-            Djy_EventDelay(CN_PING_DEFAULT_TIMEOUT);
+            Djy_EventDelay(waittime);
+            numrcv++;
         }
         else
         {
             printf("0x%08x %s reply:Timeout\n\r",i,inet_ntoa(ipaddr));
         }
     }
+    printf("%s:snd:%d rcv:%d miss:%d\n\r",__FUNCTION__,times,numrcv,times-numrcv);
     return true;
 }
 
@@ -138,8 +145,8 @@ struct ShellCmdTab  gServicePing[] =
     {
         "ping",
         Ping,
-        "usage:ping hostname [times]",
-        "usage:ping hostname [times]",
+        "usage:ping hostname [times] [waittime](second)",
+        "usage:ping hostname [times] [waittime](second)",
     }
 };
 

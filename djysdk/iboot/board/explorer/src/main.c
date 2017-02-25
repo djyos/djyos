@@ -73,11 +73,11 @@ void LED_Init(void)
 }
 void LED_On (unsigned int num)
 {
-	GPIOF->BSRRL = led_mask[num];
+	GPIOF->BSRR = led_mask[num];
 }
 void LED_Off (unsigned int num)
 {
-	GPIOF->BSRRH = led_mask[num];
+	GPIOF->BSRR = led_mask[num]<<16;
 }
 
 ptu32_t djy_main(void)

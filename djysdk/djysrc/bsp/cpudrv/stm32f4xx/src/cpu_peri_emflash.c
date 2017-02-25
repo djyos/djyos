@@ -43,6 +43,7 @@
 // 不负任何责任，即在该种使用已获事前告知可能会造成此类损害的情形下亦然。
 //-----------------------------------------------------------------------------
 
+#include <string.h>
 #include <stdlib.h>
 #include <driver.h>
 #include <driver/flash/flash.h>
@@ -59,7 +60,7 @@ static struct EmbdFlashDescr{
 	u16     NormalSectorsPerPlane;       // 每plane的normal sector数
 	u16 	Planes;                      // plane数
 	u32     MappedStAddr;
-} *sp_tEmFlashDesrc;
+} *s_ptEmbdFlash;
 extern u32 gc_ptIbootSize;
 //-----------------------------------------------------------------------------
 //功能: 内置FLASH初始化
@@ -89,16 +90,16 @@ static s32 EmFlash_Init(struct EmbdFlashDescr *Description)
 //-----------------------------------------------------------------------------
 static s32 EmFlash_GetDescr(struct EmFlashDescr *Description)
 {
-	Description->BytesPerPage = sp_tEmFlashDesrc->BytesPerPage;
-	Description->TotalPages = (sp_tEmFlashDesrc->PagesPerSmallSect *
-							   sp_tEmFlashDesrc->SmallSectorsPerPlane +
-							   sp_tEmFlashDesrc->PagesPerLargeSect *
-							   sp_tEmFlashDesrc->LargeSectorsPerPlane +
-							   sp_tEmFlashDesrc->PagesPerNormalSect *
-							   sp_tEmFlashDesrc->NormalSectorsPerPlane) *
-					          sp_tEmFlashDesrc->Planes;
-	Description->ReservedPages = gc_ptIbootSize / sp_tEmFlashDesrc->BytesPerPage;
-	Description->MappedStAddr = sp_tEmFlashDesrc->MappedStAddr;
+	Description->BytesPerPage = s_ptEmbdFlash->BytesPerPage;
+	Description->TotalPages = (s_ptEmbdFlash->PagesPerSmallSect *
+							   s_ptEmbdFlash->SmallSectorsPerPlane +
+							   s_ptEmbdFlash->PagesPerLargeSect *
+							   s_ptEmbdFlash->LargeSectorsPerPlane +
+							   s_ptEmbdFlash->PagesPerNormalSect *
+							   s_ptEmbdFlash->NormalSectorsPerPlane) *
+					          s_ptEmbdFlash->Planes;
+	Description->ReservedPages = gc_ptIbootSize / s_ptEmbdFlash->BytesPerPage;
+	Description->MappedStAddr = s_ptEmbdFlash->MappedStAddr;
 	return (0);
 }
 //-----------------------------------------------------------------------------
@@ -110,21 +111,22 @@ static s32 EmFlash_GetDescr(struct EmFlashDescr *Description)
 static s32 EmFlash_SectorEarse(u32 SectorNo)
 {
 	s32 Ret;
-	u32 sector;
+	u32 SECTORError=0;//保存出错类型信息
+	static FLASH_EraseInitTypeDef EraseInitStruct;
 
-	FLASH_Unlock();
-	FLASH_DataCacheCmd(DISABLE);
+	HAL_FLASH_Unlock();
 
-	sector = SectorNo * 0x08;
-	Ret = FLASH_EraseSector(sector, VoltageRange_3);
+	EraseInitStruct.TypeErase     = FLASH_TYPEERASE_SECTORS;
+	EraseInitStruct.VoltageRange  = FLASH_VOLTAGE_RANGE_3;
+	EraseInitStruct.Sector        = SectorNo;
+	EraseInitStruct.NbSectors     = 1;
 
-	FLASH_DataCacheCmd(ENABLE);
-	FLASH_Lock();
-	if(Ret != FLASH_COMPLETE)
-		Ret = -1;
+	if (HAL_FLASHEx_Erase(&EraseInitStruct, &SECTORError) != HAL_OK)
+	 	Ret=-1;
 	else
-		Ret = 0;
-	return (Ret);
+		Ret=0;
+	HAL_FLASH_Lock();
+	return Ret;
 }
 //-----------------------------------------------------------------------------
 //功能: 写某页
@@ -141,26 +143,27 @@ static s32 EmFlash_PageProgram(u32 Page, u8 *Data, u32 Flags)
 	u32 Ret,i;
 	u32 *pData = (u32*)Data;
 
-	u32 Addr = Page * sp_tEmFlashDesrc->BytesPerPage + sp_tEmFlashDesrc->MappedStAddr;
+	u32 Addr = Page * s_ptEmbdFlash->BytesPerPage + s_ptEmbdFlash->MappedStAddr;
 
 	if(!Data)
 		return (-1);
 
-	FLASH_Unlock();
+	HAL_FLASH_Unlock();
 
-	for(i = 0; i < sp_tEmFlashDesrc->BytesPerPage;)
+	for(i = 0; i < s_ptEmbdFlash->BytesPerPage;)
 	{
     	if(*(u32*)Addr != *pData)
     	{
-    		Ret = FLASH_ProgramWord(Addr,*pData);
-    		if(Ret != FLASH_COMPLETE)
+    		Ret = HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,Addr,*pData);
+    		if(Ret != HAL_OK)
     			break;
     	}
 		pData++;
 		i += 4;
 		Addr += 4;
 	}
-	FLASH_Lock();
+
+	HAL_FLASH_Lock();
 
 	return i;
 }
@@ -172,13 +175,13 @@ static s32 EmFlash_PageProgram(u32 Page, u8 *Data, u32 Flags)
 //-----------------------------------------------------------------------------
 static s32 EmFlash_PageRead(u32 Page, u8 *Data, u32 Flags)
 {
-	u32 Addr = Page * sp_tEmFlashDesrc->BytesPerPage + sp_tEmFlashDesrc->MappedStAddr;
+	u32 Addr = Page * s_ptEmbdFlash->BytesPerPage + s_ptEmbdFlash->MappedStAddr;
 
 	if(!Data)
 		return (-1);
 
-	memcpy(Data, (u8*)Addr, sp_tEmFlashDesrc->BytesPerPage);
-	return (sp_tEmFlashDesrc->BytesPerPage);
+	memcpy(Data, (u8*)Addr, s_ptEmbdFlash->BytesPerPage);
+	return (s_ptEmbdFlash->BytesPerPage);
 
 }
 
@@ -200,33 +203,33 @@ static s32 EmFlash_PageToSector(u32 PageNo, u32 *Remains, u32 *SectorNo)
 
 	Sector = 0;
 	PagesDone = 0;
-	PagesLeft = sp_tEmFlashDesrc->PagesPerSmallSect -
-			   (PageNo % sp_tEmFlashDesrc->PagesPerSmallSect);
-	for(i = 1; i <= sp_tEmFlashDesrc->SmallSectorsPerPlane; i++)
+	PagesLeft = s_ptEmbdFlash->PagesPerSmallSect -
+			   (PageNo % s_ptEmbdFlash->PagesPerSmallSect);
+	for(i = 1; i <= s_ptEmbdFlash->SmallSectorsPerPlane; i++)
 	{
-		if(PageNo < (PagesDone + sp_tEmFlashDesrc->PagesPerSmallSect * i))
+		if(PageNo < (PagesDone + s_ptEmbdFlash->PagesPerSmallSect * i))
 			goto DONE;
 		Sector++;
 	}
 
-	PagesDone += sp_tEmFlashDesrc->SmallSectorsPerPlane *
-				 sp_tEmFlashDesrc->PagesPerSmallSect;
-	PagesLeft = sp_tEmFlashDesrc->PagesPerLargeSect -
-				   (PageNo % sp_tEmFlashDesrc->PagesPerLargeSect);
-	for(i = 1; i <= sp_tEmFlashDesrc->LargeSectorsPerPlane; i++)
+	PagesDone += s_ptEmbdFlash->SmallSectorsPerPlane *
+				 s_ptEmbdFlash->PagesPerSmallSect;
+	PagesLeft = s_ptEmbdFlash->PagesPerLargeSect -
+				   (PageNo % s_ptEmbdFlash->PagesPerLargeSect);
+	for(i = 1; i <= s_ptEmbdFlash->LargeSectorsPerPlane; i++)
 	{
-		if(PageNo < (PagesDone + sp_tEmFlashDesrc->PagesPerLargeSect * i))
+		if(PageNo < (PagesDone + s_ptEmbdFlash->PagesPerLargeSect * i))
 			goto DONE;
 		Sector++;
 	}
 
-	PagesDone += sp_tEmFlashDesrc->LargeSectorsPerPlane *
-					 sp_tEmFlashDesrc->PagesPerLargeSect;
-	PagesLeft = sp_tEmFlashDesrc->PagesPerNormalSect -
-				   (PageNo % sp_tEmFlashDesrc->PagesPerNormalSect);
-	for(i = 1; i <= sp_tEmFlashDesrc->NormalSectorsPerPlane; i++)
+	PagesDone += s_ptEmbdFlash->LargeSectorsPerPlane *
+					 s_ptEmbdFlash->PagesPerLargeSect;
+	PagesLeft = s_ptEmbdFlash->PagesPerNormalSect -
+				   (PageNo % s_ptEmbdFlash->PagesPerNormalSect);
+	for(i = 1; i <= s_ptEmbdFlash->NormalSectorsPerPlane; i++)
 	{
-		if(PageNo < (PagesDone + sp_tEmFlashDesrc->PagesPerNormalSect * i))
+		if(PageNo < (PagesDone + s_ptEmbdFlash->PagesPerNormalSect * i))
 			goto DONE;
 		Sector++;
 	}
@@ -249,28 +252,22 @@ s32 ModuleInstall_EmbededFlash(const char *ChipName, u32 Flags, u16 ResPages)
 {
 	u32 Len;
     struct FlashChip *Chip;
+    struct EmFlashDescr FlashDescr;
 	struct MutexLCB *EmFlashLock;
-	struct EmFlashDescr FlashDescr;
 	u8 *Buf;
 	s32 Ret = 0;
 
 	if (!ChipName)
 		return (-1);
 
-	if(sp_tEmFlashDesrc)
+	if(s_ptEmbdFlash)
 		return (-4); // 设备已注册
 
-	sp_tEmFlashDesrc = malloc(sizeof(*sp_tEmFlashDesrc));
-	if(!sp_tEmFlashDesrc)
+	s_ptEmbdFlash = malloc(sizeof(*s_ptEmbdFlash));
+	if(!s_ptEmbdFlash)
 		return (-1);
 
-    // 获取FLASH信息
-    if(EmFlash_Init(sp_tEmFlashDesrc))
-    {
-        TraceDrv(FLASH_TRACE_ERROR, "解析内置FLASH信息失败\r\n");
-		Ret = -3;
-		goto FAILURE;
-    }
+	EmFlash_Init(s_ptEmbdFlash);
 
     EmFlash_GetDescr(&FlashDescr);// 获取FLASH信息
    	if(ResPages > FlashDescr.TotalPages)
@@ -300,7 +297,7 @@ s32 ModuleInstall_EmbededFlash(const char *ChipName, u32 Flags, u16 ResPages)
 	strcpy(Chip->Name, ChipName); // 设备名
 	if(Flags & FLASH_BUFFERED)
 	{
-		Buf = (u8*)malloc(sp_tEmFlashDesrc->BytesPerPage); // NAND底层缓冲
+		Buf = (u8*)malloc(s_ptEmbdFlash->BytesPerPage); // NAND底层缓冲
 		if(!Buf)
 		{
 			TraceDrv(FLASH_TRACE_ERROR, "out of memory!\r\n");
@@ -326,8 +323,8 @@ s32 ModuleInstall_EmbededFlash(const char *ChipName, u32 Flags, u16 ResPages)
 FAILURE:
 	if(Ret)
 	{
-		if(sp_tEmFlashDesrc)
-			free(sp_tEmFlashDesrc);
+		if(s_ptEmbdFlash)
+			free(s_ptEmbdFlash);
 		if(EmFlashLock)
 			Lock_MutexDelete(EmFlashLock);
 		if(Buf)

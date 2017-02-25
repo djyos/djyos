@@ -13,6 +13,10 @@
 #include "os.h"
 #include "cpu_peri.h"
 #include "time.h"
+#define LSE_Flag_Reg 0xA5A5
+#define LSI_Flag_Reg 0xA5A0
+
+#define BAK_Reg   2
 
 #define HexToBcd(x) ((((x) / 10) <<4) + ((x) % 10))
 #define BcdToHex(x) ((((x) & 0xF0) >>4) * 10 + ((x) & 0x0F))
@@ -203,48 +207,90 @@ ptu32_t Rtc_UpdateTime(void)
 static bool_t RTC_Configuration(void)
 {
 
-	u16 retry=200;
+	u16 retry=400;
+	u32 SSR;
 
 	RCC->APB1ENR|=1<<28;		//使能电源接口时钟
 	PWR->CR1|=1<<8;				//后备区域访问使能(RTC+SRAM)
-
-	RCC->CSR|=1<<0;				//LSI总是使能
-	while(!(RCC->CSR&0x02));	//等待LSI就绪
-
-	RCC->BDCR|=1<<0;			//尝试开启LSE
-	while(retry&&((RCC->BDCR&0X02)==0))//等待LSE准备好
+	if(LSE_Flag_Reg!=BKP_ReadBackupRegister(BAK_Reg))
 	{
-		retry--;
-		Djy_DelayUs(5);
-	}
 
-	RCC->BDCR&=~(3<<8);			//清零8/9位
-
-	if(retry==0)
-		RCC->BDCR|=1<<9;	//LSE开启失败,启动LSI.
-	else
-		RCC->BDCR|=1<<8;			//选择LSE,作为RTC时钟
-	RCC->BDCR|=1<<15;				//使能RTC时钟
-
-	if(0xA5A5!=BKP_ReadBackupRegister(1))
-	{
-		RTC->WPR=0xCA;	//关闭RTC寄存器写保护
-		RTC->WPR=0x53;
-		RTC->CR=0;
-		if(false==RTC_Init_Mode())
-		{
-			RCC->BDCR=1<<16;		//复位BDCR
+			RCC->BDCR=1<<16;			//复位BDCR
 			Djy_DelayUs(10);
-			RCC->BDCR=0;			//结束复位
-			return 2;				//进入RTC初始化模式
-		}
-		RTC->PRER=0XFF;				//RTC同步分频系数(0~7FFF),必须先设置同步分频,再设置异步分频,Frtc=Fclks/((Sprec+1)*(Asprec+1))
-		RTC->PRER|=0X7F<<16;		//RTC异步分频系数(1~0X7F)
-		RTC->CR&=~(1<<6);			//RTC设置为,24小时格式
-		RTC->ISR&=~(1<<7);			//退出RTC初始化模式
-		RTC->WPR=0xFF;				//使能RTC寄存器写保护
+			RCC->BDCR=0;				//结束复位
 
-		BKP_WriteBackupRegister(1,0xA5A5);			//标记已经初始化过了,使用LSE
+			RCC->CSR|=1<<0;				//LSI总是使能
+			while(!(RCC->CSR&0x02));	//等待LSI就绪
+
+			RCC->BDCR|=1<<0;			//尝试开启LSE
+			while(retry&&((RCC->BDCR&0X02)==0))//等待LSE准备好
+			{
+				retry--;
+				Djy_DelayUs(5*1000);
+			}
+
+			RCC->BDCR&=~(3<<8);			//清零8/9位
+
+			if(retry==0)
+			{
+				BKP_WriteBackupRegister(BAK_Reg,LSI_Flag_Reg);
+				RCC->BDCR|=1<<9;	//LSE开启失败,启动LSI.
+			}
+			else
+			{
+				BKP_WriteBackupRegister(BAK_Reg,LSE_Flag_Reg);
+				RCC->BDCR|=1<<8;			//选择LSE,作为RTC时钟
+			}
+			RCC->BDCR|=1<<15;				//使能RTC时钟
+
+			RTC->WPR=0xCA;	//关闭RTC寄存器写保护
+			RTC->WPR=0x53;
+			RTC->CR=0;
+			if(false==RTC_Init_Mode())
+			{
+				RCC->BDCR=1<<16;		//复位BDCR
+				Djy_DelayUs(10);
+				RCC->BDCR=0;			//结束复位
+				return false;				//进入RTC初始化模式
+			}
+			RTC->PRER=0XFF;				//RTC同步分频系数(0~7FFF),必须先设置同步分频,再设置异步分频,Frtc=Fclks/((Sprec+1)*(Asprec+1))
+			RTC->PRER|=0X7F<<16;		//RTC异步分频系数(1~0X7F)
+			RTC->CR&=~(1<<6);			//RTC设置为,24小时格式
+			RTC->ISR&=~(1<<7);			//退出RTC初始化模式
+			RTC->WPR=0xFF;				//使能RTC寄存器写保护
+			//第一次配置装载时间初值退出初始化模式
+			if(BKP_ReadBackupRegister(BAK_Reg)!=LSI_Flag_Reg &&\
+			 BKP_ReadBackupRegister(BAK_Reg)!=LSI_Flag_Reg)
+			{
+
+					RTC->DR=(((u32)(1))<<13)|
+					((u32)HexToBcd(2017-1970)<<16)|
+					((u32)HexToBcd(2)<<8)|
+					((u32)HexToBcd(20));
+
+					RTC->TR=((u32)HexToBcd(12)<<16)|\
+					((u32)HexToBcd(0)<<8)|\
+					(u32)(HexToBcd(0));
+			}
+
+	}
+	else
+	{
+		retry=10;		//连续10次SSR的值都没变化,则LSE死了.
+		SSR=RTC->SSR;	//读取初始值
+		while(retry)	//检测ssr寄存器的动态,来判断LSE是否正常
+		{
+			Djy_DelayUs(10*1000);
+			if(SSR==RTC->SSR)retry--;	//对比
+			else break;
+		}
+		if(retry==0)	//LSE挂了,清除配置等待下次进入重新设置
+		{
+			BKP_WriteBackupRegister(BAK_Reg,0XFFFF);	//标记错误的值
+			RCC->BDCR=1<<16;			//复位BDCR
+			Djy_DelayUs(10);
+			RCC->BDCR=0;				//结束复位
+		}
 	}
 	return true;
 }

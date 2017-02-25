@@ -562,6 +562,10 @@ struct DjyDevice * Driver_OpenDeviceAlias(u32 DevAlias,u32 flags,u32 timeout)
                     Dev = NULL;
                 }
             }
+            else
+            {
+            	Dev = NULL;		
+            }
         }
     }
     return Dev;

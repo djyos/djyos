@@ -62,10 +62,7 @@ bool_t TcpIpVersion(char *param)
     printf("DAT      :%s \r\n",__DATE__);
     printf("SUBMIT2  :any new idea, please contact with %s \r\n",CN_TCPIP_AUTHOR);
     printf("ChangeLog:\r\n");
-    printf("         :1,add some debug style\r\n");
-    printf("         :2,fix some bugs\r\n");
-    printf("         :3,rebuild the link and rout layer\r\n");
-    printf("         :4,wish you enjoy it!\r\n");
+    printf("FUNCTIONS:TCP/UDP/IPV4/PPP/FTP/TFTP/ICMP/PING/SOCKET\r\n");
     return true;
 }
 // =============================================================================
@@ -84,10 +81,7 @@ ptu32_t ModuleInstall_TcpIp(ptu32_t para)
     printk("DAT      :%s \r\n",__DATE__);
     printk("SUBMIT2  :any new idea, please contact with %s \r\n",CN_TCPIP_AUTHOR);
     printk("ChangeLog:\r\n");
-    printk("         :1,add some debug style\r\n");
-    printk("         :2,fix some bugs\r\n");
-    printk("         :3,rebuild the link and rout layer\r\n");
-    printk("         :4,wish you enjoy it!\r\n");
+    printk("FUNCTIONS:TCP/UDP/IPV4/PPP/FTP/TFTP/ICMP/PING/SOCKET\r\n");
 	//do the package manage module initialize
 	extern bool_t PkgInit(void);
 	if(false == PkgInit())

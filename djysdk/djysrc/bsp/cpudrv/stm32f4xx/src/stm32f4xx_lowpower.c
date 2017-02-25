@@ -67,11 +67,10 @@
 #include "stdint.h"
 #include "stddef.h"
 #include "lowpower.h"
-#include "stm32f4xx_pwr.h"
-//#include "stm32f4xx_bkp.h"
-#include "stm32f4xx_rcc.h"
+#include "cpu_peri.h"
 
-#define Stm32SleepModel4    0x789a
+
+#define Stm32SleepModel4    0x3456789a
 
 //----初始化低功耗硬件--------------------------------------------------------
 //功能: 初始化低功耗管理硬件,如果不需要初始化,可以直接return true.因为stm32低功耗
@@ -81,8 +80,8 @@
 //----------------------------------------------------------------------------
 bool_t __LP_BSP_HardInit(void)
 {
-	PWR_DeInit();				//PWR模块使能
-	PWR_BackupAccessCmd(ENABLE);//后备区使能
+	HAL_PWR_DeInit();				//PWR模块使能
+	HAL_PWR_EnableBkUpAccess();//后备区使能
     return true;
 }
 
@@ -96,13 +95,12 @@ bool_t __LP_BSP_HardInit(void)
 //----------------------------------------------------------------------------
 u32 __LP_BSP_GetSleepLevel(void)
 {
-    u32 LP_Flag;
-    u16 bkt_DR;
-    LP_Flag = PWR_GetFlagStatus(PWR_FLAG_WU+PWR_FLAG_SB);
-    if(LP_Flag & PWR_FLAG_WU)
+
+    u32 bkt_DR;
+    if(__HAL_PWR_GET_FLAG(PWR_FLAG_WU+PWR_FLAG_SB)& PWR_FLAG_WU)
     {
-//        bkt_DR = BKP_ReadBackupRegister(BKP_DR42);
-    	bkt_DR = Stm32SleepModel4;//todo
+        bkt_DR = RTC->BKP0R;//todo
+//    	bkt_DR = Stm32SleepModel4;
         if(bkt_DR == Stm32SleepModel4)
             return CN_SLEEP_L4;
         else
@@ -121,7 +119,7 @@ bool_t __LP_BSP_SaveSleepLevel(u32 SleepLevel)
 {
     if((SleepLevel!= CN_SLEEP_L3) && (SleepLevel!= CN_SLEEP_L4))
         return false;
-//    BKP_WriteBackupRegister(BKP_DR42,(u16)SleepLevel);//todo
+    RTC->BKP0R=SleepLevel;//todo
     return true;
 }
 
@@ -132,8 +130,8 @@ bool_t __LP_BSP_SaveSleepLevel(u32 SleepLevel)
 //-----------------------------------------------------------------------------
 void __LP_BSP_EntrySleepL0(void)
 {
-    NVIC_SystemLPConfig(NVIC_LP_SLEEPDEEP + NVIC_LP_SLEEPONEXIT +NVIC_LP_SEVONPEND,DISABLE);
-    __WFE( );
+
+    HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFE);
 }
 
 //----进入L1级低功耗-----------------------------------------------------------
@@ -144,8 +142,8 @@ void __LP_BSP_EntrySleepL0(void)
 //-----------------------------------------------------------------------------
 void __LP_BSP_EntrySleepL1(void)
 {
-    NVIC_SystemLPConfig(NVIC_LP_SLEEPDEEP + NVIC_LP_SLEEPONEXIT +NVIC_LP_SEVONPEND,DISABLE);
-    __WFE( );
+
+    HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFE);
 }
 
 //----进入L2级低功耗-----------------------------------------------------------
@@ -158,9 +156,9 @@ void __LP_BSP_EntrySleepL2(void)
 	//禁止中断
 
 	//清所有外部中断标志和RTC闹钟标志
-	EXTI_ClearITPendingBit(0xFFFFF);
+	EXTI->PR = 0xFFFFF;
+	HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFE);
 
-    PWR_EnterSTOPMode(PWR_Regulator_LowPower,PWR_STOPEntry_WFE);
 }
 
 //----进入L3级低功耗-----------------------------------------------------------
@@ -170,7 +168,8 @@ void __LP_BSP_EntrySleepL2(void)
 //-----------------------------------------------------------------------------
 void __LP_BSP_EntrySleepL3(void)
 {
-    PWR_EnterSTANDBYMode( );
+
+	HAL_PWR_EnterSTANDBYMode();
 }
 
 //----进入L4级低功耗-----------------------------------------------------------
@@ -181,6 +180,6 @@ void __LP_BSP_EntrySleepL3(void)
 //-----------------------------------------------------------------------------
 void __LP_BSP_EntrySleepL4(void)
 {
-    PWR_EnterSTANDBYMode( );
+    HAL_PWR_EnterSTANDBYMode( );
 }
 

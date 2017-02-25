@@ -118,6 +118,10 @@ void Init_Cpu(void)
     //系统时钟初始化Fsys=PLL=261MHZ   Fusb==48Mhz
     while(false==SysClockInit());
 
+#ifdef USE_HAL_DRIVER
+    HAL_TickInit();
+#endif
+
     extern void SRAM_Init(void);
     SRAM_Init();		//片外RAM 初始化
 

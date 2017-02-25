@@ -142,7 +142,7 @@ void semp_reset(semp_t semp)
 bool_t taskcreate(const char *name,u16 stacksize,u8 prior,ptu32_t (*fnTask)(void),ptu32_t para)
 {
 	u16 evttID,eventID;
-    evttID= Djy_EvttRegist(EN_CORRELATIVE, prior, 0, 1,fnTask,NULL, stacksize,name);
+    evttID= Djy_EvttRegist(EN_INDEPENDENCE, prior, 0, 1,fnTask,NULL, stacksize,name);
     if(evttID == CN_EVTT_ID_INVALID)
     {
         goto EXIT_EVTTFAILED;

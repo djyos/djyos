@@ -70,8 +70,8 @@
 
 #define CN_CAN_RX_BUF_SIZE                2048
 #define CN_CAN_DEV_MONITOR_TIME           3*1000*1000
-#define CN_CAN_NUM                   2
-#define CN_DEBUG_CAN_CNT    10
+#define CN_CAN_NUM                        1
+#define CN_DEBUG_CAN_CNT                  10
 
 #define CAN_SJW_1TQ      ((uint32_t)0x00000000U)     /*!< 1 time quantum */
 #define CAN_SJW_2TQ      ((uint32_t)CAN_BTR_SJW_0)  /*!< 2 time quantum */
@@ -156,25 +156,25 @@ typedef struct
 /*---------------------------------------------------------------------------
  *      Internal variables
  *---------------------------------------------------------------------------*/
-static uint32_t gs_CANBaudRate[CN_CAN_NUM]={125,125};
+static uint32_t gs_CANBaudRate[CN_CAN_NUM]={125};
 static CAN_DevCtrl *CAN_DevCtrlPtr=NULL;
 static CanFilterConfPara *gs_pCanFilterPara=NULL;
-static u64 gs_u64AppSndCnt[CN_CAN_NUM]={0,0};
-static u64 gs_u64HardSndCnt[CN_CAN_NUM]={0,0};
-static u64 gs_u64HardRcvCnt[CN_CAN_NUM]={0,0};
-static u64 gs_u64AppRcvCnt[CN_CAN_NUM]={0,0};
-static u64 gs_u64BusOffCnt[CN_CAN_NUM]={0,0};     //Bus off err
-static u64 gs_u64PassiveErrCnt[CN_CAN_NUM]={0,0}; //Error passive flag
-static u64 gs_u64CrcErrCnt[CN_CAN_NUM]={0,0};     //Crc err
-static u64 gs_u64PasBitErrCnt[CN_CAN_NUM]={0,0};  //隐性位错误
-static u64 gs_u64DomBitErrCnt[CN_CAN_NUM]={0,0};  //显性位错误
-static u64 gs_u64FoErrCnt[CN_CAN_NUM]={0,0};      //format err
-static u64 gs_u64StErrCnt[CN_CAN_NUM]={0,0};      //bit stuff err
-static u64 gs_u64ACKErrCnt[CN_CAN_NUM]={0,0};     //ACK err
-static u64 gs_TxErrRstCnt[CN_CAN_NUM]={0,0};
-static u64 gs_RxErrRstCnt[CN_CAN_NUM]={0,0};
-static u64 gs_u64RcvPkgBadCnt[CN_CAN_NUM]={0,0};
-static u64 gs_u64SndPkgBadCnt[CN_CAN_NUM]={0,0};//数据包不完整，有效数据不为8个字节
+static u64 gs_u64AppSndCnt[CN_CAN_NUM]={0};
+static u64 gs_u64HardSndCnt[CN_CAN_NUM]={0};
+static u64 gs_u64HardRcvCnt[CN_CAN_NUM]={0};
+static u64 gs_u64AppRcvCnt[CN_CAN_NUM]={0};
+static u64 gs_u64BusOffCnt[CN_CAN_NUM]={0};     //Bus off err
+static u64 gs_u64PassiveErrCnt[CN_CAN_NUM]={0}; //Error passive flag
+static u64 gs_u64CrcErrCnt[CN_CAN_NUM]={0};     //Crc err
+static u64 gs_u64PasBitErrCnt[CN_CAN_NUM]={0};  //隐性位错误
+static u64 gs_u64DomBitErrCnt[CN_CAN_NUM]={0};  //显性位错误
+static u64 gs_u64FoErrCnt[CN_CAN_NUM]={0};      //format err
+static u64 gs_u64StErrCnt[CN_CAN_NUM]={0};      //bit stuff err
+static u64 gs_u64ACKErrCnt[CN_CAN_NUM]={0};     //ACK err
+static u64 gs_TxErrRstCnt[CN_CAN_NUM]={0};
+static u64 gs_RxErrRstCnt[CN_CAN_NUM]={0};
+static u64 gs_u64RcvPkgBadCnt[CN_CAN_NUM]={0};
+static u64 gs_u64SndPkgBadCnt[CN_CAN_NUM]={0};//数据包不完整，有效数据不为8个字节
 static uint8_t CAN_MonitorStack[0x400];
 static uint8_t gs_SndPkg[13*CN_DEBUG_CAN_CNT];
 static uint8_t gs_RcvPkg[13*CN_DEBUG_CAN_CNT];
@@ -296,7 +296,7 @@ static void Sh_CAN_Stat(void)
    uint32_t data[2];//used to print the s64 type
    uint8_t i;
    printf("CAN Stat:\r\n");
-   for(i=0;i<2;i++)
+   for(i=0;i<CN_CAN_NUM;i++)
    {
 	  printf("CAN %d:\r\n",i);
 	  memcpy(data,&gs_u64AppSndCnt[i],sizeof(data));
@@ -344,7 +344,7 @@ static void Sh_Read_CAN_Reg(void)
 	  uint8_t i,j;
 	  tagCanReg *pCan;
 	  printf("CAN Reg:\r\n");
-	  for(i=0;i<2;i++)
+	  for(i=0;i<CN_CAN_NUM;i++)
 	  {
 		  if(i==0)
 		  {
@@ -595,19 +595,10 @@ static void __CAN_GpioConfig(uint8_t byCanNo)
 	switch(byCanNo)
 	{
 		case CN_CAN1:
+		case CN_CAN2:
 			RCC->APB1ENR |=(1<<25);//CAN1时钟使能
-			GPIO_PowerOn(GPIO_A);//GPIO时钟使能
-			GPIO_AFSet( GPIO_A,PIN11|PIN12, AF9);//设置复用功能
-			GPIO_CfgPinFunc(GPIO_A,PIN11|PIN12,GPIO_MODE_AF,
-							GPIO_OTYPE_PP,GPIO_SPEED_100M,GPIO_PUPD_PU);
 			break;
-//		case CN_CAN2:
-//			RCC->APB1ENR |=(1<<17);
-//			GPIO_PowerOn(GPIO_A);//GPIO时钟使能
-//			GPIO_AFSet( GPIO_A,PIN2|PIN3, AF7);
-//			GPIO_CfgPinFunc(GPIO_A,PIN2|PIN3,GPIO_MODE_AF,
-//					GPIO_OTYPE_PP,GPIO_SPEED_100M,GPIO_PUPD_NONE);
-//			break;
+
 		default:
 			break;
 	}
@@ -725,32 +716,32 @@ static void  __CAN_IntInit(uint8_t byCanNo)
 		Int_ClearLine(CN_INT_LINE_CAN1_SCE);
 		Int_RestoreAsynLine(CN_INT_LINE_CAN1_SCE);
 	}
-	else
-	{
-		//发送中断线
-		Int_Register(CN_INT_LINE_CAN2_RX0);
-		Int_SetClearType(CN_INT_LINE_CAN2_RX0,CN_INT_CLEAR_AUTO);
-		Int_IsrConnect(CN_INT_LINE_CAN2_RX0,CAN_ISR_Handler);
-		Int_SettoAsynSignal(CN_INT_LINE_CAN2_RX0);
-		Int_ClearLine(CN_INT_LINE_CAN2_RX0);
-		Int_RestoreAsynLine(CN_INT_LINE_CAN2_RX0);
-
-		//发送中断线
-		Int_Register(CN_INT_LINE_CAN2_RX1);
-		Int_SetClearType(CN_INT_LINE_CAN2_RX1,CN_INT_CLEAR_AUTO);
-		Int_IsrConnect(CN_INT_LINE_CAN2_RX1,CAN_ISR_Handler);
-		Int_SettoAsynSignal(CN_INT_LINE_CAN2_RX1);
-		Int_ClearLine(CN_INT_LINE_CAN2_RX1);
-		Int_RestoreAsynLine(CN_INT_LINE_CAN2_RX1);
-
-		//发送中断线
-		Int_Register(CN_INT_LINE_CAN2_SCE);
-		Int_SetClearType(CN_INT_LINE_CAN2_SCE,CN_INT_CLEAR_AUTO);
-		Int_IsrConnect(CN_INT_LINE_CAN2_SCE,CAN_ISR_Handler);
-		Int_SettoAsynSignal(CN_INT_LINE_CAN2_SCE);
-		Int_ClearLine(CN_INT_LINE_CAN2_SCE);
-		Int_RestoreAsynLine(CN_INT_LINE_CAN2_SCE);
-	}
+//	else
+//	{
+//		//发送中断线
+//		Int_Register(CN_INT_LINE_CAN2_RX0);
+//		Int_SetClearType(CN_INT_LINE_CAN2_RX0,CN_INT_CLEAR_AUTO);
+//		Int_IsrConnect(CN_INT_LINE_CAN2_RX0,CAN_ISR_Handler);
+//		Int_SettoAsynSignal(CN_INT_LINE_CAN2_RX0);
+//		Int_ClearLine(CN_INT_LINE_CAN2_RX0);
+//		Int_RestoreAsynLine(CN_INT_LINE_CAN2_RX0);
+//
+//		//发送中断线
+//		Int_Register(CN_INT_LINE_CAN2_RX1);
+//		Int_SetClearType(CN_INT_LINE_CAN2_RX1,CN_INT_CLEAR_AUTO);
+//		Int_IsrConnect(CN_INT_LINE_CAN2_RX1,CAN_ISR_Handler);
+//		Int_SettoAsynSignal(CN_INT_LINE_CAN2_RX1);
+//		Int_ClearLine(CN_INT_LINE_CAN2_RX1);
+//		Int_RestoreAsynLine(CN_INT_LINE_CAN2_RX1);
+//
+//		//发送中断线
+//		Int_Register(CN_INT_LINE_CAN2_SCE);
+//		Int_SetClearType(CN_INT_LINE_CAN2_SCE,CN_INT_CLEAR_AUTO);
+//		Int_IsrConnect(CN_INT_LINE_CAN2_SCE,CAN_ISR_Handler);
+//		Int_SettoAsynSignal(CN_INT_LINE_CAN2_SCE);
+//		Int_ClearLine(CN_INT_LINE_CAN2_SCE);
+//		Int_RestoreAsynLine(CN_INT_LINE_CAN2_SCE);
+//	}
 
 }
 
@@ -769,11 +760,11 @@ static bool_t __CAN_SetBaudRate(tagCanReg * pCan,uint32_t baudrate)
     	return false;
 	if(baudrate==125)
 	{
-      pCan->BTR=(uint32_t)CAN_BRP_27|CAN_SJW_1TQ|CAN_TS1_9TQ|CAN_TS2_4TQ;
+      pCan->BTR=(uint32_t)CAN_BRP_27|CAN_SJW_1TQ|CAN_TS1_9TQ|CAN_TS2_6TQ;
 	}
 	else if(baudrate==250)
 	{
-		pCan->BTR=(uint32_t)CAN_BRP_27|CAN_SJW_1TQ|CAN_TS1_3TQ|CAN_TS2_2TQ;
+		pCan->BTR=(uint32_t)CAN_BRP_27|CAN_SJW_1TQ|CAN_TS1_5TQ|CAN_TS2_2TQ;
 	}
 	else
 		return false;
@@ -844,36 +835,38 @@ bool_t CAN_Hard_Init(uint8_t byCanNo,uint32_t baudrate,CanFilterConfPara \
 	//Disable time triggered communication mode
 	pCan->MCR&=~(uint32_t)CAN_MCR_TTCM;
 	//Set automatic bus-off management
-	pCan->MCR|=CAN_MCR_ABOM;
+//	pCan->MCR|=CAN_MCR_ABOM;
+	pCan->MCR&=~(uint32_t)CAN_MCR_ABOM;
 	//Set automatic wake-up mode
-	pCan->MCR|=CAN_MCR_AWUM;
+//	pCan->MCR|=CAN_MCR_AWUM;
+	pCan->MCR&=~(uint32_t)CAN_MCR_AWUM;
 	//Set no automatic retransmission
 	pCan->MCR&=~(uint32_t)CAN_MCR_NART;      //todo
 	//Set transmit FIFO priority (first in first out)
 	pCan->MCR|=CAN_MCR_TXFP;
 	//Set recv FIFO locked mode
 	pCan->MCR&=~(uint32_t)CAN_MCR_RFLM;
+
 	//Set the bit timing register  APB1上 54MHz
 	__CAN_SetBaudRate(pCan,baudrate);
-   //Init int
-	__CAN_IntInit(byCanNo);
-	//Enabel Recv Fifo(FMPIE/FFIE/FOVIE) EPVIE BOFIE LECIE ERRIE interrupt
-	pCan->IER|=CAN_IER_FMPIE0|CAN_IER_FFIE0|CAN_IER_FOVIE0|CAN_IER_FMPIE1\
-			|CAN_IER_FFIE1|CAN_IER_FOVIE1|CAN_IER_EPVIE|CAN_IER_BOFIE\
-			|CAN_IER_LECIE|CAN_IER_ERRIE;
-
    //Set loopback test mode
-	pCan->BTR|=CAN_BTR_LBKM;   //todo debug for test
-
-	if(gs_bLoopBackFlag)
-	{
-		pCan->BTR|=CAN_BTR_LBKM;
-	}
+//	pCan->BTR|=CAN_BTR_LBKM;   //todo debug for test
+//
+//	if(gs_bLoopBackFlag)
+//	{
+//		pCan->BTR|=CAN_BTR_LBKM;
+//	}
 	//Set filter configuration
 	if(pFilterConfPara!=NULL)
 	{
 		__CAN_ConfigFilter(pFilterConfPara);
 	}
+
+	 //Init int
+	__CAN_IntInit(byCanNo);
+	//Enabel Recv Fifo(FMPIE/FFIE/FOVIE) EPVIE BOFIE LECIE ERRIE interrupt
+	pCan->IER|=CAN_IER_FMPIE0|CAN_IER_FFIE0|CAN_IER_FOVIE0|CAN_IER_FMPIE1\
+		|CAN_IER_FFIE1|CAN_IER_FOVIE1|CAN_IER_BOFIE|CAN_IER_LECIE|CAN_IER_ERRIE;
 	//Request leave init
 	pCan->MCR&=~(uint32_t)CAN_MCR_INRQ;
 	//Wait the acknowledge
@@ -972,7 +965,7 @@ static bool_t __IsCanTxOk(uint8_t byChip,uint8_t TxMailboxNo)
 //-----------------------------------------------------------------------------
 uint32_t CAN_WriteData(uint8_t byChip, uint8_t* txBuf, uint32_t len)
 {
-	uint32_t Id,Len;
+	uint32_t Id=0,Len=0;
 	uint8_t pkgnum,i,j;
 	tagCanReg *pCan;
 	sint8_t TxMailboxNo;
@@ -1079,7 +1072,7 @@ uint32_t CAN_WriteData(uint8_t byChip, uint8_t* txBuf, uint32_t len)
 //-----------------------------------------------------------------------------
 uint32_t CAN_ReadData(uint8_t byChip, uint8_t* rxBuf, uint32_t len, uint32_t *pRd)
 {
-	uint32_t rdLen=0x0000,ringlen,pkgnum;
+	uint32_t rdLen=0x0000,ringlen,pkgnum,r_len;
 	CAN_DevCtrl *CAN_DevCtrlTempptr=NULL;
 	struct RingBuf *rxRingBuf=NULL;
 	atom_low_t atom;
@@ -1094,8 +1087,14 @@ uint32_t CAN_ReadData(uint8_t byChip, uint8_t* rxBuf, uint32_t len, uint32_t *pR
 	ringlen=Ring_Check(rxRingBuf);
 	Int_LowAtomEnd(atom);
 	if(len>ringlen)
-		 return 0;
-	rdLen=Ring_Read(rxRingBuf,rxBuf,len);
+	{
+		r_len=ringlen;
+	}
+	else
+	{
+		r_len=len;
+	}
+	rdLen=Ring_Read(rxRingBuf,rxBuf,r_len);
 	pkgnum=rdLen/13;
 	gs_u64AppRcvCnt[byChip]+=pkgnum;
 	return rdLen;
@@ -1254,6 +1253,7 @@ static void __CAN_Err_Handle(uint8_t byChip)
 		gs_u64BusOffCnt[byChip]++;
 		printf("Bus Off. \r\n");
 		CAN_Hard_Init(byChip,gs_CANBaudRate[byChip],gs_pCanFilterPara);
+		return;
 	}
 	if(byEsr&CAN_ESR_EPVF)
 	{
@@ -1286,6 +1286,10 @@ static void __CAN_Err_Handle(uint8_t byChip)
 			   break;
 		}
 	}
+	//清中断
+	pCan->MSR|=CAN_MSR_ERRI;
+
+
 }
 //----CAN中断响应函数------------------------------------------------------------
 //功能: CAN中断响应函数
@@ -1395,9 +1399,27 @@ bool_t CAN_Main(void)
 	uint16_t evtt;
 	uint8_t i;
 	bool_t ret;
-	for(i=0;i<2;i++)
+	CanFilterConfPara *pFilterConfPara;
+	pFilterConfPara=malloc(sizeof(CanFilterConfPara));
+	if(pFilterConfPara==NULL)
 	{
-		ret=CAN_Hard_Init(i,125,NULL);
+		printf("Can Init failed.\r\n");
+		return false;
+	}
+	pFilterConfPara->FilterNumber=0;
+	pFilterConfPara->FilterMode=CAN_FILTERMODE_IDMASK;
+	pFilterConfPara->FilterScale=CAN_FILTERSCALE_32BIT;
+	pFilterConfPara->FilterIdHigh=0x0000;
+	pFilterConfPara->FilterIdLow=0x0000;
+	pFilterConfPara->FilterMaskIdHigh=0x0000;
+	pFilterConfPara->FilterMaskIdLow=0x0000;
+	pFilterConfPara->FilterFIFOAssignment=0;
+	pFilterConfPara->FilterActivation=1;
+	pFilterConfPara->BankNumber=14;
+
+	for(i=0;i<CN_CAN_NUM;i++)
+	{
+		ret=CAN_Hard_Init(i,125,pFilterConfPara);
 		if(!ret)
 		{
 			printf("Can Init failed.\r\n");

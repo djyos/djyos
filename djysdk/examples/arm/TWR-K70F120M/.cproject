@@ -59,7 +59,7 @@
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.paths.992234689" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\arm\cortex-m\armv7e-m\cortex-m4\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\FslKxx\TWR_K70F120M&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\extern-component\firmware\FslKxx&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\third\firmware\FslKxx&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs.1308190582" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__ARM_ARCH_7EM__=1"/>
@@ -81,8 +81,8 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\cpudrv\FslKxx\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\arm\cortex-m\armv7e-m\cortex-m4\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\FslKxx\TWR_K70F120M&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\extern-component\firmware\FslKxx&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\extern-component\firmware\CMSIS\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\third\firmware\FslKxx&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\third\firmware\CMSIS\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\FslKxx&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\boarddrv\TWR_K70F120M\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\test\filesystem_test\testbench_lib&quot;"/>
@@ -143,7 +143,7 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
-					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.310691604" name="/" resourcePath="src/OS_code/extern-component/firmware/CMSIS/CM4">
+					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.310691604" name="/" resourcePath="src/third/firmware/CMSIS/CM4">
 						<toolChain id="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug.1953346070" name="Cross ARM GCC" superClass="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug" unusedChildren="">
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.1208013092.1508891078" name="Optimization Level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.1208013092"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.messagelength.1369301694.1787787999" name="Message length (-fmessage-length=0)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.messagelength.1369301694"/>
@@ -193,7 +193,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src/user/test/whetstone|src/user/test/filesystem_test|src/user/test/dhrystone|src/OS_code/djyos|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework|src/user/test/lua_test|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_attribs.c|src/user/UnderDevelopment|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_mtdif_single.c|src/OS_code/loader|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/utils|src/OS_code/component|src/OS_code/bsp|src/OS_code/exp-component|src/user/UnderDevelopment/fat/driver/explorer_m4|src/user/UnderDevelopment/fat/drivers/explorer_m4|src/OS_code/libc|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/linux-tests|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/mtdemul|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/patches|src/OS_code/extern-component|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_mtdif_multi.c|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_vfs_multi.c|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_vfs_single.c|src/user/UnderDevelopment/fat/driver/sdcard.c|src/user/test/djyiptest|src/user/test/timertest|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/u-boot" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/user/test/whetstone|src/user/test/filesystem_test|src/user/test/dhrystone|src/djyos|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework|src/user/test/lua_test|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_attribs.c|src/user/UnderDevelopment|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_mtdif_single.c|src/loader|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/utils|src/component|src/bsp|src/exp-component|src/user/UnderDevelopment/fat/driver/explorer_m4|src/user/UnderDevelopment/fat/drivers/explorer_m4|src/libc|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/linux-tests|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/mtdemul|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/patches|src/third|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_mtdif_multi.c|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_vfs_multi.c|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_vfs_single.c|src/user/UnderDevelopment/fat/driver/sdcard.c|src/user/test/djyiptest|src/user/test/timertest|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/u-boot" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -256,7 +256,7 @@
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.paths.2143633170" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\arm\cortex-m\armv7-m\cortex-m3\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\FslKxx\TWR-K70F120M&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\extern-component\firmware\FslKxx&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\third\firmware\FslKxx&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs.1566922907" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__ARM_ARCH_7EM__=1"/>
@@ -279,8 +279,8 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\arm\cortex-m\armv7e-m\cortex-m4\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\FslKxx\TWR_K70F120M&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\test\filesystem_test\testbench_lib&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\extern-component\firmware\FslKxx&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\extern-component\firmware\CMSIS\include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\third\firmware\FslKxx&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\third\firmware\CMSIS\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\FslKxx&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\boarddrv\TWR_K70F120M\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\gui\gdd\widget&quot;"/>
@@ -339,7 +339,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src/user/test/timertest|src/user/test/djyiptest|src/user/test/lua_test|src/user/test/whetstone|src/user/test/filesystem_test|src/user/test/dhrystone|src/OS_code/djyos|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/patches|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_attribs.c|src/OS_code/extern-component|src/user/UnderDevelopment|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_mtdif_single.c|src/OS_code/loader|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/utils|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_mtdif_multi.c|src/OS_code/component|src/OS_code/bsp|src/OS_code/exp-component|src/user/UnderDevelopment/fat/driver/explorer_m4|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_vfs_multi.c|src/user/UnderDevelopment/fat/drivers/explorer_m4|src/OS_code/libc|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_vfs_single.c|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/linux-tests|src/user/UnderDevelopment/fat/driver/sdcard.c|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/mtdemul|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/u-boot|src/user/mbedtls-development" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/user/test/timertest|src/user/test/djyiptest|src/user/test/lua_test|src/user/test/whetstone|src/user/test/filesystem_test|src/user/test/dhrystone|src/djyos|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/test-framework|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/patches|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_attribs.c|src/third|src/user/UnderDevelopment|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_mtdif_single.c|src/loader|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/utils|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_mtdif_multi.c|src/component|src/bsp|src/exp-component|src/user/UnderDevelopment/fat/driver/explorer_m4|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_vfs_multi.c|src/user/UnderDevelopment/fat/drivers/explorer_m4|src/libc|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/yaffs_vfs_single.c|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/linux-tests|src/user/UnderDevelopment/fat/driver/sdcard.c|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/mtdemul|src/user/UnderDevelopment/yaffs2/yaffs2-583dbd9/yaffs2-583dbd9/direct/u-boot|src/user/mbedtls-development" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

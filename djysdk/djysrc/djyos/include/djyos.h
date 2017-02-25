@@ -393,6 +393,7 @@ void Djy_DelayUs(u32 time);
 
 bool_t Djy_GetEventInfo(u16 id, struct EventInfo *info);
 bool_t Djy_GetEvttName(u16 evtt_id, char *dest, u32 len);
+bool_t Djy_RegisterHook(u16 EvttID,SchHookFunc HookFunc);
 
 #ifdef __cplusplus
 }

@@ -115,6 +115,8 @@ static DMA_Stream_TypeDef * const UartDmaTxStream[] =
 								  DMA1_Stream3,DMA1_Stream4,
 								  DMA1_Stream7,DMA2_Stream6,
 								  DMA1_Stream1,DMA1_Stream0};
+static u8 const DMA_Tx_ch[] = {4,4,4,4,4,5,5,5};
+static u8 const DMA_Rx_ch[] = {4,4,4,4,4,5,5,5};
 // DMA正在使用标记，是否使用DMA标记
 static bool_t s_UART_DmaSending[] = {false,false,false,false,false,false,false,false};
 static bool_t s_UART_DmaUsed[]    = {false,false,false,false,false,false,false,false};
@@ -656,10 +658,10 @@ void __UART_SetDmaUsed(u32 port)
     __UART_TxIntDisable(CN_DMA_UNUSED,port);
     tg_UART_Reg[port]->CR1 |= (1<<4);//enable idle int
 
-    DMA_Config(UartDmaRxStream[port],4,(u32)&(tg_UART_Reg[port]->RDR),
+    DMA_Config(UartDmaRxStream[port],DMA_Rx_ch[port],(u32)&(tg_UART_Reg[port]->RDR),
             (u32)DmaRecvBuf,DMA_DIR_P2M,DMA_DATABITS_8,DMA_DATABITS_8,32);
 
-    DMA_Config(UartDmaTxStream[port],4,(u32)&(tg_UART_Reg[port]->TDR),
+    DMA_Config(UartDmaTxStream[port],DMA_Tx_ch[port],(u32)&(tg_UART_Reg[port]->TDR),
             (u32)DmaSendBuf,DMA_DIR_M2P,DMA_DATABITS_8,DMA_DATABITS_8,32);
 
 

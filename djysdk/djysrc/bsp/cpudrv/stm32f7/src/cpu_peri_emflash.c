@@ -130,6 +130,8 @@ static s32 Flash_SectorEarse(u32 SectorNo)
 	else
 		Ret=0;
 	HAL_FLASH_Lock();
+
+	SCB_CleanInvalidateDCache();//块擦除后，需清cache，否则读flash可能数据错误
 	return Ret;
 }
 //-----------------------------------------------------------------------------

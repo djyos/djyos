@@ -3233,7 +3233,7 @@ static bool_t __dealclienttimer(tagSocket *client)
         }
     }
     //chk all the transmissions if any package need retransmission
-    if(ccb->timerctrl &(CN_TCP_TIMER_SYN|CN_TCP_TIMER_RESEND|CN_TCP_TIMER_RESEND))
+    if(ccb->timerctrl &(CN_TCP_TIMER_SYN|CN_TCP_TIMER_RESEND|CN_TCP_TIMER_FIN))
     {
         if(ccb->resndtimer == 0)
         {

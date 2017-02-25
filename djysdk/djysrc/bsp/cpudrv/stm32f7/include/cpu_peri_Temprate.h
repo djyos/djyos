@@ -45,6 +45,7 @@
 #ifndef CPU_PERI_TEMPRATE_H_
 #define CPU_PERI_TEMPRATE_H_
 
+#include <stddef.h>
 
 #define Temprate_num	20 //多次测量求均值测量次数
 

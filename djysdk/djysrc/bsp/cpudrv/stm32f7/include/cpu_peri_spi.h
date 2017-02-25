@@ -62,6 +62,7 @@
 #define CN_SPI6		5
 #define CN_SPI_NUM	6
 
+#define Spi SPI_TypeDef
 
 s32 ModuleInstall_SPI(u8 Port);
 

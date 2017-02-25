@@ -25,72 +25,72 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>src/OS_code/component</name>
+			<name>src/component</name>
 			<type>2</type>
 			<locationURI>DJYOS_SRC_LOCATION/component</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/djyos</name>
+			<name>src/djyos</name>
 			<type>2</type>
 			<locationURI>DJYOS_SRC_LOCATION/djyos</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/extern-component</name>
+			<name>src/third</name>
 			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/extern-component</locationURI>
+			<locationURI>DJYOS_SRC_LOCATION/third</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/libc</name>
+			<name>src/libc</name>
 			<type>2</type>
 			<locationURI>DJYOS_SRC_LOCATION/libc</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/bsp/boarddrv</name>
+			<name>src/bsp/boarddrv</name>
 			<type>2</type>
 			<locationURI>DJYOS_SRC_LOCATION/bsp/boarddrv/SAMV71Xplained</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/bsp/cpudrv</name>
+			<name>src/bsp/cpudrv</name>
 			<type>2</type>
 			<locationURI>DJYOS_SRC_LOCATION/bsp/cpudrv/AtmelSamV7</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/bsp/startup</name>
+			<name>src/bsp/startup</name>
 			<type>2</type>
 			<locationURI>DJYOS_SRC_LOCATION/bsp/startup/AtmelSamV7/SAMV71Xplained</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/loader/si</name>
+			<name>src/loader/si</name>
 			<type>2</type>
 			<locationURI>DJYOS_SRC_LOCATION/loader/si</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/bsp/arch/arm32_feature.h</name>
+			<name>src/bsp/arch/arm32_feature.h</name>
 			<type>1</type>
 			<locationURI>DJYOS_SRC_LOCATION/bsp/arch/arm/arm32_feature.h</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/bsp/arch/arm32_stdint.h</name>
+			<name>src/bsp/arch/arm32_stdint.h</name>
 			<type>1</type>
 			<locationURI>DJYOS_SRC_LOCATION/bsp/arch/arm/arm32_stdint.h</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/bsp/arch/armv7m.h</name>
+			<name>src/bsp/arch/armv7m.h</name>
 			<type>1</type>
 			<locationURI>DJYOS_SRC_LOCATION/bsp/arch/arm/cortex-m/armv7m.h</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/bsp/arch/core</name>
+			<name>src/bsp/arch/core</name>
 			<type>2</type>
 			<locationURI>DJYOS_SRC_LOCATION/bsp/arch/arm/cortex-m/armv7e-m/cortex-m7/core</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/bsp/arch/cortex-m.h</name>
+			<name>src/bsp/arch/cortex-m.h</name>
 			<type>1</type>
 			<locationURI>DJYOS_SRC_LOCATION/bsp/arch/arm/cortex-m/cortex-m.h</locationURI>
 		</link>
 		<link>
-			<name>src/OS_code/bsp/arch/include</name>
+			<name>src/bsp/arch/include</name>
 			<type>2</type>
 			<locationURI>DJYOS_SRC_LOCATION/bsp/arch/arm/cortex-m/armv7e-m/cortex-m7/include</locationURI>
 		</link>

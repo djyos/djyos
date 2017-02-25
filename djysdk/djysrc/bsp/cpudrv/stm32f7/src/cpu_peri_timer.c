@@ -88,6 +88,7 @@ struct STM32TimerHandle
     u32     irqline;          //中断号
     u32     cycle;            //定时周期
     u32     timerstate;       //定时器标识
+    fntTimerIsr UserIsr;            //用户中断响应函数
 };
 #define CN_STM32TIMER_NUM   (EN_STM32TIMER_5 +1)
 #define CN_STM32TIMER_MAX    EN_STM32TIMER_5
@@ -245,10 +246,10 @@ bool_t  __STM32Timer_SetCycle(struct STM32TimerHandle  *timer, u32 cycle)
         }
         else
         {
-            __STM32Timer_Time2Counter(cycle,&counter);
-            tg_TIMER_Reg[timerno]->ARR = (u32)counter;
-            __STM32Timer_Counter2Time(counter,&time_set);
-            timer->cycle = time_set;
+//            __STM32Timer_Time2Counter(cycle,&counter);
+            tg_TIMER_Reg[timerno]->ARR = (u32)cycle;
+//            __STM32Timer_Counter2Time(counter,&time_set);
+            timer->cycle = cycle;
 
             return true;
         }
@@ -296,6 +297,25 @@ bool_t  __STM32Timer_SetAutoReload(struct STM32TimerHandle  *timer, bool_t autor
 
     return result;
 }
+
+//-----------------------------------------------------------------------------
+// 功能：定时器中断响应函数，对于像atmel m7这样，需要自行操作定时器的寄存器才能
+//       清中断的定时器，必须在这里实现ISR，然后间接调用user ISR，否则在
+//       user isr中将无所适从。
+// 参数：定时器句柄。
+// 返回：user ISR的返回值
+//-----------------------------------------------------------------------------
+u32 __STM32Timer_isr(ptu32_t TimerHandle)
+{
+    u32 timerno;
+    timerno = ((struct STM32TimerHandle  *)TimerHandle)->timerno;
+    //以下两句顺序不能改
+    tg_TIMER_Reg[timerno]->CNT = 0;
+    tg_TIMER_Reg[timerno]->SR = 0;//清中断标志
+    Int_ClearLine(((struct STM32TimerHandle  *)TimerHandle)->irqline);
+    return ((struct STM32TimerHandle  *)TimerHandle)->UserIsr(TimerHandle);
+}
+
 // =============================================================================
 // 函数功能:__STM32Timer_Alloc
 //          分配定时器
@@ -332,6 +352,7 @@ ptu32_t __STM32Timer_Alloc(fntTimerIsr timerisr)
     timer->timerno = timerno;
     timer->irqline = irqline;
     timer->timerstate = CN_TIMER_ENUSE;
+    timer->UserIsr=timerisr;
     //好了，中断号和定时器号码都有了，该干嘛就干嘛了。
     //先设置好定时器周期
     __STM32Timer_PauseCount(timer);
@@ -339,10 +360,15 @@ ptu32_t __STM32Timer_Alloc(fntTimerIsr timerisr)
     //设置定时器中断,先结束掉该中断所有的关联相关内容
     Int_Register(irqline);
     Int_CutLine(irqline);
+
     Int_IsrDisConnect(irqline);
     Int_EvttDisConnect(irqline);
     Int_SettoAsynSignal(irqline);
-    Int_IsrConnect(irqline, timerisr);
+
+    Int_SetClearType(irqline,CN_INT_CLEAR_USER);
+    Int_SetIsrPara(irqline,(ptu32_t)timer);
+
+    Int_IsrConnect(irqline, __STM32Timer_isr);
     timerhandle = (ptu32_t)timer;
 
     return timerhandle;
