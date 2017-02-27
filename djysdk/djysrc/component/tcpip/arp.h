@@ -51,15 +51,7 @@
 
 #include <sys/socket.h>
 
-#define CN_ARPITEM_PRO_DYNAMIC (1<<0)         //set by the hand
-#define CN_ARPITEM_PRO_STABLE  (1<<1)         //which means the mac could be use
-#define CN_ARPITEM_PRO_NONE    (0)            //no property
-
 bool_t ArpFindMac(u32 ip,u8 *mac);
-bool_t ArpItemCreate(u32 ip,u8 *mac,u32 pro);
-bool_t ArpItemDelete(u32 ip);
-bool_t ArpItemUpdate(u32 ip,u8 *mac);
-bool_t ArpTabClean();
 bool_t ArpInform(char *param);
 
 #include "rout.h"

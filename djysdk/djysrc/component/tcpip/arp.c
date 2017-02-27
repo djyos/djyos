@@ -82,6 +82,15 @@ static tagArpItem          **pArpItemTab  = NULL;     //which used to arp hash c
 static tagNetPkg            *pArpPkgQH  = NULL;     //this used to storage the arp package head
 static struct MutexLCB      *pArpPkgMutex = NULL; //this used to protect the arp package queue
 
+#define CN_ARPITEM_PRO_DYNAMIC (1<<0)         //set by the hand
+#define CN_ARPITEM_PRO_STABLE  (1<<1)         //which means the mac could be use
+#define CN_ARPITEM_PRO_NONE    (0)            //no property
+
+bool_t ArpItemCreate(u32 ip,u8 *mac,u32 pro);
+bool_t ArpItemDelete(u32 ip);
+bool_t ArpItemUpdate(u32 ip,u8 *mac);
+bool_t ArpTabClean();
+
 typedef struct
 {
    u32 sndnum;
@@ -95,7 +104,6 @@ typedef struct
    u64 resolvenum;
    u64 resolveerr;
 }taggArpDebugs;
-
 static taggArpDebugs gArpDebugs;
 //use this function to match an item in the arp tab with specified ip address
 static tagArpItem *__ArpMatchItem(u32 ip)
@@ -188,7 +196,7 @@ static bool_t __ArpSndRequest(u32 ip)
     ipdst = ip;
     TCPIP_DEBUG_INC(gArpDebugs.sndnum);
     //if the src is in the sub net, we will response it, else do nothing
-    rout = RoutMatch(EN_IPV_4,ip);
+    rout = RoutMatch(EN_IPV_4,ipdst);
     if(NULL == rout)
     {
     	return result; //NO ROUT FOR THIS IP TO FIND
@@ -198,6 +206,7 @@ static bool_t __ArpSndRequest(u32 ip)
     if(NULL != pkg)
     {
     	macsrc = NetDevGetMac(rout->dev);
+    	ipsrc = rout->ipaddr.ipv4.ip;
         hdr = (tagArpHdr *)(pkg->buf + pkg->offset);
         memcpy(hdr->tarproaddr ,&ipdst,CN_IPADDR_LEN_V4);
         memcpy(hdr->senproaddr ,&ipsrc,CN_IPADDR_LEN_V4);
@@ -297,7 +306,7 @@ bool_t __Arp_Process_Request(tagNetDev *dev,tagArpHdr *arp)
 	//create the item or update it if the ipsrc is in the subnet
     if(RoutSubNet(dev,EN_IPV_4,ipsrc))
     {
-    	ArpItemCreate(ipsrc,macsrc,CN_ARPITEM_PRO_STABLE);
+    	ArpItemCreate(ipsrc,macsrc,CN_ARPITEM_PRO_STABLE|CN_ARPITEM_PRO_DYNAMIC);
     }
     //if we are the destination ip host, then we will send a response to it
     if(RoutHostIp(EN_IPV_4,ipdst))
@@ -577,7 +586,7 @@ bool_t ArpFindMac(u32 ip,u8 *mac)
 
     if(Lock_MutexPend(pArpItemMutex,CN_TIMEOUT_FOREVER))
     {
-        TCPIP_DEBUG_DEC(gArpDebugs.resolvenum);
+        TCPIP_DEBUG_INC(gArpDebugs.resolvenum);
         tmp = __ArpMatchItem(ip);
         if(NULL == tmp)
         {
@@ -590,7 +599,7 @@ bool_t ArpFindMac(u32 ip,u8 *mac)
                 tmp->timeout = CN_ARPITEM_LIFE_TRIG;
                 __ArpSndRequest(ip);
             }
-            TCPIP_DEBUG_DEC(gArpDebugs.resolveerr);
+            TCPIP_DEBUG_INC(gArpDebugs.resolveerr);
         }
         else
         {
@@ -603,6 +612,7 @@ bool_t ArpFindMac(u32 ip,u8 *mac)
             else
             {
                 __ArpSndRequest(ip);  //do an arp request
+                TCPIP_DEBUG_INC(gArpDebugs.resolveerr);
             }
         }
         Lock_MutexPost(pArpItemMutex);

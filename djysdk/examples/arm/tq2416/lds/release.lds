@@ -1,4 +1,4 @@
-ENTRY(isr_vector)
+ENTRY(AppStart)
 
 INCLUDE  ..\lds\memory.lds
 
