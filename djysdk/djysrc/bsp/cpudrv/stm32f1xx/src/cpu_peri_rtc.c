@@ -59,8 +59,48 @@
 //------------------------------------------------------
 #include "stddef.h"
 #include "time.h"
-#include "stm32f10x.h"
 #include "cpu_peri.h"
+
+#define LSE_Flag_Reg 0xA5A5
+#define LSI_Flag_Reg 0xA5A0
+#define BAK_Reg   RTC_BKP_DR1
+
+RTC_HandleTypeDef RTC_Handler;  //RTC句柄
+
+
+static u32 RTC_GetCounter(void)
+{
+  uint16_t tmp = 0;
+  tmp = RTC->CNTL;
+  return (((u32)RTC->CNTH << 16 ) | tmp) ;
+}
+
+static void RTC_WaitForLastTask(void)
+{
+  /* Loop until RTOFF flag is set */
+  while ((RTC->CRL & RTC_FLAG_RTOFF) == (uint16_t)RESET)
+  {
+  }
+}
+static void RTC_SetCounter(u32 CounterValue)
+{
+    RTC->CRL |= RTC_CRL_CNF;
+  /* Set RTC COUNTER MSB word */
+  RTC->CNTH = CounterValue >> 16;
+  /* Set RTC COUNTER LSB word */
+  RTC->CNTL = (CounterValue & RTC_CNTL_RTC_CNT_Msk);
+  RTC->CRL &= (uint16_t)~((uint16_t)RTC_CRL_CNF);
+}
+
+static void RTC_WaitForSynchro(void)
+{
+  /* Clear RSF flag */
+  RTC->CRL &= (uint16_t)~RTC_FLAG_RSF;
+  /* Loop until RSF flag is set */
+  while ((RTC->CRL & RTC_FLAG_RSF) == (uint16_t)RESET)
+  {
+  }
+}
 
 // =============================================================================
 // 功能：RTC硬件寄存器配置
@@ -69,26 +109,50 @@
 // =============================================================================
 void RTC_Configuration(void)
 {
-    // 使用RTC及BKP的时钟
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
-    PWR_BackupAccessCmd(ENABLE);    // 使能对RTC及BKP的寄存器的访问
-    BKP_DeInit();   // 复位BKP到初始化状态
-    RCC_LSEConfig(RCC_LSE_ON);  // 配置外部低频振荡器
-    while (RCC_GetFlagStatus(RCC_FLAG_LSERDY) == RESET) // 等待初始化完成
-    {}
+    u32 timeout;
 
-    RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE); // 选择外部低速时钟
-    RCC_RTCCLKCmd(ENABLE);  // 使能RTC的时钟
-    RTC_WaitForSynchro();   // 等待RTC寄存器与APB时钟同步
-    RTC_WaitForLastTask();  // 等待最后一次RTC写寄存器完成
+    RTC_Handler.Instance=RTC;
+    RTC_Handler.Init.AsynchPrediv=32767;
+    RTC_Handler.Init.OutPut=RTC_OUTPUTSOURCE_NONE;
 
-    RTC_ITConfig(RTC_IT_SEC, DISABLE);  // 禁止RTC的秒中断
-    RTC_WaitForLastTask();  // 等待最后一次RTC写寄存器完成
+    RCC->APB1ENR |=RCC_APB1ENR_BKPEN|RCC_APB1ENR_PWREN;
+    HAL_PWR_EnableBkUpAccess();//备份区访问使能
 
-    // 设置RTC的分频值
-    /* RTC period = RTCCLK/RTC_PR = (32.768 KHz)/(32767+1) */
-    RTC_SetPrescaler(32767);
-    RTC_WaitForLastTask();  // 等待最后一次RTC写寄存器完成
+    if(HAL_RTCEx_BKUPRead(&RTC_Handler,BAK_Reg)!=LSE_Flag_Reg)
+    {
+        RCC->BDCR=RCC_BDCR_BDRST;            //复位BDCR
+        Djy_DelayUs(10);
+        RCC->BDCR=0;                //结束复位
+
+        RCC->CSR|=RCC_CSR_LSION;                //LSI总是使能
+        while(!(RCC->CSR&RCC_CSR_LSIRDY));    //等待LSI就绪
+
+        RCC->BDCR |=RCC_BDCR_LSEON;//开启外部低速时钟
+        timeout=0;
+        while(timeout<1000)
+        {
+           if(RCC->BDCR|RCC_BDCR_LSERDY)
+               break;
+           timeout++;
+           Djy_DelayUs(1000);
+        }
+        if(timeout==1000)//外部时钟启动超时选择内部时钟LSI
+        {
+           RCC->BDCR &=~RCC_BDCR_RTCSEL_Msk;
+           RCC->BDCR |=RCC_BDCR_RTCSEL_1;
+           HAL_RTCEx_BKUPWrite(&RTC_Handler,BAK_Reg,LSI_Flag_Reg);
+        }
+        else//选择外部时钟LSE
+        {
+           RCC->BDCR &=~RCC_BDCR_RTCSEL_Msk;
+           RCC->BDCR |=RCC_BDCR_RTCSEL_0;
+           HAL_RTCEx_BKUPWrite(&RTC_Handler,BAK_Reg,LSE_Flag_Reg);
+        }
+
+        RCC->BDCR |=RCC_BDCR_RTCEN;
+        HAL_RTC_Init(&RTC_Handler);
+    }
+
 }
 
 // =============================================================================
@@ -98,7 +162,12 @@ void RTC_Configuration(void)
 // =============================================================================
 bool_t RTC_TimeGet(s64 *time)
 {
-    *time = 1000000 * RTC_GetCounter();
+    s64 time_s;
+    u32 time_us;
+
+    time_s=RTC_GetCounter();
+    time_us = ((32767-RTC->DIVL)*1000000)/32768;
+    *time = (s64)((1000000 * time_s)+(time_us));
     RTC_WaitForLastTask();
 
     return true;
@@ -114,12 +183,11 @@ bool_t RTC_TimeUpdate(s64 time)
     u32 time_s;
 
     time_s = (u32)(time/1000000);
-
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
-    PWR_BackupAccessCmd(ENABLE);    // 使能对RTC及BKP的寄存器的访问
+    RCC->APB1ENR |=RCC_APB1ENR_BKPEN|RCC_APB1ENR_PWREN;
+    HAL_PWR_EnableBkUpAccess();//备份区访问使能
     RTC_WaitForSynchro();
 
-    RTC_SetCounter((u32)time_s);
+    RTC_SetCounter(time_s);
     RTC_WaitForLastTask();
 
     return true;
@@ -132,15 +200,18 @@ bool_t RTC_TimeUpdate(s64 time)
 // =============================================================================
 ptu32_t ModuleInstall_RTC(ptu32_t para)
 {
-    // 查看备份寄存器，如果不是0xA5A5的话，则表示从未初始化过RTC（包括在断电之前）
-    if (BKP_ReadBackupRegister(BKP_DR1) != 0xA5A5)
-    {
-        RTC_Configuration();    // 配置RTC
-        BKP_WriteBackupRegister(BKP_DR1, 0xA5A5);   // 标志RTC已经初始化过
-    }
+    struct timeval tv;
+    s64 rtc_time;
 
-    RTC_WaitForSynchro();
+    RTC_Configuration();    // 配置RTC
 
-    Rtc_RegisterDev(RTC_TimeGet,RTC_TimeUpdate);
+    RTC_TimeGet(&rtc_time);
+
+    tv.tv_sec  = rtc_time/1000000;//us ---> s
+    tv.tv_usec = rtc_time%1000000;
+
+    settimeofday(&tv,NULL);
+    if(!Rtc_RegisterDev(RTC_TimeGet,RTC_TimeUpdate))
+        return false;
     return true;
 }

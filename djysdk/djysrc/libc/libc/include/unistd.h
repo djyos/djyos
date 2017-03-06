@@ -3,6 +3,7 @@
 
 #include <_ansi.h>
 #include <stddef.h>
+#include <sys\types.h>
 
 int _EXFUN(access,(const char *__path, int __amode ));
 unsigned  _EXFUN(alarm, (unsigned __secs ));
@@ -33,9 +34,12 @@ off_t   _EXFUN(lseek, (int __fildes, off_t __offset, int __whence ));
 
 int     _EXFUN(rmdir, (const char *__path ));
 
+unsigned _EXFUN(sleep, (unsigned int __seconds ));
+int     _EXFUN(usleep, (useconds_t __useconds));
 void    _EXFUN(swab, (const void *__restrict, void *__restrict, ssize_t));
 char *  _EXFUN(ttyname, (int __fildes ));
 int     _EXFUN(unlink, (const char *__path ));
+int     _EXFUN(usleep, (useconds_t __useconds));
 int     _EXFUN(vhangup, (void ));
 
 extern char *optarg;            /* getopt(3) external variables */

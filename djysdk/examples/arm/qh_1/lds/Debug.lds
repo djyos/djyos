@@ -1,4 +1,4 @@
-ENTRY(AppStart)
+ENTRY(AppStart)  
 
 INCLUDE ..\lds\memory.lds
 

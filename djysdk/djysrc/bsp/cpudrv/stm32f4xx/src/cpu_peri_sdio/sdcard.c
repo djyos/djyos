@@ -1,5 +1,6 @@
 //#include "integer.h"
 //#include "diskio.h"
+#if 0	//todo---hemin modified for compile
 #include <stdlib.h>
 #include <cpu_peri_sdio.h>/* 来源于正点原子 */
 #include <djyfs/fat/port/drivers/fat_drivers.h>
@@ -159,3 +160,4 @@ s32  ModuleInstall_SD(const char *ChipName, s32 Clean)
 	free(Name);
 	return (-3);// 操作失败
 }
+#endif

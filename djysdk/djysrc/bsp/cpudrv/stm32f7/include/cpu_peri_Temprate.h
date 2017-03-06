@@ -46,7 +46,9 @@
 #define CPU_PERI_TEMPRATE_H_
 
 #include <stddef.h>
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 #define Temprate_num	20 //多次测量求均值测量次数
 
 
@@ -54,4 +56,7 @@ bool_t Temprate_Init(void);
 
 float Get_Temprate(void);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

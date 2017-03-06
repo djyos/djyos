@@ -95,7 +95,7 @@ struct MultiplexSetsCB
                             // 对象集，大于ObjectSum 表示全触发
     u32 Actived;            // 已经触发的对象数
     bool_t SetsActived;     // 对象集是否已经触发。
-    struct SemaphoreLCB Lock;        // Type定义了异步触发模式:同步用的锁。
+    struct SemaphoreLCB Lock;       // 等待Sets被触发用的锁。
 };
 
 struct MultiplexObjectCB
@@ -115,7 +115,7 @@ struct MultiplexObjectCB
 };
 
 ptu32_t ModuleInstall_Multiplex(ptu32_t para);
-struct MultiplexSetsCB *Multiplex_Creat(u32 ActiveLevel);
+struct MultiplexSetsCB *Multiplex_Create(u32 ActiveLevel);
 bool_t Multiplex_AddObject(struct MultiplexSetsCB  *Sets,
                     struct MultiplexObjectCB **ObjectHead,
                     u32 ObjectStatus,ptu32_t ObjectID, u32 SensingBit);

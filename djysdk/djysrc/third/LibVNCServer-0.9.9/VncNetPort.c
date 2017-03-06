@@ -137,7 +137,7 @@ void  rfbInitServerSocket(rfbScreenInfoPtr rfbScreen)
         printk("rfbInitServerSocket:ServerSocket Init Failed");
     }
 
-    rfbScreen->allFds = Multiplex_Creat(1);
+    rfbScreen->allFds = Multiplex_Create(1);
     Socket_MultiplexAdd(rfbScreen->allFds,rfbScreen->listenSock,CN_SOCKET_IOACCEPT);
 }
 // =========================================================================
@@ -240,12 +240,12 @@ int rfbCheckFds(rfbScreenInfoPtr rfbScreen,long usec)
                 cl = rfbNewClient(rfbScreen,sock);
                 if(NULL == cl)
                 {
-                	Socket_MultiplexDel(rfbScreen->allFds,sock);
+                    Socket_MultiplexDel(rfbScreen->allFds,sock);
                     closesocket(sock);
                 }
                 else
                 {
-                	socket_setprivate(sock,(ptu32_t)cl);
+                    socket_setprivate(sock,(ptu32_t)cl);
                 }
             }
 
@@ -253,8 +253,8 @@ int rfbCheckFds(rfbScreenInfoPtr rfbScreen,long usec)
     }
     else
     {
-    	//chk the socket corresponding to the client
-    	cl = (rfbClientRec*)socket_getprivate(sock);
+        //chk the socket corresponding to the client
+        cl = (rfbClientRec*)socket_getprivate(sock);
         if(NULL != cl)//该client为脏，要删除的对象
         {
             rfbProcessClientMessage(cl);//处理client和server的正常通信状态
@@ -410,7 +410,7 @@ rfbWriteExact(rfbClientPtr cl,
 int
 rfbStringToAddr(char *str, in_addr_t *addr)
 {
-	return 0;
+    return 0;
 }
 
 
@@ -429,14 +429,14 @@ int
 rfbConnectToTcpAddr(char *host,
                     int port)
 {
-	return -1;
+    return -1;
 }
 
 int
 rfbListenOnUDPPort(int port,
                    in_addr_t iface)
 {
-	return -1;
+    return -1;
 }
 
 /*

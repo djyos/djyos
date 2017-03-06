@@ -14,7 +14,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271" name="iboot_wb7293" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271" name="iboot_wb7293" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
 					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271." name="/" resourcePath="">
 						<toolChain id="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug.495280590" name="Cross ARM GCC" nonInternalBuilderId="ilg.gnuarmeclipse.managedbuild.cross.builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug">
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.1814922187" name="Optimization Level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level" value="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.none" valueType="enumerated"/>
@@ -87,6 +87,7 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\third\firmware\CMSIS\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/board/wb7293/src/OS_prjcfg/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include\net&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.977282279" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
@@ -182,7 +183,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.559563414" name="iboot_sr3252" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.559563414" name="iboot_sr3252" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
 					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.559563414." name="/" resourcePath="">
 						<toolChain id="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug.57183886" name="Cross ARM GCC" nonInternalBuilderId="ilg.gnuarmeclipse.managedbuild.cross.builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug">
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.1138729345" name="Optimization Level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level" value="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.none" valueType="enumerated"/>
@@ -255,6 +256,7 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSamV7\sr3252&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/board/sr3252/src/OS_prjcfg/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include\net&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.309581924" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
@@ -350,7 +352,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002" name="iboot_sr5333" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002" name="iboot_sr5333" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
 					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002." name="/" resourcePath="">
 						<toolChain id="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug.746995777" name="Cross ARM GCC" nonInternalBuilderId="ilg.gnuarmeclipse.managedbuild.cross.builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug">
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.615569229" name="Optimization Level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level" value="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.none" valueType="enumerated"/>
@@ -424,6 +426,7 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\boarddrv\sr5333\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/board/sr5333/src/OS_prjcfg/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include\net&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.1507739177" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
@@ -519,7 +522,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1078929205" name="iboot_tq2416" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1078929205" name="iboot_tq2416" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
 					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1078929205." name="/" resourcePath="">
 						<toolChain id="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug.921445262" name="Cross ARM GCC" nonInternalBuilderId="ilg.gnuarmeclipse.managedbuild.cross.builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug">
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.1297393834" name="Optimization Level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level" value="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.none" valueType="enumerated"/>
@@ -595,6 +598,7 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/board/tq2416/src/OS_prjcfg/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include\net&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.1083376990" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
@@ -688,7 +692,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1410193659" name="iboot_twrk70" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1410193659" name="iboot_twrk70" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
 					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1410193659." name="/" resourcePath="">
 						<toolChain id="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug.256834969" name="Cross ARM GCC" nonInternalBuilderId="ilg.gnuarmeclipse.managedbuild.cross.builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug">
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.895427397" name="Optimization Level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level" value="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.none" valueType="enumerated"/>
@@ -761,6 +765,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/iboot/board/twrk70/src/OS_prjcfg/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include\net&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.1766661006" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
@@ -855,7 +860,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1410193659.253202322" name="iboot_twrk60" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1410193659.253202322" name="iboot_twrk60" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
 					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1410193659.253202322." name="/" resourcePath="">
 						<toolChain id="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug.1951430428" name="Cross ARM GCC" nonInternalBuilderId="ilg.gnuarmeclipse.managedbuild.cross.builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug">
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.717408342" name="Optimization Level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level" value="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.none" valueType="enumerated"/>
@@ -928,6 +933,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/iboot/board/twrk70/src/OS_prjcfg/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\loader\si&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include\net&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.1361198622" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
@@ -1022,7 +1028,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.40321693" name="iboot_explorerstm32f4" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.40321693" name="iboot_explorerstm32f4" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
 					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.40321693." name="/" resourcePath="">
 						<toolChain id="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug.1280196810" name="Cross ARM GCC" nonInternalBuilderId="ilg.gnuarmeclipse.managedbuild.cross.builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug">
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.1065563001" name="Optimization Level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level" value="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.none" valueType="enumerated"/>
@@ -1096,6 +1102,7 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\third\firmware\stm32f4\inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\cpudrv\stm32f4xx\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include\net&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.1356737760" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
@@ -1192,7 +1199,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1410193659.253202322.368846629" name="iboot_sam4e" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1410193659.253202322.368846629" name="iboot_sam4e" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
 					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1410193659.253202322.368846629." name="/" resourcePath="">
 						<toolChain id="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug.1890625812" name="Cross ARM GCC" nonInternalBuilderId="ilg.gnuarmeclipse.managedbuild.cross.builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug">
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.1235579802" name="Optimization Level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level" value="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.none" valueType="enumerated"/>
@@ -1263,6 +1270,7 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\cpudrv\AtmelSam4e\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSam4e&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include\net&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.329284839" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
@@ -1358,7 +1366,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1410193659.253202322.494341371" name="iboot_mcb1700" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1410193659.253202322.494341371" name="iboot_mcb1700" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
 					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1410193659.253202322.494341371." name="/" resourcePath="">
 						<toolChain id="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug.1037494389" name="Cross ARM GCC" nonInternalBuilderId="ilg.gnuarmeclipse.managedbuild.cross.builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug">
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.1288637792" name="Optimization Level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level" value="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.more" valueType="enumerated"/>
@@ -1430,6 +1438,7 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\boarddrv\mcb1700\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/board/mcb1700/src/OS_prjcfg/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include\net&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.404207323" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
@@ -1524,7 +1533,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.40321693.192686476" name="iboot_qhstm32f1" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.40321693.192686476" name="iboot_qhstm32f1" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
 					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.40321693.192686476." name="/" resourcePath="">
 						<toolChain id="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug.1456356785" name="Cross ARM GCC" nonInternalBuilderId="ilg.gnuarmeclipse.managedbuild.cross.builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug">
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.430663651" name="Optimization Level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level" value="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.none" valueType="enumerated"/>
@@ -1586,10 +1595,6 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\djyos\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\tcpip\comport&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\third\firmware\stm32&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\third\firmware\stm32\F10x&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\third\firmware\stm32\F10x\inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/board/qh/src/OS_prjcfg/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\stm32f103\qh_1&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\arch\arm\cortex-m\armv7-m\cortex-m3\include&quot;"/>
@@ -1598,9 +1603,14 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\boarddrv\qh_1\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\stm32f103&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include\net&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\third\firmware\stm32f1&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\third\firmware\stm32f1\inc&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.1647064558" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
+									<listOptionValue builtIn="false" value="STM32F103xG"/>
+									<listOptionValue builtIn="false" value="USE_HAL_DRIVER"/>
 									<listOptionValue builtIn="false" value="__ARM_ARCH_7M__=1"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.nostdinc.1365153721" name="Do not search system directories (-nostdinc)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.nostdinc" useByScannerDiscovery="true" value="true" valueType="boolean"/>
@@ -1692,7 +1702,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1973357053" name="iboot_ty82xx" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1973357053" name="iboot_ty82xx" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
 					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1973357053." name="/" resourcePath="">
 						<toolChain id="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug.57078531" name="Cross ARM GCC" nonInternalBuilderId="ilg.gnuarmeclipse.managedbuild.cross.builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug">
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.643508918" name="Optimization Level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level" value="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.none" valueType="enumerated"/>
@@ -1765,6 +1775,7 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\boarddrv\ty82xx\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\startup\AtmelSamV7\ty82xx&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include\net&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.885818520" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
@@ -1860,7 +1871,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002.957774120" name="iboot_NUCLEO-F746ZG" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002.957774120" name="iboot_NUCLEO-F746ZG" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
 					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002.957774120." name="/" resourcePath="">
 						<toolChain id="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug.1648594422" name="Cross ARM GCC" nonInternalBuilderId="ilg.gnuarmeclipse.managedbuild.cross.builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug">
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.1552430314" name="Optimization Level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level" value="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.none" valueType="enumerated"/>
@@ -1934,6 +1945,7 @@
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/board/STM32756G-EVAL2/src/OS_prjcfg/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\third\firmware\stm32f7\Inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include\net&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.2118132154" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
@@ -2030,7 +2042,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002.957774120.1109145296" name="iboot_STM32756G-EVAL2" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002.957774120.1109145296" name="iboot_STM32756G-EVAL2" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
 					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002.957774120.1109145296." name="/" resourcePath="">
 						<toolChain id="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug.1131903360" name="Cross ARM GCC" nonInternalBuilderId="ilg.gnuarmeclipse.managedbuild.cross.builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug">
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.278875222" name="Optimization Level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level" value="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.none" valueType="enumerated"/>
@@ -2103,6 +2115,7 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\boarddrv\sr5333-v2.0\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\third\firmware\stm32f7\Inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include\net&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.255732615" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
@@ -2198,7 +2211,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1463309690" name="iboot_samv71Xplained" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1463309690" name="iboot_samv71Xplained" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
 					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1463309690." name="/" resourcePath="">
 						<toolChain id="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug.499466466" name="Cross ARM GCC" nonInternalBuilderId="ilg.gnuarmeclipse.managedbuild.cross.builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug">
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.1558789931" name="Optimization Level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level" value="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.none" valueType="enumerated"/>
@@ -2271,6 +2284,7 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\third\firmware\CMSIS\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/board/wb7293/src/OS_prjcfg/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include\net&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.1744176080" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
@@ -2366,7 +2380,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002.957774120.1488835551" name="iboot_sr5333_v2.0" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002.957774120.1488835551" name="iboot_sr5333_v2.0" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
 					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.1290028002.957774120.1488835551." name="/" resourcePath="">
 						<toolChain id="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug.1470034786" name="Cross ARM GCC" nonInternalBuilderId="ilg.gnuarmeclipse.managedbuild.cross.builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug">
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.1713628416" name="Optimization Level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level" value="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.none" valueType="enumerated"/>
@@ -2439,6 +2453,7 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\boarddrv\sr5333-v2.0\include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\third\firmware\stm32f7\Inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include\net&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.713751416" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
@@ -2534,7 +2549,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.40321693.1687245936" name="iboot_NUCLEO-L476RG" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="${cross_rm} -rf" description="" id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.40321693.1687245936" name="iboot_NUCLEO-L476RG" parent="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug">
 					<folderInfo id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.923972346.1698126220.1839098271.40321693.1687245936." name="/" resourcePath="">
 						<toolChain id="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug.451260573" name="Cross ARM GCC" nonInternalBuilderId="ilg.gnuarmeclipse.managedbuild.cross.builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.toolchain.elf.debug">
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.69881922" name="Optimization Level" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level" value="ilg.gnuarmeclipse.managedbuild.cross.option.optimization.level.none" valueType="enumerated"/>
@@ -2608,6 +2623,7 @@
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\third\firmware\stm32L4&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\third\firmware\stm32L4\inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\bsp\chipdrv&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${DJYOS_SRC_LOCATION}\component\include\net&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.327108453" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
@@ -2696,57 +2712,61 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="libc-release"/>
+		<configuration configurationName="iboot_samv71Xplained"/>
+		<configuration configurationName="iboot_NUCLEO-L476RG"/>
 		<configuration configurationName="iboot_twrk60"/>
-		<configuration configurationName="iboot_wb7293v1.0">
+		<configuration configurationName="libOS-debug"/>
+		<configuration configurationName="libOS-release"/>
+		<configuration configurationName="iboot_tq2416"/>
+		<configuration configurationName="Iboot_debug"/>
+		<configuration configurationName="iboot_stm32f7">
 			<resource resourceType="PROJECT" workspacePath="/iboot"/>
 		</configuration>
-		<configuration configurationName="libc-debug"/>
-		<configuration configurationName="iboot_sr5333"/>
-		<configuration configurationName="iboot_explorerstm32f4"/>
-		<configuration configurationName="platform-release"/>
-		<configuration configurationName="libOS-debug"/>
-		<configuration configurationName="iboot_sam4e"/>
-		<configuration configurationName="release"/>
-		<configuration configurationName="libOS"/>
-		<configuration configurationName="iboot_mcb1700"/>
-		<configuration configurationName="libc"/>
-		<configuration configurationName="Iboot-release"/>
-		<configuration configurationName="Iboot_debug"/>
-		<configuration configurationName="platform-debug"/>
-		<configuration configurationName="AtmelV7Fw"/>
-		<configuration configurationName="iboot_wb7293"/>
-		<configuration configurationName="libc-release"/>
-		<configuration configurationName="sqlite3-cm3"/>
-		<configuration configurationName="iboot_sr5333_v2.0"/>
+		<configuration configurationName="iboot_NUCLEO-F746ZG"/>
 		<configuration configurationName="iboot_stm32f746">
 			<resource resourceType="PROJECT" workspacePath="/iboot"/>
 		</configuration>
+		<configuration configurationName="iboot_STM32756G-EVAL2"/>
+		<configuration configurationName="iboot_qhstm32f1"/>
+		<configuration configurationName="iboot_mcb1700"/>
+		<configuration configurationName="iboot_sr3252"/>
+		<configuration configurationName="iboot_sam4e"/>
+		<configuration configurationName="libOS"/>
 		<configuration configurationName="iboot_Stm32f7"/>
-		<configuration configurationName="Stm32F10xFirmWare"/>
-		<configuration configurationName="Debug">
-			<resource resourceType="PROJECT" workspacePath="/qh_1"/>
+		<configuration configurationName="platform-debug"/>
+		<configuration configurationName="libc"/>
+		<configuration configurationName="iboot_sr5333_v2.0"/>
+		<configuration configurationName="platform-release"/>
+		<configuration configurationName="iboot_sr5333"/>
+		<configuration configurationName="Multiple configurations">
+			<resource resourceType="PROJECT" workspacePath="/iboot"/>
 		</configuration>
-		<configuration configurationName="Release">
+		<configuration configurationName="iboot_ty82xx"/>
+		<configuration configurationName="iboot_wb7293"/>
+		<configuration configurationName="atmelV7Fw-release"/>
+		<configuration configurationName="Stm32F10xFirmWare"/>
+		<configuration configurationName="iboot_explorerstm32f4"/>
+		<configuration configurationName="iboot_wb7293v1.0">
+			<resource resourceType="PROJECT" workspacePath="/iboot"/>
+		</configuration>
+		<configuration configurationName="Iboot-release"/>
+		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/qh_1"/>
 		</configuration>
 		<configuration configurationName="iboot_twrk70">
 			<resource resourceType="PROJECT" workspacePath="/iboot"/>
 		</configuration>
-		<configuration configurationName="iboot_STM32756G-EVAL2"/>
-		<configuration configurationName="iboot_NUCLEO-F746ZG"/>
-		<configuration configurationName="iboot_tq2416"/>
-		<configuration configurationName="iboot_stm32f7">
-			<resource resourceType="PROJECT" workspacePath="/iboot"/>
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/qh_1"/>
 		</configuration>
-		<configuration configurationName="iboot_samv71Xplained"/>
-		<configuration configurationName="iboot_ty82xx"/>
+		<configuration configurationName="libc-debug"/>
 		<configuration configurationName="AtmelV7Fw-debug">
 			<resource resourceType="PROJECT" workspacePath="/PRS-3393"/>
 		</configuration>
-		<configuration configurationName="libOS-release"/>
-		<configuration configurationName="iboot_sr3252"/>
-		<configuration configurationName="atmelV7Fw-release"/>
-		<configuration configurationName="iboot_qhstm32f1"/>
+		<configuration configurationName="sqlite3-cm3"/>
+		<configuration configurationName="AtmelV7Fw"/>
+		<configuration configurationName="release"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>

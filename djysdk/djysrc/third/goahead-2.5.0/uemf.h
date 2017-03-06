@@ -203,7 +203,7 @@
 
 #ifdef DJYOS
     #include <limits.h>
-    #include <tcpip/comport/sys/socket.h>
+    #include <sys/socket.h>
     #include <errno.h>
     #include <stdio.h>
     #include <stdlib.h>

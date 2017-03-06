@@ -108,7 +108,7 @@ bool_t tcptstserver(void)
 
     //创建发送集合
     activebits = CN_SOCKET_IOOR | CN_SOCKET_IOWRITE;
-    writesets = Multiplex_Creat(activebits);
+    writesets = Multiplex_Create(activebits);
     if(NULL==writesets)
     {
         printk("Create WriteSets failed!\n\r");
@@ -120,7 +120,7 @@ bool_t tcptstserver(void)
 
     //创建接收客户端集合
     activebits = CN_SOCKET_IOOR | CN_SOCKET_IOACCEPT;
-    acceptsets = Multiplex_Creat(activebits);
+    acceptsets = Multiplex_Create(activebits);
     if(NULL==acceptsets)
     {
         printk("Create acceptsets failed!\n\r");

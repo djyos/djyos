@@ -58,8 +58,7 @@
 #include "stdint.h"
 #include "stddef.h"
 #include "cpu_peri.h"
-#include "stm32f10x.h"
-#include "stm32f10x_flash.h"
+
 
 //stm32上的低功耗Level定义(参考lowpower.h文件中的定义)
 //L0:即执行wfe指令,无其他操作.与L1一样,进入的是处理器的睡眠模式.
@@ -77,24 +76,31 @@ static void LP_RamFlashErase(void)
 {
     u8 page;
     u32 addr;
+    u32 PAGEError = 0;//存储出错类型
+    static FLASH_EraseInitTypeDef EraseInitStruct;
 
+    EraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGES;
+    EraseInitStruct.NbPages     = 1;
+    HAL_FLASH_Unlock();
     for(page = 255; page > 255-32; page--)
     {
         addr = page*0x800 + 0x08000000;
-        FLASH_Unlock();
-        FLASH_ErasePage(addr);
+        EraseInitStruct.PageAddress = addr;
+
+        HAL_FLASHEx_Erase(&EraseInitStruct, &PAGEError);
     }
+    HAL_FLASH_Lock();
 }
 
 static u32 LP_RamFlashProgram(u32 addr,u32 *buf,u32 len)
 {
     u32 i;
-    FLASH_Unlock();
+    HAL_FLASH_Unlock();
     for(i = 0; i < len; i++)
     {
-        FLASH_ProgramWord(addr+4*i,buf[i]);
+        HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, addr+4*i, buf[i]);
     }
-
+    HAL_FLASH_Unlock();
     return len;
 }
 

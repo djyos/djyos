@@ -95,8 +95,8 @@ void SysClockInit(void)
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_MSI;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV8;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV16;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV4;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
   {
@@ -148,3 +148,59 @@ void SysClockInit(void)
 //HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
+
+// =============================================================================
+// ==========================HAL INIT ==========================================
+#ifdef USE_HAL_DRIVER
+#include "stm32l4xx_hal_tim.h"
+uint32_t HAL_GetTick(void)
+{
+	static u32 sTickHigh = 0,sTickLow = 0;
+	u16 TimCnt;
+
+	TIM_HandleTypeDef TimHandle;
+
+	TimHandle.Instance = TIM6;
+	TimCnt = (__HAL_TIM_GET_COUNTER(&TimHandle))&0xFFFF;//1ms
+
+	if( sTickLow > TimCnt)
+	{
+		sTickHigh ++;
+	}
+	sTickLow = TimCnt;
+	return (u32)((sTickHigh << 16) + (sTickLow));
+}
+void HAL_SuspendTick(void)
+{
+	TIM_HandleTypeDef TimHandle;
+	TimHandle.Instance = TIM6;
+	HAL_TIM_Base_Stop(&TimHandle);
+}
+void HAL_ResumeTick(void)
+{
+	TIM_HandleTypeDef TimHandle;
+	TimHandle.Instance = TIM6;
+	HAL_TIM_Base_Start(&TimHandle);
+}
+
+
+//´Ë´¦ÓÃTIM6
+void HAL_TickInit(void)
+{
+	u32 uwPrescalerValue;
+	TIM_HandleTypeDef TimHandle;
+
+	__HAL_RCC_TIM6_CLK_ENABLE();
+
+	uwPrescalerValue = ((CN_CFG_MCLK) / 1000) - 1;	//Counter Clock = 1K
+	TimHandle.Instance = TIM6;
+	TimHandle.Init.Period        = 0xFFFF;
+	TimHandle.Init.Prescaler     = uwPrescalerValue;
+	TimHandle.Init.ClockDivision = 0;
+	TimHandle.Init.CounterMode   = TIM_COUNTERMODE_UP;
+
+	HAL_TIM_Base_DeInit(&TimHandle);
+	HAL_TIM_Base_Init(&TimHandle);
+	HAL_TIM_Base_Start(&TimHandle);
+}
+#endif

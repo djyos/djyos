@@ -150,6 +150,7 @@ typedef s64 int_least64_t;
 typedef u64 uint_least64_t;
 
 typedef u32 uint_fast8_t;
+typedef s32 int_fast8_t;
 
 typedef s32 int_fast16_t;
 typedef u32 uint_fast16_t;
@@ -163,8 +164,20 @@ typedef u64 uint_fast64_t;
 typedef s64 intmax_t;
 typedef u64 uintmax_t;
 
-typedef s8 * intptr_t;
-typedef u8 * uintptr_t;
+/* Types for `void *' pointers.  */
+#if CN_PTR_BITS == 64
+# ifndef __intptr_t_defined
+typedef s64               intptr_t;
+#  define __intptr_t_defined
+# endif
+typedef u64    uintptr_t;
+#else
+# ifndef __intptr_t_defined
+typedef s32                    intptr_t;
+#  define __intptr_t_defined
+# endif
+typedef u32        uintptr_t;
+#endif
 
 #define INTPTR_MIN      (1<<(CN_PTR_BITS-1))
 #define INTPTR_MAX      ((1<<(CN_PTR_BITS-1))-1)

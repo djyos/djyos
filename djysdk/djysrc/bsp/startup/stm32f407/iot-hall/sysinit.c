@@ -276,4 +276,59 @@ void SRAM_Init(void)
 }
 
 
+// =============================================================================
+// ==========================HAL INIT ==========================================
+#ifdef USE_HAL_DRIVER
+#include "stm32f4xx_hal_tim.h"
+uint32_t HAL_GetTick(void)
+{
+	static u32 sTick = 0,sTickLast = 0;
+	u16 TimCnt;
 
+	TIM_HandleTypeDef TimHandle;
+
+	TimHandle.Instance = TIM6;
+	TimCnt = (__HAL_TIM_GET_COUNTER(&TimHandle))&0xFFFF;//0.5ms
+
+	if( sTickLast > TimCnt)
+	{
+		sTick += 65536;
+	}
+	sTickLast = TimCnt;
+
+	return (sTick + (TimCnt >> 1));
+}
+void HAL_SuspendTick(void)
+{
+	TIM_HandleTypeDef TimHandle;
+	TimHandle.Instance = TIM6;
+	HAL_TIM_Base_Stop(&TimHandle);
+}
+void HAL_ResumeTick(void)
+{
+	TIM_HandleTypeDef TimHandle;
+	TimHandle.Instance = TIM6;
+	HAL_TIM_Base_Start(&TimHandle);
+}
+
+
+//¥À¥¶”√TIM6
+void HAL_TickInit(void)
+{
+	u32 uwPrescalerValue;
+	TIM_HandleTypeDef TimHandle;
+
+	__HAL_RCC_TIM6_CLK_ENABLE();
+
+	uwPrescalerValue = ((CN_CFG_MCLK/4) / 1000) - 1;	//Counter Clock = 2K
+	TimHandle.Instance = TIM6;
+	TimHandle.Init.Period        = 0xFFFF;
+	TimHandle.Init.Prescaler     = uwPrescalerValue;
+	TimHandle.Init.ClockDivision = 0;
+	TimHandle.Init.CounterMode   = TIM_COUNTERMODE_UP;
+
+	HAL_TIM_Base_DeInit(&TimHandle);
+	HAL_TIM_Base_Init(&TimHandle);
+	HAL_TIM_Base_Start(&TimHandle);
+}
+#endif

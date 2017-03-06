@@ -102,6 +102,10 @@ void Init_Cpu(void)
     extern void SysClockInit(void);
     SysClockInit();
 
+#ifdef USE_HAL_DRIVER
+    HAL_TickInit();
+#endif
+
     extern void SRAM_Init(void);
 //    SRAM_Init();
 

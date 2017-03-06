@@ -56,7 +56,7 @@
 #include "systime.h"
 #include "wdt_hal.h"
 #include "cpu_peri.h"
-#include "stm32f10x.h"
+
 
 #define CN_WDT_WDTCYCLE  5000*mS//200*1000      //单位为微秒
 #define CN_WWDG_WDTCYCLE  50*mS                 //WWDG最大为58mS

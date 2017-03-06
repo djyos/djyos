@@ -45,6 +45,13 @@
 #ifndef CPU_PERI_RTC_H_
 #define CPU_PERI_RTC_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 ptu32_t ModuleInstall_CpuRtc(ptu32_t para);
+#ifdef __cplusplus
+}
+#endif
 
 #endif

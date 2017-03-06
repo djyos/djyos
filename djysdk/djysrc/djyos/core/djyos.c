@@ -383,6 +383,20 @@ u32 Djy_GetLastError(void)
     return g_ptEventRunning->error_no;
 }
 
+u32 *DjyCurrentErrnoAddr(void)
+{
+	static u32 err;
+	if(NULL == g_ptEventRunning)
+	{
+		return &err;
+	}
+	else
+	{
+		return &g_ptEventRunning->error_no;
+	}
+}
+
+
 //----从ready队列中取出一个事件------------------------------------------------
 //功能: 把一个事件从ready队列中取出，并使ready队列重新连接
 //参数: event，待取出的事件指针

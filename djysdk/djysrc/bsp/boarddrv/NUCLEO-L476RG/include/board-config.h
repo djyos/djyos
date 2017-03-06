@@ -74,14 +74,14 @@ extern "C" {
 #define CN_CPU_OPTIONAL_FPU         1       //是否支持fpu
 
 #define Mhz             1000000
-#define CN_CFG_MCLK     (30*Mhz)           //主频，内核要用，必须定义
+#define CN_CFG_MCLK     (24*Mhz)           //主频，内核要用，必须定义
 #define CN_CFG_FCLK     CN_CFG_MCLK
 #define CN_CFG_AHBCLK   CN_CFG_MCLK         //总线时钟
 #define CN_CFG_PCLK2    (CN_CFG_MCLK/2)     //高速外设时钟
 #define CN_CFG_PCLK1    (CN_CFG_MCLK/4)     //低速外设时钟
 #define CN_CFG_EXTCLK   (10*Mhz)             //外部时钟=8M
 
-#define CN_CFG_FINE_US 0x00000889  //1/30M,tick输入时钟周期，以uS为单位，32位定点数整数、小数各占16位，这也限制了ticks最长不超过65535uS
+#define CN_CFG_FINE_US 0x00000AAA  //1/24M,tick输入时钟周期，以uS为单位，32位定点数整数、小数各占16位，这也限制了ticks最长不超过65535uS
 #define CN_CFG_FINE_HZ CN_CFG_MCLK  //tick输入时钟频率，是CN_CFG_FINE_US的倒数。
 
 //内核相关配置

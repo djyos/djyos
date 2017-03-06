@@ -63,7 +63,6 @@
 #include "hard-exp.h"
 #include "lowpower.h"
 #include "djyos.h"
-#include "stm32f10x.h"
 #include "core_cmFunc.h"
 
 extern   uint32_t   msp_top[ ];

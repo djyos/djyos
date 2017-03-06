@@ -64,8 +64,14 @@
 
 #define Spi SPI_TypeDef
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 s32 ModuleInstall_SPI(u8 Port);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

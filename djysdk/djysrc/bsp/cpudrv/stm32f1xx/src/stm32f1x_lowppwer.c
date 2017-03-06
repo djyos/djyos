@@ -66,9 +66,7 @@
 
 #include "stdint.h"
 #include "lowpower.h"
-#include "stm32f10x_pwr.h"
-#include "stm32f10x_bkp.h"
-#include "stm32f10x_rcc.h"
+#include "cpu_peri.h"
 
 #define Stm32SleepModel4    0x789a
 
@@ -80,8 +78,8 @@
 //----------------------------------------------------------------------------
 bool_t __LP_BSP_HardInit(void)
 {
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_BKP | RCC_APB1Periph_PWR,ENABLE);
-    PWR_BackupAccessCmd(ENABLE);
+    RCC->APB1ENR |=RCC_APB1ENR_BKPEN|RCC_APB1ENR_PWREN;//PWR模块使能
+    HAL_PWR_EnableBkUpAccess();//后备区使能
     return true;
 }
 
@@ -95,16 +93,17 @@ bool_t __LP_BSP_HardInit(void)
 //----------------------------------------------------------------------------
 u32 __LP_BSP_GetSleepLevel(void)
 {
-    u32 LP_Flag;
-    u16 bkt_DR;
-    LP_Flag = PWR_GetFlagStatus(PWR_FLAG_WU+PWR_FLAG_SB);
-    if(LP_Flag & PWR_FLAG_WU)
+    u32 bkt_DR;
+    RTC_HandleTypeDef RTC_Handler;  //RTC句柄
+    RTC_Handler.Instance=RTC;
+    if(__HAL_PWR_GET_FLAG(PWR_FLAG_WU+PWR_FLAG_SB)& PWR_FLAG_WU)
     {
-        bkt_DR = BKP_ReadBackupRegister(BKP_DR42);
+        bkt_DR = HAL_RTCEx_BKUPRead(&RTC_Handler,RTC_BKP_DR2);//todo
+//        bkt_DR = Stm32SleepModel4;
         if(bkt_DR == Stm32SleepModel4)
             return CN_SLEEP_L4;
         else
-         return CN_SLEEP_L3;
+            return CN_SLEEP_L3;
     }
     else
         return CN_SLEEP_NORMAL;
@@ -117,10 +116,14 @@ u32 __LP_BSP_GetSleepLevel(void)
 //-----------------------------------------------------------------------------
 bool_t __LP_BSP_SaveSleepLevel(u32 SleepLevel)
 {
+    RTC_HandleTypeDef RTC_Handler;  //RTC句柄
+    RTC_Handler.Instance=RTC;
+
     if((SleepLevel!= CN_SLEEP_L3) && (SleepLevel!= CN_SLEEP_L4))
         return false;
-    BKP_WriteBackupRegister(BKP_DR42,(u16)SleepLevel);
+    HAL_RTCEx_BKUPWrite(&RTC_Handler,RTC_BKP_DR2,SleepLevel);//todo
     return true;
+
 }
 
 //----进入L0级低功耗-----------------------------------------------------------
@@ -130,8 +133,7 @@ bool_t __LP_BSP_SaveSleepLevel(u32 SleepLevel)
 //-----------------------------------------------------------------------------
 void __LP_BSP_EntrySleepL0(void)
 {
-    NVIC_SystemLPConfig(NVIC_LP_SLEEPDEEP + NVIC_LP_SLEEPONEXIT +NVIC_LP_SEVONPEND,DISABLE);
-    __WFE( );
+    HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFE);
 }
 
 //----进入L1级低功耗-----------------------------------------------------------
@@ -142,8 +144,7 @@ void __LP_BSP_EntrySleepL0(void)
 //-----------------------------------------------------------------------------
 void __LP_BSP_EntrySleepL1(void)
 {
-    NVIC_SystemLPConfig(NVIC_LP_SLEEPDEEP + NVIC_LP_SLEEPONEXIT +NVIC_LP_SEVONPEND,DISABLE);
-    __WFE( );
+    HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFE);
 }
 
 //----进入L2级低功耗-----------------------------------------------------------
@@ -153,13 +154,11 @@ void __LP_BSP_EntrySleepL1(void)
 //-----------------------------------------------------------------------------
 void __LP_BSP_EntrySleepL2(void)
 {
-	//禁止中断
-
-	//清所有外部中断标志和RTC闹钟标志
-	EXTI_ClearITPendingBit(0xFFFFF);
-	RTC_ClearITPendingBit(RTC_IT_ALR);
-
-    PWR_EnterSTOPMode(PWR_Regulator_LowPower,PWR_STOPEntry_WFE);
+    //禁止中断
+    //清所有外部中断标志和RTC闹钟标志
+    EXTI->PR=0xFFFFF;
+    CLEAR_BIT(RTC->CRL, RTC_FLAG_ALRAF);
+    HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFE);
 }
 
 //----进入L3级低功耗-----------------------------------------------------------
@@ -169,7 +168,7 @@ void __LP_BSP_EntrySleepL2(void)
 //-----------------------------------------------------------------------------
 void __LP_BSP_EntrySleepL3(void)
 {
-    PWR_EnterSTANDBYMode( );
+    HAL_PWR_EnterSTANDBYMode();
 }
 
 //----进入L4级低功耗-----------------------------------------------------------
@@ -180,6 +179,6 @@ void __LP_BSP_EntrySleepL3(void)
 //-----------------------------------------------------------------------------
 void __LP_BSP_EntrySleepL4(void)
 {
-    PWR_EnterSTANDBYMode( );
+    HAL_PWR_EnterSTANDBYMode( );
 }
 

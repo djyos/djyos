@@ -167,7 +167,7 @@ static int aspTest(int eid, webs_t wp, int argc, char_t **argv)
         return -1;
     }
 
-    return websWrite(wp, T("Name: %s, Address %s:modified by DJYOS"), name, address);
+    return websWrite(wp, T("Name: %s, Address %s"), name, address);
 }
 
 /******************************************************************************/
@@ -184,8 +184,8 @@ static void formTest(webs_t wp, char_t *path, char_t *query)
     address = websGetVar(wp, T("address"), T("1212 Milky Way Ave.")); 
 
     websHeader(wp);
-//  websWrite(wp, T("<body><h2>Name: %s, Address: %s</h2>\n"), name, address);
-    websWrite(wp, T("<body><h2>WEBSERVER FOR DJYOS</h2>\n"));
+    websWrite(wp, T("<body><h2>Name: %s, Address: %s</h2>\n"), name, address);
+//    websWrite(wp, T("<body><h2>WEBSERVER FOR DJYOS</h2>\n"));
 
     websFooter(wp);
     websDone(wp, 200);

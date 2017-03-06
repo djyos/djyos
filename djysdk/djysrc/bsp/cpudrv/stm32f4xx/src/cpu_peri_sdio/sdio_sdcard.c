@@ -1,6 +1,7 @@
 //
 //  源码改自正点原子开发板
 //
+#if 0	//todo---hemin modified for compile
 #include <stdlib.h>
 #include <string.h>
 #include <cpu_peri_sdio.h>
@@ -1326,7 +1327,7 @@ Int_RestoreAsynSignal();
     return sta;
 }
 
-
+#endif
 
 
 

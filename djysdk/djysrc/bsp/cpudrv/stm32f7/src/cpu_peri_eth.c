@@ -310,6 +310,28 @@ NODESCERROR:
 
     return result;
 }
+
+u32 ETH_SendData(u8 *buf,u32 len)
+{
+    tagNetPkg          pkg;
+    tagMacDriver      *pDrive;
+
+    pDrive = &gMacDriver;
+
+    pkg.partnext = NULL;
+    pkg.pkgflag  = (1<<0);  //只有一个包
+    pkg.offset   = 0;
+    pkg.datalen  = len;
+    pkg.buf      = buf;
+    if(MacSnd(pDrive->devhandle,&pkg,len,0))
+    {
+        return len;
+    }
+    else
+    {
+        return 0;
+    }
+}
 //This is the interrut handler
 u32 ETH_IntHandler(ufast_t IntLine)
 {
@@ -586,7 +608,7 @@ bool_t macdebuginfo(char *param)
 }
 
 #define CN_GMAC_REG_BASE   ((u32)ETH)
-bool_t gmacreg(char *param)
+bool_t MacReg(char *param)
 {
     vu32    i;
     vu32   *addr;
@@ -633,15 +655,41 @@ bool_t gmacreg(char *param)
     addr = (u32 *)(CN_GMAC_REG_BASE + 0x150);
     value =*addr;
     printf("%08x  %08x\n\r",(u32)addr,value);
+    addr = (u32 *)(CN_GMAC_REG_BASE + 0x168);
+    value =*addr;
+    printf("%08x  %08x	Transmitted good frames \n\r",(u32)addr,value);
     addr = (u32 *)(CN_GMAC_REG_BASE + 0x194);
     value =*addr;
-    printf("%08x  %08x\n\r",(u32)addr,value);
+    printf("%08x  %08x	Receive frames with CRC error\n\r",(u32)addr,value);
     addr = (u32 *)(CN_GMAC_REG_BASE + 0x198);
     value =*addr;
-    printf("%08x  %08x\n\r",(u32)addr,value);
+    printf("%08x  %08x	Receive frames with alignment error\n\r",(u32)addr,value);
     addr = (u32 *)(CN_GMAC_REG_BASE + 0x1C4);
     value =*addr;
-    printf("%08x  %08x\n\r",(u32)addr,value);
+    printf("%08x  %08x	Received good unicast frames\n\r",(u32)addr,value);
+
+    printf("ETH_DMA Register Below:\r\n");
+    printf("%-10s%-10s\n\r",\
+            "Addr(Hex)","Value(Hex)");
+    addr = (u32 *)(CN_GMAC_REG_BASE + 0x1000);
+    num = 10;
+    for(i=0;i < num;i++)
+    {
+        value =*addr;
+        if((u32)addr == CN_GMAC_REG_BASE + 0x101c)
+        {
+        	printf("%08x  %08x	ETH_DMAIER Register\n\r",(u32)addr,value);
+        }
+        else if((u32)addr == CN_GMAC_REG_BASE + 0x1020)
+        {
+        	printf("%08x  %08x 	Missed frames and buffer overflow counter\n\r",(u32)addr,value);
+        }
+        else
+        {
+        	printf("%08x  %08x\n\r",(u32)addr,value);
+        }
+        addr++;
+    }
 
     return true;
 }
@@ -691,8 +739,8 @@ static struct ShellCmdTab  gMacDebug[] =
     },
     {
         "macreg",
-        gmacreg,
-        "usage:gmacreg",
+        MacReg,
+        "usage:MacReg",
         NULL
     },
 //    {

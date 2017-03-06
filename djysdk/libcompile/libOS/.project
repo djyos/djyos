@@ -35,19 +35,49 @@
 			<locationURI>DJYOS_SRC_LOCATION/djyos</locationURI>
 		</link>
 		<link>
-			<name>src/libc</name>
-			<type>2</type>
-			<locationURI>DJYOS_SRC_LOCATION/libc</locationURI>
-		</link>
-		<link>
 			<name>src/third</name>
 			<type>2</type>
 			<locationURI>DJYOS_SRC_LOCATION/third</locationURI>
 		</link>
 		<link>
+			<name>src/libc</name>
+			<type>2</type>
+			<locationURI>DJYOS_SRC_LOCATION/libc</locationURI>
+		</link>
+		<link>
+			<name>src/bsp/arch</name>
+			<type>2</type>
+			<locationURI>DJYOS_SRC_LOCATION/bsp/arch</locationURI>
+		</link>
+		<link>
+			<name>src/bsp/boarddrv</name>
+			<type>2</type>
+			<locationURI>DJYOS_SRC_LOCATION/bsp/boarddrv</locationURI>
+		</link>
+		<link>
+			<name>src/bsp/chipdrv</name>
+			<type>2</type>
+			<locationURI>DJYOS_SRC_LOCATION/bsp/chipdrv</locationURI>
+		</link>
+		<link>
+			<name>src/bsp/cpudrv</name>
+			<type>2</type>
+			<locationURI>DJYOS_SRC_LOCATION/bsp/cpudrv</locationURI>
+		</link>
+		<link>
+			<name>src/bsp/startup</name>
+			<type>2</type>
+			<locationURI>DJYOS_SRC_LOCATION/bsp/startup</locationURI>
+		</link>
+		<link>
 			<name>src/third/firmware</name>
 			<type>2</type>
 			<locationURI>DJYOS_SRC_LOCATION/third/firmware</locationURI>
+		</link>
+		<link>
+			<name>src/loader/si</name>
+			<type>2</type>
+			<locationURI>DJYOS_SRC_LOCATION/loader/si</locationURI>
 		</link>
 	</linkedResources>
 	<variableList>

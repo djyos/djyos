@@ -114,6 +114,7 @@ void Init_Cpu(void)
     extern void SysClockInit(void);
     SysClockInit();
 
+    HAL_TickInit();
     IAP_SelectLoadProgam();
 }
 

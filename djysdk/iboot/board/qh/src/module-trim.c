@@ -180,7 +180,7 @@ void Sys_ModuleInit(void)
     //日历时钟模块
 //    ModuleInstall_TM(0);
     //使用硬件RTC,注释掉则使用tick做RTC计时,依赖:日历时钟模块
-//    ModuleInstall_RTC(0);
+    ModuleInstall_RTC(0);
 
     //定时器组件
 //    extern ptu32_t ModuleInstall_Timer(ptu32_t para);
@@ -212,6 +212,7 @@ void Sys_ModuleInit(void)
     //  Dev = Driver_OpenDevice("UART3",D_RDONLY,CN_TIMEOUT_FOREVER);
     ModuleInstall_Ymodem(NULL);
     Ymodem_PathSet("/iboot");
+	ModuleInstall_IAP_FS(NULL);
     ModuleInstall_IAP();
 //    ModuleInstall_Font(0);                 //字体模块
 

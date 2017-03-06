@@ -186,7 +186,11 @@ enum _NEWLIB_ERROR_CODE_
 };
 void Djy_SaveLastError(u32 ErrorCode);
 u32 Djy_GetLastError(void);
-#define errno Djy_GetLastError()
+//#define errno Djy_GetLastError()
+
+extern int *DjyCurrentErrnoAddr(void);
+#define errno   (*(int*)DjyCurrentErrnoAddr())
+//extern int errno;
 
 #ifdef __cplusplus
 }

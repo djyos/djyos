@@ -37,7 +37,9 @@ SECTIONS
         KEEP(*liblibOS_qhstm32f1_o0.a:pre_loader.o (.text .text.* .rodata .rodata.*))
         KEEP(*liblibOS_qhstm32f1_o0.a:IAP_pLoad.o (.text .text.* .rodata .rodata.*))
         KEEP(*liblibOS_qhstm32f1_o0.a:SRAM.o (.text .text.* .rodata .rodata.*))
-        KEEP(*liblibOS_qhstm32f1_o0.a:stm32f10x_fsmc.o (.text .text.* .rodata .rodata.*)) 
+        KEEP(*liblibOS_qhstm32f1_o0.a:stm32f1xx_ll_fsmc.o (.text .text.* .rodata .rodata.*)) 
+        KEEP(*liblibOS_qhstm32f1_o0.a:stm32f1xx_hal_sram.o (.text .text.* .rodata .rodata.*)) 
+        KEEP(*liblibOS_qhstm32f1_o0.a:stm32f1xx_hal_nand.o (.text .text.* .rodata .rodata.*)) 
         KEEP(*board/qh/src/OS_prjcfg/Iboot_config.o (.text .text.* .rodata .rodata.*))            
     }>InnerFlash
 

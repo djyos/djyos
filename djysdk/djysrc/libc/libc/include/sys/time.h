@@ -58,6 +58,7 @@
 #define __TIME_H__
 #include "stdint.h"
 #include "errno.h"
+#include <types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -128,16 +129,12 @@ bool_t Rtc_RegisterDev(fntRtc_GetTime gettimefunc,
 
 //the c lib interface for time  --modified by zqf
 
-typedef s64  __time_t;
-typedef s32  __suseconds_t;
-typedef __time_t time_t;
-
 #ifndef _TIMEVAL_DEFINED /* 第三方软件也可能定义 */
 #define _TIMEVAL_DEFINED
 struct timeval
 {
-    __time_t           tv_sec;
-    __suseconds_t      tv_usec;
+    time_t           tv_sec;
+    suseconds_t      tv_usec;
 };
 #define timerisset(tvp)  ((tvp)->tv_sec || (tvp)->tv_usec)
 #define timercmp(tvp, uvp, cmp) \
@@ -166,6 +163,9 @@ struct tm *localtime_r(const time_t *timep, struct tm *result);
 
 time_t mktime(struct tm *tm);
 time_t time(time_t *t);
+
+clock_t clock (void);
+double difftime(time_t tim1, time_t tim2);
 
 int gettimeofday(struct timeval *tv, struct timezone *tz);
 int settimeofday(const struct timeval *tv, const struct timezone *tz);

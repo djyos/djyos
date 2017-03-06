@@ -1,6 +1,7 @@
 //
 //  源码改自正点原子开发板
 //
+#if 0	//todo---hemin modified for compile
 #ifndef __SDIO_SDCARD_H
 #define __SDIO_SDCARD_H
 
@@ -367,7 +368,7 @@ u8 SD_WriteDisk(u8*buf,u32 sector,u8 cnt);	//写SD卡,fatfs/usb调用
 s32 ModuleInstall_SD(const char *ChipName, s32 Clean);
 #endif 
 
-
+#endif
 
 
 

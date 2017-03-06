@@ -59,7 +59,6 @@
 #include "stdlib.h"
 #include "string.h"
 #include "cpu_peri.h"
-#include "stm32f10x.h"
 #include "ili9325-brd.h"
 #include "ili9325.h"
 #include "djyos.h"

@@ -100,7 +100,7 @@ bool_t Rtc_GetTime(s64 *time)
     struct tm dtm;
     u32 year,month,date,hour,min,sec;
     u32 DR_bak=0,TR_bak=0;
-
+    u32 tim_us;
     u8 timeout=10;
 	while(timeout&&(false==RTC_Wait_Rsf()))
 	{
@@ -111,7 +111,7 @@ bool_t Rtc_GetTime(s64 *time)
 
  	DR_bak=RTC->DR;//将年月日。。一次读出来防止进位误差
  	TR_bak=RTC->TR;
-
+ 	tim_us = (1000000*(0xff - RTC->SSR) )/ (0xff + 1);
 	year=BcdToHex((DR_bak>>16)&0XFF)+1970;
 	month=BcdToHex((DR_bak>>8)&0X1F);
 	date=BcdToHex(DR_bak&0X3F);
@@ -127,7 +127,7 @@ bool_t Rtc_GetTime(s64 *time)
     dtm.tm_min  = min;
     dtm.tm_sec  = sec;
 
-    *time = 1000000 * Tm_MkTime(&dtm);
+    *time = (s64)(1000000 * Tm_MkTime(&dtm)+tim_us);
     return true;
 }
 
@@ -325,8 +325,8 @@ ptu32_t ModuleInstall_CpuRtc(ptu32_t para)
     Djy_EventPop(evtt,NULL,0,NULL,0,0);
     Rtc_GetTime(&rtc_time);
 
-    tv.tv_sec = rtc_time/1000000;//us ---> s
-    tv.tv_usec = 0;
+    tv.tv_sec  = rtc_time/1000000;//us ---> s
+    tv.tv_usec = rtc_time%1000000;
 
     settimeofday(&tv,NULL);
 

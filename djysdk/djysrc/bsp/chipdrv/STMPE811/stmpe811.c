@@ -57,7 +57,6 @@
 #include "stdint.h"
 #include "stdio.h"
 #include "stddef.h"
-#include "stm32f10x.h"
 #include "Touch.h"
 #include "string.h"
 #include "gkernel.h"

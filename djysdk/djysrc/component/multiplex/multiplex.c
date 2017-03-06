@@ -62,9 +62,6 @@
 #include "lock.h"
 #include <djyos.h>
 #include "multiplex.h"
-#define CN_MULTIPLEX_ACTIVED   (1<<31)  //MultiplexSets是否已经触发，只有type设置
-//为CN_MULTIPLEX_OBJECT_AND有效，在OR模式
-//下，用ActiveQ判断即可
 
 static struct MemCellPool *g_ptMultiplexSetsPool;
 static struct MemCellPool *g_ptMultiplexObjectPool;
@@ -145,7 +142,7 @@ ptu32_t ModuleInstall_Multiplex(ptu32_t para)
 //参数：ActiveLevel, 触发水平,该集合被触发的对象达到此数后,触发集合.
 //返回：新创建的MultiplexSets指针
 //----------------------------------------------------------------------------
-struct MultiplexSetsCB* Multiplex_Creat(u32 ActiveLevel)
+struct MultiplexSetsCB* Multiplex_Create(u32 ActiveLevel)
 {
     struct MultiplexSetsCB *SetsQ;
     if (ActiveLevel == 0)       //触发水平必须大于0
@@ -172,7 +169,7 @@ struct MultiplexSetsCB* Multiplex_Creat(u32 ActiveLevel)
 //      ObjectHead，被操作的Object队列头指针的指针，*ObjectHead=NULL表示该对象尚
 //          未加入任何MultiplexSets，因此，第一次调用Multiplex_AddObject前,
 //          *ObjectHead初始化值必须是NULL。允许多次调用Multiplex_AddObject把一个
-//          Object 允许加入多个MultiplexSets.每加入一个MultiplexSets，将增加一个
+//          Object 加入多个MultiplexSets.每加入一个MultiplexSets，将增加一个
 //          struct MultiplexObjectCB *类型的结点，所有结点的NextSets指针连接
 //          成一个单向链表，*ObjectHead指向该链表头。*ObjectHead再也不允许在外部
 //          修改，否则结果不可预料。
@@ -183,8 +180,8 @@ struct MultiplexSetsCB* Multiplex_Creat(u32 ActiveLevel)
 //返回: true=成功，false=失败。
 //-----------------------------------------------------------------------------
 bool_t Multiplex_AddObject(struct MultiplexSetsCB *Sets,
-                            struct MultiplexObjectCB **ObjectHead,
-                            u32 ObjectStatus, ptu32_t ObjectID, u32 SensingBit)
+                           struct MultiplexObjectCB **ObjectHead,
+                           u32 ObjectStatus, ptu32_t ObjectID, u32 SensingBit)
 {
     struct MultiplexObjectCB *temp;
     struct MultiplexObjectCB **TargetQ;

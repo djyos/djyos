@@ -24,6 +24,12 @@
 #include <stdlib.h>
 #include "cJSON.h"
 
+
+long ftell(FILE *f)
+{
+	return 0;
+}
+
 /* Parse text to JSON, then render back to text, and print! */
 void doit(char *text)
 {
@@ -45,12 +51,116 @@ void dofile(char *filename)
 {
 	FILE *f;long len;char *data;
 	
-	f=fopen(filename,"rb");fseek(f,0,SEEK_END);len=ftell(f);fseek(f,0,SEEK_SET);
-	data=(char*)malloc(len+1);fread(data,1,len,f);fclose(f);
+	f=fopen(filename,"rb");
+    if(NULL == f)
+    {
+        printf("open %s failed\n\r",filename);
+        return;
+    }
+    fseek(f,0,SEEK_END);
+    len=ftell(f);fseek(f,0,SEEK_SET);
+	data=(char*)malloc(len+1);
+    fread(data,1,len,f);fclose(f);
 	doit(data);
 	free(data);
 }
 
+void DecodeRout(char *filename)
+{
+	FILE *f;long len;char *data;
+	
+	f=fopen(filename,"rb");
+    if(NULL == f)
+    {
+        printf("open %s failed\n\r",filename);
+        return;
+    }
+    fseek(f,0,SEEK_END);
+    len=ftell(f);fseek(f,0,SEEK_SET);
+	data=(char*)malloc(len+1);
+    fread(data,1,len,f);fclose(f);
+	char *out;cJSON *json;
+	
+	json=cJSON_Parse(data);
+	if (!json) {printf("Error before: [%s]\n",cJSON_GetErrorPtr());}
+	else
+	{
+		out=cJSON_Print(json);
+		int i,arraylen;
+		//check the rout
+		cJSON *routarray,*rout,*item;
+		routarray = cJSON_GetObjectItem(json,"rout");
+		if(NULL == routarray)
+		{
+			printf("No rout find\n\r");	
+		}
+		else
+		{
+			//decode the array
+			arraylen = cJSON_GetArraySize(routarray);
+			for(i = 0;i<arraylen;i++)
+			{
+				rout = cJSON_GetArrayItem(routarray,i);
+				if(NULL != rout)
+				{
+					const char *itemname;
+
+					itemname = "ip";
+					item = cJSON_GetObjectItem(rout,itemname);
+					if(NULL != item)
+					{
+						printf("rout%d:%s:%s\n\r",i,item->string,item->valuestring);
+					}
+					else
+					{
+						printf("rout%d:%s:not configure\n\r",i,itemname);
+					}
+
+					itemname = "subnet";
+					item = cJSON_GetObjectItem(rout,itemname);
+					if(NULL != item)
+					{
+						printf("rout%d:%s:%s\n\r",i,item->string,item->valuestring);
+					}
+					else
+					{
+						printf("rout%d:%s:not configure\n\r",i,itemname);
+					}
+
+					itemname = "gateway";
+					item = cJSON_GetObjectItem(rout,itemname);
+					if(NULL != item)
+					{
+						printf("rout%d:%s:%s\n\r",i,item->string,item->valuestring);
+					}
+					else
+					{
+						printf("rout%d:%s:not configure\n\r",i,itemname);
+					}
+
+					itemname = "default";
+					item = cJSON_GetObjectItem(rout,itemname);
+					if(NULL != item)
+					{
+						printf("rout%d:%s:%s\n\r",i,item->string,item->valueint);
+					}
+					else
+					{
+						printf("rout%d:%s:not configure\n\r",i,itemname);
+					}
+				}
+			}
+		}
+		
+		
+		
+		
+		cJSON_Delete(json);
+		printf("%s\n",out);
+		free(out);
+	}
+	free(data);
+}
 /* Used by some code below as an example datatype. */
 struct record {const char *precision;double lat,lon;const char *address,*city,*state,*zip,*country; };
 
@@ -135,28 +245,28 @@ void create_objects()
 
 int JSON_main (int argc, const char * argv[]) {
 	/* a bunch of json: */
-	char text1[]="{\n\"name\": \"Jack (\\\"Bee\\\") Nimble\", \n\"format\": {\"type\":       \"rect\", \n\"width\":      1920, \n\"height\":     1080, \n\"interlace\":  false,\"frame rate\": 24\n}\n}";	
-	char text2[]="[\"Sunday\", \"Monday\", \"Tuesday\", \"Wednesday\", \"Thursday\", \"Friday\", \"Saturday\"]";
-	char text3[]="[\n    [0, -1, 0],\n    [1, 0, 0],\n    [0, 0, 1]\n	]\n";
-	char text4[]="{\n		\"Image\": {\n			\"Width\":  800,\n			\"Height\": 600,\n			\"Title\":  \"View from 15th Floor\",\n			\"Thumbnail\": {\n				\"Url\":    \"http:/*www.example.com/image/481989943\",\n				\"Height\": 125,\n				\"Width\":  \"100\"\n			},\n			\"IDs\": [116, 943, 234, 38793]\n		}\n	}";
-	char text5[]="[\n	 {\n	 \"precision\": \"zip\",\n	 \"Latitude\":  37.7668,\n	 \"Longitude\": -122.3959,\n	 \"Address\":   \"\",\n	 \"City\":      \"SAN FRANCISCO\",\n	 \"State\":     \"CA\",\n	 \"Zip\":       \"94107\",\n	 \"Country\":   \"US\"\n	 },\n	 {\n	 \"precision\": \"zip\",\n	 \"Latitude\":  37.371991,\n	 \"Longitude\": -122.026020,\n	 \"Address\":   \"\",\n	 \"City\":      \"SUNNYVALE\",\n	 \"State\":     \"CA\",\n	 \"Zip\":       \"94085\",\n	 \"Country\":   \"US\"\n	 }\n	 ]";
+//	char text1[]="{\n\"name\": \"Jack (\\\"Bee\\\") Nimble\", \n\"format\": {\"type\":       \"rect\", \n\"width\":      1920, \n\"height\":     1080, \n\"interlace\":  false,\"frame rate\": 24\n}\n}";
+//	char text2[]="[\"Sunday\", \"Monday\", \"Tuesday\", \"Wednesday\", \"Thursday\", \"Friday\", \"Saturday\"]";
+//	char text3[]="[\n    [0, -1, 0],\n    [1, 0, 0],\n    [0, 0, 1]\n	]\n";
+//	char text4[]="{\n		\"Image\": {\n			\"Width\":  800,\n			\"Height\": 600,\n			\"Title\":  \"View from 15th Floor\",\n			\"Thumbnail\": {\n				\"Url\":    \"http:/*www.example.com/image/481989943\",\n				\"Height\": 125,\n				\"Width\":  \"100\"\n			},\n			\"IDs\": [116, 943, 234, 38793]\n		}\n	}";
+//	char text5[]="[\n	 {\n	 \"precision\": \"zip\",\n	 \"Latitude\":  37.7668,\n	 \"Longitude\": -122.3959,\n	 \"Address\":   \"\",\n	 \"City\":      \"SAN FRANCISCO\",\n	 \"State\":     \"CA\",\n	 \"Zip\":       \"94107\",\n	 \"Country\":   \"US\"\n	 },\n	 {\n	 \"precision\": \"zip\",\n	 \"Latitude\":  37.371991,\n	 \"Longitude\": -122.026020,\n	 \"Address\":   \"\",\n	 \"City\":      \"SUNNYVALE\",\n	 \"State\":     \"CA\",\n	 \"Zip\":       \"94085\",\n	 \"Country\":   \"US\"\n	 }\n	 ]";
+//
+//	/* Process each json textblock by parsing, then rebuilding: */
+//	doit(text1);
+//	doit(text2);
+//	doit(text3);
+//	doit(text4);
+//	doit(text5);
 
-	/* Process each json textblock by parsing, then rebuilding: */
-	doit(text1);
-	doit(text2);	
-	doit(text3);
-	doit(text4);
-	doit(text5);
-
-	/* Parse standard testfiles: */
-/*	dofile("../../tests/test1"); */
-/*	dofile("../../tests/test2"); */
-/*	dofile("../../tests/test3"); */
-/*	dofile("../../tests/test4"); */
-/*	dofile("../../tests/test5"); */
-
+	/* Parse standard testfiles:*/ 
+//	dofile("./tests/test1");
+//	dofile("./tests/test2"); 
+//	dofile("./tests/test3"); 
+//	dofile("./tests/test4"); 
+//	dofile("./tests/test5"); 
+	dofile("./tests/routconfig");
 	/* Now some samplecode for building objects concisely: */
-	create_objects();
+//	create_objects();
 	
 	return 0;
 }

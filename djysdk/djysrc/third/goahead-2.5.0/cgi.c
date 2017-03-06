@@ -106,6 +106,8 @@ int websCgiHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg,
 			gstrstr(cgiPath, T(".bat")) == NULL) {
 #elif (defined (NW))
 			if (gstrstr(cgiPath, T(".nlm")) == NULL) {
+#elif (defined (DJYOS))
+		{
 #else
 		if (gaccess(cgiPath, X_OK) != 0) {
 #endif /* WIN || CE */

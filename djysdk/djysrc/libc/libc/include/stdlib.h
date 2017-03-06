@@ -46,6 +46,7 @@ typedef int (*__compar_fn_t) (const _PTR, const _PTR);
 #define EXIT_FAILURE 1
 #define EXIT_SUCCESS 0
 
+#define __RAND_MAX 0x1000000 //-TODO,add by zqf
 #define RAND_MAX __RAND_MAX
 
 int _EXFUN(__locale_mb_cur_max,(_VOID));
