@@ -188,7 +188,7 @@ void Djy_SaveLastError(u32 ErrorCode);
 u32 Djy_GetLastError(void);
 //#define errno Djy_GetLastError()
 
-extern int *DjyCurrentErrnoAddr(void);
+extern u32 *DjyCurrentErrnoAddr(void);
 #define errno   (*(int*)DjyCurrentErrnoAddr())
 //extern int errno;
 
